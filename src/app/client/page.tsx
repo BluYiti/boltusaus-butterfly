@@ -1,92 +1,107 @@
-import React from 'react';
+import React, { useState } from 'react';
+import Image from 'next/image';
+interface Therapist {
+  name: string;
+  title: string;
+  image: string;
+  about: string;
+  background: string;
+  specialties: string[];
+}
 
-export default function Dashboard() {
+const therapists: Therapist[] = [
+  {
+    name: 'Hanni Pham',
+    title: 'Senior Psychotherapist',
+    image: '/path_to_image/hanni.png', // Replace with your image path
+    about: 'As a psychologist, my mission is to nurture mental well-being, offering compassionate support and guiding individuals towards resilience and personal growth.',
+    background: 'Bachelor of Arts in Psychology',
+    specialties: ['Health and Lifestyle', 'Mindfulness'],
+  },
+  {
+    name: 'Bruno Gonzaga',
+    title: 'Psychotherapist',
+    image: '/path_to_image/bruno.png', // Replace with your image path
+    about: 'Bruno is committed to helping clients navigate life\'s challenges by fostering resilience and self-awareness.',
+    background: 'Master\'s in Clinical Psychology',
+    specialties: ['Cognitive Behavioral Therapy', 'Stress Management'],
+  },
+  {
+    name: 'Ariana Corales',
+    title: 'Therapist',
+    image: '/path_to_image/ariana.png', // Replace with your image path
+    about: 'Ariana offers a safe and welcoming space to explore emotions and achieve personal growth.',
+    background: 'Bachelor in Counseling',
+    specialties: ['Emotional Regulation', 'Self-esteem Improvement'],
+  },
+  {
+    name: 'Juan Karlos',
+    title: 'Therapist',
+    image: '/path_to_image/juan.png', // Replace with your image path
+    about: 'Juan believes in a holistic approach to mental health, focusing on both emotional and physical well-being.',
+    background: 'Diploma in Psychotherapy',
+    specialties: ['Holistic Therapy', 'Mindfulness'],
+  },
+];
+
+const Page: React.FC = () => {
+  const [selectedTherapist, setSelectedTherapist] = useState<Therapist>(therapists[0]);
+
   return (
-    <div className="min-h-screen bg-gray-100 p-4">
-      <header className="flex justify-between items-center bg-blue-500 p-4 rounded-lg">
-        <h1 className="text-white text-xl">Home</h1>
-        <button className="text-white text-2xl">&#9776;</button>
+    <div className="min-h-screen bg-gray-100 p-8">
+      <header className="text-center">
+        <h1 className="text-2xl font-bold text-blue-500">Therapy</h1>
+        <h2 className="text-lg font-semibold text-black mt-2">Select your Psychotherapist</h2>
       </header>
 
-      <section className="my-4">
-        <h2 className="text-lg font-bold text-black">Good Morning, Raianna!</h2>
-      </section>
-
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Upcoming Sessions */}
-        <div className="bg-white p-4 rounded-lg shadow-md">
-          <h3 className="font-bold mb-4 text-black">Upcoming Sessions</h3>
-          <div className="flex items-center mb-4">
-            <div className="w-4 h-4 bg-green-400 rounded-full mr-4"></div>
-            <div>
-              <p className="font-bold text-black">April 25, 2024</p>
-              <p className="text-sm text-gray-600">8:00 AM</p>
-            </div>
-          </div>
-          <div className="flex items-center mb-4">
-            <div className="w-4 h-4 bg-red-400 rounded-full mr-4"></div>
-            <div>
-              <p className="font-bold text-black">May 2, 2024</p>
-              <p className="text-sm text-gray-600">10:00 AM</p>
-            </div>
-          </div>
-          <div className="flex items-center">
-            <div className="w-4 h-4 bg-blue-400 rounded-full mr-4"></div>
-            <div>
-              <p className="font-bold text-black">May 9, 2024</p>
-              <p className="text-sm text-gray-600">1:00 PM</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Weekly Check-up */}
-        <div className="bg-white p-4 rounded-lg shadow-md">
-          <h3 className="font-bold mb-4 text-black">Weekly Check-up</h3>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
+      <section className="flex justify-center mt-8">
+        <div className="flex space-x-4">
+          {therapists.map((therapist, index) => (
+            <div key={index} className="flex flex-col items-center">
               <img
-                src="public\images\wellbeing.png" // Replace with the correct image path
-                alt="Weekly Check-up"
-                className="h-12 w-12 rounded-full"
+                src={therapist.image}
+                alt={therapist.name}
+                className={`w-20 h-20 rounded-full cursor-pointer ${selectedTherapist.name === therapist.name ? 'border-4 border-green-400' : 'border-2 border-transparent'}`}
+                onClick={() => setSelectedTherapist(therapist)}
               />
-              <div className="ml-4">
-                <p className="font-bold text-black">Weekly well-being check up</p>
-              </div>
+              <p className="mt-2 text-sm font-semibold text-center">{therapist.name}</p>
             </div>
-            <button className="py-2 px-4 bg-blue-500 text-white rounded-lg">
-              START
-            </button>
-          </div>
-        </div>
-
-        {/* Journal */}
-        <div className="bg-white p-4 rounded-lg shadow-md">
-          <h3 className="font-bold mb-4 text-black">Journal</h3>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <img
-                src="path_to_your_image" // Replace with the correct image path
-                alt="Journal"
-                className="h-12 w-12 rounded-full"
-              />
-              <div className="ml-4">
-                <p className="font-bold text-black">Raianna’s Journal</p>
-              </div>
-            </div>
-            <button className="py-2 px-4 bg-blue-500 text-white rounded-lg">
-              TRACK
-            </button>
-          </div>
+          ))}
         </div>
       </section>
 
-      {/* Bottom Navigation */}
-      <footer className="fixed bottom-0 left-0 right-0 bg-blue-500 p-4 flex justify-around">
-        <button className="text-white text-2xl">&#x1F3E0;</button>
-        <button className="text-white text-2xl">&#128104;&#8205;&#x1F4BB;</button>
-        <button className="text-white text-2xl">&#128081;</button>
-        <button className="text-white text-2xl">&#x1F4C8;</button>
-      </footer>
+      <section className="mt-8 bg-white p-6 rounded-lg shadow-md max-w-4xl mx-auto">
+        <div className="flex items-center mb-4">
+          <img src={selectedTherapist.image} alt={selectedTherapist.name} className="w-16 h-16 rounded-full" />
+          <div className="ml-4">
+            <h3 className="text-lg font-bold text-black">{selectedTherapist.name}</h3>
+            <p className="text-sm text-green-600">{selectedTherapist.title}</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* About me */}
+          <div>
+            <h4 className="text-md font-bold text-black mb-2">About me</h4>
+            <p className="text-gray-700">{selectedTherapist.about}</p>
+          </div>
+
+          {/* Professional Background */}
+          <div>
+            <h4 className="text-md font-bold text-black mb-2">Professional Background</h4>
+            <p className="text-gray-700">{selectedTherapist.background}</p>
+
+            <h4 className="text-md font-bold text-black mt-4">Specialties</h4>
+            <ul className="list-disc list-inside text-gray-700">
+              {selectedTherapist.specialties.map((specialty, index) => (
+                <li key={index}>{specialty}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
     </div>
   );
-}
+};
+
+export default Page;
