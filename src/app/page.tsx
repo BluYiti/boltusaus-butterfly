@@ -1,7 +1,18 @@
 'use client'
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
+  const router = useRouter();
+
+  const handlePreAssessmentClick = () => {
+    router.push('/preassessment');
+  };
+
+  const handleLoginClick = () => {
+    router.push('/login');
+  };
+
   return (
     <div className="min-h-screen bg-blue-100 flex items-center justify-center">
       <div className="text-center">
@@ -15,14 +26,15 @@ export default function Home() {
         />
         <p className="text-black mt-4 mb-10">This is the start of your self-care journey.</p>
         <button
+          onClick={handlePreAssessmentClick}
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-3xl"
         >
           GET STARTED
         </button>
         <p className="mt-4">
           <a
-            href="#"
-            className="text-blue-600 hover:underline"
+            onClick={handleLoginClick}
+            className="text-blue-600 hover:underline cursor-pointer"
           >
             I already have an account
           </a>
