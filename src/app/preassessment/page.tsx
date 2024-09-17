@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Question from '@/app/preassessment/components/Question';
 import { useAssessment } from '@/app/preassessment/hooks/useAssessment';
 import { questions } from '@/app/preassessment/data/questions';
@@ -14,7 +14,28 @@ export default function PreAssessmentPage() {
     handleNext,
     handleBack,
     handleSubmit,
-  } = useAssessment(questions || []); 
+  } = useAssessment(questions || []);
+
+  // Email state
+  const [email, setEmail] = useState('');
+  const [emailError, setEmailError] = useState('');
+
+  // Email validation function
+  const validateEmail = (email: string) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+  };
+
+  // This function will now be called on button click and it uses the `email` from the state
+  const handleFormSubmit = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    event.preventDefault(); // Prevent the default form action
+    if (!validateEmail(email)) {
+      setEmailError('Please enter a valid email address.');
+      return;
+    }
+    setEmailError(''); // Clear the error if the email is valid
+    handleSubmit(email); // Call handleSubmit from the hook, passing the email
+  };
 
   return (
     <div className="min-h-screen flex justify-center items-center bg-gray-50">
@@ -28,9 +49,28 @@ export default function PreAssessmentPage() {
           <Question
             text={questions[currentQuestionIndex].text}
             options={questions[currentQuestionIndex].options}
-            currentAnswer={answers[currentQuestionIndex]}
+            currentAnswer={answers[currentQuestionIndex]?.answerInt ?? null}
             handleSelectOption={handleSelectOption}
           />
+
+          {/* Email input section */}
+          {currentQuestionIndex === questions.length - 1 && (
+            <div className="mt-4 text-left">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                Email:
+              </label>
+              <input
+                type="email"
+                id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="mt-1 p-2 border border-gray-300 rounded-md shadow-sm w-full"
+                placeholder="Enter your email"
+              />
+              {emailError && <p className="text-red-500 text-sm mt-1">{emailError}</p>}
+            </div>
+          )}
+
           <div className="mt-6 flex justify-between gap-4">
             {currentQuestionIndex > 0 && (
               <button
@@ -50,7 +90,7 @@ export default function PreAssessmentPage() {
             ) : (
               <button
                 className="flex-1 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-500"
-                onClick={handleSubmit}
+                onClick={handleFormSubmit} // Updated to use handleFormSubmit
               >
                 Submit
               </button>
