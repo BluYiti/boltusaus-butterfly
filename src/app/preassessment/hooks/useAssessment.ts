@@ -5,8 +5,8 @@ import { Question } from '@/app/preassessment/data/questions';
 import { databases, ID } from '@/app/appwrite'; 
 import { useRouter } from 'next/navigation';
 
-const DATABASE_ID = '66e8ed7900302986b2b6';
-const COLLECTION_ID = '66e8f17d00267836388d';
+const DATABASE_ID = 'Butterfly-Database'; 
+const COLLECTION_ID = 'Pre-Assessment'; 
 
 export const useAssessment = (questions: Question[] = []) => {
   type Answer = {
@@ -75,7 +75,7 @@ export const useAssessment = (questions: Question[] = []) => {
           {
             email,
             answers: serializedAnswers,
-            submittedAt: new Date().toISOString(), 
+            date: new Date().toISOString(), 
           }
         );
 

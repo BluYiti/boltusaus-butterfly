@@ -16,25 +16,22 @@ export default function PreAssessmentPage() {
     handleSubmit,
   } = useAssessment(questions || []);
 
-  // Email state
   const [email, setEmail] = useState('');
   const [emailError, setEmailError] = useState('');
 
-  // Email validation function
   const validateEmail = (email: string) => {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return regex.test(email);
   };
 
-  // This function will now be called on button click and it uses the `email` from the state
   const handleFormSubmit = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    event.preventDefault(); // Prevent the default form action
+    event.preventDefault();
     if (!validateEmail(email)) {
       setEmailError('Please enter a valid email address.');
       return;
     }
-    setEmailError(''); // Clear the error if the email is valid
-    handleSubmit(email); // Call handleSubmit from the hook, passing the email
+    setEmailError('');
+    handleSubmit(email);
   };
 
   return (
@@ -53,7 +50,6 @@ export default function PreAssessmentPage() {
             handleSelectOption={handleSelectOption}
           />
 
-          {/* Email input section */}
           {currentQuestionIndex === questions.length - 1 && (
             <div className="mt-4 text-left">
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
@@ -64,7 +60,7 @@ export default function PreAssessmentPage() {
                 id="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 p-2 border border-gray-300 rounded-md shadow-sm w-full"
+                className="mt-1 p-2 border border-gray-300 rounded-md shadow-sm w-full text-black"
                 placeholder="Enter your email"
               />
               {emailError && <p className="text-red-500 text-sm mt-1">{emailError}</p>}
@@ -90,7 +86,7 @@ export default function PreAssessmentPage() {
             ) : (
               <button
                 className="flex-1 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-500"
-                onClick={handleFormSubmit} // Updated to use handleFormSubmit
+                onClick={handleFormSubmit}
               >
                 Submit
               </button>
