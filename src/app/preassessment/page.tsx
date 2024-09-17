@@ -1,40 +1,20 @@
 'use client';
 
 import React from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import Question from '@/app/preassessment/components/Question';
 import { useAssessment } from '@/app/preassessment/hooks/useAssessment';
 import { questions } from '@/app/preassessment/data/questions';
-import { useRouter } from 'next/navigation'; 
+import router from 'next/router';
 
 export default function PreAssessmentPage() {
-  const router = useRouter();
-  
-
   const {
     currentQuestionIndex,
     answers,
     handleSelectOption,
     handleNext,
     handleBack,
-  } = useAssessment(questions || []);
-
-
-  const handleSubmit = () => {
-
-    if (answers.some((answer) => answer === null)) {
-      alert('Please answer all questions before submitting.');
-      return;
-    }
-
-
-    const confirmSubmit = confirm('Are you sure you want to submit?');
-    if (confirmSubmit) {
-
-      alert('Your answers have been submitted successfully.');
-      router.push('/login');
-    }
-  };
+    handleSubmit,
+  } = useAssessment(questions || []); 
 
   return (
     <div className="min-h-screen flex justify-center items-center bg-gray-50">
