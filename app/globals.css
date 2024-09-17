@@ -2,13 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 .title-text {
   font-family: "SF Pro Display", Arial, Helvetica, sans-serif;
   color: #ffffff;
@@ -16,17 +9,12 @@
   font-weight: 800;
   letter-spacing: 1.3px;
 }
+
 body {
   color: #1e3c58;
   background: var(--background);
   font-family: var(--font-sf-pro-display);
   letter-spacing: 0px;
-}
-
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
 }
 
 @keyframes gradient-x {
@@ -44,13 +32,13 @@ body {
 .animate-gradient-x {
   background: linear-gradient(
     45deg,
-    #5a82b1,
-    #689bc8,
-    #78b0d6,
-    #a5dcfa,
-    #86c3e1,
-    #b0e2f5,
-    #5a82b1
+    #2c67f2,
+    #62cff4,
+    #45a0e6,
+    #03a9f4,
+    #0689b3,
+    rgb(46, 105, 241),
+    #87ceeb
   );
   background-size: 400% 400%;
   animation: gradient-x 15s ease infinite;
@@ -61,8 +49,20 @@ body {
   0% {
     transform: translate(0, 0) rotate(0deg);
   }
+  20% {
+    transform: translate(50px, -50px) rotate(10deg);
+  }
+  40% {
+    transform: translate(100px, -100px) rotate(15deg);
+  }
   50% {
     transform: translate(200px, -200px) rotate(20deg);
+  }
+  60% {
+    transform: translate(150px, -150px) rotate(15deg);
+  }
+  80% {
+    transform: translate(50px, -50px) rotate(10deg);
   }
   100% {
     transform: translate(0, 0) rotate(0deg);
@@ -135,69 +135,6 @@ body {
   .remove-scrollbar::-webkit-scrollbar-thumb:hover {
     /* background: #1e2238; */
     background: transparent;
-  }
-
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-    --radius: 0.5rem;
-  }
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
-  }
-}
-
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
   }
 }
 
