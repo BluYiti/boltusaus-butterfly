@@ -33,7 +33,11 @@ export const useAssessment = (questions: Question[] = []) => {
   };
 
   const handleNext = () => {
-    if (currentQuestionIndex < questions.length - 1) {
+    // If we're on the last question (14th question), transition to the review page
+    if (currentQuestionIndex === questions.length) {
+      // This is the review page, no need to increment
+      return;
+    } else if (currentQuestionIndex < questions.length) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     }
   };
@@ -50,6 +54,7 @@ export const useAssessment = (questions: Question[] = []) => {
   };
 
   const handleSubmit = async (email: string) => {
+    // Ensure all questions are answered before submission
     if (answers.some((answer) => answer === null)) {
       alert('Please answer all questions before submitting.');
       return;

@@ -1,4 +1,8 @@
 import React, { useState } from 'react';
+import termsContent from '@/app/register/data/terms';
+import privacyContent from '@/app/register/data/privacy';
+import TermsAndPrivacy from '@/app/register/components/TermsAndPrivacy';
+
 
 interface RegisterFormProps {
     onRegister: (username: string, email: string, password: string) => void;
@@ -10,8 +14,10 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
     const [username, setUsername] = useState<string>('');
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
-    const [emailError, setEmailError] = useState<string | null>(null); 
-    const [agreeToTerms, setAgreeToTerms] = useState<boolean>(false); 
+    const [emailError, setEmailError] = useState<string | null>(null);
+    const [agreeToTerms, setAgreeToTerms] = useState<boolean>(false);
+    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+    const [contentType, setContentType] = useState<'terms' | 'privacy'>('terms');
 
     const validateEmail = (email: string): boolean => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -24,14 +30,23 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
             setEmailError('Invalid email format. Please enter a valid email address.');
             return;
         }
-        setEmailError(null); 
+        setEmailError(null);
 
         if (!agreeToTerms) {
             alert('You must agree to the terms and conditions before registering.');
             return;
         }
 
-        onRegister(username, email, password); 
+        onRegister(username, email, password);
+    };
+
+    const openModal = (type: 'terms' | 'privacy') => {
+        setContentType(type);
+        setIsModalOpen(true);
+    };
+
+    const closeModal = () => {
+        setIsModalOpen(false);
     };
 
     return (
@@ -76,18 +91,19 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
                     />
                 </div>
 
-                <div className="flex items-center mt-4">
+                <div className="flex items-start mt-4 space-x-2">
                     <input
                         type="checkbox"
                         id="terms"
                         checked={agreeToTerms}
                         onChange={(e) => setAgreeToTerms(e.target.checked)}
-                        className="mr-2"
+                        className="mt-1"
                     />
                     <label htmlFor="terms" className="text-gray-500 text-xs">
                         I agree to the
-                        <a href="/terms" className="text-blue-500 hover:underline"> Terms and Conditions</a> and
-                        <a href="/privacy" className="text-blue-500 hover:underline"> Privacy Policy</a>.
+                        <button type="button" onClick={() => openModal('terms')} className="text-blue-500 hover:underline ml-1">Terms and Conditions</button>
+                        &nbsp;and the&nbsp;
+                        <button type="button" onClick={() => openModal('privacy')} className="text-blue-500 hover:underline ml-1">Privacy Policy</button>.
                     </label>
                 </div>
 
@@ -99,6 +115,14 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
                     {loading ? 'Registering...' : 'Register'}
                 </button>
             </form>
+
+            <TermsAndPrivacy 
+                isOpen={isModalOpen}
+                onClose={closeModal}
+                contentType={contentType}
+                termsContent={termsContent}
+                privacyContent={privacyContent}
+            />
         </div>
     );
 };

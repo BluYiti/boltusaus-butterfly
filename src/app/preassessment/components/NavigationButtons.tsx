@@ -7,6 +7,7 @@ interface NavigationButtonsProps {
   onNext: () => void;
   showBack: boolean;
   isLastQuestion: boolean;
+  nextButtonLabel: string; // Add this new prop
 }
 
 const NavigationButtons: React.FC<NavigationButtonsProps> = ({
@@ -14,6 +15,7 @@ const NavigationButtons: React.FC<NavigationButtonsProps> = ({
   onNext,
   showBack,
   isLastQuestion,
+  nextButtonLabel, // Receive this prop
 }) => {
   return (
     <div className="mt-6 flex justify-between gap-4">
@@ -29,7 +31,7 @@ const NavigationButtons: React.FC<NavigationButtonsProps> = ({
         className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-500"
         onClick={onNext}
       >
-        {isLastQuestion ? 'Submit' : 'Next'}
+        {nextButtonLabel} {/* Use the dynamic label */}
       </button>
     </div>
   );

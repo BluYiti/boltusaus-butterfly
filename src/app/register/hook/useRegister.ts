@@ -1,4 +1,4 @@
-import { account, ID } from '@/app/appwrite'; // Import Appwrite's account and ID module
+import { account, ID } from '@/app/appwrite';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -16,19 +16,15 @@ export const useRegister = () => {
 
             await account.create(userId, email, password, username);
 
-            await account.createEmailPasswordSession(email, password);
-
             await account.updatePrefs({
                 role: 'client',
             });
             console.log('Label assigned successfully');
 
-
             router.push('/login');
         } catch (err: any) {
             console.error('Error during registration:', err);
             setError(`Registration failed: ${err.message}`);
-            console.error('Error assigning label:', err);
         } finally {
             setLoading(false);
         }
