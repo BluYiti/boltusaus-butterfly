@@ -1,53 +1,42 @@
-'use client'
-
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { Button } from "@/components/ui/button";
+import React from "react";
+import Image from "next/image";
+import Link from "next/link";
 
 export default function Home() {
-  const router = useRouter();
-
-  const handlePreAssessmentClick = () => {
-    router.push('/preassessment');
-  };
-
-  const handleLoginClick = () => {
-    router.push('/login');
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-300 via-blue-500 to-blue-700 animate-gradient-x relative overflow-hidden flex items-center justify-center">
-      <div className="text-center z-10">
-        <h1 className="title-text">A.M.Peralta Psychological Services</h1>
-        <Image 
-          src="/images/ButterflyLanding.png" 
-          alt="Welcome Image" 
-          width={150} 
-          height={150} 
-          className="mx-auto mb-6 mt-6"
-        />
-        <p className="text-white mt-4 mb-10">This is the start of your self-care journey.</p>
-        <button
-          onClick={handlePreAssessmentClick}
-          className="bg-[#1e3c58] hover:bg-[#16304a] text-white font-bold py-2 px-4 rounded-3xl"
-        >
-          Get Started
-        </button>
-        <p className="mt-4">
-          <a
-            onClick={handleLoginClick}
-            className="text-white hover:underline cursor-pointer"
+      <section className="mb-12">
+        <div>
+          <br />
+          <h1 className="header text-center text-light-200">A.M. Peralta</h1>
+          <h4 className="header text-center text-light-200">
+            Psychological Services
+          </h4>
+          <Image
+            src="/assets/images/butterfly-logo.svg"
+            alt="Butterfly Logo"
+            width={200}
+            height={200}
+            className="mx-auto mt-8"
+          />
+          <br />
+          <p className="text-white mt-4 mb-10 text-center">
+            This is the start of your self-care journey.
+          </p>
+          <Button
+            className="bg-white text-blue-300 w-full rounded-full hover:bg-white hover:text-blue-400"
+            asChild
           >
-            I already have an account
-          </a>
-        </p>
-      </div>
-    
-      {/* Animated Bubbles */}
-      <div className="bubble-container">
-        <div className="bubble bubble-1"></div>
-        <div className="bubble bubble-2"></div>
-        <div className="bubble bubble-3"></div>
-      </div>
+            <Link href="/client/sign-up">Get Started</Link>
+          </Button>
+          <div className="text-center mt-6">
+            <Link href="/login" className="text-light-200">
+              Already have an account?
+            </Link>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
