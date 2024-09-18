@@ -2,21 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-.title-text {
-  font-family: "SF Pro Display", Arial, Helvetica, sans-serif;
-  color: #ffffff;
-  font-size: 2rem;
-  font-weight: 800;
-  letter-spacing: 1.3px;
-}
-
-body {
-  color: #1e3c58;
-  background: var(--background);
-  font-family: var(--font-sf-pro-display);
-  letter-spacing: 0px;
-}
-
 @keyframes gradient-x {
   0% {
     background-position: 0% 50%;

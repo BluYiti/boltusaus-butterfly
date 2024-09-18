@@ -37,6 +37,11 @@ export default function Home() {
           </div>
         </div>
       </section>
+      <div className="bubble-container">
+        <div className="bubble bubble-1"></div>
+        <div className="bubble bubble-2"></div>
+        <div className="bubble bubble-3"></div>
+      </div>
     </div>
   );
 }
