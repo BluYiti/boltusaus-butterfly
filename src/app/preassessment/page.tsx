@@ -22,20 +22,28 @@ export default function PreAssessmentPage() {
   } = useAssessment(questions || []);
 
   const handleFormSubmit = () => {
+    // Basic email validation regex
+    const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    
+    if (!isValidEmail) {
+      alert('Please enter a valid email address.');
+      return;
+    }
+
     handleSubmit(email);
   };
+
+  const isLastQuestion = currentQuestionIndex === questions.length - 1; 
 
   return (
     <div className="min-h-screen flex justify-center items-center bg-gray-50">
       {currentQuestionIndex < questions.length ? (
         <div className="bg-blue-100 text-center rounded-xl p-8 shadow-lg w-full max-w-lg">
-
           <div className="mb-4 text-left">
             <h2 className="text-sm text-gray-700">
               {currentQuestionIndex + 1}/{questions.length} Questions answered
             </h2>
           </div>
-
 
           <Question
             text={questions[currentQuestionIndex].text}
@@ -44,8 +52,7 @@ export default function PreAssessmentPage() {
             handleSelectOption={handleSelectOption}
           />
 
-
-          {currentQuestionIndex === questions.length - 1 && (
+          {isLastQuestion && (
             <div className="mt-4 text-left">
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                 Email:
@@ -61,11 +68,12 @@ export default function PreAssessmentPage() {
             </div>
           )}
 
-
+          {/* Navigation */}
           <NavigationButtons
             onBack={handleBack}
-            onNext={currentQuestionIndex < questions.length - 1 ? handleNext : handleFormSubmit}
+            onNext={isLastQuestion ? handleFormSubmit : handleNext}
             showBack={currentQuestionIndex > 0}
+            isLastQuestion={isLastQuestion}
           />
         </div>
       ) : (

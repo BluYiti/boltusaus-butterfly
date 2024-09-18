@@ -26,16 +26,6 @@ const RegisterPage: React.FC = () => {
                 <div className="w-1/2 p-8">
                     <RegisterForm onRegister={register} error={error} loading={loading} />
 
-                    <div className="mt-4">
-                        <label className="flex items-center">
-                        <input type="checkbox" required className="mr-2" />
-                        <span className="text-gray-500 text-sm">
-                        I agree to the
-                        <a href="/terms" className="text-blue-500 hover:underline"> Terms and Conditions</a> and
-                        <a href="/privacy" className="text-blue-500 hover:underline"> Privacy Policy</a>.
-                        </span>
-                        </label>
-                    </div>
                 </div>
             </div>
 

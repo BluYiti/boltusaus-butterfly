@@ -7,14 +7,15 @@ interface RegisterFormProps {
 }
 
 const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading }) => {
-    const [username, setUsername] = useState<string>(''); // State for username
-    const [email, setEmail] = useState<string>(''); // State for email
-    const [password, setPassword] = useState<string>(''); // State for password
-    const [emailError, setEmailError] = useState<string | null>(null); // Email error state
+    const [username, setUsername] = useState<string>('');
+    const [email, setEmail] = useState<string>('');
+    const [password, setPassword] = useState<string>('');
+    const [emailError, setEmailError] = useState<string | null>(null); 
+    const [agreeToTerms, setAgreeToTerms] = useState<boolean>(false); 
 
     const validateEmail = (email: string): boolean => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email); // Return true if email is valid, false otherwise
+        return emailRegex.test(email);
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -23,8 +24,14 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
             setEmailError('Invalid email format. Please enter a valid email address.');
             return;
         }
-        setEmailError(null); // Reset email error if valid
-        onRegister(username, email, password); // Call the register function with username, email, and password
+        setEmailError(null); 
+
+        if (!agreeToTerms) {
+            alert('You must agree to the terms and conditions before registering.');
+            return;
+        }
+
+        onRegister(username, email, password); 
     };
 
     return (
@@ -68,10 +75,26 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
                         className="input-style"
                     />
                 </div>
+
+                <div className="flex items-center mt-4">
+                    <input
+                        type="checkbox"
+                        id="terms"
+                        checked={agreeToTerms}
+                        onChange={(e) => setAgreeToTerms(e.target.checked)}
+                        className="mr-2"
+                    />
+                    <label htmlFor="terms" className="text-gray-500 text-xs">
+                        I agree to the
+                        <a href="/terms" className="text-blue-500 hover:underline"> Terms and Conditions</a> and
+                        <a href="/privacy" className="text-blue-500 hover:underline"> Privacy Policy</a>.
+                    </label>
+                </div>
+
                 <button
                     type="submit"
-                    disabled={loading}
-                    className="btn-submit"
+                    disabled={loading || !agreeToTerms}
+                    className={`btn-submit ${!agreeToTerms ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                     {loading ? 'Registering...' : 'Register'}
                 </button>
