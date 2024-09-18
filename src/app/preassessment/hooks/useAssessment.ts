@@ -15,7 +15,6 @@ export const useAssessment = (questions: Question[] = []) => {
     answerStr: string;
   };
 
-
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Answer[]>(Array(questions.length).fill(null));
   const [email, setEmail] = useState<string>(''); 
@@ -46,13 +45,11 @@ export const useAssessment = (questions: Question[] = []) => {
   };
 
   const validateEmail = (email: string) => {
-
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return regex.test(email);
   };
 
   const handleSubmit = async (email: string) => {
-
     if (answers.some((answer) => answer === null)) {
       alert('Please answer all questions before submitting.');
       return;
@@ -81,20 +78,10 @@ export const useAssessment = (questions: Question[] = []) => {
 
         console.log('Document created successfully:', response);
         alert('Your answers have been submitted successfully.');
-        router.push('/login');
-
+        router.push('/register');
       } catch (error) {
-        console.log('Submitting answers:', answers);
-      
-
-        if (error instanceof Error) {
-          console.error('Error submitting answers:', error);
-          alert(`There was an error submitting your answers. Error: ${error.message}`);
-        } else {
-
-          console.error('Unknown error submitting answers:', error);
-          alert('There was an unknown error submitting your answers. Please try again.');
-        }
+        console.error('Error submitting answers:', error);
+        alert(`There was an error submitting your answers. Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
       }
     }
   };

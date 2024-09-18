@@ -4,7 +4,7 @@ import React from 'react';
 
 interface NavigationButtonsProps {
   onBack: () => void;
-  onNext: () => void;
+  onNext: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   showBack: boolean;
 }
 

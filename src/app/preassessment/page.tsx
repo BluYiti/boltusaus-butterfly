@@ -1,36 +1,27 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Question from '@/app/preassessment/components/Question';
+import NavigationButtons from '@/app/preassessment/components/NavigationButtons';
 import { useAssessment } from '@/app/preassessment/hooks/useAssessment';
 import { questions } from '@/app/preassessment/data/questions';
+import BubbleAnimation from '@/app/preassessment/components/BubbleAnimation';
+import '@/app/login/styles/login.css';
 import router from 'next/router';
 
 export default function PreAssessmentPage() {
   const {
     currentQuestionIndex,
     answers,
+    email,
+    setEmail,
     handleSelectOption,
     handleNext,
     handleBack,
     handleSubmit,
   } = useAssessment(questions || []);
 
-  const [email, setEmail] = useState('');
-  const [emailError, setEmailError] = useState('');
-
-  const validateEmail = (email: string) => {
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return regex.test(email);
-  };
-
-  const handleFormSubmit = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    event.preventDefault();
-    if (!validateEmail(email)) {
-      setEmailError('Please enter a valid email address.');
-      return;
-    }
-    setEmailError('');
+  const handleFormSubmit = () => {
     handleSubmit(email);
   };
 
@@ -38,17 +29,21 @@ export default function PreAssessmentPage() {
     <div className="min-h-screen flex justify-center items-center bg-gray-50">
       {currentQuestionIndex < questions.length ? (
         <div className="bg-blue-100 text-center rounded-xl p-8 shadow-lg w-full max-w-lg">
+
           <div className="mb-4 text-left">
             <h2 className="text-sm text-gray-700">
               {currentQuestionIndex + 1}/{questions.length} Questions answered
             </h2>
           </div>
+
+
           <Question
             text={questions[currentQuestionIndex].text}
             options={questions[currentQuestionIndex].options}
             currentAnswer={answers[currentQuestionIndex]?.answerInt ?? null}
             handleSelectOption={handleSelectOption}
           />
+
 
           {currentQuestionIndex === questions.length - 1 && (
             <div className="mt-4 text-left">
@@ -63,35 +58,15 @@ export default function PreAssessmentPage() {
                 className="mt-1 p-2 border border-gray-300 rounded-md shadow-sm w-full text-black"
                 placeholder="Enter your email"
               />
-              {emailError && <p className="text-red-500 text-sm mt-1">{emailError}</p>}
             </div>
           )}
 
-          <div className="mt-6 flex justify-between gap-4">
-            {currentQuestionIndex > 0 && (
-              <button
-                className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-500"
-                onClick={handleBack}
-              >
-                Back
-              </button>
-            )}
-            {currentQuestionIndex < questions.length - 1 ? (
-              <button
-                className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-500"
-                onClick={handleNext}
-              >
-                Next
-              </button>
-            ) : (
-              <button
-                className="flex-1 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-500"
-                onClick={handleFormSubmit}
-              >
-                Submit
-              </button>
-            )}
-          </div>
+
+          <NavigationButtons
+            onBack={handleBack}
+            onNext={currentQuestionIndex < questions.length - 1 ? handleNext : handleFormSubmit}
+            showBack={currentQuestionIndex > 0}
+          />
         </div>
       ) : (
         <div className="bg-green-100 text-center rounded-xl p-8 shadow-lg w-full max-w-lg">
@@ -102,12 +77,14 @@ export default function PreAssessmentPage() {
           </div>
           <button
             className="mt-4 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-500"
-            onClick={() => router.push('/login')}
+            onClick={() => router.push('/register')}
           >
             HOME
           </button>
         </div>
       )}
+
+      <BubbleAnimation />
     </div>
   );
 }
