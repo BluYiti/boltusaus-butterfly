@@ -1,13 +1,13 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Question from '@/app/preassessment/components/Question';
 import NavigationButtons from '@/app/preassessment/components/NavigationButtons';
 import { useAssessment } from '@/app/preassessment/hooks/useAssessment';
 import { questions } from '@/app/preassessment/data/questions';
 import BubbleAnimation from '@/app/preassessment/components/BubbleAnimation';
 import '@/app/login/styles/login.css';
-import router from 'next/router';
+import SubmissionModal from '@/app/preassessment/components/Submission';  // Updated import
 
 export default function PreAssessmentPage() {
   const {
@@ -18,24 +18,16 @@ export default function PreAssessmentPage() {
     handleSelectOption,
     handleNext,
     handleBack,
-    handleSubmit,
+    handleFormSubmit, // Trigger the modal flow
+    confirmSubmit, // Actual submission after confirmation
+    isModalOpen, // Controls modal visibility
+    modalMessage, // The message to display in the modal
+    modalType, // The type of modal (confirmation, error, success)
+    closeModal, // Close modal handler
     isAllAnswered,
   } = useAssessment(questions || []);
 
-  const handleFormSubmit = () => {
-    const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    
-    if (!isValidEmail) {
-      alert('Please enter a valid email address.');
-      return;
-    }
-
-    handleSubmit(email);
-  };
-
   const isReviewPage = currentQuestionIndex === questions.length;
-
-  const nextButtonLabel = isReviewPage ? "Submit" : currentQuestionIndex === questions.length - 1 ? "Review Answers" : "Next";
 
   return (
     <div className="min-h-screen flex justify-center items-center bg-gray-50">
@@ -49,7 +41,7 @@ export default function PreAssessmentPage() {
                 <div className="border border-gray-300 rounded-md p-4 bg-white shadow-md">
                   <p className="font-bold text-gray-900">{question.text}</p>
                   <div className="mt-2 space-y-2">
-                    {question.options.map((option: any, optIndex: number) => (
+                    {question.options.map((option, optIndex) => (
                       <div
                         key={optIndex}
                         className={`p-2 border rounded-md text-gray-600 ${answers[index]?.answerInt === optIndex ? 'bg-blue-300 border-blue-500' : 'border-gray-500'}`}
@@ -84,7 +76,7 @@ export default function PreAssessmentPage() {
             </button>
             <button
               className="flex-1 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-500"
-              onClick={handleFormSubmit}
+              onClick={handleFormSubmit} // Opens the confirmation modal
             >
               Submit
             </button>
@@ -116,6 +108,14 @@ export default function PreAssessmentPage() {
       )}
 
       <BubbleAnimation />
+      
+      <SubmissionModal
+        isOpen={isModalOpen}
+        modalType={modalType}
+        message={modalMessage}
+        onClose={closeModal}
+        onConfirm={modalType === 'confirmation' ? confirmSubmit : undefined}
+      />
     </div>
   );
 }

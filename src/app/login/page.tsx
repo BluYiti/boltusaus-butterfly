@@ -7,6 +7,7 @@ import '@/app/login/styles/login.css';
 import termsContent from '@/app/register/data/terms';
 import privacyContent from '@/app/register/data/privacy';
 import TermsAndPrivacy from '@/app/register/components/TermsAndPrivacy';
+import BubbleAnimation from '@/app/preassessment/components/BubbleAnimation';
 
 const LoginPage: React.FC = () => {
     const { login, error } = useLogin();
@@ -72,11 +73,7 @@ const LoginPage: React.FC = () => {
                 </div>
             </div>
 
-            <div className="bubble-container">
-                <div className="bubble bubble-1"></div>
-                <div className="bubble bubble-2"></div>
-                <div className="bubble bubble-3"></div>
-            </div>
+            <BubbleAnimation />
 
             <TermsAndPrivacy
                 isOpen={isModalOpen}
@@ -85,6 +82,8 @@ const LoginPage: React.FC = () => {
                 termsContent={termsContent}
                 privacyContent={privacyContent}
             />
+
+            
         </div>
     );
 };

@@ -4,6 +4,7 @@ import React from 'react';
 import { useRegister } from '@/app/register/hook/useRegister';
 import RegisterForm from '@/app/register/components/RegisterForm';
 import '@/app/login/styles/login.css';
+import BubbleAnimation from '@/app/preassessment/components/BubbleAnimation';
 
 const RegisterPage: React.FC = () => {
     const { register, error, loading } = useRegister();
@@ -29,11 +30,7 @@ const RegisterPage: React.FC = () => {
                 </div>
             </div>
 
-            <div className="bubble-container">
-                <div className="bubble bubble-1"></div>
-                <div className="bubble bubble-2"></div>
-                <div className="bubble bubble-3"></div>
-            </div>
+            <BubbleAnimation />
         </div>
     );
 };

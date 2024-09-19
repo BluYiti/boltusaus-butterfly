@@ -2,11 +2,11 @@
 
 import { useState } from 'react';
 import { Question } from '@/app/preassessment/data/questions';
-import { databases, ID } from '@/app/appwrite'; 
+import { databases, ID } from '@/app/appwrite';
 import { useRouter } from 'next/navigation';
 
-const DATABASE_ID = 'Butterfly-Database'; 
-const COLLECTION_ID = 'Pre-Assessment'; 
+const DATABASE_ID = 'Butterfly-Database';
+const COLLECTION_ID = 'Pre-Assessment';
 
 export const useAssessment = (questions: Question[] = []) => {
   type Answer = {
@@ -17,8 +17,11 @@ export const useAssessment = (questions: Question[] = []) => {
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Answer[]>(Array(questions.length).fill(null));
-  const [email, setEmail] = useState<string>(''); 
-  const router = useRouter(); 
+  const [email, setEmail] = useState<string>(''); // Collect email
+  const [modalMessage, setModalMessage] = useState<string>(''); // Message to display in modal
+  const [modalType, setModalType] = useState<'confirmation' | 'error' | 'success'>('confirmation'); // Modal type
+  const [isModalOpen, setModalOpen] = useState(false); // Control modal open/close state
+  const router = useRouter();
 
   const handleSelectOption = (value: number) => {
     const selectedOption = questions[currentQuestionIndex].options.find(option => option.value === value);
@@ -33,9 +36,7 @@ export const useAssessment = (questions: Question[] = []) => {
   };
 
   const handleNext = () => {
-    // If we're on the last question (14th question), transition to the review page
     if (currentQuestionIndex === questions.length) {
-      // This is the review page, no need to increment
       return;
     } else if (currentQuestionIndex < questions.length) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
@@ -53,41 +54,59 @@ export const useAssessment = (questions: Question[] = []) => {
     return regex.test(email);
   };
 
-  const handleSubmit = async (email: string) => {
-    // Ensure all questions are answered before submission
+  const handleFormSubmit = () => {
+    // Validate all questions and email
     if (answers.some((answer) => answer === null)) {
-      alert('Please answer all questions before submitting.');
+      setModalMessage('Please answer all questions before submitting.');
+      setModalType('error');
+      setModalOpen(true);
       return;
     }
 
     if (!validateEmail(email)) {
-      alert('Please enter a valid email address.');
+      setModalMessage('Please enter a valid email address.');
+      setModalType('error');
+      setModalOpen(true);
       return;
     }
 
-    const confirmSubmit = confirm('Are you sure you want to submit?');
-    if (confirmSubmit) {
-      try {
-        const serializedAnswers = JSON.stringify(answers);
+    // Open confirmation modal
+    setModalMessage('Are you sure you want to submit your answers?');
+    setModalType('confirmation');
+    setModalOpen(true);
+  };
 
-        const response = await databases.createDocument(
-          DATABASE_ID,
-          COLLECTION_ID,
-          ID.unique(),
-          {
-            email,
-            answers: serializedAnswers,
-            date: new Date().toISOString(), 
-          }
-        );
+  const confirmSubmit = async () => {
+    try {
+      const serializedAnswers = JSON.stringify(answers);
 
-        console.log('Document created successfully:', response);
-        alert('Your answers have been submitted successfully.');
-        router.push('/register');
-      } catch (error) {
-        console.error('Error submitting answers:', error);
-        alert(`There was an error submitting your answers. Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      }
+      await databases.createDocument(
+        DATABASE_ID,
+        COLLECTION_ID,
+        ID.unique(),
+        {
+          email,
+          answers: serializedAnswers,
+          date: new Date().toISOString(),
+        }
+      );
+
+      setModalMessage('Your answers have been submitted successfully.');
+      setModalType('success');
+      setModalOpen(true);
+    } catch (error) {
+      setModalMessage(`Error submitting answers: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setModalType('error');
+      setModalOpen(true);
+    }
+  };
+
+  const closeModal = () => {
+    if (modalType === 'success') {
+      setModalOpen(false);
+      router.push('/register');
+    } else {
+      setModalOpen(false);
     }
   };
 
@@ -95,11 +114,16 @@ export const useAssessment = (questions: Question[] = []) => {
     currentQuestionIndex,
     answers,
     email,
-    setEmail, 
+    setEmail,
     handleSelectOption,
     handleNext,
     handleBack,
-    handleSubmit,
+    handleFormSubmit,
+    confirmSubmit,
+    isModalOpen,
+    modalMessage,
+    modalType,
+    closeModal,
     isAllAnswered: answers.every((answer) => answer !== null),
   };
 };
