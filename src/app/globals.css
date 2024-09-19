@@ -306,7 +306,7 @@
 
   /* =====  SHADCN OVERRIDES */
   .shad-primary-btn {
-    @apply bg-light-200 text-blue-400 !important;
+    @apply bg-light-200 text-blue-300 !important;
   }
 
   .shad-danger-btn {
@@ -391,7 +391,7 @@
 
   /* =====  REACT PHONE NUMBER INPUT OVERRIDES */
   .input-phone {
-    @apply mt-2 h-11 rounded-md px-3 text-sm border bg-light-200 placeholder:text-dark-600 border-dark-700 !important;
+    @apply mt-2 h-11 rounded-xl px-3 text-sm border bg-light-200 placeholder:text-dark-600 border-dark-700 !important;
   }
 
   /* =====  REACT DATE PICKER OVERRIDES */
