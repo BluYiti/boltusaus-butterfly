@@ -25,7 +25,7 @@ export default function Home() {
             This is the start of your self-care journey.
           </p>
           <Button
-            className="bg-white text-blue-300 w-full rounded-full hover:bg-white hover:text-blue-400"
+            className="shad-primary-btn w-full rounded-full hover:bg-white hover:text-blue-400"
             asChild
           >
             <Link href="/client/sign-up">Get Started</Link>
