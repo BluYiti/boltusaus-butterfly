@@ -1,13 +1,13 @@
 export const SexOptions = ["Male", "Female"];
 
-export const ClientFormDefaultValues = {
+export const RegisterFormDefaultValues = {
   firstName: "",
   lastName: "",
   middleName: "",
   suffixName: "",
   email: "",
   phone: "",
-  birthDate: new Date(Date.now()),
+  birthDate: new Date(Date.now() - 315360000000),
   sex: "Male" as Sex,
   nationality: "",
   civilStatus: "",
@@ -19,13 +19,13 @@ export const ClientFormDefaultValues = {
   emergencyContactName: "",
   emergencyContactNumber: "",
   allergies: "",
-  currentMedication: "",
+  currentMedications: "",
   familyMedicalHistory: "",
   pastMedicalHistory: "",
   identificationType: "Birth Certificate",
   identificationNumber: "",
   identificationDocument: [],
-  treatmentConsent: false,
+  therapyConsent: false,
   disclosureConsent: false,
   privacyConsent: false,
 };
@@ -72,4 +72,3 @@ export const StatusIcon = {
   pending: "/assets/icons/pending.svg",
   cancelled: "/assets/icons/cancelled.svg",
 };
-
