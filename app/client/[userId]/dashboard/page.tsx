@@ -2,10 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import Menu from "@/components/Menu";
 import NavBar from "@/components/NavBar";
-import Announcements from "@/components/client/Announcements";
-import ClientCalendar from "@/components/client/ClientCalendar";
 import ClientPage from "@/components/client/ClientPage";
-import MoodTrackerCard from "@/components/client/MoodTrackerCard";
 
 const ClientDashboard = () => {
   return (
