@@ -10,7 +10,7 @@ const menuItems = [
       {
         icon: "/assets/icons/home.svg",
         label: "Home",
-        href: "/client/dashboard",
+        href: "`/client/dashboard`",
         visible: ["admin", "psychotherapist", "client", "associate"],
       },
       {
@@ -27,7 +27,7 @@ const menuItems = [
       {
         icon: "/assets/icons/profile.svg",
         label: "Profile",
-        href: "/client/profile",
+        href: `/client/profile`,
         visible: ["admin", "psychotherapist", "client", "associate"],
       },
       {
