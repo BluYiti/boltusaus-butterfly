@@ -1,6 +1,8 @@
 'use client'
+
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import BubbleAnimation from '@/app/preassessment/components/BubbleAnimation';
 
 export default function Home() {
   const router = useRouter();
@@ -41,12 +43,7 @@ export default function Home() {
         </p>
       </div>
     
-      {/* Animated Bubbles */}
-      <div className="bubble-container">
-        <div className="bubble bubble-1"></div>
-        <div className="bubble bubble-2"></div>
-        <div className="bubble bubble-3"></div>
-      </div>
+      <BubbleAnimation />
     </div>
   );
 }
