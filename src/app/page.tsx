@@ -47,7 +47,7 @@ const App: React.FC = () => {
             <p className="mt-4">Discover pathways to mental well-being and personal growth.</p>
             <button className="relative inline-block font-medium group mt-6">
   <span className="absolute inset-0 w-full h-full transition duration-400 ease-out transform translate-x-1 translate-y-1 bg-blue-600 group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
-  <span className="absolute inset-0 w-full h-full bg-white border-[#38B6FF] group-hover:bg-blue-600"></span>
+  <span className="absolute inset-0 w-full h-full bg-white border-[#38B6FF] group-hover:bg-[#87CEFA]"></span>
   <span className="relative font-bold text-[#000000] px-6 py-3 rounded">Get Started</span>
 </button>
           </div>
