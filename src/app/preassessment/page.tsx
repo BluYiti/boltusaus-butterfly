@@ -6,15 +6,13 @@ import NavigationButtons from '@/app/preassessment/components/NavigationButtons'
 import { useAssessment } from '@/app/preassessment/hooks/useAssessment';
 import { questions } from '@/app/preassessment/data/questions';
 import BubbleAnimation from '@/app/preassessment/components/BubbleAnimation';
-import '@/app/login/styles/login.css';
-import SubmissionModal from '@/app/preassessment/components/Submission';  // Updated import
+import '@/app/auth/login/styles/login.css';
+import SubmissionModal from '@/app/preassessment/components/Submission';
 
 export default function PreAssessmentPage() {
   const {
     currentQuestionIndex,
     answers,
-    email,
-    setEmail,
     handleSelectOption,
     handleNext,
     handleBack,
@@ -54,18 +52,6 @@ export default function PreAssessmentPage() {
               </li>
             ))}
           </ul>
-
-          <div className="mt-4 text-left">
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email:</label>
-            <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 p-2 border border-gray-300 rounded-md shadow-sm w-full text-black"
-              placeholder="Enter your email"
-            />
-          </div>
 
           <div className="flex justify-between gap-4 mt-6">
             <button

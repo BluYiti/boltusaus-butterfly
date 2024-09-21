@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import termsContent from '@/app/register/data/terms';
-import privacyContent from '@/app/register/data/privacy';
-import TermsAndPrivacy from '@/app/register/components/TermsAndPrivacy';
+import termsContent from '@/app/auth/register/data/terms';
+import privacyContent from '@/app/auth/register/data/privacy';
+import TermsAndPrivacy from '@/app/auth/register/components/TermsAndPrivacy';
 
 
 interface RegisterFormProps {

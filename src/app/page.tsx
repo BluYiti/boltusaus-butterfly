@@ -8,7 +8,7 @@ export default function Home() {
   const router = useRouter();
 
   const handlePreAssessmentClick = () => {
-    router.push('/preassessment');
+    router.push('/register');
   };
 
   const handleLoginClick = () => {
