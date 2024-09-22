@@ -10,7 +10,10 @@
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^6.6.0",
+    "@fortawesome/free-solid-svg-icons": "^6.6.0",
+    "@fortawesome/react-fontawesome": "^0.2.2",
     "appwrite": "^15.0.0",
+    "ink": "^5.0.1",
     "next": "^14.2.11",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
