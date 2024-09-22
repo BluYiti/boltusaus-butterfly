@@ -6,7 +6,6 @@ import NavigationButtons from '@/app/preassessment/components/NavigationButtons'
 import { useAssessment } from '@/app/preassessment/hooks/useAssessment';
 import { questions } from '@/app/preassessment/data/questions';
 import BubbleAnimation from '@/app/preassessment/components/BubbleAnimation';
-import '@/app/auth/login/styles/login.css';
 import SubmissionModal from '@/app/preassessment/components/Submission';
 
 export default function PreAssessmentPage() {
@@ -28,7 +27,7 @@ export default function PreAssessmentPage() {
   const isReviewPage = currentQuestionIndex === questions.length;
 
   return (
-    <div className="min-h-screen flex justify-center items-center bg-gray-50">
+    <div className="min-h-screen flex justify-center items-center bg-blue-500">
       {isReviewPage ? (
         <div className="text-center rounded-xl p-8 shadow-lg w-full max-w-3xl">
           <h3 className="text-xl mb-4 text-gray-800">Review Your Answers</h3>

@@ -3,7 +3,7 @@
 import React from 'react';
 import { useRegister } from '@/app/auth/register/hook/useRegister';
 import RegisterForm from '@/app/auth/register/components/RegisterForm';
-import '@/app/auth/login/styles/login.css';
+import '@/app/auth/styles/style.css';
 import BubbleAnimation from '@/app/preassessment/components/BubbleAnimation';
 
 const RegisterPage: React.FC = () => {
@@ -11,7 +11,8 @@ const RegisterPage: React.FC = () => {
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-blue-500">
-            <div className="flex bg-white rounded-lg shadow-lg max-w-4xl w-full overflow-hidden">
+
+            <div className="flex bg-white w-full h-full min-h-screen overflow-hidden">
                 
                 <div className="w-1/2 bg-blue-100 flex flex-col items-center justify-center p-8">
                     <img
@@ -24,9 +25,11 @@ const RegisterPage: React.FC = () => {
                     </h2>
                 </div>
 
-                <div className="w-1/2 p-8">
-                    <RegisterForm onRegister={register} error={error} loading={loading} />
 
+                <div className="w-1/2 flex items-center justify-center p-8">
+                    <div className="w-full max-w-md">
+                        <RegisterForm onRegister={register} error={error} loading={loading} />
+                    </div>
                 </div>
             </div>
 
@@ -36,4 +39,3 @@ const RegisterPage: React.FC = () => {
 };
 
 export default RegisterPage;
-
