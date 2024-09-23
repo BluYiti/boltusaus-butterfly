@@ -22,12 +22,12 @@ const Header: React.FC = () => {
     <header className="flex justify-between items-center p-4 border-b">
       <div className="text-xl font-bold">Logo</div>
       <nav className="flex space-x-4">
-        <a href="#" className="text-gray-600 hover:text-black">Dashboard</a>
-        <a href="#" className="text-gray-600 hover:text-black">Client List</a>
-        <a href="#" className="text-gray-600 hover:text-black">Reports</a>
-        <a href="#" className="text-gray-600 hover:text-black">Recordings</a>
-        <a href="#" className="text-gray-600 hover:text-black">Resources</a>
-        <a href="#" className="text-gray-600 hover:text-black">About</a>
+      <a href="/psychotherapist" className="hover:text-black">Dashboard</a>
+          <a href="/psychotherapist/pages/pclientlist" className="hover:text-black">Client List</a>
+          <a href="/psychotherapist/pages/preports" className="hover:text-black">Reports</a>
+          <a href="#" className="hover:text-black">Recordings</a>
+          <a href="/psychotherapist/pages/presources" className="hover:text-black">Resources</a>
+          <a href="/psychotherapist/pages/paboutme" className="hover:text-black">About</a>
       </nav>
     </header>
   );

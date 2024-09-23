@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Question } from '@/app/preassessment/data/questions';
-import { databases, ID } from '@/app/appwrite';
+import { databases, account, ID } from '@/app/appwrite';
 import { useRouter } from 'next/navigation';
 
 const DATABASE_ID = 'Butterfly-Database';
@@ -17,11 +17,26 @@ export const useAssessment = (questions: Question[] = []) => {
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Answer[]>(Array(questions.length).fill(null));
-  const [email, setEmail] = useState<string>(''); // Collect email
-  const [modalMessage, setModalMessage] = useState<string>(''); // Message to display in modal
-  const [modalType, setModalType] = useState<'confirmation' | 'error' | 'success'>('confirmation'); // Modal type
-  const [isModalOpen, setModalOpen] = useState(false); // Control modal open/close state
+  const [modalMessage, setModalMessage] = useState<string>('');
+  const [modalType, setModalType] = useState<'confirmation' | 'error' | 'success'>('confirmation');
+  const [isModalOpen, setModalOpen] = useState(false);
+  const [userName, setUserName] = useState<string>('');
+  const [userID, setUserID] = useState<string>('');
   const router = useRouter();
+
+  // Fetch the current authenticated user's name and ID
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const user = await account.get();
+        setUserName(user.name);
+        setUserID(user.$id);
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+    fetchUser();
+  }, []);
 
   const handleSelectOption = (value: number) => {
     const selectedOption = questions[currentQuestionIndex].options.find(option => option.value === value);
@@ -49,13 +64,7 @@ export const useAssessment = (questions: Question[] = []) => {
     }
   };
 
-  const validateEmail = (email: string) => {
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return regex.test(email);
-  };
-
   const handleFormSubmit = () => {
-    // Validate all questions and email
     if (answers.some((answer) => answer === null)) {
       setModalMessage('Please answer all questions before submitting.');
       setModalType('error');
@@ -63,14 +72,6 @@ export const useAssessment = (questions: Question[] = []) => {
       return;
     }
 
-    if (!validateEmail(email)) {
-      setModalMessage('Please enter a valid email address.');
-      setModalType('error');
-      setModalOpen(true);
-      return;
-    }
-
-    // Open confirmation modal
     setModalMessage('Are you sure you want to submit your answers?');
     setModalType('confirmation');
     setModalOpen(true);
@@ -85,7 +86,8 @@ export const useAssessment = (questions: Question[] = []) => {
         COLLECTION_ID,
         ID.unique(),
         {
-          email,
+          userID,
+          userName,
           answers: serializedAnswers,
           date: new Date().toISOString(),
         }
@@ -104,7 +106,7 @@ export const useAssessment = (questions: Question[] = []) => {
   const closeModal = () => {
     if (modalType === 'success') {
       setModalOpen(false);
-      router.push('/register');
+      router.push('/auth/login');
     } else {
       setModalOpen(false);
     }
@@ -113,8 +115,6 @@ export const useAssessment = (questions: Question[] = []) => {
   return {
     currentQuestionIndex,
     answers,
-    email,
-    setEmail,
     handleSelectOption,
     handleNext,
     handleBack,
