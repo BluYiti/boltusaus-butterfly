@@ -1,12 +1,6 @@
 import React from 'react';
 import FetchPreAssessmentDetails from '@/app/psychotherapist/components/FetchPreassessmentDetails';
-
-interface Client {
-  initials: string;
-  name: string;
-  status: string;
-  userID: string;
-}
+import { Client } from '../hooks/useTypes';
 
 interface ModalProps {
   client: Client | null;

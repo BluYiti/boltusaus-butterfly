@@ -5,6 +5,7 @@ interface Client {
   name: string;
   status: string;
   userID: string;
+  email: string;
 }
 
 export const useFetchClients = () => {
@@ -19,7 +20,8 @@ export const useFetchClients = () => {
       const fetchedClients = data.users.map((user: any) => ({
         initials: `${user.name[0]}${user.name.split(' ')[1]?.[0] || ''}`,
         name: user.name,
-        userID: user.$id, 
+        userID: user.$id,
+        email: user.email,
         status: user.prefs?.status || 'Unknown',
       }));
 

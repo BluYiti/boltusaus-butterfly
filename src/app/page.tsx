@@ -1,9 +1,15 @@
-// src/App.tsx
+"use client"
+
 import React from "react";
+import BubbleAnimation from '@/app/preassessment/components/BubbleAnimation';
+import { useRouter } from 'next/navigation';
 
 const App: React.FC = () => {
+
+  const router = useRouter();
+  
   return (
-    <div className="text-black min-h-screen bg-gray-100">
+    <div className="text-black min-h-screen bg-blue-500">
       {/* Navbar */}
       <nav className="fixed top-0 left-0 w-full flex justify-between items-center p-4 bg-white shadow z-50">
         <div className="text-2xl font-bold">Butterfly</div>
@@ -12,6 +18,7 @@ const App: React.FC = () => {
             <a
               href="#about"
               className="text-[#20206b] font-bold relative after:content-[''] after:absolute after:w-0 after:h-[2px] after:bg-blue-600 after:left-0 after:bottom-0 after:transition-all after:duration-300 hover:after:w-full"
+              onClick={() => router.push('/About')}
             >
               About
             </a>
@@ -20,6 +27,7 @@ const App: React.FC = () => {
             <a
               href="#blog"
               className="text-[#20206b] font-bold relative after:content-[''] after:absolute after:w-0 after:h-[2px] after:bg-blue-600 after:left-0 after:bottom-0 after:transition-all after:duration-300 hover:after:w-full"
+              onClick={() => router.push('/Frequently Asked Questions')}
             >
               Frequently Asked Questions
             </a>
@@ -28,15 +36,18 @@ const App: React.FC = () => {
             <a
               href="#contact"
               className="text-[#20206b] font-bold relative after:content-[''] after:absolute after:w-0 after:h-[2px] after:bg-blue-600 after:left-0 after:bottom-0 after:transition-all after:duration-300 hover:after:w-full"
+              onClick={() => router.push('/Contact Us')}
             >
               Contact Us
             </a>
           </li>
         </ul>
-        <button className="relative inline-flex items-center justify-start overflow-hidden font-medium transition-all bg-blue-600 text-white rounded py-2 px-4 group">
-  <span className="absolute inset-0 w-full h-full bg-blue-500 transform translate-x-full transition duration-300 ease-out group-hover:translate-x-0"></span>
-  <span className="relative w-full text-left transition-colors duration-300 ease-in-out group-hover:text-white">Login</span>
-</button>
+        <button className="relative inline-flex items-center justify-start overflow-hidden font-medium transition-all bg-blue-600 text-white rounded py-2 px-4 group"
+        onClick={() => router.push('/auth/login')}
+        >
+        <span className="absolute inset-0 w-full h-full bg-blue-500 transform translate-x-full transition duration-300 ease-out group-hover:translate-x-0"></span>
+        <span className="relative w-full text-left transition-colors duration-300 ease-in-out group-hover:text-white">Login</span>
+        </button>
       </nav>
 
       {/* Hero Section */}
@@ -45,11 +56,13 @@ const App: React.FC = () => {
           <div className="text-center text-white">
             <h1 className="text-4xl font-bold">We Help You To Heal Yourself</h1>
             <p className="mt-4">Discover pathways to mental well-being and personal growth.</p>
-            <button className="relative inline-block font-medium group mt-6">
-  <span className="absolute inset-0 w-full h-full transition duration-400 ease-out transform translate-x-1 translate-y-1 bg-blue-600 group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
-  <span className="absolute inset-0 w-full h-full bg-white border-[#38B6FF] group-hover:bg-[#87CEFA]"></span>
-  <span className="relative font-bold text-[#000000] px-6 py-3 rounded">Get Started</span>
-</button>
+            <button className="relative inline-block font-medium group mt-6"
+            onClick={() => router.push('/auth/register')}
+            >
+              <span className="absolute inset-0 w-full h-full transition duration-400 ease-out transform translate-x-1 translate-y-1 bg-blue-600 group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
+              <span className="absolute inset-0 w-full h-full bg-white border-[#38B6FF] group-hover:bg-[#87CEFA]"></span>
+              <span className="relative font-bold text-[#000000] px-6 py-3 rounded">Get Started</span>
+            </button>
           </div>
         </div>
       </header>
@@ -101,45 +114,43 @@ const App: React.FC = () => {
           </div>
         ))}
       </div>
-    
-      <BubbleAnimation />
     </div>
   </div>
 </section>
 
  {/* Info Section */}
       <section id="insights" className="py-12">
-  <div className="container mx-auto px-4">
-    {/* Title with a border line */}
-    <h2 className="text-3xl font-bold text-center mb-8 border-b-4 border-[#B3EBF2] inline-block pb-2">
-      How does Butterfly work?
-    </h2>
+        <div className="container mx-auto px-4">
+          {/* Title with a border line */}
+          <h2 className="text-3xl font-bold text-center mb-8 border-b-4 border-[#B3EBF2] inline-block pb-2">
+            How does Butterfly work?
+          </h2>
 
-  {/* Info list */}
-<div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-  {[
-    { title: 'Create your Account', description: 'Login or register to access our services.' },
-    { title: 'Answer the Pre-assessment Form', description: 'Choose your answers to determine your suitability for our services.' },
-    { title: 'Wait for your Evaluation Result', description: 'The psychotherapist will evaluate your pre-assessment form before you get accepted or referred to other services.' },
-    { title: 'Set your Appointment', description: 'Choose your preferred Psychotherapist, and date and time for your consultation.' },
-    { title: 'Pay your Session Fee', description: 'Choose your payment method and pay for your upcoming session.' },
-    { title: 'Start with Therapy', description: 'Explore effective self-care strategies, and communicate with our experts to enhance your well-being.' }
-  ].map((insight, index) => (
-    <div 
-      key={index} 
-      className="bg-white p-6 shadow rounded transition-all duration-300 relative overflow-hidden group"
-    >
-      <div className="absolute inset-0 bg-[#B3EBF2] transform -translate-x-full transition-transform duration-300 group-hover:translate-x-0"></div>
-      <div className="relative z-10">
-        {/* Subtitle with a border line */}
-        <h3 className="text-xl font-semibold mb-2 border-b-2 border-white pb-1">{insight.title}</h3>
-        <p className="text-gray-600 mt-2">{insight.description}</p>
-      </div>
-    </div>
-  ))}
-</div>
-  </div>
-</section>
+        {/* Info list */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              { title: 'Create your Account', description: 'Login or register to access our services.' },
+              { title: 'Answer the Pre-assessment Form', description: 'Choose your answers to determine your suitability for our services.' },
+              { title: 'Wait for your Evaluation Result', description: 'The psychotherapist will evaluate your pre-assessment form before you get accepted or referred to other services.' },
+              { title: 'Set your Appointment', description: 'Choose your preferred Psychotherapist, and date and time for your consultation.' },
+              { title: 'Pay your Session Fee', description: 'Choose your payment method and pay for your upcoming session.' },
+              { title: 'Start with Therapy', description: 'Explore effective self-care strategies, and communicate with our experts to enhance your well-being.' }
+            ].map((insight, index) => (
+              <div 
+                key={index} 
+                className="bg-white p-6 shadow rounded transition-all duration-300 relative overflow-hidden group"
+              >
+                  <div className="absolute inset-0 bg-[#B3EBF2] transform -translate-x-full transition-transform duration-300 group-hover:translate-x-0"></div>
+                  <div className="relative z-10">
+                    {/* Subtitle with a border line */}
+                    <h3 className="text-xl font-semibold mb-2 border-b-2 border-white pb-1">{insight.title}</h3>
+                    <p className="text-gray-600 mt-2">{insight.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+      </section>
 
   {/* Schedule Visit Section */}
       <section className="py-12 bg-blue-50">
@@ -159,6 +170,7 @@ const App: React.FC = () => {
           </ul>
         </div>
       </footer>
+      <BubbleAnimation />
     </div>
   );
 };

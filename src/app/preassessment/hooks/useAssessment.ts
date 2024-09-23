@@ -20,17 +20,17 @@ export const useAssessment = (questions: Question[] = []) => {
   const [modalMessage, setModalMessage] = useState<string>('');
   const [modalType, setModalType] = useState<'confirmation' | 'error' | 'success'>('confirmation');
   const [isModalOpen, setModalOpen] = useState(false);
-  const [userName, setUserName] = useState<string>(''); // Store the user's name
-  const [userID, setUserID] = useState<string>(''); // Store the user's ID
+  const [userName, setUserName] = useState<string>('');
+  const [userID, setUserID] = useState<string>('');
   const router = useRouter();
 
   // Fetch the current authenticated user's name and ID
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const user = await account.get(); // Get the logged-in user
-        setUserName(user.name); // Save the user's name
-        setUserID(user.$id); // Save the user's ID (correct field name)
+        const user = await account.get();
+        setUserName(user.name);
+        setUserID(user.$id);
       } catch (error) {
         console.error('Error fetching user data:', error);
       }
@@ -86,8 +86,8 @@ export const useAssessment = (questions: Question[] = []) => {
         COLLECTION_ID,
         ID.unique(),
         {
-          userID, // Ensure that "userID" is passed correctly
-          userName, // Ensure that "userName" is passed correctly
+          userID,
+          userName,
           answers: serializedAnswers,
           date: new Date().toISOString(),
         }

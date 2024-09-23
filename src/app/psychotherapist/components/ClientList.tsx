@@ -1,16 +1,9 @@
 import React, { useState } from 'react';
 import ClientModal from './ClientModal';
 import { useFetchClients } from '../hooks/useFetchClients';
-
-interface Client {
-  initials: string;
-  name: string;
-  status: string;
-  userID: string;
-}
+import { Client } from '../hooks/useTypes';
 
 const ClientList: React.FC = () => {
-  // Now, setClients is available here
   const { clients, setClients, error } = useFetchClients();
   const [selectedOption, setSelectedOption] = useState<string>('Current Clients');
   const [showDropdown, setShowDropdown] = useState(false);
@@ -37,14 +30,14 @@ const ClientList: React.FC = () => {
           prefs: { role, status },
         }),
       });
-  
+
       if (!response.ok) {
         throw new Error('Failed to update user preferences');
       }
-  
+
       const data = await response.json();
       console.log('Updated user preferences:', data);
-  
+
       setClients((prevClients: Client[]) =>
         prevClients.map(c =>
           c.userID === client.userID ? { ...c, status } : c
@@ -56,16 +49,40 @@ const ClientList: React.FC = () => {
     }
   };
 
-  const handleAccept = (client: Client) => {
+  const handleAccept = async (client: Client) => {
     console.log(`Accepted: ${client.name}`);
-    handleUpdateStatus(client, 'client', 'Current Client');
+  
+    await handleUpdateStatus(client, 'client', 'Current Client');
+  
+    try {
+      const response = await fetch('/api/sendMagicURL', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: client.userID,  
+          email: client.email,    
+          name: client.name,      
+        }),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to send Magic URL email');
+      }
+  
+      const data = await response.json();
+      console.log('Magic URL email sent successfully:', data);
+    } catch (error) {
+      console.error('Error sending Magic URL email:', error);
+    }
   };
 
-  const handleRefer = (client: Client) => {
+  const handleRefer = async (client: Client) => {
     console.log(`Referred: ${client.name}`);
-    handleUpdateStatus(client, 'client', 'Referred');
+    await handleUpdateStatus(client, 'client', 'Referred');
   };
-
+  
   const filteredClients = clients.filter(client =>
     (selectedOption === 'Current Clients' && client.status === 'Current Client') ||
     (selectedOption === 'Referred Clients' && client.status === 'Referred') ||
