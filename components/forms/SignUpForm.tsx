@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { Form } from "@/components/ui/form";
-import { createUser } from "@/lib/actions/client.actions";
+import { registerUser } from "@/lib/actions/client.actions";
 import { SignUpFormValidation } from "@/lib/validation";
 
 import { CustomFormField } from "../CustomFormField";
@@ -49,7 +49,7 @@ const SignUpForm = () => {
     try {
       const userData = { firstName, email, phone };
 
-      const user = await createUser(userData);
+      const user = await registerUser(userData);
 
       if (user) router.push(`/client/sign-up/pre-assessment`);
     } catch (error) {
@@ -67,7 +67,7 @@ const SignUpForm = () => {
             <h2 className="header text-center">Psychological Services</h2>
             <br />
             <p className="text-dark-500 text-center">
-              This is the beginning of your self-care journey
+              Take the First Step
             </p>
           </div>
         </section>

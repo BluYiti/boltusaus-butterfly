@@ -11,7 +11,7 @@ import { CustomFormField } from "../CustomFormField";
 import { LoginFormValidation } from "@/lib/validation";
 import Link from "next/link";
 
-import { createUser } from "@/lib/actions/client.actions";
+import { loginUser } from "@/lib/actions/client.actions";
 import SubmitButton from "../SubmitButton";
 
 export enum FormFieldType {
@@ -47,7 +47,7 @@ const LoginForm = () => {
 
     try {
       // const userData = { username, password };
-      // const user = await createUser(userData);
+      // const user = await registerUser(userData);
       // if (user) router.push(`/client/${user.$id}/dashboard`)
     } catch (error) {
       console.log(error);
