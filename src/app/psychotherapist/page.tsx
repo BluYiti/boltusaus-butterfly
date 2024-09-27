@@ -18,12 +18,12 @@ const Dashboard = () => {
           <img src="/logo.png" alt="Logo" className="h-8" />
         </div>
         <nav className="flex space-x-6 text-gray-700">
-          <a href="#" className="hover:text-black">Dashboard</a>
-          <a href="#" className="hover:text-black">Client List</a>
-          <a href="#" className="hover:text-black">Reports</a>
+          <a href="/psychotherapist" className="hover:text-black">Dashboard</a>
+          <a href="/psychotherapist/pages/pclientlist" className="hover:text-black">Client List</a>
+          <a href="/psychotherapist/pages/preports" className="hover:text-black">Reports</a>
           <a href="#" className="hover:text-black">Recordings</a>
-          <a href="#" className="hover:text-black">Resources</a>
-          <a href="#" className="hover:text-black">About</a>
+          <a href="/psychotherapist/pages/presources" className="hover:text-black">Resources</a>
+          <a href="/psychotherapist/pages/paboutme" className="hover:text-black">About</a>
         </nav>
       </header>
 
