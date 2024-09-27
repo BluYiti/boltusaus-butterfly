@@ -15,13 +15,8 @@ import {
 } from "../appwrite.config";
 import { parseStringify } from "../utils";
 
-// Login User
-export const loginUser = async (user: LoginUserParams) => {
-  
-}
-
-// Create User in Appwrite
-export const registerUser = async (user: RegisterUserParams) => {
+// Create a User to answer the pre-assessment
+export const createUser = async (user: SignUpUserParams) => {
   try {
     const newUser = await users.create(
       ID.unique(),
@@ -34,13 +29,12 @@ export const registerUser = async (user: RegisterUserParams) => {
 
     return parseStringify(newUser);
   } catch (error: any) {
-    // Check existing user
     if (error && error?.code === 409) {
       const existingUser = await users.list([
         Query.equal("email", [user.email]),
       ]);
 
-      return existingUser.users[0];
+      return existingUser?.users[0];
     }
     console.error("An error occurred while creating a new user:", error);
   }
@@ -112,3 +106,6 @@ export const getClient = async (userId: string) => {
     );
   }
 };
+
+// Login User
+export const loginUser = async (user: LoginUserParams) => {};
