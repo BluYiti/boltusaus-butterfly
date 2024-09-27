@@ -17,11 +17,11 @@ import { parseStringify } from "../utils";
 
 // Login User
 export const loginUser = async (user: LoginUserParams) => {
-
+  
 }
 
 // Create User in Appwrite
-export const createUser = async (user: CreateUserParams) => {
+export const registerUser = async (user: RegisterUserParams) => {
   try {
     const newUser = await users.create(
       ID.unique(),

@@ -21,22 +21,19 @@ declare interface User extends SignUpUserParams {
 declare interface RegisterUserParams extends SignUpUserParams {
   userId: string;
   lastName: string;
-  middleName: string;
-  suffixName: string;
+  firstName: string;
+  middleName: string | undefined;
+  suffixName: string | undefined;
   birthDate: Date;
   sex: Sex;
   nationality: string;
   civilStatus: string;
-  address: string;
-  barangay: string;
-  city: string;
-  province: string;
   occupation: string;
+  address: string;
   emergencyContactName: string;
   emergencyContactNumber: string;
-  allergies: string | undefined;
-  allergyDetails: string | undefined;
-  currentMedications: string | undefined;
+  therapyReason: string;
+  currentMedication: string | undefined;
   familyMedicalHistory: string | undefined;
   pastMedicalHistory: string | undefined;
   identificationType: string | undefined;

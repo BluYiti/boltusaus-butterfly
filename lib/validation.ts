@@ -1,14 +1,8 @@
 import { z } from "zod";
 
 export const LoginFormValidation = z.object({
-  username: z
-    .string()
-    .min(2, "Username must be at least 2 characters")
-    .max(20, "Username must be at most 20 characters"),
-  password: z
-    .string()
-    .min(2, "Password must be at least 8 characters")
-    .max(30, "Password must be at most 20 characters"),
+  username: z.string().min(2, "Please enter your username"),
+  password: z.string().min(2, "Please enter your password"),
 });
 
 export const SignUpFormValidation = z.object({
@@ -31,29 +25,24 @@ export const RegisterFormValidation = z.object({
     .string()
     .min(2, "First name must be at least 2 characters")
     .max(50, "First name must be at most 50 characters"),
-  middleName: z
-    .string()
-    .min(2, "Middle name must be at least 2 characters")
-    .max(5, "Middle name must be at most 5 characters"),
-  suffixName: z
-    .string()
-    .min(2, "Suffix name must be at least 2 characters")
-    .max(5, "Suffix name must be at most 5 characters"),
+  middleName: z.string().optional(),
+  suffixName: z.string().min(1, "Select 'None' if no suffix name"),
+  birthDate: z.coerce.date(),
+  sex: z.enum(["Male", "Female"]),
+  nationality: z.string().min(1, "Select a Nationality"),
+  civilStatus: z.string().min(1, "Select a Civil Status"),
   email: z.string().email("Invalid email address"),
   phone: z
     .string()
     .refine((phone) => /^\+\d{10,15}$/.test(phone), "Invalid phone number"),
-  birthDate: z.coerce.date(),
-  sex: z.enum(["Male", "Female"]),
-  nationality: z.string().min(2, "Select a Nationality"),
-  address: z
-    .string()
-    .min(5, "Address must be at least 5 characters")
-    .max(500, "Address must be at most 500 characters"),
   occupation: z
     .string()
     .min(2, "Occupation must be at least 2 characters")
     .max(500, "Occupation must be at most 500 characters"),
+  address: z
+    .string()
+    .min(5, "Address must be at least 5 characters")
+    .max(500, "Address must be at most 500 characters"),
   emergencyContactName: z
     .string()
     .min(2, "Contact name must be at least 2 characters")
@@ -62,20 +51,20 @@ export const RegisterFormValidation = z.object({
     .string()
     .refine(
       (emergencyContactNumber) => /^\+\d{10,15}$/.test(emergencyContactNumber),
-      "Invalid phone number"
+      "Invalid emergency contact number"
     ),
-  allergies: z.string().optional(),
+  therapyReason: z.string().optional(),
   currentMedication: z.string().optional(),
   familyMedicalHistory: z.string().optional(),
   pastMedicalHistory: z.string().optional(),
   identificationType: z.string().optional(),
   identificationNumber: z.string().optional(),
   identificationDocument: z.custom<File[]>().optional(),
-  treatmentConsent: z
+  therapyConsent: z
     .boolean()
     .default(false)
     .refine((value) => value === true, {
-      message: "You must consent to treatment in order to proceed",
+      message: "You must consent to therapy in order to proceed",
     }),
   disclosureConsent: z
     .boolean()
