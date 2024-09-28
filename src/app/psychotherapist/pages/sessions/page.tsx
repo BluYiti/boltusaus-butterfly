@@ -1,13 +1,10 @@
 'use client'
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { faVideo } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
 
 interface IconButtonProps {
     icon: any; // Use the appropriate type for your icon
-  }
+}
 
 type ClientSession = {
   initials: string;
@@ -29,17 +26,12 @@ export default function UpcomingSessionsPage() {
   const router = useRouter();
 
   useEffect(() => {
-    setIsMounted(true); // Component is mounted, can use useRouter safely
+    setIsMounted(true);
   }, []);
 
   if (!isMounted) {
-    return null; // Render nothing until component is mounted on the client
+    return null;
   }
-
-  // Navigate to the call page
-  const handleCallClick = (clientName: string) => {
-    router.push(`./pvideocall/`);
-  };
 
   // Navigate to the message page
   const handleMessageClick = (clientName: string) => {
@@ -82,12 +74,6 @@ export default function UpcomingSessionsPage() {
                 </div>
                 <div className="flex items-center space-x-4">
                   <span className="text-sm">{session.time}</span>
-                  <button
-                    onClick={() => handleCallClick(session.name)}
-                    className="text-xl bg-black text-white p-2 rounded-full hover:bg-gray-700"
-                  >
-                    <FontAwesomeIcon icon={faVideo} style={{color: "#ffffff",}} size="lg" />                  
-                  </button>
                   <button
                     onClick={() => handleMessageClick(session.name)}
                     className="text-xl bg-black text-white p-2 rounded-full hover:bg-gray-700"

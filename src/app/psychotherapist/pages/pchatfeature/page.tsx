@@ -1,6 +1,8 @@
-'use client';
-
-import React, { useState } from 'react';
+'use client'
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation'; // Assuming you're using Next.js for navigation
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faVideo } from '@fortawesome/free-solid-svg-icons';
 
 // Define the type for messages
 interface Message {
@@ -18,6 +20,14 @@ interface Patient {
 
 // Main Chat Component
 const Chat: React.FC = () => {
+  const [isMounted, setIsMounted] = useState(false); // Track whether the component is mounted
+  const router = useRouter(); // Use router for navigation
+
+  // Ensure that router is only accessed when the component is mounted
+  useEffect(() => {
+    setIsMounted(true); // Set to true when component is mounted
+  }, []);
+
   // Define a list of patients
   const [patients, setPatients] = useState<Patient[]>([
     {
@@ -75,17 +85,31 @@ const Chat: React.FC = () => {
     }
   };
 
+  // Function to handle video call click and navigate to the video call page
+  const handleVideoCallClick = (patientName: string) => {
+    if (isMounted && router) {
+      const formattedName = patientName.toLowerCase().replace(/ /g, '-'); // Convert name to URL-friendly format
+      router.push(`./pvideocall/`); // Navigate to the pvideocall route
+    }
+  };
+
   // Function to simulate a back button
   const goBack = () => {
-    window.history.back(); // Replace with real navigation if needed
+    if (typeof window !== "undefined") {
+      window.history.back(); // Ensure we have access to window object for navigation
+    }
   };
+
+  if (!isMounted) {
+    return null; // Don't render until the component is mounted
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 p-8 flex flex-col">
       {/* Back Button Outside */}
       <div className="mb-4">
         <button onClick={goBack} className="text-2xl bg-gray-300 rounded-md px-4 py-2">
-          &larr; 
+          &larr;
         </button>
       </div>
 
@@ -116,13 +140,26 @@ const Chat: React.FC = () => {
           {selectedPatient && (
             <>
               {/* Header */}
-              <div className="flex items-center mb-4">
-                <img
-                  src={selectedPatient.avatar}
-                  alt={selectedPatient.name}
-                  className="w-12 h-12 rounded-full mr-4"
-                />
-                <h2 className="text-2xl font-bold">{selectedPatient.name}</h2>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center">
+                  <img
+                    src={selectedPatient.avatar}
+                    alt={selectedPatient.name}
+                    className="w-12 h-12 rounded-full mr-4"
+                  />
+
+                  {/* Name and Icon */}
+                  <div className="flex items-center">
+                    <h2 className="text-2xl font-bold mr-2">{selectedPatient.name}</h2>
+                    <button
+                      onClick={() => handleVideoCallClick(selectedPatient.name)}
+                      className="text-xl bg-blue-500 text-white p-2 rounded-full hover:bg-blue-700"
+                      aria-label="Start Video Call"
+                    >
+                      <FontAwesomeIcon icon={faVideo} />
+                    </button>
+                  </div>
+                </div>
               </div>
 
               {/* Chat Messages */}
