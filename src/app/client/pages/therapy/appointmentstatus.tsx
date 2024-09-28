@@ -2,7 +2,7 @@ import React from 'react';
 
 const TherapyPage: React.FC = () => {
   return (
-    <div className="text-black min-h-screen bg-gray-100 flex flex-col">
+    <div className="min-h-screen bg-gray-100 flex flex-col">
       {/* Header */}
       <header className="bg-blue-600 p-4 text-white flex items-center justify-between">
         <button className="text-white text-lg">&larr;</button>
@@ -22,6 +22,7 @@ const TherapyPage: React.FC = () => {
               <th className="p-3">Appointments</th>
               <th className="p-3">Fee</th>
               <th className="p-3">Date</th>
+              <th className="p-3">Discount</th>
               <th className="p-3">Status</th>
               <th className="p-3 text-right">Actions</th>
             </tr>
@@ -30,10 +31,11 @@ const TherapyPage: React.FC = () => {
             {/* Appointment 1 */}
             <tr className="border-b">
               <td className="p-3">Week 1</td>
-              <td className="p-3">Php</td>
-              <td className="p-3"></td>
+              <td className="p-3">Php 1000</td>
+              <td className="p-3">23/04/2024</td>
+              <td className="p-3">None</td>
               <td className="p-3">
-                <span className=""></span>
+                <span className="text-green-500">● Paid</span>
               </td>
               <td className="p-3 flex justify-end space-x-2">
                 <button className="bg-blue-400 text-white px-3 py-1 rounded">Resched</button>
@@ -43,39 +45,27 @@ const TherapyPage: React.FC = () => {
 
             {/* Appointment 2 */}
             <tr className="border-b">
-              <td className="p-3">Week 2</td>
-              <td className="p-3">Php</td>
-              <td className="p-3"></td>
+              <td className="p-3">Week 1</td>
+              <td className="p-3">Php 1000</td>
+              <td className="p-3">23/04/2024</td>
+              <td className="p-3">None</td>
               <td className="p-3">
-                <span className=""></span>
+                <span className="text-blue-500">● Refunded</span>
               </td>
               <td className="p-3 flex justify-end space-x-2">
                 <button className="bg-blue-400 text-white px-3 py-1 rounded">Resched</button>
-                <button className="bg-red-400 text-white px-3 py-1 rounded">Cancel</button>
+                <button className="bg-gray-400 text-white px-3 py-1 rounded" disabled>Cancel</button>
               </td>
             </tr>
 
             {/* Appointment 3 */}
             <tr>
-              <td className="p-3">Week 3</td>
-              <td className="p-3">Php</td>
-              <td className="p-3"></td>
+              <td className="p-3">Week 2</td>
+              <td className="p-3">Php 950</td>
+              <td className="p-3">29/04/2024</td>
+              <td className="p-3">5%</td>
               <td className="p-3">
-                <span className=""></span>
-              </td>
-              <td className="p-3 flex justify-end space-x-2">
-                <button className="bg-blue-400 text-white px-3 py-1 rounded">Resched</button>
-                <button className="bg-red-400 text-white px-3 py-1 rounded">Cancel</button>
-              </td>
-            </tr>
-
-                {/* Appointment 4 */}
-                <tr>
-              <td className="p-3">Week 4</td>
-              <td className="p-3">Php</td>
-              <td className="p-3"></td>
-              <td className="p-3">
-                <span className=""></span>
+                <span className="text-orange-500">● Pending</span>
               </td>
               <td className="p-3 flex justify-end space-x-2">
                 <button className="bg-blue-400 text-white px-3 py-1 rounded">Resched</button>
@@ -89,6 +79,22 @@ const TherapyPage: React.FC = () => {
           <button className="bg-blue-500 text-white px-6 py-2 rounded">PAY</button>
         </div>
       </div>
+
+      {/* Bottom Navigation */}
+      <footer className="bg-blue-600 p-4 flex justify-around items-center text-white">
+        <button className="text-center">
+          <span className="block text-xl">🏠</span>
+          <span className="text-sm">Home</span>
+        </button>
+        <button className="text-center">
+          <span className="block text-xl">💬</span>
+          <span className="text-sm">Explore</span>
+        </button>
+        <button className="text-center">
+          <span className="block text-xl">🎯</span>
+          <span className="text-sm">Goals</span>
+        </button>
+      </footer>
     </div>
   );
 };
