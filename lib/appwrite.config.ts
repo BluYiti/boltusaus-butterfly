@@ -1,3 +1,4 @@
+// Appwrite Configurations
 import * as sdk from "node-appwrite";
 
 export const {
@@ -7,6 +8,7 @@ export const {
   CLIENT_COLLECTION_ID,
   PSYCHOTHERAPIST_COLLECTION_ID,
   APPOINTMENT_COLLECTION_ID,
+  PREASSESSMENT_COLLECTION_ID,
   NEXT_PUBLIC_BUCKET_ID: BUCKET_ID,
   NEXT_PUBLIC_ENDPOINT: ENDPOINT,
 } = process.env;

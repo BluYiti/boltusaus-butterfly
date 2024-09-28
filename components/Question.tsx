@@ -3,27 +3,22 @@ interface Option {
   value: number;
 }
 
-interface Option {
-  label: string;
-  value: number;
-}
-
 interface QuestionProps {
-  text: string;
+  question: string;
   options: Option[];
   currentAnswer: number | null;
   handleSelectOption: (value: number) => void;
 }
 
 const Question: React.FC<QuestionProps> = ({
-  text,
+  question,
   options,
   currentAnswer,
   handleSelectOption,
 }) => {
   return (
     <div className="mb-4">
-      <h3 className="text-xl text-blue-900 mb-4">{text}</h3>
+      <h3 className="text-xl text-blue-900 mb-4">{question}</h3>
       <div className="flex flex-col items-center">
         {options.map((option) => (
           <button

@@ -80,6 +80,10 @@ export const RegisterFormValidation = z.object({
     }),
 });
 
+export const PreAssessmentFormValidation = z.object({
+  answers: z.string().optional(),
+});
+
 export const AppointmentFormValidation = z.object({});
 
 export const CreateAppointmentSchema = z.object({
