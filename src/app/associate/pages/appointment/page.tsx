@@ -1,24 +1,26 @@
 'use client';
 
 import React, { useState } from 'react';
+import { format, addMonths, subMonths, getMonth, getYear } from 'date-fns';
 
 const AppointmentDashboard: React.FC = () => {
-  const [selectedDate, setSelectedDate] = useState('April 8');
+  const [selectedView, setSelectedView] = useState<'day' | 'week' | 'month'>('month');
+  const [selectedDate, setSelectedDate] = useState(new Date()); // Start with today
   const [isDeclineModalOpen, setIsDeclineModalOpen] = useState(false);
   const [isRescheduleViewOpen, setIsRescheduleViewOpen] = useState(false);
   const [isRescheduleConfirmed, setIsRescheduleConfirmed] = useState(false);
-  const [isAppointmentConfirmed, setIsAppointmentConfirmed] = useState(false); // New state for appointment confirmation
-  const [selectedRescheduleTime, setSelectedRescheduleTime] = useState(''); // State to store the selected reschedule time
+  const [isAppointmentConfirmed, setIsAppointmentConfirmed] = useState(false);
+  const [selectedRescheduleTime, setSelectedRescheduleTime] = useState('');
 
   const handleDecline = () => {
     setIsDeclineModalOpen(true);
   };
 
   const handleCancel = () => {
-    setIsDeclineModalOpen(false);  // Close decline modal
-    setIsRescheduleViewOpen(false);  // Close reschedule view if open
-    setIsRescheduleConfirmed(false); // Close reschedule confirmation modal
-    setIsAppointmentConfirmed(false); // Close appointment confirmation modal
+    setIsDeclineModalOpen(false);
+    setIsRescheduleViewOpen(false);
+    setIsRescheduleConfirmed(false);
+    setIsAppointmentConfirmed(false);
   };
 
   const handleConfirmReschedule = () => {
@@ -29,20 +31,34 @@ const AppointmentDashboard: React.FC = () => {
   const handleReschedule = () => {
     if (selectedRescheduleTime) {
       setIsRescheduleViewOpen(false);
-      setIsRescheduleConfirmed(true); // Show confirmation modal
+      setIsRescheduleConfirmed(true);
     } else {
-      alert("Please select a reschedule time.");
+      alert('Please select a reschedule time.');
     }
   };
 
   const handleCloseConfirmation = () => {
-    setIsRescheduleConfirmed(false); // Hide confirmation modal
-    setIsAppointmentConfirmed(false); // Hide appointment confirmation modal
+    setIsRescheduleConfirmed(false);
+    setIsAppointmentConfirmed(false);
   };
 
   const handleConfirmAppointment = () => {
-    setIsAppointmentConfirmed(true); // Show appointment confirmation modal
+    setIsAppointmentConfirmed(true);
   };
+
+  // Navigate months
+  const goToPreviousMonth = () => {
+    setSelectedDate(subMonths(selectedDate, 1));
+  };
+
+  const goToNextMonth = () => {
+    setSelectedDate(addMonths(selectedDate, 1));
+  };
+
+  // Get formatted month and year
+  const formattedMonthYear = format(selectedDate, 'MMMM yyyy');
+  const currentMonth = getMonth(selectedDate);
+  const currentYear = getYear(selectedDate);
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
@@ -61,23 +77,6 @@ const AppointmentDashboard: React.FC = () => {
           <button className="hover:underline">Appointments</button>
           <button className="hover:underline">Client List</button>
         </div>
-        <button className="sm:hidden">
-          {/* Mobile menu icon */}
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M4 6h16M4 12h16m-7 6h7"
-            />
-          </svg>
-        </button>
       </header>
 
       {/* Main Content */}
@@ -86,72 +85,69 @@ const AppointmentDashboard: React.FC = () => {
         <div className="bg-white rounded-lg shadow-lg flex-1 p-6">
           <div className="flex justify-between items-center mb-4">
             <div className="flex space-x-2">
-              <button className="bg-blue-600 text-white py-2 px-4 rounded-lg">
+              <button
+                className={`py-2 px-4 rounded-lg ${
+                  selectedView === 'day' ? 'bg-blue-600 text-white' : 'bg-gray-200'
+                }`}
+                onClick={() => setSelectedView('day')}
+              >
                 Day
               </button>
-              <button className="bg-blue-600 text-white py-2 px-4 rounded-lg">
+              <button
+                className={`py-2 px-4 rounded-lg ${
+                  selectedView === 'week' ? 'bg-blue-600 text-white' : 'bg-gray-200'
+                }`}
+                onClick={() => setSelectedView('week')}
+              >
                 Week
               </button>
-              <button className="bg-blue-600 text-white py-2 px-4 rounded-lg">
+              <button
+                className={`py-2 px-4 rounded-lg ${
+                  selectedView === 'month' ? 'bg-blue-600 text-white' : 'bg-gray-200'
+                }`}
+                onClick={() => setSelectedView('month')}
+              >
                 Month
               </button>
             </div>
             <div className="flex items-center space-x-4">
-              <button>&lt;</button>
-              <h2 className="font-bold text-lg">APRIL</h2>
-              <button>&gt;</button>
+              <button onClick={goToPreviousMonth}>&lt;</button>
+              <h2 className="font-bold text-lg">{formattedMonthYear}</h2>
+              <button onClick={goToNextMonth}>&gt;</button>
             </div>
           </div>
 
-          {/* Calendar Grid */}
+          {/* Calendar Grid based on selected view */}
           <div className="grid grid-cols-7 gap-2 text-center text-sm">
             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
               <div key={day} className="font-bold text-gray-500">
                 {day}
               </div>
             ))}
-            {/* Dates */}
-            {Array.from({ length: 5 }, (_, i) => (
-              <div key={i} className="bg-gray-100 text-gray-400 p-4 rounded-lg">
-                {i + 29}
-              </div>
-            ))}
-            {Array.from({ length: 2 }, (_, i) => (
-              <div key={i} className="p-4 rounded-lg text-black">
-                {i + 1}
-              </div>
-            ))}
-            {Array.from({ length: 7 }, (_, i) => (
-              <div key={i} className="p-4 rounded-lg text-black">
-                {i + 3}
-              </div>
-            ))}
-            {Array.from({ length: 7 }, (_, i) => (
-              <div key={i} className="p-4 rounded-lg text-black">
-                {i + 10}
-              </div>
-            ))}
-            {Array.from({ length: 7 }, (_, i) => (
-              <div key={i} className="p-4 rounded-lg text-black">
-                {i + 17}
-              </div>
-            ))}
-            {Array.from({ length: 7 }, (_, i) => (
-              <div key={i} className="p-4 rounded-lg text-black">
-                {i + 24}
-              </div>
-            ))}
-            {Array.from({ length: 2 }, (_, i) => (
-              <div key={i} className="p-4 rounded-lg text-black">
-                {i + 1}
-              </div>
-            ))}
+            {/* Render Calendar based on the view */}
+            {selectedView === 'day' && (
+              <div className="p-4 rounded-lg text-black">Detailed view for selected day</div>
+            )}
+            {selectedView === 'week' &&
+              Array.from({ length: 7 }).map((_, i) => (
+                <div key={i} className="p-4 rounded-lg text-black">
+                  Day {i + 1} of the week
+                </div>
+              ))}
+            {selectedView === 'month' &&
+              Array.from({ length: 30 }).map((_, i) => (
+                <div key={i} className="p-4 rounded-lg text-black">
+                  {i + 1}
+                </div>
+              ))}
           </div>
         </div>
 
         {/* Appointment Details */}
         <div className="bg-white rounded-lg shadow-lg flex-1 max-w-sm p-6">
-          <h2 className="text-lg font-semibold mb-4">This {selectedDate}</h2>
+          <h2 className="text-lg font-semibold mb-4">
+            {format(selectedDate, 'MMMM d')} Appointment
+          </h2>
           <div className="flex items-center space-x-4 mb-4">
             <img
               src="/path/to/profile-pic.png"
@@ -177,7 +173,7 @@ const AppointmentDashboard: React.FC = () => {
               <span className="font-semibold">Mode:</span> GCash
             </p>
             <p>
-              <span className="font-semibold">Date Paid:</span> Apr 1, 2024
+              <span className="font-semibold">Date Paid:</span> {format(new Date(), 'MMM d, yyyy')}
             </p>
             <p>
               <span className="font-semibold">Discount:</span> 5%
@@ -193,7 +189,7 @@ const AppointmentDashboard: React.FC = () => {
               DECLINE
             </button>
             <button
-              onClick={handleConfirmAppointment} // Trigger appointment confirmation modal
+              onClick={handleConfirmAppointment}
               className="bg-green-500 text-white py-2 px-6 rounded-lg"
             >
               CONFIRM
@@ -280,42 +276,46 @@ const AppointmentDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Reschedule Confirmation Modal */}
+      {/* Reschedule Confirmation */}
       {isRescheduleConfirmed && (
         <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center">
           <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
             <h2 className="text-xl font-bold mb-4 text-center">
-              Appointment Rescheduled
+              APPOINTMENT RESCHEDULED.
             </h2>
             <p className="text-center mb-6">
-              Your appointment has been successfully rescheduled.
+              Your appointment has been rescheduled.
             </p>
-            <button
-              onClick={handleCloseConfirmation}
-              className="bg-green-500 text-white py-2 px-4 rounded-lg mx-auto block"
-            >
-              Close
-            </button>
+            <div className="text-center">
+              <button
+                onClick={handleCloseConfirmation}
+                className="bg-blue-500 text-white py-2 px-6 rounded-lg"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Appointment Confirmation Modal */}
+      {/* Appointment Confirmation */}
       {isAppointmentConfirmed && (
         <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center">
           <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
             <h2 className="text-xl font-bold mb-4 text-center">
-              Appointment Confirmed
+              APPOINTMENT CONFIRMED.
             </h2>
             <p className="text-center mb-6">
-              Your appointment has been successfully confirmed.
+              Your appointment has been confirmed.
             </p>
-            <button
-              onClick={handleCloseConfirmation}
-              className="bg-green-500 text-white py-2 px-4 rounded-lg mx-auto block"
-            >
-              Close
-            </button>
+            <div className="text-center">
+              <button
+                onClick={handleCloseConfirmation}
+                className="bg-blue-500 text-white py-2 px-6 rounded-lg"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}
