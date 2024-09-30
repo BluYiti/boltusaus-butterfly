@@ -6,6 +6,9 @@ import { FiUser, FiBarChart2, FiLock, FiClipboard, FiList, FiLogOut } from "reac
 import ToggleButton from "./ToggleButton";
 import SidebarItem from "./SidebarItem";
 import Loading from "./Loading"; // Import the Loading component
+import LogoutButton from '@/app/auth/logout/component/logoutButton';
+
+
 
 const Sidebar = () => {
   const [isMinimized, setIsMinimized] = useState<boolean | null>(null); // Using `null` to represent the loading state
@@ -54,12 +57,7 @@ const Sidebar = () => {
       </nav>
 
       {/* Logout Button */}
-      <div className="mt-auto p-4 flex items-center">
-        <button onClick={handleLogout} className="w-full flex items-center hover:bg-red-600 p-2 rounded text-red-400">
-          <FiLogOut size={24} />
-          {!isMinimized && <span className="ml-4">Logout</span>}
-        </button>
-      </div>
+      <LogoutButton isMinimized={isMinimized} />
     </div>
   );
 };

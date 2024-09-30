@@ -6,15 +6,12 @@ import NavigationButtons from '@/app/preassessment/components/NavigationButtons'
 import { useAssessment } from '@/app/preassessment/hooks/useAssessment';
 import { questions } from '@/app/preassessment/data/questions';
 import BubbleAnimation from '@/app/preassessment/components/BubbleAnimation';
-import '@/app/login/styles/login.css';
-import SubmissionModal from '@/app/preassessment/components/Submission';  // Updated import
+import SubmissionModal from '@/app/preassessment/components/Submission';
 
 export default function PreAssessmentPage() {
   const {
     currentQuestionIndex,
     answers,
-    email,
-    setEmail,
     handleSelectOption,
     handleNext,
     handleBack,
@@ -30,7 +27,7 @@ export default function PreAssessmentPage() {
   const isReviewPage = currentQuestionIndex === questions.length;
 
   return (
-    <div className="min-h-screen flex justify-center items-center bg-gray-50">
+    <div className="min-h-screen flex justify-center items-center bg-blue-500">
       {isReviewPage ? (
         <div className="text-center rounded-xl p-8 shadow-lg w-full max-w-3xl">
           <h3 className="text-xl mb-4 text-gray-800">Review Your Answers</h3>
@@ -54,18 +51,6 @@ export default function PreAssessmentPage() {
               </li>
             ))}
           </ul>
-
-          <div className="mt-4 text-left">
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email:</label>
-            <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 p-2 border border-gray-300 rounded-md shadow-sm w-full text-black"
-              placeholder="Enter your email"
-            />
-          </div>
 
           <div className="flex justify-between gap-4 mt-6">
             <button
