@@ -5,28 +5,21 @@ const categories = [
   {
     title: "Wellness",
     items: [
-      { name: "Yoga", time: "10 mins", description: "Find balance, strength, and serenity on the mat.", img: "/images/yoga1.jpg" },
-      { name: "Goals", time: "10 mins", description: "Track your goals.", img: "/images/goals.jpg" },
-      { name: "Workout", time: "10 mins", description: "Stay fit and healthy.", img: "workout.jpg" },
-      { name: "Swimming", time: "10 mins", description: "Flow with the water.", img: "swimming.jpg" },
+      { name: "Yoga", time: "10 mins", description: "Find balance, strength, and serenity on the mat.", img: "/images/reading1.jpg" },
+      { name: "Goals", time: "10 mins", description: "Track your goals.", img: "/images/reading3.jpg" },
+      { name: "Workout", time: "10 mins", description: "Stay fit and healthy.", img: "/images/reading3.jpg" },
+      { name: "Swimming", time: "10 mins", description: "Flow with the water.", img: "/images/reading1.jpg" },
     ]
   },
   {
     title: "Worklife",
     items: [
-      { name: "Reading", time: "5 mins", description: "Mental Health at work: How to improve it?", img: "reading.jpg" },
-      { name: "Drawing", time: "3 mins", description: "Express yourself with art.", img: "drawing.jpg" },
-      { name: "Take time off", time: "5 mins", description: "It is okay to rest.", img: "take_time_off.jpg" },
-      { name: "Contemplate", time: "3 mins", description: "Reflect and learn.", img: "contemplate.jpg" }
+      { name: "Reading", time: "5 mins", description: "Mental Health at work: How to improve it?", img: "/images/reading1.jpg" },
+      { name: "Drawing", time: "3 mins", description: "Express yourself with art.", img: "/images/reading3.jpg" },
+      { name: "Take time off", time: "5 mins", description: "It is okay to rest.", img: "/images/reading3.jpg" },
+      { name: "Contemplate", time: "3 mins", description: "Reflect and learn.", img: "/images/reading1.jpg" }
     ]
   },
-  {
-    title: "Psychology",
-    items: [
-      { name: "Reflect", time: "5 mins", description: "Reflect on your thoughts.", img: "reflect.jpg" },
-      { name: "Learn", time: "7 mins", description: "Learn new mental techniques.", img: "learn.jpg" },
-    ]
-  }
 ];
 
 const App = () => {

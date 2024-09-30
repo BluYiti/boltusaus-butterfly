@@ -1,96 +1,270 @@
-import React from 'react';
+"use client";
+import React, { useState } from "react";
+import {
+  FaBell,
+  FaBars,
+  FaHome,
+  FaUserMd,
+  FaUserFriends,
+  FaTasks,
+  FaCalendarAlt,
+  FaCogs,
+  FaSignOutAlt,
+} from "react-icons/fa";
 
-const TherapyPage: React.FC = () => {
+const Dashboard: React.FC = () => {
+  // State for selected month (default: current month)
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
+
+  // Get the current date info
+  const today = new Date();
+  const currentDay = today.getDate();
+  const currentMonth = today.getMonth();
+
+  // Months of the year
+  const months = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+
+  // Days in each month for the year 2024 (leap year)
+  const daysInMonth = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+  // Function to handle month change
+  const handleMonthChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedMonth(parseInt(event.target.value));
+  };
+
   return (
-    <div className="text-black min-h-screen bg-gray-100 flex flex-col">
-      {/* Header */}
-      <header className="bg-blue-600 p-4 text-white flex items-center justify-between">
-        <button className="text-white text-lg">&larr;</button>
-        <h1 className="text-xl font-bold">Therapy</h1>
-        <div className="relative">
-          <span className="absolute top-0 right-0 bg-red-500 text-white rounded-full h-4 w-4 text-xs flex items-center justify-center">1</span>
-          <button className="text-white text-lg">&#128276;</button> {/* Notification bell */}
+    <div className="text-black min-h-screen flex">
+      {/* Sidebar */}
+      <div className="bg-white shadow-md w-64 min-h-screen px-4">
+        <div className="py-8">
+          {/* Logo */}
+          <div className="text-center mb-8">
+            <div className="text-3xl font-bold text-blue-500">Butterfly</div>
+          </div>
+
+          {/* Menu Items */}
+          <nav className="space-y-2">
+            <a href="#" className="flex items-center space-x-3 p-2 rounded-lg text-blue-600 hover:bg-gray-100">
+              <FaHome className="text-xl" />
+              <span className="font-medium">Home</span>
+            </a>
+            <a href="#" className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100">
+              <FaCalendarAlt className="text-xl" />
+              <span className="font-medium">Profile</span>
+            </a>
+            <a href="#" className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100">
+              <FaUserMd className="text-xl" />
+              <span className="font-medium">Communication</span>
+            </a>
+            <a href="#" className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100">
+              <FaCogs className="text-xl" />
+              <span className="font-medium">Settings</span>
+            </a>
+            <a href="#" className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100">
+              <FaCogs className="text-xl" />
+              <span className="font-medium">Goals</span>
+            </a>
+            <a href="#" className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100">
+              <FaSignOutAlt className="text-xl" />
+              <span className="font-medium">Logout</span>
+            </a>
+          </nav>
         </div>
-        <button className="text-white text-lg">&#9776;</button> {/* Menu */}
-      </header>
+      </div>
 
       {/* Main Content */}
-      <div className="p-4">
-        <table className="min-w-full bg-white rounded-lg shadow-lg overflow-hidden">
-          <thead>
-            <tr className="bg-gray-200 text-left text-gray-600 text-sm font-medium">
-              <th className="p-3">Appointments</th>
-              <th className="p-3">Fee</th>
-              <th className="p-3">Date</th>
-              <th className="p-3">Status</th>
-              <th className="p-3 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {/* Appointment 1 */}
-            <tr className="border-b">
-              <td className="p-3">Week 1</td>
-              <td className="p-3">Php</td>
-              <td className="p-3"></td>
-              <td className="p-3">
-                <span className=""></span>
-              </td>
-              <td className="p-3 flex justify-end space-x-2">
-                <button className="bg-blue-400 text-white px-3 py-1 rounded">Resched</button>
-                <button className="bg-red-400 text-white px-3 py-1 rounded">Cancel</button>
-              </td>
-            </tr>
+      <div className="flex-grow flex flex-col justify-between bg-gray-100">
+        {/* Top Section with User Info and Header */}
+        <div className="bg-white shadow-lg py-4 px-6 flex justify-between items-center">
+          {/* User Info */}
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white">
+              <i className="fas fa-user"></i>
+            </div>
+            <h1 className="text-xl font-semibold">
+              Good Morning, <span className="font-bold">"Client!"</span>
+            </h1>
+          </div>
 
-            {/* Appointment 2 */}
-            <tr className="border-b">
-              <td className="p-3">Week 2</td>
-              <td className="p-3">Php</td>
-              <td className="p-3"></td>
-              <td className="p-3">
-                <span className=""></span>
-              </td>
-              <td className="p-3 flex justify-end space-x-2">
-                <button className="bg-blue-400 text-white px-3 py-1 rounded">Resched</button>
-                <button className="bg-red-400 text-white px-3 py-1 rounded">Cancel</button>
-              </td>
-            </tr>
+          {/* Menu and Notification Icons */}
+          <div className="flex items-center space-x-4">
+            <button className="text-gray-600 hover:text-gray-800">
+              <FaBell size={24} />
+            </button>
+          </div>
+        </div>
 
-            {/* Appointment 3 */}
-            <tr>
-              <td className="p-3">Week 3</td>
-              <td className="p-3">Php</td>
-              <td className="p-3"></td>
-              <td className="p-3">
-                <span className=""></span>
-              </td>
-              <td className="p-3 flex justify-end space-x-2">
-                <button className="bg-blue-400 text-white px-3 py-1 rounded">Resched</button>
-                <button className="bg-red-400 text-white px-3 py-1 rounded">Cancel</button>
-              </td>
-            </tr>
+        {/* Main Dashboard Content */}
+        <div className="flex-grow overflow-auto p-8">
+          {/* Calendar and What to do section */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Calendar */}
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              <h2 className="text-lg font-semibold">Calendar</h2>
 
-                {/* Appointment 4 */}
-                <tr>
-              <td className="p-3">Week 4</td>
-              <td className="p-3">Php</td>
-              <td className="p-3"></td>
-              <td className="p-3">
-                <span className=""></span>
-              </td>
-              <td className="p-3 flex justify-end space-x-2">
-                <button className="bg-blue-400 text-white px-3 py-1 rounded">Resched</button>
-                <button className="bg-red-400 text-white px-3 py-1 rounded">Cancel</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+              {/* Dropdown to select month */}
+              <div className="mt-4">
+                <label htmlFor="month-select" className="font-medium text-gray-700">
+                  Choose a month:
+                </label>
+                <select
+                  id="month-select"
+                  value={selectedMonth}
+                  onChange={handleMonthChange}
+                  className="ml-2 p-2 border border-gray-300 rounded-lg"
+                >
+                  {months.map((month, index) => (
+                    <option key={index} value={index}>
+                      {month}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-        <div className="flex justify-end mt-4">
-          <button className="bg-blue-500 text-white px-6 py-2 rounded">PAY</button>
+              {/* Calendar Grid */}
+              <div className="mt-6">
+                <div className="text-center">
+                  <div className="font-bold text-xl">{months[selectedMonth]}</div>
+                  <div className="grid grid-cols-7 text-center mt-4">
+                    {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+                      <div key={day} className="text-sm font-medium text-gray-700">
+                        {day}
+                      </div>
+                    ))}
+                  </div>
+                  <div className="grid grid-cols-7 gap-2 mt-2">
+                    {[...Array(daysInMonth[selectedMonth])].map((_, dayIndex) => {
+                      const day = dayIndex + 1;
+                      const isToday =
+                        selectedMonth === currentMonth && day === currentDay;
+
+                      return (
+                        <div
+                          key={dayIndex}
+                          className={`py-2 rounded ${
+                            isToday
+                              ? "bg-blue-500 text-white font-bold" // Highlight today's date
+                              : [6, 7, 13, 14, 20, 21].includes(day)
+                              ? "text-red-500"
+                              : "text-green-500"
+                          }`}
+                        >
+                          {day}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* What to do section */}
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              <h2 className="text-lg font-semibold">What to do?</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                <ActivityCard
+                  title="Meditate"
+                  description="20-30 minutes/day"
+                  icon="🧘‍♀️"
+                />
+                <ActivityCard
+                  title="Pet Time"
+                  description="Be sure to have some play time with your beloved pets"
+                  icon="🐶"
+                />
+                <ActivityCard
+                  title="Exercise"
+                  description="30-35 minutes/day"
+                  icon="💪"
+                />
+                <ActivityCard
+                  title="Arts"
+                  description="Showcase your talent, express yourself!"
+                  icon="🎨"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Mood Tracker Section */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+            {/* Mood Tracker */}
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              <h2 className="text-xl font-semibold mb-4">Mood Tracker</h2>
+              <div className="flex justify-between items-center">
+                <p className="text-lg font-medium">How are you feeling today?</p>
+                <button className="bg-blue-500 text-white px-4 py-2 rounded-lg">START</button>
+              </div>
+            </div>
+
+            {/* Reading Resources */}
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              <h2 className="text-xl font-semibold mb-4">Reading Resources</h2>
+              <div className="flex justify-between items-center">
+                <p className="text-lg font-medium">Start your day by reading something inspiring!</p>
+                <button className="bg-blue-500 text-white px-4 py-2 rounded-lg">VIEW</button>
+              </div>
+            </div>
+          </div>
+
+          {/* Announcements Section */}
+          <div className="bg-white rounded-lg shadow-lg p-6 mt-6">
+            <h2 className="text-xl font-semibold mb-4">A Reminder to Yourself</h2>
+            <div className="space-y-4">
+              <div className="bg-gray-50 p-4 rounded-lg shadow">
+                <h3 className="font-semibold text-lg">This Too Shall Pass</h3>
+                <p className="text-gray-700">Feelings are temporary. Hold on, better days are coming.</p>
+              </div>
+              <div className="bg-gray-50 p-4 rounded-lg shadow">
+                <h3 className="font-semibold text-lg">Breathe In, Let Go</h3>
+                <p className="text-gray-700">Take a moment to breathe. Release the tension in your mind and body.</p>
+              </div>
+              <div className="bg-gray-50 p-4 rounded-lg shadow">
+                <h3 className="font-semibold text-lg">You Are Enough.</h3>
+                <p className="text-gray-700">Your worth isn’t measured by your struggles. You are enough just as you are.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="bg-white shadow-lg py-4 px-6 text-center">
+          <p className="text-gray-500">© 2024 Butterfly Inc. All rights reserved.</p>
         </div>
       </div>
     </div>
   );
 };
 
-export default TherapyPage;
+// ActivityCard Component
+const ActivityCard: React.FC<{ title: string; description: string; icon: string }> = ({ title, description, icon }) => {
+  return (
+    <div className="bg-gray-100 p-4 rounded-lg shadow flex items-center">
+      <span className="text-3xl mr-4">{icon}</span>
+      <div>
+        <h3 className="text-lg font-semibold">{title}</h3>
+        <p className="text-gray-600">{description}</p>
+      </div>
+    </div>
+  );
+};
+
+    {/* Clinic Location Section */}
+    <div className="mt-6 bg-gray-50 p-4 rounded-lg shadow-md">
+    <h2 className="text-xl font-semibold mb-4">Clinic Location</h2>
+    <div className="rounded-lg overflow-hidden shadow-md">
+      <iframe
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1221.4468853018993!2d120.5977013968742!3d16.410048859398453!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3391a16008c97969%3A0x6fdba0b90e8c2642!2sSam-sons%20Building%2C%20Lower%20Mabini%20St%2C%20Baguio%2C%20Benguet%2C%20Philippines!5e0!3m2!1sen!2sus!4v1692571430635!5m2!1sen!2sus"
+        width="100%"
+        height="300"
+        style={{ border: 0 }}
+        allowFullScreen
+        loading="lazy"
+      ></iframe>
+    </div>
+  </div>
+
+export default Dashboard;
