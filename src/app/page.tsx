@@ -97,6 +97,48 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
+{/* Upcoming Sessions and Announcements Section */}
+<div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 mx-8">
+  {/* Upcoming Sessions Section */}
+  <div className="bg-white rounded-lg shadow-lg p-6 flex flex-col h-full">
+    <h2 className="text-bold text-xl font-bold mb-4">Upcoming Sessions</h2>
+    <div className="space-y-2 flex-grow overflow-y-auto max-h-[300px]">
+      <div className="flex justify-between items-center p-2 rounded-lg bg-gradient-to-r from-blue-300 via-blue-400 to-blue-300 animate-gradient-x">
+        <span className="font-bold">First Session</span>
+        <span className="text-gray-600 font-bold">Oct 3, 2024, 10:00 AM</span>
+      </div>
+      <div className="flex justify-between items-center p-2 rounded-lg bg-gradient-to-r from-blue-300 via-blue-400 to-blue-300 animate-gradient-x">
+        <span className="font-bold">Second Session</span>
+        <span className="text-gray-600 font-bold">Oct 10, 2024, 2:00 PM</span>
+      </div>
+      <div className="flex justify-between items-center p-2 rounded-lg bg-gradient-to-r from-blue-300 via-blue-400 to-blue-300 animate-gradient-x">
+        <span className="font-bold">Third Session</span>
+        <span className="text-gray-600 font-bold">Oct 15, 2024, 1:00 PM</span>
+      </div>
+    </div>
+  </div>
+
+  {/* Reminders Section */}
+  <div className="bg-white rounded-lg shadow-lg p-6 flex flex-col h-full">
+    <h2 className="text-xl font-semibold mb-4">A Daily Reminder to Yourself</h2>
+    <div className="space-y-4 flex-grow overflow-y-auto max-h-[300px]">
+      <div className="bg-gray-50 p-4 rounded-lg shadow">
+        <h3 className="font-semibold text-lg">This Too Shall Pass</h3>
+        <p className="text-gray-700">Feelings are temporary. Hold on, better days are coming.</p>
+      </div>
+      <div className="bg-gray-50 p-4 rounded-lg shadow">
+        <h3 className="font-semibold text-lg">Breathe In, Let Go</h3>
+        <p className="text-gray-700">Take a moment to breathe. Release the tension in your mind and body.</p>
+      </div>
+      <div className="bg-gray-50 p-4 rounded-lg shadow">
+        <h3 className="font-semibold text-lg">You Are Enough.</h3>
+        <p className="text-gray-700">Your worth isn’t measured by your struggles. You are enough just as you are.</p>
+      </div>
+      {/* Add more reminders if needed */}
+    </div>
+  </div>
+</div>
+
         {/* Main Dashboard Content */}
         <div className="flex-grow overflow-auto p-8">
           {/* Calendar and What to do section */}
@@ -206,25 +248,6 @@ const Dashboard: React.FC = () => {
               <div className="flex justify-between items-center">
                 <p className="text-lg font-medium">Start your day by reading something inspiring!</p>
                 <button className="bg-blue-500 text-white px-4 py-2 rounded-lg">VIEW</button>
-              </div>
-            </div>
-          </div>
-
-          {/* Announcements Section */}
-          <div className="bg-white rounded-lg shadow-lg p-6 mt-6">
-            <h2 className="text-xl font-semibold mb-4">A Reminder to Yourself</h2>
-            <div className="space-y-4">
-              <div className="bg-gray-50 p-4 rounded-lg shadow">
-                <h3 className="font-semibold text-lg">This Too Shall Pass</h3>
-                <p className="text-gray-700">Feelings are temporary. Hold on, better days are coming.</p>
-              </div>
-              <div className="bg-gray-50 p-4 rounded-lg shadow">
-                <h3 className="font-semibold text-lg">Breathe In, Let Go</h3>
-                <p className="text-gray-700">Take a moment to breathe. Release the tension in your mind and body.</p>
-              </div>
-              <div className="bg-gray-50 p-4 rounded-lg shadow">
-                <h3 className="font-semibold text-lg">You Are Enough.</h3>
-                <p className="text-gray-700">Your worth isn’t measured by your struggles. You are enough just as you are.</p>
               </div>
             </div>
           </div>
