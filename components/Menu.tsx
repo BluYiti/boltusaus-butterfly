@@ -16,7 +16,7 @@ const menuItems = [
       {
         icon: "/assets/icons/appointments.svg",
         label: "Appointments",
-        href: "`/client/new-appointment`",
+        href: "/client/new-appointment",
         visible: ["client"],
       },
     ],

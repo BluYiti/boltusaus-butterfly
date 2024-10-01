@@ -96,7 +96,8 @@ const SignUpForm = () => {
           name="phone"
           label="Phone Number"
         />
-        <SubmitButton isLoading={isLoading} className="shad-primary-alt-btn">
+
+        <SubmitButton isLoading={isLoading} className="shad-primary-alt-btn w-full">
           Get Started
         </SubmitButton>
       </form>

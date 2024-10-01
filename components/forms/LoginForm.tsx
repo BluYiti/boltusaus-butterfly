@@ -29,7 +29,7 @@ const LoginForm = () => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
-  // Login Form handler
+  // Form Handler: Login Form
   const form = useForm<z.infer<typeof LoginFormValidation>>({
     resolver: zodResolver(LoginFormValidation),
     defaultValues: {
@@ -81,10 +81,9 @@ const LoginForm = () => {
             Remember me
           </label>
         </div>
-        <SubmitButton isLoading={isLoading}>
-          <Link href="/client/66cd64200032246acd7f/dashboard">
-            Login
-          </Link>
+
+        <SubmitButton isLoading={isLoading} className="shad-primary-btn w-full">
+          <Link href="/client/66cd64200032246acd7f/dashboard">Login</Link>
         </SubmitButton>
       </form>
     </Form>

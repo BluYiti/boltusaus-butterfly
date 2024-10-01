@@ -306,11 +306,11 @@
 
   /* =====  SHADCN OVERRIDES */
   .shad-primary-btn {
-    @apply bg-light-200 text-blue-400  w-full rounded-full !important;
+    @apply bg-light-200 text-blue-400 rounded-full !important;
   }
 
   .shad-primary-alt-btn {
-    @apply bg-blue-400 text-light-200 w-full rounded-full !important;
+    @apply bg-blue-400 text-light-200 rounded-full !important;
   }
 
   .shad-danger-btn {

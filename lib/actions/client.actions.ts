@@ -54,6 +54,24 @@ export const getUser = async (userId: string) => {
   }
 };
 
+// Get Client
+export const getClient = async (userId: string) => {
+  try {
+    const clients = await databases.listDocuments(
+      DATABASE_ID!,
+      CLIENT_COLLECTION_ID!,
+      [Query.equal("userId", userId)]
+    );
+
+    return parseStringify(clients.documents[0]);
+  } catch (error) {
+    console.error(
+      "An error occurred while retrieving the user details:",
+      error
+    );
+  }
+};
+
 // Register Client
 export const registerClient = async ({
   identificationDocument,
@@ -86,24 +104,6 @@ export const registerClient = async ({
     return parseStringify(newClient);
   } catch (error) {
     console.error("An error occurred while creating a new client:", error);
-  }
-};
-
-// Get Client
-export const getClient = async (userId: string) => {
-  try {
-    const clients = await databases.listDocuments(
-      DATABASE_ID!,
-      CLIENT_COLLECTION_ID!,
-      [Query.equal("userId", userId)]
-    );
-
-    return parseStringify(clients.documents[0]);
-  } catch (error) {
-    console.error(
-      "An error occurred while retrieving the user details:",
-      error
-    );
   }
 };
 

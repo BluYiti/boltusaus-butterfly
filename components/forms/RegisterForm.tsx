@@ -38,9 +38,8 @@ const RegisterForm = ({ user }: { user: User }) => {
     },
   });
 
-  // Submit handler: Do something with the form values.
+  // Register Form Submit Handler
   async function onSubmit(values: z.infer<typeof RegisterFormValidation>) {
-    // ✅ This will be type-safe and validated.
     setIsLoading(true);
 
     let formData;
@@ -407,7 +406,7 @@ const RegisterForm = ({ user }: { user: User }) => {
           label="I acknowledge that I have reviewed and agree to the Privacy Policy, which explains how my personal data will be collected, used, and protected, including my rights to access, correct, and delete my data."
         />
 
-        <SubmitButton isLoading={isLoading}>Register</SubmitButton>
+        <SubmitButton isLoading={isLoading} className="shad-primary-alt-btn w-full">Register</SubmitButton>
       </form>
     </Form>
   );
