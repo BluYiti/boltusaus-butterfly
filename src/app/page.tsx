@@ -31,7 +31,7 @@ export default function Home() {
             <Link href="/client/sign-up">Get Started</Link>
           </Button>
           <div className="text-center mt-6">
-            <Link href="/login" className="text-light-200">
+            <Link href="/auth/login" className="text-light-200">
               Already have an account?
             </Link>
           </div>
