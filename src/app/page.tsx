@@ -24,10 +24,7 @@ export default function Home() {
           <p className="text-white mt-4 mb-10 text-center">
             This is the start of your self-care journey.
           </p>
-          <Button
-            className="shad-primary-btn w-full rounded-full hover:bg-white hover:text-blue-400"
-            asChild
-          >
+          <Button className="shad-primary-btn w-full" asChild>
             <Link href="/client/sign-up">Get Started</Link>
           </Button>
           <div className="text-center mt-6">
