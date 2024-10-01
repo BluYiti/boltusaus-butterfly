@@ -51,7 +51,7 @@ const App: React.FC = () => {
       </nav>
 
       {/* Hero Section */}
-      <header className="relative bg-cover bg-center h-96 mt-16" style={{ backgroundImage: "url('/assets/images/background.jpg')" }}>
+      <header className="relative bg-cover bg-center h-96 mt-16" style={{ backgroundImage: `url('/images/background.jpg')` }}>
         <div className="absolute inset-0 bg-black bg-opacity-50 flex justify-center items-center">
           <div className="text-center text-white">
             <h1 className="text-4xl font-bold">We Help You To Heal Yourself</h1>
