@@ -1,11 +1,11 @@
-import AppointmentForm from "@/components/forms/AppointmentForm";
-import { getClient } from "@/lib/actions/client.actions";
 import Image from "next/image";
 
-export default async function NewAppointment({
-  params: { userId },
-}: SearchParamProps) {
+import AppointmentForm from "@/components/forms/AppointmentForm";
+import { getClient } from "@/lib/actions/client.actions";
+
+const Appointment = async ({ params: { userId } }: SearchParamProps) => {
   const client = await getClient(userId);
+
   return (
     <div className="flex h-screen max-h-screen">
       <section className="remove-scrollbar container my-auto">
@@ -29,4 +29,6 @@ export default async function NewAppointment({
       </section>
     </div>
   );
-}
+};
+
+export default Appointment;

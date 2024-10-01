@@ -1,20 +1,20 @@
+import Image from "next/image";
+import Link from "next/link";
+
 import { Button } from "@/components/ui/button";
 import { Psychotherapists } from "@/constants";
 import { getAppointment } from "@/lib/actions/appointment.actions";
 import { formatDateTime } from "@/lib/utils";
-import Image from "next/image";
-import Link from "next/link";
-import React from "react";
 
-const Success = async ({
-  params: { userId },
+const RequestSuccess = async ({
   searchParams,
+  params: { userId },
 }: SearchParamProps) => {
   const appointmentId = (searchParams?.appointmentId as string) || "";
   const appointment = await getAppointment(appointmentId);
 
   const psychotherapist = Psychotherapists.find(
-    (psycho) => psycho.name === appointment.primaryPsychotherapist
+    (psychotherapist) => psychotherapist.name === appointment.primaryPsychotherapist
   );
 
   return (
@@ -65,7 +65,7 @@ const Success = async ({
             <p> {formatDateTime(appointment.schedule).dateTime}</p>
           </div>
         </section>
-        <Button variant="outline" className="shad-primary-btn" asChild>
+        <Button className="shad-primary-alt-btn" asChild>
           <Link href={`/clients/${userId}/new-appointment`}>
             New Appointment
           </Link>
@@ -76,4 +76,4 @@ const Success = async ({
   );
 };
 
-export default Success;
+export default RequestSuccess;

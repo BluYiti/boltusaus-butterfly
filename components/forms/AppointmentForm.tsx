@@ -12,26 +12,14 @@ import {
   updateAppointment,
 } from "@/lib/actions/appointment.actions";
 import { ConsultationType, Psychotherapists } from "@/constants";
-import {
-  AppointmentFormValidation,
-  getAppointmentSchema,
-} from "@/lib/validation";
+import { Appointment } from "@/types/appwrite.types";
+import { getAppointmentSchema } from "@/lib/validation";
 
 import { CustomFormField } from "../CustomFormField";
+import { FormFieldType } from "./SignUpForm";
 import { SelectItem } from "../ui/select";
 import SubmitButton from "../SubmitButton";
 import Image from "next/image";
-import { Appointment } from "@/types/appwrite.types";
-
-export enum FormFieldType {
-  INPUT = "input",
-  TEXTAREA = "textarea",
-  PHONE_INPUT = "phoneInput",
-  CHECKBOX = "checkbox",
-  DATE_PICKER = "datePicker",
-  SELECT = "select",
-  SKELETON = "skeleton",
-}
 
 const AppointmentForm = ({
   userId,
@@ -51,7 +39,7 @@ const AppointmentForm = ({
 
   const AppointmentFormValidation = getAppointmentSchema(type);
 
-  // Form handler: What the form will gather from the user?
+  // Form handler: Appointment Form
   const form = useForm<z.infer<typeof AppointmentFormValidation>>({
     resolver: zodResolver(AppointmentFormValidation),
     defaultValues: {
@@ -64,10 +52,11 @@ const AppointmentForm = ({
     },
   });
 
-  // Submit handler: Do something with the form values.
+  // Appointment Submit Handler
   async function onSubmit(values: z.infer<typeof AppointmentFormValidation>) {
     setIsLoading(true);
 
+    // Handle Appointment Status
     let status;
     switch (type) {
       case "schedule":
@@ -82,6 +71,7 @@ const AppointmentForm = ({
     }
 
     try {
+      // Create an Appointment
       if (type === "create" && clientId) {
         const appointmentData = {
           userId,
@@ -101,18 +91,21 @@ const AppointmentForm = ({
         if (appointment) {
           form.reset();
           router.push(
-            `/clients/${userId}/new-appointment/success?appointmentId=${appointment.$id}`
+            `/client/${userId}/new-appointment/success?appointmentId=${appointment.$id}`
           );
         }
       } else {
+        // Update an Appointment
         const appointmentToUpdate = {
           userId,
           appointmentId: appointment?.$id!,
           appointment: {
             primaryPsychotherapist: values?.primaryPsychotherapist,
             schedule: new Date(values?.schedule),
-            status: status as Status,
+            reason: values.reason!,
+            consultationType: values?.consultationType,
             cancellationReason: values?.cancellationReason,
+            status: status as Status,
           },
           type,
         };
@@ -239,7 +232,7 @@ const AppointmentForm = ({
         <SubmitButton
           isLoading={isLoading}
           className={`${
-            type === "cancel" ? "shad-danger-btn" : "shad-primary-btn"
+            type === "cancel" ? "shad-danger-btn" : "shad-primary-alt-btn"
           } w-full rounded-full`}
         >
           {buttonLabel}

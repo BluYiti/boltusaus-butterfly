@@ -87,14 +87,12 @@ export const PreAssessmentFormValidation = z.object({
 export const AppointmentFormValidation = z.object({});
 
 export const CreateAppointmentSchema = z.object({
-  primaryPsychotherapist: z
-    .string()
-    .min(2, "Select at least one psychotherapist"),
+  primaryPsychotherapist: z.string().min(1, "Select a psychotherapist"),
   schedule: z.coerce.date(),
-  consultationType: z.string().min(2, "Select a Consultation Type"),
+  consultationType: z.string().min(1, "Select a Consultation Type"),
   reason: z
     .string()
-    .min(2, "Reason must be at least 2 characters")
+    .min(10, "Reason must be at least 10 characters")
     .max(500, "Reason must be at most 500 characters"),
   consultationNotes: z.string().optional(),
   cancellationReason: z.string().optional(),
@@ -105,7 +103,7 @@ export const ScheduleAppointmentSchema = z.object({
     .string()
     .min(2, "Select at least one psychotherapist"),
   schedule: z.coerce.date(),
-  consultationType: z.string().min(2, "Select a Consultation Type"),
+  consultationType: z.string().min(1, "Select a Consultation Type"),
   reason: z.string().optional(),
   consultationNotes: z.string().optional(),
   cancellationReason: z.string().optional(),
@@ -115,13 +113,13 @@ export const CancelAppointmentSchema = z.object({
   primaryPsychotherapist: z
     .string()
     .min(2, "Select at least one psychotherapist"),
-  consultationType: z.string().min(2, "Select a Consultation Type"),
   schedule: z.coerce.date(),
+  consultationType: z.string().min(1, "Select a Consultation Type"),
   reason: z.string().optional(),
   consultationNotes: z.string().optional(),
   cancellationReason: z
     .string()
-    .min(2, "Reason must be at least 2 characters")
+    .min(10, "Reason must be at least 10 characters")
     .max(500, "Reason must be at most 500 characters"),
 });
 
