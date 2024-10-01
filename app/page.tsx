@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react";
-import BubbleAnimation from '@/app/preassessment/components/BubbleAnimation';
+import BubbleAnimation from '@/../components/BubbleAnimation';
 import { useRouter } from 'next/navigation';
 
 const App: React.FC = () => {

@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Question } from '@/app/preassessment/data/questions';
-import { databases, account, ID } from '@/app/appwrite';
+import { Question } from '@/preassessment/data/questions';
+import { databases, account, ID } from '@/appwrite';
 import { useRouter } from 'next/navigation';
 
 const DATABASE_ID = 'Butterfly-Database';

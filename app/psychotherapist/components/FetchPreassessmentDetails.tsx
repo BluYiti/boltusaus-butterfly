@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { databases } from '@/app/appwrite';
+import { databases } from '@/appwrite';
 import { Query } from 'appwrite';
 
 interface FetchPreAssessmentDetailsProps {

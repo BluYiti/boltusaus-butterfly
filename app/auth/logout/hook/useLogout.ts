@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { account } from '@/app/appwrite';
+import { account } from '@/appwrite';
 import { useState } from 'react';
 
 export const useLogout = () => {

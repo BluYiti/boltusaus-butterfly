@@ -1,13 +1,13 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useLogin } from '@/app/auth/login/hooks/useLogin';
-import LoginForm from '@/app/auth/login/components/LoginForm';
-import '@/app/auth/styles/style.css';
-import termsContent from '@/app/auth/register/data/terms';
-import privacyContent from '@/app/auth/register/data/privacy';
-import TermsAndPrivacy from '@/app/auth/register/components/TermsAndPrivacy';
-import BubbleAnimation from '@/app/preassessment/components/BubbleAnimation';
+import { useLogin } from '@/auth/login/hooks/useLogin';
+import LoginForm from '@/auth/login/components/LoginForm';
+import '@/auth/styles/style.css';
+import termsContent from '@/auth/register/data/terms';
+import privacyContent from '@/auth/register/data/privacy';
+import TermsAndPrivacy from '@/auth/register/components/TermsAndPrivacy';
+import BubbleAnimation from '@/preassessment/components/BubbleAnimation';
 
 const LoginPage: React.FC = () => {
     const { login, error } = useLogin();

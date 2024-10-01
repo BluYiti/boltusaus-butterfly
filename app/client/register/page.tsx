@@ -1,5 +1,5 @@
-import RegisterForm from "@/components/forms/RegisterForm";
-import { getUser } from "@/lib/actions/client.actions";
+import RegisterForm from "@/../components/forms/RegisterForm";
+import { getUser } from "@/../lib/actions/client.actions";
 import Image from "next/image";
 
 const Register = async ({ params: { userId } }: SearchParamProps) => {

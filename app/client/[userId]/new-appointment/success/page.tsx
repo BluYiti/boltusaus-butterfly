@@ -1,7 +1,7 @@
-import { Button } from "@/components/ui/button";
-import { Psychotherapists } from "@/constants";
-import { getAppointment } from "@/lib/actions/appointment.actions";
-import { formatDateTime } from "@/lib/utils";
+import { Button } from "@/../components/ui/button";
+import { Psychotherapists } from "@/../constants";
+import { getAppointment } from "@/../lib/actions/appointment.actions";
+import { formatDateTime } from "@/../lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";

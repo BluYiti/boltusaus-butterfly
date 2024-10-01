@@ -1,6 +1,6 @@
 import React from 'react';
 import { FiLogOut } from 'react-icons/fi';
-import { useLogout } from '@/app/auth/logout/hook/useLogout';
+import { useLogout } from '@/auth/logout/hook/useLogout';
 
 interface LogoutButtonProps {
     isMinimized: boolean;

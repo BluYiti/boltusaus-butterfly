@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { account } from '@/app/appwrite';
+import { account } from '@/appwrite';
 import { useRouter } from 'next/navigation';
 
 export const useLogin = () => {

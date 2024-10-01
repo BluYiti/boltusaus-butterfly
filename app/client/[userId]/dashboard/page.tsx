@@ -1,8 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
-import Menu from "@/components/Menu";
-import NavBar from "@/components/NavBar";
-import ClientPage from "@/components/client/ClientPage";
+import Menu from "@/../components/Menu";
+import NavBar from "@/../components/NavBar";
+import ClientPage from "@/../components/client/ClientPage";
 
 const ClientDashboard = () => {
   return (

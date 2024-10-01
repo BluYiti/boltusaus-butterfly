@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useState } from 'react';
-import Question from '@/app/preassessment/components/Question';
-import NavigationButtons from '@/app/preassessment/components/NavigationButtons';
-import { useAssessment } from '@/app/preassessment/hooks/useAssessment';
-import { questions } from '@/app/preassessment/data/questions';
-import BubbleAnimation from '@/app/preassessment/components/BubbleAnimation';
-import SubmissionModal from '@/app/preassessment/components/Submission';
+import Question from '@/preassessment/components/Question';
+import NavigationButtons from '@/preassessment/components/NavigationButtons';
+import { useAssessment } from '@/preassessment/hooks/useAssessment';
+import { questions } from '@/preassessment/data/questions';
+import BubbleAnimation from '@/../components/BubbleAnimation';
+import SubmissionModal from '@/preassessment/components/Submission';
 
 export default function PreAssessmentPage() {
   const {

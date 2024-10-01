@@ -1,5 +1,5 @@
-import AppointmentForm from "@/components/forms/AppointmentForm";
-import { getClient } from "@/lib/actions/client.actions";
+import AppointmentForm from "@/../components/forms/AppointmentForm";
+import { getClient } from "@/../lib/actions/client.actions";
 import Image from "next/image";
 
 export default async function NewAppointment({

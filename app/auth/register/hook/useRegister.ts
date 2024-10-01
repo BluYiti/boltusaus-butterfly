@@ -1,4 +1,4 @@
-import { account, ID } from '@/app/appwrite';
+import { account, ID } from '@/appwrite';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 

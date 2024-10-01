@@ -1,10 +1,10 @@
 'use client';
 
 import React from 'react';
-import { useRegister } from '@/app/auth/register/hook/useRegister';
-import RegisterForm from '@/app/auth/register/components/RegisterForm';
-import '@/app/auth/styles/style.css';
-import BubbleAnimation from '@/app/preassessment/components/BubbleAnimation';
+import { useRegister } from '@/auth/register/hook/useRegister';
+import RegisterForm from '@/auth/register/components/RegisterForm';
+import '@/auth/styles/style.css';
+import BubbleAnimation from '@/preassessment/components/BubbleAnimation';
 
 const RegisterPage: React.FC = () => {
     const { register, error, loading } = useRegister();

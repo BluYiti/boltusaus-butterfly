@@ -2,7 +2,7 @@
 
 
 import React from 'react';
-import ClientList from '@/app/psychotherapist/components/ClientList';
+import ClientList from '@/psychotherapist/components/ClientList';
 
 const ClientListPage: React.FC = () => {
   return (

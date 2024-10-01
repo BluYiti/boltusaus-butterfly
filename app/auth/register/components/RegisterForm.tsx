@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
-import termsContent from '@/app/auth/register/data/terms';
-import privacyContent from '@/app/auth/register/data/privacy';
-import TermsAndPrivacy from '@/app/auth/register/components/TermsAndPrivacy';
+import termsContent from '@/auth/register/data/terms';
+import privacyContent from '@/auth/register/data/privacy';
+import TermsAndPrivacy from '@/auth/register/components/TermsAndPrivacy';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
-import '@/app/auth/styles/style.css';
+import '@/ auth/styles/style.css';
 
 interface RegisterFormProps {
     onRegister: (username: string, email: string, password: string, phone: string) => void;

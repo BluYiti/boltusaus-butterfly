@@ -6,7 +6,7 @@ import { FiUser, FiBarChart2, FiLock, FiClipboard, FiList, FiLogOut } from "reac
 import ToggleButton from "./ToggleButton";
 import SidebarItem from "./SidebarItem";
 import Loading from "./Loading"; // Import the Loading component
-import LogoutButton from '@/app/auth/logout/component/logoutButton';
+import LogoutButton from '@/auth/logout/component/logoutButton';
 
 
 

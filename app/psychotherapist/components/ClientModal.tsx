@@ -1,5 +1,5 @@
 import React from 'react';
-import FetchPreAssessmentDetails from '@/app/psychotherapist/components/FetchPreassessmentDetails';
+import FetchPreAssessmentDetails from '@/psychotherapist/components/FetchPreassessmentDetails';
 import { Client } from '../hooks/useTypes';
 
 interface ModalProps {
