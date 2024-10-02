@@ -9,6 +9,7 @@ import {
   FaTasks,
   FaCalendarAlt,
   FaCogs,
+  FaChartLine,
   FaSignOutAlt,
 } from "react-icons/fa";
 
@@ -64,7 +65,7 @@ const Dashboard: React.FC = () => {
               <span className="font-medium">Settings</span>
             </a>
             <a href="#" className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100">
-              <FaCogs className="text-xl" />
+              <FaChartLine className="text-xl" /> {/* Use FaChartLine icon for Goals */}
               <span className="font-medium">Goals</span>
             </a>
             <a href="#" className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100">
