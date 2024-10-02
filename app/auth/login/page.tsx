@@ -7,7 +7,7 @@ import '@/auth/styles/style.css';
 import termsContent from '@/auth/register/data/terms';
 import privacyContent from '@/auth/register/data/privacy';
 import TermsAndPrivacy from '@/auth/register/components/TermsAndPrivacy';
-import BubbleAnimation from '@/preassessment/components/BubbleAnimation';
+import BubbleAnimation from '@/../components/BubbleAnimation';
 
 const LoginPage: React.FC = () => {
     const { login, error } = useLogin();
@@ -38,7 +38,7 @@ const LoginPage: React.FC = () => {
                 <div className="w-1/2 flex flex-col items-center justify-center bg-blue-100 p-8">
                     <div className="flex flex-col items-center">
                         <img
-                            src="/images/ButterflyLanding.png"
+                            src="/assets/images/ButterflyLanding.png"
                             alt="A.M.Peralta Psychological Services"
                             className="h-24 w-24 mb-4"
                         />

@@ -12,6 +12,7 @@ const App: React.FC = () => {
     <div className="text-black min-h-screen bg-blue-500">
       {/* Navbar */}
       <nav className="fixed top-0 left-0 w-full flex justify-between items-center p-4 bg-white shadow z-50">
+        
         <div className="text-2xl font-bold">Butterfly</div>
         <ul className="flex space-x-10">
           <li>
@@ -46,12 +47,12 @@ const App: React.FC = () => {
         onClick={() => router.push('/auth/login')}
         >
         <span className="absolute inset-0 w-full h-full bg-blue-500 transform translate-x-full transition duration-300 ease-out group-hover:translate-x-0"></span>
-        <span className="relative w-full text-left transition-colors duration-300 ease-in-out group-hover:text-white">Login</span>
+        <span className="text-black relative w-full text-left transition-colors duration-300 ease-in-out group-hover:text-white">Login</span>
         </button>
       </nav>
 
       {/* Hero Section */}
-      <header className="relative bg-cover bg-center h-96 mt-16" style={{ backgroundImage: `url('/images/background.jpg')` }}>
+      <header className="relative bg-cover bg-center h-96 mt-16" style={{ backgroundImage: "url('/assets/images/background.jpg')"}}>
         <div className="absolute inset-0 bg-black bg-opacity-50 flex justify-center items-center">
           <div className="text-center text-white">
             <h1 className="text-4xl font-bold">We Help You To Heal Yourself</h1>
@@ -70,7 +71,7 @@ const App: React.FC = () => {
 {/* Services Section */}
 <section id="services" className="py-12">
   <div className="container mx-auto px-4">
-    <h2 className="text-3xl font-bold text-center mb-8">Our Services</h2>
+    <h2 className="text-white text-3xl font-bold text-center mb-8">Our Services</h2>
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
       {[
         { title: 'Counseling and Psychotherapy', description: 'Professional guidance to navigate personal challenges.' },
@@ -122,7 +123,7 @@ const App: React.FC = () => {
       <section id="insights" className="py-12">
         <div className="container mx-auto px-4">
           {/* Title with a border line */}
-          <h2 className="text-3xl font-bold text-center mb-8 border-b-4 border-[#B3EBF2] inline-block pb-2">
+          <h2 className="text-white text-3xl font-bold text-center mb-8 border-b-4 border-[#B3EBF2] inline-block pb-2">
             How does Butterfly work?
           </h2>
 
