@@ -1,11 +1,11 @@
-'use client';
+"use client"; // Add this line at the top
 
 import React, { useState } from 'react';
 import { format, addMonths, subMonths, getMonth, getYear } from 'date-fns';
 
 const AppointmentDashboard: React.FC = () => {
   const [selectedView, setSelectedView] = useState<'day' | 'week' | 'month'>('month');
-  const [selectedDate, setSelectedDate] = useState(new Date()); // Start with today
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const [isDeclineModalOpen, setIsDeclineModalOpen] = useState(false);
   const [isRescheduleViewOpen, setIsRescheduleViewOpen] = useState(false);
   const [isRescheduleConfirmed, setIsRescheduleConfirmed] = useState(false);
@@ -46,7 +46,6 @@ const AppointmentDashboard: React.FC = () => {
     setIsAppointmentConfirmed(true);
   };
 
-  // Navigate months
   const goToPreviousMonth = () => {
     setSelectedDate(subMonths(selectedDate, 1));
   };
@@ -55,29 +54,24 @@ const AppointmentDashboard: React.FC = () => {
     setSelectedDate(addMonths(selectedDate, 1));
   };
 
-  // Get formatted month and year
   const formattedMonthYear = format(selectedDate, 'MMMM yyyy');
   const currentMonth = getMonth(selectedDate);
   const currentYear = getYear(selectedDate);
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
-      {/* Header */}
-      <header className="bg-blue-600 text-white p-4 flex justify-between items-center">
-        <div className="flex items-center space-x-4">
-          <img
-            src="/path/to/profile-pic.png"
-            alt="Profile"
-            className="w-8 h-8 rounded-full"
-          />
-          <h1 className="text-xl">Dashboard</h1>
-        </div>
-        <div className="flex space-x-6">
-          <button className="hover:underline">Dashboard</button>
-          <button className="hover:underline">Appointments</button>
-          <button className="hover:underline">Client List</button>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gray-100 flex">
+      {/* Side Navigation Bar */}
+      <aside className="bg-white w-60 p-6 shadow-lg">
+        <h1 className="text-2xl font-bold text-blue-600 mb-8">Butterfly</h1>
+        <nav className="space-y-4">
+          <button className="block text-gray-600 hover:text-blue-600">Home</button>
+          <button className="block text-gray-600 hover:text-blue-600">Profile</button>
+          <button className="block text-blue-600 hover:text-gray-600">Appointments</button>
+          <button className="block text-gray-600 hover:text-blue-600">Client List</button>
+          <button className="block text-gray-600 hover:text-blue-600">Payments</button>
+          <button className="block text-gray-600 hover:text-blue-600">Logout</button>
+        </nav>
+      </aside>
 
       {/* Main Content */}
       <div className="flex-grow p-4 flex space-x-4">
@@ -86,25 +80,19 @@ const AppointmentDashboard: React.FC = () => {
           <div className="flex justify-between items-center mb-4">
             <div className="flex space-x-2">
               <button
-                className={`py-2 px-4 rounded-lg ${
-                  selectedView === 'day' ? 'bg-blue-600 text-white' : 'bg-gray-200'
-                }`}
+                className={`py-2 px-4 rounded-lg ${selectedView === 'day' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
                 onClick={() => setSelectedView('day')}
               >
                 Day
               </button>
               <button
-                className={`py-2 px-4 rounded-lg ${
-                  selectedView === 'week' ? 'bg-blue-600 text-white' : 'bg-gray-200'
-                }`}
+                className={`py-2 px-4 rounded-lg ${selectedView === 'week' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
                 onClick={() => setSelectedView('week')}
               >
                 Week
               </button>
               <button
-                className={`py-2 px-4 rounded-lg ${
-                  selectedView === 'month' ? 'bg-blue-600 text-white' : 'bg-gray-200'
-                }`}
+                className={`py-2 px-4 rounded-lg ${selectedView === 'month' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
                 onClick={() => setSelectedView('month')}
               >
                 Month
@@ -117,29 +105,17 @@ const AppointmentDashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Calendar Grid based on selected view */}
           <div className="grid grid-cols-7 gap-2 text-center text-sm">
             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-              <div key={day} className="font-bold text-gray-500">
-                {day}
-              </div>
+              <div key={day} className="font-bold text-gray-500">{day}</div>
             ))}
-            {/* Render Calendar based on the view */}
-            {selectedView === 'day' && (
-              <div className="p-4 rounded-lg text-black">Detailed view for selected day</div>
-            )}
-            {selectedView === 'week' &&
-              Array.from({ length: 7 }).map((_, i) => (
-                <div key={i} className="p-4 rounded-lg text-black">
-                  Day {i + 1} of the week
-                </div>
-              ))}
-            {selectedView === 'month' &&
-              Array.from({ length: 30 }).map((_, i) => (
-                <div key={i} className="p-4 rounded-lg text-black">
-                  {i + 1}
-                </div>
-              ))}
+            {selectedView === 'day' && <div className="p-4 rounded-lg text-black">Detailed view for selected day</div>}
+            {selectedView === 'week' && Array.from({ length: 7 }).map((_, i) => (
+              <div key={i} className="p-4 rounded-lg text-black">Day {i + 1} of the week</div>
+            ))}
+            {selectedView === 'month' && Array.from({ length: 30 }).map((_, i) => (
+              <div key={i} className="p-4 rounded-lg text-black">{i + 1}</div>
+            ))}
           </div>
         </div>
 
@@ -149,56 +125,29 @@ const AppointmentDashboard: React.FC = () => {
             {format(selectedDate, 'MMMM d')} Appointment
           </h2>
           <div className="flex items-center space-x-4 mb-4">
-            <img
-              src="/path/to/profile-pic.png"
-              alt="Profile"
-              className="w-12 h-12 rounded-full"
-            />
+            <img src="/path/to/profile-pic.png" alt="Profile" className="w-12 h-12 rounded-full" />
             <div>
               <h3 className="font-bold">Denzel White</h3>
               <p className="text-sm text-gray-600">9:00 AM</p>
             </div>
           </div>
 
-          {/* Appointment Info */}
           <div className="space-y-2 text-sm">
-            <p>
-              <span className="font-semibold">Type:</span> Online
-            </p>
-            <p>
-              <span className="font-semibold">Status:</span>{' '}
-              <span className="text-green-500">Paid</span>
-            </p>
-            <p>
-              <span className="font-semibold">Mode:</span> GCash
-            </p>
-            <p>
-              <span className="font-semibold">Date Paid:</span> {format(new Date(), 'MMM d, yyyy')}
-            </p>
-            <p>
-              <span className="font-semibold">Discount:</span> 5%
-            </p>
+            <p><span className="font-semibold">Type:</span> Online</p>
+            <p><span className="font-semibold">Status:</span> <span className="text-green-500">Paid</span></p>
+            <p><span className="font-semibold">Mode:</span> GCash</p>
+            <p><span className="font-semibold">Date Paid:</span> {format(new Date(), 'MMM d, yyyy')}</p>
+            <p><span className="font-semibold">Discount:</span> 5%</p>
           </div>
 
-          {/* Action Buttons */}
           <div className="flex justify-between mt-4">
-            <button
-              onClick={handleDecline}
-              className="bg-red-500 text-white py-2 px-6 rounded-lg"
-            >
-              DECLINE
-            </button>
-            <button
-              onClick={handleConfirmAppointment}
-              className="bg-green-500 text-white py-2 px-6 rounded-lg"
-            >
-              CONFIRM
-            </button>
+            <button onClick={handleDecline} className="bg-red-500 text-white py-2 px-6 rounded-lg">DECLINE</button>
+            <button onClick={handleConfirmAppointment} className="bg-green-500 text-white py-2 px-6 rounded-lg">CONFIRM</button>
           </div>
         </div>
       </div>
 
-      {/* Decline Modal */}
+      {/* Modals for Decline, Reschedule, and Confirm */}
       {isDeclineModalOpen && (
         <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center">
           <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
@@ -219,15 +168,15 @@ const AppointmentDashboard: React.FC = () => {
                 onClick={handleConfirmReschedule}
                 className="bg-green-500 text-white py-2 px-4 rounded-lg"
               >
-                Confirm
+                Reschedule
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Reschedule View */}
-      {isRescheduleViewOpen && (
+       {/* Reschedule View */}
+       {isRescheduleViewOpen && (
         <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center">
           <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
             <h2 className="text-xl font-bold mb-4 text-center">
@@ -276,7 +225,7 @@ const AppointmentDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Reschedule Confirmation */}
+
       {isRescheduleConfirmed && (
         <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center">
           <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
@@ -284,21 +233,20 @@ const AppointmentDashboard: React.FC = () => {
               APPOINTMENT RESCHEDULED.
             </h2>
             <p className="text-center mb-6">
-              Your appointment has been rescheduled.
+              Your appointment has been rescheduled to {selectedRescheduleTime}.
             </p>
-            <div className="text-center">
+            <div className="flex justify-center">
               <button
                 onClick={handleCloseConfirmation}
-                className="bg-blue-500 text-white py-2 px-6 rounded-lg"
+                className="bg-green-500 text-white py-2 px-4 rounded-lg"
               >
-                Close
+                OK
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Appointment Confirmation */}
       {isAppointmentConfirmed && (
         <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center">
           <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
@@ -306,14 +254,14 @@ const AppointmentDashboard: React.FC = () => {
               APPOINTMENT CONFIRMED.
             </h2>
             <p className="text-center mb-6">
-              Your appointment has been confirmed.
+              You have confirmed the appointment with Denzel White.
             </p>
-            <div className="text-center">
+            <div className="flex justify-center">
               <button
                 onClick={handleCloseConfirmation}
-                className="bg-blue-500 text-white py-2 px-6 rounded-lg"
+                className="bg-green-500 text-white py-2 px-4 rounded-lg"
               >
-                Close
+                OK
               </button>
             </div>
           </div>
