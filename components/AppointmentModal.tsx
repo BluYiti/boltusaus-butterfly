@@ -1,4 +1,4 @@
-"use client";
+'use client'
 
 import {
   Dialog,
@@ -7,11 +7,11 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from "@/../components/ui/dialog";
 import { useState } from "react";
 import { Button } from "./ui/button";
 import AppointmentForm from "./forms/AppointmentForm";
-import { Appointment } from "@/types/appwrite.types";
+import { Appointment } from "@/../types/appwrite.types";
 
 const AppointmentModal = ({
   type,
