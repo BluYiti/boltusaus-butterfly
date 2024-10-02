@@ -1,4 +1,4 @@
-import { StatusIcon } from "@/constants";
+import { StatusIcon } from "@/../constants";
 import clsx from "clsx";
 import Image from "next/image";
 import React from "react";

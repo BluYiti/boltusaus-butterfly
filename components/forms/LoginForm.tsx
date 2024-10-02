@@ -6,12 +6,12 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
-import { Form } from "@/components/ui/form";
+import { Form } from "@/../components/ui/form";
 import { CustomFormField } from "../CustomFormField";
-import { LoginFormValidation } from "@/lib/validation";
+import { LoginFormValidation } from "@/../lib/validation";
 import Link from "next/link";
 
-import { loginUser } from "@/lib/actions/client.actions";
+import { loginUser } from "@/../lib/actions/client.actions";
 import SubmitButton from "../SubmitButton";
 
 export enum FormFieldType {

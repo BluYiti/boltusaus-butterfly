@@ -1,10 +1,10 @@
-"use client";
+"use client"
 
 import { ColumnDef } from "@tanstack/react-table";
 import Image from "next/image";
 import StatusBadge from "../StatusBadge";
-import { formatDateTime } from "@/lib/utils";
-import { Psychotherapists } from "@/constants";
+import { formatDateTime } from "@/../lib/utils";
+import { Psychotherapists } from "@/../constants";
 import AppointmentModal from "../AppointmentModal";
 
 export type Payment = {

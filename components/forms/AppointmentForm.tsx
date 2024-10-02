@@ -6,22 +6,22 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { Form } from "@/components/ui/form";
+import { Form } from "@/../components/ui/form";
 import {
   createAppointment,
   updateAppointment,
-} from "@/lib/actions/appointment.actions";
-import { ConsultationType, Psychotherapists } from "@/constants";
+} from "@/../lib/actions/appointment.actions";
+import { ConsultationType, Psychotherapists } from "@/../constants";
 import {
   AppointmentFormValidation,
   getAppointmentSchema,
-} from "@/lib/validation";
+} from "@/../lib/validation";
 
 import { CustomFormField } from "../CustomFormField";
 import { SelectItem } from "../ui/select";
 import SubmitButton from "../SubmitButton";
 import Image from "next/image";
-import { Appointment } from "@/types/appwrite.types";
+import { Appointment } from "@/../types/appwrite.types";
 
 export enum FormFieldType {
   INPUT = "input",

@@ -4,7 +4,7 @@ import React from 'react';
 import { useRegister } from '@/auth/register/hook/useRegister';
 import RegisterForm from '@/auth/register/components/RegisterForm';
 import '@/auth/styles/style.css';
-import BubbleAnimation from '@/preassessment/components/BubbleAnimation';
+import BubbleAnimation from '@/../components/BubbleAnimation';
 
 const RegisterPage: React.FC = () => {
     const { register, error, loading } = useRegister();

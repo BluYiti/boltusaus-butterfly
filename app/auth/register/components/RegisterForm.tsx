@@ -5,7 +5,7 @@ import privacyContent from '@/auth/register/data/privacy';
 import TermsAndPrivacy from '@/auth/register/components/TermsAndPrivacy';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
-import '@/ auth/styles/style.css';
+import '@/auth/styles/style.css';
 
 interface RegisterFormProps {
     onRegister: (username: string, email: string, password: string, phone: string) => void;
