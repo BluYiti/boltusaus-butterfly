@@ -11,12 +11,10 @@ const RegisterPage: React.FC = () => {
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-blue-500">
-
             <div className="flex bg-white w-full h-full min-h-screen overflow-hidden">
-                
                 <div className="w-1/2 bg-blue-100 flex flex-col items-center justify-center p-8">
                     <img
-                        src="/images/ButterflyLanding.png"
+                        src="/assets/images/ButterflyLanding.png"
                         alt="A.M.Peralta Psychological Services"
                         className="h-24 w-24 mb-4"
                     />
