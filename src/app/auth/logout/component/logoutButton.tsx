@@ -17,7 +17,7 @@ const LogoutButton: React.FC<LogoutButtonProps> = ({ isMinimized }) => {
         <div className="mt-auto p-4 flex items-center">
             <button
                 onClick={handleLogout}
-                className="w-full flex items-center hover:bg-red-600 p-2 rounded text-red-400"
+                className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 cursor-pointer"
             >
                 <FiLogOut size={24} />
                 {!isMinimized && <span className="ml-4">Logout</span>}

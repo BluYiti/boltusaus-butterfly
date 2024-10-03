@@ -1,6 +1,7 @@
-'use client'
+'use client';
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation'; // Import useRouter
+import { useRouter } from 'next/navigation';
+import { account } from '@/app/appwrite'; // Import Appwrite account
 
 // Therapist Interface
 interface Therapist {
@@ -43,9 +44,26 @@ const TherapistSelection: React.FC = () => {
   const [selectedTherapist, setSelectedTherapist] = useState<Therapist>(therapists[0]);
   const router = useRouter(); // Initialize router
 
-  const handleNextClick = () => {
-    // Redirect to the consultation selection page
-    router.push('/client/pages/availabledates'); // Navigates to ConsultationSelection page
+  const handleNextClick = async () => {
+    try {
+      console.log("Selected therapist to be saved:", selectedTherapist.name); // Log the selected therapist before saving
+  
+      // Save the selected therapist as a preference in Appwrite
+      await account.updatePrefs({
+        psychotherapist: selectedTherapist.name,
+        role: 'client',
+        status: 'To Be Evaluated',
+      });
+  
+      // Check if the preference was saved successfully
+      const userPrefs = await account.get(); // Fetch the updated user account to check preferences
+      console.log("Updated preferences after saving:", userPrefs.prefs); // Log the updated preferences
+  
+      // Redirect to the consultation selection page
+      router.push('/client/pages/availabledates');
+    } catch (error) {
+      console.error("Failed to save therapist preference:", error); // Log the error if something goes wrong
+    }
   };
 
   return (

@@ -9,7 +9,7 @@ const ClientListPage: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       <header className="flex items-center justify-between p-4 bg-white shadow-md">
         <div className="flex items-center">
-          <img src="/logo.png" alt="Logo" className="h-8" />
+          <img src="/images/butterfly.jpg" alt="Logo" className="h-8" />
         </div>
         <nav className="flex space-x-6 text-gray-700">
           <a href="/psychotherapist" className="hover:text-black">Dashboard</a>
