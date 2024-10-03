@@ -39,6 +39,7 @@
     "react-phone-input-2": "^2.15.1",
     "react-phone-number-input": "^3.4.7",
     "react-router-dom": "^6.26.2",
+    "recharts": "^2.12.7",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
     "zod": "^3.23.8"
