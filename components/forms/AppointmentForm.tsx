@@ -21,7 +21,7 @@ import { CustomFormField } from "../CustomFormField";
 import { SelectItem } from "../ui/select";
 import SubmitButton from "../SubmitButton";
 import Image from "next/image";
-import { Appointment } from "@/../types/appwrite.types";
+import { Appointment } from "@/types/appwrite.types";
 
 export enum FormFieldType {
   INPUT = "input",
