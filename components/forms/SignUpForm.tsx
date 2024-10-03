@@ -10,19 +10,8 @@ import { Form } from "@/components/ui/form";
 import { createUser } from "@/lib/actions/client.actions";
 import { SignUpFormValidation } from "@/lib/validation";
 
-import { CustomFormField } from "../CustomFormField";
+import { CustomFormField, FormFieldType } from "../CustomFormField";
 import SubmitButton from "../SubmitButton";
-
-export enum FormFieldType {
-  INPUT = "input",
-  TEXTAREA = "textarea",
-  PHONE_INPUT = "phoneInput",
-  CHECKBOX = "checkbox",
-  DATE_PICKER = "datePicker",
-  SELECT = "select",
-  SKELETON = "skeleton",
-  PASSWORD = "password",
-}
 
 const SignUpForm = () => {
   const router = useRouter();
@@ -71,6 +60,7 @@ const SignUpForm = () => {
             </p>
           </div>
         </section>
+        
         <CustomFormField
           fieldType={FormFieldType.INPUT}
           control={form.control}

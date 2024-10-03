@@ -8,7 +8,7 @@ import { z } from "zod";
 
 import { questions } from "@/constants/questions";
 
-import { CustomFormField } from "../CustomFormField";
+import { CustomFormField, FormFieldType} from "../CustomFormField";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Form } from "@/components/ui/form";
 import SubmitButton from "../SubmitButton";

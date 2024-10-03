@@ -1,20 +1,20 @@
 "use client";
 
+import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { SelectItem } from "@/components/ui/select";
 import { Form, FormControl } from "@/components/ui/form";
+
 import { registerClient } from "@/lib/actions/client.actions";
 import { RegisterFormValidation } from "@/lib/validation";
 
-import { CustomFormField } from "../CustomFormField";
-import { FormFieldType } from "./SignUpForm";
+import { CustomFormField, FormFieldType } from "../CustomFormField";
 import FileUploader from "../FileUploader";
 import SubmitButton from "../SubmitButton";
 
@@ -102,7 +102,7 @@ const RegisterForm = ({ user }: { user: User }) => {
             name="lastName"
             label={
               <span>
-                Last Name (<i>Apeliyido</i>)
+                Last Name
               </span>
             }
             placeholder="Last Name"
@@ -114,7 +114,7 @@ const RegisterForm = ({ user }: { user: User }) => {
             name="firstName"
             label={
               <span>
-                First Name (<i>Pangalan</i>)
+                First Name
               </span>
             }
             placeholder="First Name"
@@ -126,7 +126,7 @@ const RegisterForm = ({ user }: { user: User }) => {
             name="middleName"
             label={
               <span>
-                Middle Name (<i>Panggitnang apelyido</i>)
+                Middle Name
               </span>
             }
             placeholder="Middle Name"
@@ -152,7 +152,7 @@ const RegisterForm = ({ user }: { user: User }) => {
             name="birthDate"
             label={
               <span>
-                Date of Birth (<i>Petsa ng kapanganakan</i>)
+                Date of Birth
               </span>
             }
             className="w-full"
@@ -163,7 +163,7 @@ const RegisterForm = ({ user }: { user: User }) => {
             name="sex"
             label={
               <span>
-                Sex (<i>Kasarian</i>)
+                Sex
               </span>
             }
             renderSkeleton={(field) => (
@@ -192,7 +192,7 @@ const RegisterForm = ({ user }: { user: User }) => {
             name="nationality"
             label={
               <span>
-                Nationality (<i>Nasyonalidad</i>)
+                Nationality
               </span>
             }
             placeholder="Select Nationality"
@@ -209,7 +209,7 @@ const RegisterForm = ({ user }: { user: User }) => {
             name="civilStatus"
             label={
               <span>
-                Civil Status (<i>Estado</i>)
+                Civil Status
               </span>
             }
             placeholder="Select Civil Status"

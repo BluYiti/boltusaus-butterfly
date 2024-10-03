@@ -400,7 +400,7 @@
 
   /* =====  REACT DATE PICKER OVERRIDES */
   .date-picker {
-    @apply overflow-hidden border-transparent w-full placeholder:text-dark-700  h-11 text-14-medium rounded-md px-3 outline-none !important;
+    @apply overflow-hidden border-transparent w-full placeholder:text-dark-700  h-11 text-14-medium rounded-xl px-3 outline-none !important;
   }
 }
 
@@ -435,7 +435,7 @@
 }
 
 .react-datepicker__time-list-item:hover {
-  background-color: #38b6ff !important;
+  background-color: #3585FF !important;
 }
 
 .react-datepicker__input-container input {
@@ -445,7 +445,7 @@
 }
 
 .react-datepicker__day--selected {
-  background-color: #38b6ff !important;
+  background-color: #3585FF !important;
   color: #ffffff !important;
   border-radius: 4px;
 }

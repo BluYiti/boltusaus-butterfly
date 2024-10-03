@@ -15,8 +15,7 @@ import { ConsultationType, Psychotherapists } from "@/constants";
 import { Appointment } from "@/types/appwrite.types";
 import { getAppointmentSchema } from "@/lib/validation";
 
-import { CustomFormField } from "../CustomFormField";
-import { FormFieldType } from "./SignUpForm";
+import { CustomFormField, FormFieldType } from "../CustomFormField";
 import { SelectItem } from "../ui/select";
 import SubmitButton from "../SubmitButton";
 import Image from "next/image";

@@ -1,8 +1,8 @@
 import { z } from "zod";
 
 export const LoginFormValidation = z.object({
-  username: z.string().min(2, "Please enter your username"),
-  password: z.string().min(2, "Please enter your password"),
+  username: z.string().min(5, "Please enter your username"),
+  password: z.string().min(5, "Please enter your password"),
 });
 
 export const SignUpFormValidation = z.object({
@@ -19,11 +19,11 @@ export const SignUpFormValidation = z.object({
 export const RegisterFormValidation = z.object({
   lastName: z
     .string()
-    .min(2, "Last name must be at least 2 characters")
+    .min(4, "Last name must be at least 4 characters")
     .max(50, "Last name must be at most 50 characters"),
   firstName: z
     .string()
-    .min(2, "First name must be at least 2 characters")
+    .min(4, "First name must be at least 4 characters")
     .max(50, "First name must be at most 50 characters"),
   middleName: z.string().optional(),
   suffixName: z.string().min(1, "Select 'None' if no suffix name"),

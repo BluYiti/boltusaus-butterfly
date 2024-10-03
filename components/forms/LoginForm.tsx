@@ -7,23 +7,12 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { Form } from "@/components/ui/form";
-import { CustomFormField } from "../CustomFormField";
+import { CustomFormField, FormFieldType } from "../CustomFormField";
 import { LoginFormValidation } from "@/lib/validation";
 import Link from "next/link";
 
 import { loginUser } from "@/lib/actions/client.actions";
 import SubmitButton from "../SubmitButton";
-
-export enum FormFieldType {
-  INPUT = "input",
-  PASSWORD = "password",
-  TEXTAREA = "textarea",
-  PHONE_INPUT = "phoneInput",
-  CHECKBOX = "checkbox",
-  DATE_PICKER = "datePicker",
-  SELECT = "select",
-  SKELETON = "skeleton",
-}
 
 const LoginForm = () => {
   const router = useRouter();
@@ -47,7 +36,7 @@ const LoginForm = () => {
 
     try {
       // const userData = { username, password };
-      // const user = await registerUser(userData);
+      // const user = await loginUser(userData);
       // if (user) router.push(`/client/${user.$id}/dashboard`)
     } catch (error) {
       console.log(error);
