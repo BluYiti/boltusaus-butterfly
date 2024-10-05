@@ -62,26 +62,41 @@ const config: Config = {
           "5": "hsl(var(--chart-5))",
         },
         green: {
-          500: "#24AE7C",
-          600: "#0D2A1F",
+          100: "#24AE7C",
+          200: "#0F7C4F",
+          700: "#0D2A1F",
         },
         blue: {
+          100: "#DCEAF1",
+          200: "#AECBEB",
+          210: "#83B0E1",
+          220: "#71A5DE",
           300: "#38B6FF",
-          400: "#3585FF",
-          500: "#2b4369",
-          600: "#dceaf1",
-          700: "#152432",
+          310: "#3585FF",
+          400: "#01C5F2",
+          410: "#5ADBE4",
+          500: "#3585FF",
+          600: "#2081C3",
+          700: "#2B4369",
+          800: "#102154",
+          900: "#152432",
         },
         red: {
-          500: "#F37877",
-          600: "#3E1716",
+          100: "#F37877",
+          200: "#F24E43",
+          300: "#DD2145",
+          400: "#CE1126",
+          500: "#BB242C",
           700: "#F24E43",
         },
-        orange: {
-          300: "#ffb000",
+        yellow: {
+          200: "#FCD116",
+          300: "#FFB000",
         },
         light: {
-          200: "#E8E9E9",
+          200: "#F8F9F8",
+          300: "#E8E9E9",
+          400: "#D0D5DD"
         },
         dark: {
           200: "#0D0F10",
@@ -94,6 +109,8 @@ const config: Config = {
       },
       fontFamily: {
         sans: ["var(--font-sans)", ...fontFamily.sans],
+        serif: ["var(--font-serif)", ...fontFamily.serif],
+        script: ["var(--font-script",...fontFamily.script]
       },
       backgroundImage: {
         appointments: "url('/assets/images/appointments-bg.png')",
