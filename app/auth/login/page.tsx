@@ -7,7 +7,8 @@ import '@/auth/styles/style.css';
 import termsContent from '@/auth/register/data/terms';
 import privacyContent from '@/auth/register/data/privacy';
 import TermsAndPrivacy from '@/auth/register/components/TermsAndPrivacy';
-import BubbleAnimation from '@/../components/BubbleAnimation';
+import Back from '@/components/Back';
+import BubbleAnimation from '@/components/BubbleAnimation';
 
 const LoginPage: React.FC = () => {
     const { login, error } = useLogin();
@@ -31,14 +32,14 @@ const LoginPage: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen flex bg-blue-500">
+        <div className="min-h-screen flex">
+            <Back/>
             <div className="flex w-full min-h-screen overflow-hidden">
-                
                 {/* Left side */}
                 <div className="w-1/2 flex flex-col items-center justify-center bg-blue-100 p-8">
                     <div className="flex flex-col items-center">
                         <img
-                            src="/assets/images/ButterflyLanding.png"
+                            src="/images/ButterflyLanding.png"
                             alt="A.M.Peralta Psychological Services"
                             className="h-24 w-24 mb-4"
                         />

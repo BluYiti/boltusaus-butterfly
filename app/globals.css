@@ -99,6 +99,14 @@
   animation: bubble-float 7s ease-in infinite;
 }
 
+/*=================CUSTOM FONTS=================*/
+@font-face {
+  font-family: 'PaintBrush';
+  src: url('/fonts/PaintBrushScript.otf') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+
 /* ========================================== TAILWIND STYLES */
 @layer base {
   /* Remove scrollbar */
@@ -154,8 +162,8 @@
   }
 
   .container {
-    @apply relative flex-1 overflow-y-auto px-[5%];
-  }
+    @apply relative flex-1 overflow-y-auto px-[5%] overflow-x-hidden; /* Add this */
+  }  
 
   .sub-container {
     @apply mx-auto flex size-full flex-col py-10;
