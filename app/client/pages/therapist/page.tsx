@@ -1,104 +1,132 @@
 'use client';
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { account } from '@/app/appwrite'; // Import Appwrite account
 
-import router from 'next/router';
-import { useState } from 'react';
+// Therapist Interface
+interface Therapist {
+  name: string;
+  title: string;
+  image: string;
+  about: string;
+  background: string;
+  specialties: string[];
+}
 
-export default function ConsultationSelection() {
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [selectedTime, setSelectedTime] = useState<string | null>(null);
-  const [consultationOption, setConsultationOption] = useState<string>('Face to Face');
+const therapists: Therapist[] = [
+  {
+    name: "Hanni Pham",
+    title: "Senior Psychotherapist",
+    image: "/images/therapist1.jpg",
+    about: "My mission is to nurture mental well-being, offering compassionate support and guiding individuals towards resilience and personal growth.",
+    background: "Bachelor of Arts in Psychology",
+    specialties: ["Health and Lifestyle", "Mindfulness"],
+  },
+  {
+    name: "Bruno Gonzaga",
+    title: "Psychotherapist",
+    image: "/images/therapist2.jpg",
+    about: "I focus on creating a safe space for clients to explore their emotions and experiences, helping them develop coping strategies and achieve mental clarity.",
+    background: "Master of Science in Counseling Psychology",
+    specialties: ["Cognitive Behavioral Therapy", "Anxiety Management"],
+  },
+  {
+    name: "Ariana Marie",
+    title: "Psychotherapist",
+    image: "/images/therapist3.jpg",
+    about: "I believe in a holistic approach to therapy, integrating mind, body, and spirit to help clients find balance and self-acceptance.",
+    background: "Master of Arts in Clinical Psychology",
+    specialties: ["Trauma Recovery", "Mindfulness-Based Stress Reduction"],
+  },
+];
 
-  const availableDates = [
-    { day: '23', weekday: 'Friday' },
-    { day: '26', weekday: 'Monday' },
-    { day: '27', weekday: 'Tuesday' },
-  ];
+const TherapistSelection: React.FC = () => {
+  const [selectedTherapist, setSelectedTherapist] = useState<Therapist>(therapists[0]);
+  const router = useRouter(); // Initialize router
 
-  const availableTimes = ['7:30 AM', '8:30 AM', '9:30 AM', '10:30 AM'];
-
-  const handleDateClick = (day: string) => {
-    setSelectedDate(day);
-  };
-
-  const handleTimeClick = (time: string) => {
-    setSelectedTime(time);
-  };
-
-  const handleConsultationChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setConsultationOption(e.target.value);
-  };
-
-  const handleConfirm = () => {
-    router.push('/availabledates');
-    if (!selectedDate || !selectedTime) {
-      alert('Please select a date and time.');
-      return;
+  const handleNextClick = async () => {
+    try {
+      console.log("Selected therapist to be saved:", selectedTherapist.name); // Log the selected therapist before saving
+  
+      // Save the selected therapist as a preference in Appwrite
+      await account.updatePrefs({
+        psychotherapist: selectedTherapist.name,
+        role: 'client',
+        status: 'To Be Evaluated',
+      });
+  
+      // Check if the preference was saved successfully
+      const userPrefs = await account.get(); // Fetch the updated user account to check preferences
+      console.log("Updated preferences after saving:", userPrefs.prefs); // Log the updated preferences
+  
+      // Redirect to the consultation selection page
+      router.push('/client/pages/availabledates');
+    } catch (error) {
+      console.error("Failed to save therapist preference:", error); // Log the error if something goes wrong
     }
-    console.log('Date:', selectedDate);
-    console.log('Time:', selectedTime);
-    console.log('Consultation Option:', consultationOption);
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-white text-black p-4">
-      <div className="w-full max-w-lg">
-        {/* Available dates */}
-        <h2 className="text-lg font-bold mb-4">Available dates</h2>
-        <div className="flex space-x-4 mb-4">
-          {availableDates.map((date) => (
-            <button
-              key={date.day}
-              className={`p-4 rounded-lg ${
-                selectedDate === date.day ? 'bg-gray-300' : 'bg-gray-200'
-              }`}
-              onClick={() => handleDateClick(date.day)}
+    <div className="text-black font-bold bg-gradient-to-r from-blue-300 via-blue-500 to-blue-700 animate-gradient-x relative overflow-hidden flex items-center justify-center min-h-screen p-6">
+      <div className="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md">
+        <h1 className="text-2xl font-bold text-center mb-4">Select your Psychotherapist</h1>
+
+        {/* Therapist Selection */}
+        <div className="flex justify-around mb-6">
+          {therapists.map((therapist, index) => (
+            <div
+              key={index}
+              className={`cursor-pointer text-center ${selectedTherapist.name === therapist.name ? 'border-green-500' : ''}`}
+              onClick={() => setSelectedTherapist(therapist)}
             >
-              <div className="font-bold text-xl">{date.day}</div>
-              <div className="text-sm">{date.weekday}</div>
-            </button>
+              <img
+                src={therapist.image}
+                alt={therapist.name}
+                className={`w-24 h-24 rounded-full mx-auto ${selectedTherapist.name === therapist.name ? 'border-4 border-green-500' : 'border-2 border-gray-300'}`}
+              />
+              <p className="mt-2 font-semibold">{therapist.name}</p>
+            </div>
           ))}
         </div>
 
-        {/* Available time slots */}
-        <h2 className="text-lg font-bold mb-4">Available time of consultation</h2>
-        <div className="flex space-x-4 mb-4">
-          {availableTimes.map((time) => (
-            <button
-              key={time}
-              className={`p-4 rounded-lg ${
-                selectedTime === time ? 'bg-gray-300' : 'bg-gray-200'
-              }`}
-              onClick={() => handleTimeClick(time)}
-            >
-              {time}
-            </button>
-          ))}
+        {/* Selected Therapist Details */}
+        <div className="border-t border-gray-300 pt-6">
+          <h2 className="text-xl font-bold text-center mb-2">{selectedTherapist.name}</h2>
+          <p className="text-center text-green-600 font-semibold mb-4">{selectedTherapist.title}</p>
+          
+          <div className="grid grid-cols-2 gap-4">
+            {/* About Section */}
+            <div>
+              <h3 className="font-semibold text-lg">About me</h3>
+              <p className="text-gray-600">{selectedTherapist.about}</p>
+            </div>
+
+            {/* Professional Background */}
+            <div>
+              <h3 className="font-semibold text-lg">Professional Background</h3>
+              <p className="text-gray-600">{selectedTherapist.background}</p>
+              <h3 className="font-semibold text-lg mt-4">Specialties</h3>
+              <ul className="list-disc ml-4 text-gray-600">
+                {selectedTherapist.specialties.map((specialty, index) => (
+                  <li key={index}>{specialty}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
         </div>
 
-        {/* Consultation options */}
-        <h2 className="text-lg font-bold mb-4">Consultation Option</h2>
-        <div className="mb-4">
-          <select
-            className="w-full p-4 rounded-lg bg-gray-200"
-            value={consultationOption}
-            onChange={handleConsultationChange}
-          >
-            <option value="Face to Face">Face to Face</option>
-            <option value="Online">Online</option>
-          </select>
-        </div>
-
-        {/* Confirm button */}
-        <div className="flex justify-center">
+        {/* Next Button */}
+        <div className="text-center mt-8">
           <button
-            className="py-2 px-8 bg-blue-500 text-white rounded-lg"
-            onClick={handleConfirm}
+            onClick={handleNextClick}
+            className="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition"
           >
-            CONFIRM
+            Next
           </button>
         </div>
       </div>
     </div>
   );
-}
+};
 
+export default TherapistSelection;

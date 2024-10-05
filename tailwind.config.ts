@@ -5,9 +5,9 @@ const { fontFamily } = require("tailwindcss/defaultTheme");
 const config: Config = {
   darkMode: ["class"],
   content: [
-    "./app/pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./app/components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    './app/**/*.{js,ts,jsx,tsx}',  // If you're using Next.js with the new app router
+    './app/pages/**/*.{js,ts,jsx,tsx}', // If you're using the old pages directory
+    './app/components/**/*.{js,ts,jsx,tsx}',
   ],
   prefix: "",
   theme: {
@@ -92,7 +92,9 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans: ["var(--font-sans)", ...fontFamily.sans],
+        sans: ['Roboto', 'sans-serif'],
+        paintbrush: ['PaintBrush'],
+        montserrat: ['Montserrat'],
       },
       backgroundImage: {
         appointments: "url('/assets/images/appointments-bg.png')",

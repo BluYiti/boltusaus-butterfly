@@ -1,48 +1,93 @@
-import React from "react";
-import Image from "next/image";
-import LoginForm from "@/../components/forms/LoginForm";
-import Link from "next/link";
+'use client';
 
-const Login = () => {
-  return (
-    <div className="min-h-screen bg-gradient-to-r from-blue-300 via-blue-500 to-blue-700 animate-gradient-x relative overflow-hidden flex items-center justify-center">
-      <section className="flex justify-center items-center">
-        <div className="flex justify-center items-center w-full flex justify-between gap-20">
-          <div className="w-1/2 mb-8">
-            <Image
-              src="/assets/images/butterfly-logo.svg"
-              alt="Butterfly Logo"
-              width={200}
-              height={200}
-              className="mx-auto mt-8"
-            />
-            <br />
-            <h1 className="header text-center text-light-200">A.M. Peralta</h1>
-            <h4 className="header text-center text-light-200">
-              Psychological Services
-            </h4>
-            <br />
-            <p className="text-white mt-2 mb-4 text-center">
-              This is the start of your self-care journey.
-            </p>
-          </div>
-          <div className="w-1/2">
-            <LoginForm />
-            <div className="flex justify-center mt-4">
-              <Link href="/forgot-password" className="text-light-200">
-                Forgot Password?
-              </Link>
+import React, { useState } from 'react';
+import { useLogin } from './hooks/useLogin';
+import LoginForm from './components/LoginForm';
+import termsContent from '@/constants/terms';
+import privacyContent from '@/constants/privacy';
+import TermsAndPrivacy from '@/auth/register/components/TermsAndPrivacy';
+import Back from '@/components/Back';
+import BubbleAnimation from '@/components/BubbleAnimation';
+
+const LoginPage: React.FC = () => {
+    const { login, error } = useLogin();
+    const [loading, setLoading] = useState<boolean>(false);
+    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+    const [contentType, setContentType] = useState<'terms' | 'privacy'>('terms');
+
+    const handleLogin = async (email: string, password: string) => {
+        setLoading(true);
+        await login(email, password);
+        setLoading(false);
+    };
+
+    const openModal = (type: 'terms' | 'privacy') => {
+        setContentType(type);
+        setIsModalOpen(true);
+    };
+
+    const closeModal = () => {
+        setIsModalOpen(false);
+    };
+
+    return (
+        <div className="min-h-screen flex bg-blue-100">
+            <Back />
+            <div className="flex w-full min-h-screen overflow-hidden">
+                {/* Left side */}
+                <div className="w-1/2 flex flex-col items-center justify-center bg-blue-100 p-8">
+                    <div className="flex flex-col items-center">
+                        <img
+                            src="/images/ButterflyLanding.png"
+                            alt="A.M.Peralta Psychological Services"
+                            className="h-24 w-24 mb-4"
+                        />
+                    </div>
+                    <h2 className="text-2xl font-semibold text-center">
+                        A.M.Peralta Psychological Services
+                    </h2>
+                </div>
+
+                {/* Right side - center the login form */}
+                <div className="w-1/2 flex items-center justify-center p-8">
+                    <div className="w-full max-w-md">
+                        <LoginForm onLogin={handleLogin} error={error} loading={loading} />
+
+                        <div className="text-center mt-4">
+                            <p className="text-gray-500 text-sm">
+                                By logging in, you agree to our
+                                <button
+                                    type="button"
+                                    onClick={() => openModal('terms')}
+                                    className="text-blue-500 hover:underline ml-1"
+                                >
+                                    Terms and Conditions
+                                </button>
+                                &nbsp;and&nbsp;
+                                <button
+                                    type="button"
+                                    onClick={() => openModal('privacy')}
+                                    className="text-blue-500 hover:underline"
+                                >
+                                    Privacy Policy
+                                </button>.
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
+
+            <BubbleAnimation />
+
+            <TermsAndPrivacy
+                isOpen={isModalOpen}
+                onClose={closeModal}
+                contentType={contentType}
+                termsContent={termsContent}
+                privacyContent={privacyContent}
+            />
         </div>
-      </section>
-      <div className="bubble-container">
-        <div className="bubble bubble-1"></div>
-        <div className="bubble bubble-2"></div>
-        <div className="bubble bubble-3"></div>
-      </div>
-    </div>
-  );
+    );
 };
 
-export default Login;
+export default LoginPage;

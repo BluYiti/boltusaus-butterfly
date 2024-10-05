@@ -14,7 +14,9 @@ export const useLogout = () => {
             router.push('/auth/login');
         } catch (err: any) {
             console.error('Error during logout:', err);
-            setError(`Logout failed: ${err.message}`);
+            // Check if err.message exists; otherwise, provide a fallback
+            const message = err.message || 'An unexpected error occurred.';
+            setError(`Logout failed: ${message}`);
         }
     };
 

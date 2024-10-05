@@ -1,128 +1,92 @@
-'use client'; 
+import React from 'react';
 
-import React, { useState } from 'react';
-import Link from 'next/link';
+const Sidebar = () => {
+  return (
+    <div className="w-64 h-screen bg-white text-gray-800 p-6 shadow-md">
+      <h1 className="text-2xl font-semibold mb-8 text-blue-600">Butterfly</h1>
+      <ul>
+        <li className="mb-4">
+          <a href="#" className="text-gray-800 hover:text-blue-600">Home</a>
+        </li>
+        <li className="mb-4">
+          <a href="#" className="text-gray-800 hover:text-blue-600">Profile</a>
+        </li>
+        <li className="mb-4">
+          <a href="#" className="text-gray-800 hover:text-blue-600">Appointments</a>
+        </li>
+        <li className="mb-4">
+          <a href="#" className="text-gray-800 hover:text-blue-600">Client List</a>
+        </li>
+        <li className="mb-4">
+          <a href="#" className="text-blue-800 hover:text-gray-600">Payments</a>
+        </li>
+        <li>
+          <a href="#" className="text-gray-800 hover:text-blue-600">Logout</a>
+        </li>
+      </ul>
+    </div>
+  );
+};
 
-const PaymentsHistory: React.FC = () => {
-  const [selectedClient, setSelectedClient] = useState<string | null>(null);
-  const [paymentHistory, setPaymentHistory] = useState<any[]>([]);
-
-  // List of clients with their therapists
-  const clients = [
-    { name: 'Bella Swan', therapist: 'Mrs. Angelica Peralta' },
-    { name: 'Michael Bieber', therapist: 'Mrs. Angelica Peralta' },
-    { name: 'Nicki Minaj', therapist: 'Mr. Dwayne Carter' },
-    // Add more clients here as needed
+const PaymentHistory = () => {
+  const payments = [
+    { name: 'John Doe', date: 'Oct 3, 2024', amount: '$100', status: 'Completed' },
+    { name: 'Jane Smith', date: 'Oct 10, 2024', amount: '$200', status: 'Pending' },
+    { name: 'Alex Johnson', date: 'Oct 15, 2024', amount: '$150', status: 'Completed' },
+    { name: 'Chris Brown', date: 'Sep 25, 2024', amount: '$250', status: 'Completed' },
+    { name: 'Emily Davis', date: 'Sep 18, 2024', amount: '$300', status: 'Pending' },
+    { name: 'Michael Scott', date: 'Oct 5, 2024', amount: '$400', status: 'Completed' },
+    { name: 'Pam Beesly', date: 'Oct 7, 2024', amount: '$180', status: 'Pending' },
+    { name: 'Dwight Schrute', date: 'Oct 12, 2024', amount: '$220', status: 'Completed' },
+    { name: 'Hev Abigail', date: 'Oct 25, 2024', amount: '$100', status: 'Failed' },
+    { name: 'Rain Lorenzo', date: 'Oct 27, 2024', amount: '$200', status: 'Failed' },
   ];
-
-  // Example payment history data for the selected client
-  const samplePaymentHistory = [
-    { date: '10/03/24', time: '9:30 - 10:30 AM', amount: 'PHP 1,000.00', mode: 'GCash', status: 'pending' },
-    { date: '09/10/24', time: '9:30 - 10:30 AM', amount: 'PHP 1,000.00', mode: 'GCash', status: 'refunded' },
-    { date: '09/02/24', time: '3:00 - 4:05 PM', amount: 'PHP 1,000.00', mode: 'GCash', status: 'successful' },
-    { date: '08/21/24', time: '9:00 - 4:00 PM', amount: 'PHP 1,000.00', mode: 'GCash', status: 'successful' },
-  ];
-
-  // Open payment history modal
-  const openHistoryModal = (clientName: string) => {
-    setSelectedClient(clientName);
-    setPaymentHistory(samplePaymentHistory); // Replace with real data when available
-  };
-
-  // Close payment history modal
-  const closeModal = () => {
-    setSelectedClient(null);
-    setPaymentHistory([]);
-  };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex">
-      {/* Side Navigation Bar */}
-      <aside className="bg-white w-60 p-6 shadow-lg">
-        <h1 className="text-2xl font-bold text-blue-400 mb-8">Butterfly</h1>
-        <nav className="space-y-4">
-        <Link href="/associate/pages/dashboard">
-            <button className="block text-gray-600 hover:text-blue-400">Home</button>
-          </Link>
-          <Link href="/associate/pages/payments">
-            <button className="block text-blue-400">Payments</button>
-          </Link>
-          <button className="block text-gray-600 hover:text-blue-400">Logout</button>
-        </nav>
-      </aside>
+    <div className="bg-white shadow-md rounded-lg p-6 w-full">
+      <h2 className="text-lg font-semibold text-gray-800 mb-4">Payment History</h2>
+      <table className="min-w-full bg-white">
+        <thead>
+          <tr>
+            <th className="py-2 px-4 bg-gray-100 text-left text-sm font-semibold text-gray-600">Client Name</th>
+            <th className="py-2 px-4 bg-gray-100 text-left text-sm font-semibold text-gray-600">Date</th>
+            <th className="py-2 px-4 bg-gray-100 text-left text-sm font-semibold text-gray-600">Amount Paid</th>
+            <th className="py-2 px-4 bg-gray-100 text-left text-sm font-semibold text-gray-600">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {payments.map((payment, index) => (
+            <tr key={index} className="border-t">
+              <td className="py-2 px-4 text-gray-700">{payment.name}</td>
+              <td className="py-2 px-4 text-gray-700">{payment.date}</td>
+              <td className="py-2 px-4 text-gray-700">{payment.amount}</td>
+              <td className={`py-2 px-4 text-sm font-medium ${payment.status === 'Completed' ? 'text-green-500' : 'text-red-500'}`}>
+                {payment.status}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
+const Dashboard = () => {
+  return (
+    <div className="flex h-screen">
+      {/* Sidebar */}
+      <Sidebar />
 
       {/* Main Content */}
-      <div className="flex-grow p-4">
-        <h2 className="text-2xl font-semibold mb-6">Payment History</h2>
+      <div className="flex-1 p-6 bg-gray-100">
+        {/* Greeting */}
+        <h1 className="text-3xl font-semibold text-gray-800 mb-6">Good Morning, Associate!</h1>
 
-        <div className="grid grid-cols-1 gap-4">
-          {clients.map((client, index) => (
-            <div key={index} className="bg-white rounded-lg shadow-lg p-4 flex justify-between items-center">
-              <span>{client.name}</span>
-              <button
-                className="bg-blue-400 text-white px-4 py-2 rounded"
-                onClick={() => openHistoryModal(client.name)}
-              >
-                View History
-              </button>
-            </div>
-          ))}
-        </div>
-
-        {/* Modal for Payment History */}
-        {selectedClient && (
-            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-              <div className="bg-white p-8 rounded-lg shadow-lg w-[600px]">  {/* Increased width */}
-                <h3 className="text-xl font-semibold mb-4">{selectedClient}</h3>
-                <p className="text-gray-700 mb-6">
-                  Under {clients.find(client => client.name === selectedClient)?.therapist}
-                </p>
-
-                {/* Payment History Table */}
-                <table className="w-full text-left">
-                  <thead>
-                    <tr className="text-gray-600">
-                      <th className="py-3">Date</th>
-                      <th className="py-3">Time</th>
-                      <th className="py-3">Amount</th>
-                      <th className="py-3">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {paymentHistory.map((history, index) => (
-                      <tr key={index}>
-                        <td className="py-2">{history.date}</td>
-                        <td className="py-2">{history.time}</td>
-                        <td className="py-2">{history.amount}</td>
-                        <td
-                          className={`py-2 ${
-                            history.status === 'successful'
-                              ? 'text-green-500'
-                              : history.status === 'pending'
-                              ? 'text-yellow-500'
-                              : 'text-red-500'
-                          }`}
-                        >
-                          {history.status}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-
-                {/* Close Button */}
-                <div className="flex justify-end mt-6">
-                  <button className="bg-red-500 text-white px-6 py-2 rounded" onClick={closeModal}>
-                    Close
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-          
+        {/* Payment History Section */}
+        <PaymentHistory />
       </div>
     </div>
   );
 };
 
-export default PaymentsHistory;
+export default Dashboard;

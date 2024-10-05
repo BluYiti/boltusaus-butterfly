@@ -1,9 +1,11 @@
 'use client';
 
-import router from 'next/router';
+import { useRouter } from 'next/navigation'; // Import from next/navigation for app directory
 import { useState } from 'react';
 
 export default function ConsultationSelection() {
+  const router = useRouter(); // Initialize router
+
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [consultationOption, setConsultationOption] = useState<string>('Face to Face');
@@ -16,47 +18,62 @@ export default function ConsultationSelection() {
 
   const availableTimes = ['7:30 AM', '8:30 AM', '9:30 AM', '10:30 AM'];
 
+  // Function to handle date selection
   const handleDateClick = (day: string) => {
-    setSelectedDate(day);
+    // Construct full date string (assuming current year and month for example)
+    const currentYear = new Date().getFullYear(); // Get current year
+    const currentMonth = new Date().getMonth() + 1; // Get current month (0-based, so +1)
+    const fullDate = `${currentYear}-${currentMonth.toString().padStart(2, '0')}-${day.padStart(2, '0')}`;
+    setSelectedDate(fullDate);
   };
 
+  // Function to handle time selection
   const handleTimeClick = (time: string) => {
     setSelectedTime(time);
   };
 
+  // Function to handle consultation option change
   const handleConsultationChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setConsultationOption(e.target.value);
   };
 
+  // Function to handle confirmation and storing data in sessionStorage
   const handleConfirm = () => {
-    router.push('/availabledates');
     if (!selectedDate || !selectedTime) {
       alert('Please select a date and time.');
       return;
     }
-    console.log('Date:', selectedDate);
-    console.log('Time:', selectedTime);
-    console.log('Consultation Option:', consultationOption);
+
+    // Store selected details in sessionStorage
+    sessionStorage.setItem('selectedDate', selectedDate);
+    sessionStorage.setItem('selectedTime', selectedTime);
+    sessionStorage.setItem('consultationOption', consultationOption);
+
+    // Redirect to the 'booksession' page
+    router.push('/client/pages/booksession'); // Ensure this path is correct
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-white text-black p-4">
+    <div className="text-black flex flex-col bg-gradient-to-r from-blue-300 via-blue-500 to-blue-700 animate-gradient-x relative overflow-hidden items-center justify-center min-h-screen p-6">
       <div className="w-full max-w-lg">
         {/* Available dates */}
         <h2 className="text-lg font-bold mb-4">Available dates</h2>
         <div className="flex space-x-4 mb-4">
-          {availableDates.map((date) => (
-            <button
-              key={date.day}
-              className={`p-4 rounded-lg ${
-                selectedDate === date.day ? 'bg-gray-300' : 'bg-gray-200'
-              }`}
-              onClick={() => handleDateClick(date.day)}
-            >
-              <div className="font-bold text-xl">{date.day}</div>
-              <div className="text-sm">{date.weekday}</div>
-            </button>
-          ))}
+          {availableDates.map((date) => {
+            const currentYear = new Date().getFullYear(); 
+            const currentMonth = new Date().getMonth() + 1; 
+            const fullDate = `${currentYear}-${currentMonth.toString().padStart(2, '0')}-${date.day.padStart(2, '0')}`;
+            return (
+              <button
+                key={date.day}
+                className={`p-4 rounded-lg ${selectedDate === fullDate ? 'bg-gray-300 border-2 border-black' : 'bg-gray-200'}`}
+                onClick={() => handleDateClick(date.day)}
+              >
+                <div className="font-bold text-xl">{date.day}</div>
+                <div className="text-sm">{date.weekday}</div>
+              </button>
+            );
+          })}
         </div>
 
         {/* Available time slots */}
@@ -65,9 +82,7 @@ export default function ConsultationSelection() {
           {availableTimes.map((time) => (
             <button
               key={time}
-              className={`p-4 rounded-lg ${
-                selectedTime === time ? 'bg-gray-300' : 'bg-gray-200'
-              }`}
+              className={`p-4 rounded-lg ${selectedTime === time ? 'bg-gray-300 border-2 border-black' : 'bg-gray-200'}`}
               onClick={() => handleTimeClick(time)}
             >
               {time}

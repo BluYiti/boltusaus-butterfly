@@ -5,7 +5,7 @@ import Question from '@/preassessment/components/Question';
 import NavigationButtons from '@/preassessment/components/NavigationButtons';
 import { useAssessment } from '@/preassessment/hooks/useAssessment';
 import { questions } from '@/preassessment/data/questions';
-import BubbleAnimation from '@/../components/BubbleAnimation';
+import BubbleAnimation from '@/components/BubbleAnimation';
 import SubmissionModal from '@/preassessment/components/Submission';
 
 export default function PreAssessmentPage() {

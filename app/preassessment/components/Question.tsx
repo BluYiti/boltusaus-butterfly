@@ -19,7 +19,7 @@ const Question: React.FC<QuestionProps> = ({ text, options, currentAnswer, handl
           <button
             key={option.value}
             className={`w-full py-3 px-5 rounded-lg mb-3 transition-colors ease-in-out flex justify-between items-center
-              ${currentAnswer === option.value ? 'bg-blue-500 text-white' : 'bg-white text-blue-900 hover:bg-blue-900 hover:text-blue-500'} 
+              ${currentAnswer === option.value ? 'bg-blue-500 text-white' : 'bg-white text-blue-900 hover:bg-blue-900 hover:text-white'} 
               focus:outline-none focus:ring-2 focus:ring-blue-500 active:bg-blue-600`}
             onClick={() => handleSelectOption(option.value)}
           >
