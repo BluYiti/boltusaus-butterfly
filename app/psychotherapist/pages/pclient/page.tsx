@@ -3,10 +3,12 @@
 
 import React from 'react';
 import ClientList from '@/psychotherapist/components/ClientList';
+import Sidebar from '@/psychotherapist/components/SideBar';
 
 const ClientListPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
+      <Sidebar></Sidebar>
       <header className="flex items-center justify-between p-4 bg-white shadow-md">
         <div className="flex items-center">
           <img src="/logo.png" alt="Logo" className="h-8" />
