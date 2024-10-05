@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  scroll-behavior: smooth;
+}
+
 @keyframes gradient-x {
   0% {
     background-position: 0% 50%;
@@ -103,6 +107,12 @@
 @font-face {
   font-family: 'PaintBrush';
   src: url('/fonts/PaintBrushScript.otf') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Montserrat';
+  src: url('/fonts/Montserrat.otf') format('woff2');
   font-weight: normal;
   font-style: normal;
 }

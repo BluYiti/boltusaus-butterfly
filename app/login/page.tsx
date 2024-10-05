@@ -1,11 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useLogin } from '@/auth/login/hooks/useLogin';
-import LoginForm from '@/auth/login/components/LoginForm';
-import '@/auth/styles/style.css';
-import termsContent from '@/auth/register/data/terms';
-import privacyContent from '@/auth/register/data/privacy';
+import { useLogin } from './hooks/useLogin';
+import LoginForm from './components/LoginForm';
+import termsContent from '@/constants/terms';
+import privacyContent from '@/constants/privacy';
 import TermsAndPrivacy from '@/auth/register/components/TermsAndPrivacy';
 import Back from '@/components/Back';
 import BubbleAnimation from '@/components/BubbleAnimation';
@@ -32,8 +31,8 @@ const LoginPage: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen flex">
-            <Back/>
+        <div className="min-h-screen flex bg-blue-100">
+            <Back />
             <div className="flex w-full min-h-screen overflow-hidden">
                 {/* Left side */}
                 <div className="w-1/2 flex flex-col items-center justify-center bg-blue-100 p-8">
@@ -44,7 +43,7 @@ const LoginPage: React.FC = () => {
                             className="h-24 w-24 mb-4"
                         />
                     </div>
-                    <h2 className="text-xl font-semibold text-center">
+                    <h2 className="text-2xl font-semibold text-center">
                         A.M.Peralta Psychological Services
                     </h2>
                 </div>

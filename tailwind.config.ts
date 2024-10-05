@@ -93,7 +93,8 @@ const config: Config = {
       },
       fontFamily: {
         sans: ['Roboto', 'sans-serif'],
-        paintbrush: ['PaintBrush']
+        paintbrush: ['PaintBrush'],
+        montserrat: ['Montserrat'],
       },
       backgroundImage: {
         appointments: "url('/assets/images/appointments-bg.png')",

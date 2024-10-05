@@ -1,9 +1,5 @@
 "use client";
 import React, { useState } from "react";
-
-import { useRouter } from 'next/navigation';
-import LogoutButton from '@/auth/logout/component/logoutButton';
-
 import {
   FaBell,
   FaBars,
@@ -17,18 +13,6 @@ import {
 } from "react-icons/fa";
 
 const Dashboard: React.FC = () => {
-
-  const router = useRouter();
-    // Function to navigate to Mood Tracker page
-  const handleNavigateToMoodTracker = () => {
-      router.push('/client/pages/moods'); 
-  };
-  
-    // Function to navigate to Reading Resources page
-  const handleNavigateToReadingResources = () => {
-    router.push('/client/pages/explore'); 
-  };
-  
   // State for selected month (default: current month)
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
 
@@ -63,44 +47,30 @@ const Dashboard: React.FC = () => {
 
           {/* Menu Items */}
           <nav className="space-y-2">
-            <a
-              onClick={() => router.push('/')}
-              className="flex items-center space-x-3 p-2 rounded-lg text-blue-600 hover:bg-gray-100 cursor-pointer"
-            >
+            <a href="#" className="flex items-center space-x-3 p-2 rounded-lg text-blue-600 hover:bg-gray-100">
               <FaHome className="text-xl" />
               <span className="font-medium">Home</span>
             </a>
-            <a
-              onClick={() => router.push('/client/pages/profile')}
-              className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 cursor-pointer"
-            >
+            <a href="#" className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100">
               <FaCalendarAlt className="text-xl" />
               <span className="font-medium">Profile</span>
             </a>
-            <a
-              onClick={() => router.push('/client/pages/communication')}
-              className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 cursor-pointer"
-            >
+            <a href="#" className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100">
               <FaUserMd className="text-xl" />
               <span className="font-medium">Communication</span>
             </a>
-            <a
-              onClick={() => router.push('/client/pages/settings')}
-              className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 cursor-pointer"
-            >
+            <a href="#" className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100">
               <FaCogs className="text-xl" />
               <span className="font-medium">Settings</span>
             </a>
-            <a
-              onClick={() => router.push('/client/pages/goals')}
-              className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 cursor-pointer"
-            >
+            <a href="#" className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100">
               <FaCogs className="text-xl" />
               <span className="font-medium">Goals</span>
             </a>
-            
-            <LogoutButton isMinimized={false} />
-
+            <a href="#" className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100">
+              <FaSignOutAlt className="text-xl" />
+              <span className="font-medium">Logout</span>
+            </a>
           </nav>
         </div>
       </div>
@@ -261,36 +231,26 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
 
-        {/* Mood Tracker Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-          {/* Mood Tracker */}
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h2 className="text-xl font-semibold mb-4">Mood Tracker</h2>
-            <div className="flex justify-between items-center">
-              <p className="text-lg font-medium">How are you feeling today?</p>
-              <button
-                className="bg-blue-500 text-white px-4 py-2 rounded-lg"
-                onClick={handleNavigateToMoodTracker} // Navigate to Mood Tracker page
-              >
-                START
-              </button>
+          {/* Mood Tracker Section */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+            {/* Mood Tracker */}
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              <h2 className="text-xl font-semibold mb-4">Mood Tracker</h2>
+              <div className="flex justify-between items-center">
+                <p className="text-lg font-medium">How are you feeling today?</p>
+                <button className="bg-blue-500 text-white px-4 py-2 rounded-lg">START</button>
+              </div>
             </div>
-          </div>
 
-          {/* Reading Resources */}
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h2 className="text-xl font-semibold mb-4">Reading Resources</h2>
-            <div className="flex justify-between items-center">
-              <p className="text-lg font-medium">Start your day by reading something inspiring!</p>
-              <button
-                className="bg-blue-500 text-white px-4 py-2 rounded-lg"
-                onClick={handleNavigateToReadingResources} // Navigate to Reading Resources page
-              >
-                VIEW
-              </button>
+            {/* Reading Resources */}
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              <h2 className="text-xl font-semibold mb-4">Reading Resources</h2>
+              <div className="flex justify-between items-center">
+                <p className="text-lg font-medium">Start your day by reading something inspiring!</p>
+                <button className="bg-blue-500 text-white px-4 py-2 rounded-lg">VIEW</button>
+              </div>
             </div>
           </div>
-        </div>
         </div>
 
         {/* Footer */}

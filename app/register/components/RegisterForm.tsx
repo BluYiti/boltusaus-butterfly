@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
-import termsContent from '@/auth/register/data/terms';
-import privacyContent from '@/auth/register/data/privacy';
+import termsContent from '@/constants/terms';
+import privacyContent from '@/constants/privacy';
 import TermsAndPrivacy from '@/auth/register/components/TermsAndPrivacy';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
