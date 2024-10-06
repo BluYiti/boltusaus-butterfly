@@ -110,7 +110,7 @@ const config: Config = {
       fontFamily: {
         sans: ["var(--font-sans)", ...fontFamily.sans],
         serif: ["var(--font-serif)", ...fontFamily.serif],
-        script: ["var(--font-script",...fontFamily.script]
+        script: ["var(--font-script)"]
       },
       backgroundImage: {
         appointments: "url('/assets/images/appointments-bg.png')",
