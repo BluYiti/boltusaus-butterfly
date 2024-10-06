@@ -3,31 +3,17 @@
 import React, { useState } from 'react';
 import { useLogin } from './hooks/useLogin';
 import LoginForm from './components/LoginForm';
-import termsContent from '@/constants/terms';
-import privacyContent from '@/constants/privacy';
-import TermsAndPrivacy from '@/register/components/TermsAndPrivacy';
 import Back from '@/components/Back';
 import { FaEnvelope, FaEye} from 'react-icons/fa';
 
 const LoginPage: React.FC = () => {
     const { login, error } = useLogin();
     const [loading, setLoading] = useState<boolean>(false);
-    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-    const [contentType, setContentType] = useState<'terms' | 'privacy'>('terms');
 
     const handleLogin = async (email: string, password: string) => {
         setLoading(true);
         await login(email, password);
         setLoading(false);
-    };
-
-    const openModal = (type: 'terms' | 'privacy') => {
-        setContentType(type);
-        setIsModalOpen(true);
-    };
-
-    const closeModal = () => {
-        setIsModalOpen(false);
     };
 
     return (

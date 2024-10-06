@@ -85,7 +85,7 @@ const Account = () => {
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
   return (
-    <Layout sidebarTitle="Admin" sidebarItems={items}>
+    <Layout sidebarTitle="Butterfly" sidebarItems={items}>
       {/* Flex container for Tabs, Search Input, and Add Account Button */}
       <div className="flex justify-between items-center mb-6 space-x-4">
         {/* Tabs for Client, Associate, Psychotherapist */}
