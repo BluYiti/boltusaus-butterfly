@@ -14,6 +14,7 @@ const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [selectedClient, setSelectedClient] = useState<any | null>(null); // State for selected client to reschedule
   const [newSchedule, setNewSchedule] = useState<any | null>(null); // State for new schedule details
+  const [showFinalConfirm, setShowFinalConfirm] = useState(false); // State for showing the final confirmation modal
 
   // Initialize Appwrite client and databases
   const client = new Client();
@@ -77,8 +78,13 @@ const Dashboard: React.FC = () => {
     });
   };
 
-  // Function to confirm the new schedule and update the database
-  const handleConfirmSchedule = async () => {
+  // Function to show final confirmation modal
+  const handleConfirmSchedule = () => {
+    setShowFinalConfirm(true); // Show the Yes/No confirmation modal
+  };
+
+  // Function to handle the final confirmation (yes)
+  const handleFinalYes = async () => {
     if (newSchedule && selectedClient) {
       try {
         // Simulate database update
@@ -98,8 +104,14 @@ const Dashboard: React.FC = () => {
         console.error('Error updating schedule: ', error);
       } finally {
         setSelectedClient(null); // Close the modal after confirmation
+        setShowFinalConfirm(false); // Close the final confirmation modal
       }
     }
+  };
+
+  // Function to handle the final confirmation (no)
+  const handleFinalNo = () => {
+    setShowFinalConfirm(false); // Close the final confirmation modal
   };
 
   return (
@@ -216,7 +228,7 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Modal for Confirming Reschedule */}
-        {selectedClient && newSchedule && (
+        {selectedClient && newSchedule && !showFinalConfirm && (
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
             <div className="bg-white rounded-lg p-6 w-full max-w-md">
               <h3 className="text-xl font-semibold mb-4">Confirm Reschedule for {selectedClient.name}</h3>
@@ -235,6 +247,29 @@ const Dashboard: React.FC = () => {
                   onClick={() => setSelectedClient(null)} // Close the modal
                 >
                   Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Final Confirmation Modal (Yes/No) */}
+        {showFinalConfirm && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
+            <div className="bg-white rounded-lg p-6 w-full max-w-md">
+              <h3 className="text-xl font-semibold mb-4">Are you sure you want to confirm this reschedule?</h3>
+              <div className="mt-4 flex justify-end">
+                <button
+                  className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
+                  onClick={handleFinalYes}
+                >
+                  Yes
+                </button>
+                <button
+                  className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 ml-4"
+                  onClick={handleFinalNo}
+                >
+                  No
                 </button>
               </div>
             </div>
