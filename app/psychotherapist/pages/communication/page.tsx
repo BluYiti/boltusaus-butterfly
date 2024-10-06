@@ -1,8 +1,10 @@
 'use client';
+
 import { FC, useState } from 'react';
-import { FaVideo, FaSearch } from 'react-icons/fa'; // For icons
-import Link from 'next/link'; // Import Link for navigation
-import Sidebar from '@/psychotherapist/components/SideBar';
+import { FaVideo, FaSearch } from 'react-icons/fa';
+import Link from 'next/link';
+import Layout from '@/components/Sidebar/Layout';
+import items from '@/psychotherapist/data/Links';
 
 interface Contact {
   id: number;
@@ -50,8 +52,6 @@ const chatMessages = {
 const ContactList: FC<{ onContactClick: (id: number) => void; selectedContact: number | null }> = ({ onContactClick, selectedContact }) => {
   return (
     <div className="w-1/4 bg-white p-4 border-r border-gray-200">
-      <div>
-      <Sidebar></Sidebar></div>
       {/* Search Bar */}
       <div className="flex items-center bg-gray-100 p-2 rounded-full mb-4">
         <FaSearch className="text-gray-400 ml-2" />
@@ -163,8 +163,8 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[] }> = ({
   );
 };
 
-// Main Chat Page component
-const ChatPage: FC = () => {
+// Main Communication Page component with Layout
+const Communication: FC = () => {
   const [selectedContactId, setSelectedContactId] = useState<number | null>(null);
   const selectedContact = contacts.find(contact => contact.id === selectedContactId) || null;
 
@@ -172,11 +172,13 @@ const ChatPage: FC = () => {
   const messages = selectedContact ? chatMessages[selectedContactId] || [] : [];
 
   return (
-    <div className="flex h-screen">
-      <ContactList onContactClick={setSelectedContactId} selectedContact={selectedContactId} />
-      <ChatBox selectedContact={selectedContact} messages={messages} />
-    </div>
+    <Layout sidebarTitle="Butterfly" sidebarItems={items}>
+      <div className="flex h-screen bg-gray-100">
+        <ContactList onContactClick={setSelectedContactId} selectedContact={selectedContactId} />
+        <ChatBox selectedContact={selectedContact} messages={messages} />
+      </div>
+    </Layout>
   );
 };
 
-export default ChatPage;
+export default Communication;

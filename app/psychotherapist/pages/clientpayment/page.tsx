@@ -1,18 +1,20 @@
-'use client';
+'use client'
 
-import React from "react";
-import { useRouter } from 'next/navigation'; // for handling navigation
-import Sidebar from "@/psychotherapist/components/SideBar";
+import Layout from "@/components/Sidebar/Layout";
+import items from "@/psychotherapist/data/Links";
 
-// PaymentHistory Component
-const ClientPayment: React.FC = () => {
-  const router = useRouter(); // for navigation
-
+const Payments = () => {
   return (
-    <div>
-      <Sidebar></Sidebar>
-    </div>
+    <Layout sidebarTitle="Butterfly" sidebarItems={items}>
+        <div className="bg-gray-100"> {/* Ensure it can scroll if content exceeds height */}
+          <div className="bg-white rounded-b-lg shadow-md p-5 top-0 left-60 w-full z-10"> {/* Fixed position with full width */}
+            <h2 className="text-2xl font-bold">Payments</h2>
+          </div>
+
+          {/* Clients code*/}
+        </div>
+    </Layout>
   );
 };
 
-export default ClientPayment;
+export default Payments;
