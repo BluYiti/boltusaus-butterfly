@@ -5,9 +5,9 @@ import { useLogin } from './hooks/useLogin';
 import LoginForm from './components/LoginForm';
 import termsContent from '@/constants/terms';
 import privacyContent from '@/constants/privacy';
-import TermsAndPrivacy from '@/auth/register/components/TermsAndPrivacy';
+import TermsAndPrivacy from '@/register/components/TermsAndPrivacy';
 import Back from '@/components/Back';
-import BubbleAnimation from '@/components/BubbleAnimation';
+import { FaEnvelope, FaEye} from 'react-icons/fa';
 
 const LoginPage: React.FC = () => {
     const { login, error } = useLogin();
@@ -31,61 +31,21 @@ const LoginPage: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen flex bg-blue-100">
-            <Back />
-            <div className="flex w-full min-h-screen overflow-hidden">
-                {/* Left side */}
-                <div className="w-1/2 flex flex-col items-center justify-center bg-blue-100 p-8">
-                    <div className="flex flex-col items-center">
-                        <img
-                            src="/images/ButterflyLanding.png"
-                            alt="A.M.Peralta Psychological Services"
-                            className="h-24 w-24 mb-4"
-                        />
-                    </div>
-                    <h2 className="text-2xl font-semibold text-center">
-                        A.M.Peralta Psychological Services
-                    </h2>
-                </div>
-
-                {/* Right side - center the login form */}
-                <div className="w-1/2 flex items-center justify-center p-8">
-                    <div className="w-full max-w-md">
-                        <LoginForm onLogin={handleLogin} error={error} loading={loading} />
-
-                        <div className="text-center mt-4">
-                            <p className="text-gray-500 text-sm">
-                                By logging in, you agree to our
-                                <button
-                                    type="button"
-                                    onClick={() => openModal('terms')}
-                                    className="text-blue-500 hover:underline ml-1"
-                                >
-                                    Terms and Conditions
-                                </button>
-                                &nbsp;and&nbsp;
-                                <button
-                                    type="button"
-                                    onClick={() => openModal('privacy')}
-                                    className="text-blue-500 hover:underline"
-                                >
-                                    Privacy Policy
-                                </button>.
-                            </p>
-                        </div>
-                    </div>
+        <div className='overflow-hidden'>
+            <Back/>
+            <h1 className="absolute top-5 left-20 text-[#2081c3] text-2xl md:text-3xl font-bold ">Butterfly</h1>
+            <h2 className='absolute font-paintbrush text-8xl text-[#2b4369] top-32 left-20'>
+                Start your Journey
+            </h2>
+            <div className='absolute w-2/5 h-screen'>
+                <p className='absolute top-60 text-center left-24 text-[#2081c3] font-poppins'>
+                    We believe that mental health is a collaborative effort. Together, we can navigate the path toward emotional well-being and mental strength.
+                </p>
+                <div className='absolute top-72 left-52'>
+                    <LoginForm onLogin={handleLogin} error={error} loading={loading} />
                 </div>
             </div>
-
-            <BubbleAnimation />
-
-            <TermsAndPrivacy
-                isOpen={isModalOpen}
-                onClose={closeModal}
-                contentType={contentType}
-                termsContent={termsContent}
-                privacyContent={privacyContent}
-            />
+            <div className="absolute right-0 w-1/2 h-screen bg-cover bg-no-repeat" style={{ backgroundImage: `url('/images/loginfly.png')` }}></div>
         </div>
     );
 };

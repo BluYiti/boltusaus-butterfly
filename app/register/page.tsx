@@ -1,10 +1,9 @@
 'use client';
 
 import React from 'react';
-import { useRegister } from '@/auth/register/hook/useRegister';
-import RegisterForm from '@/auth/register/components/RegisterForm';
-import '@/auth/styles/style.css';
-import BubbleAnimation from '@/../components/BubbleAnimation';
+import { useRegister } from './hook/useRegister';
+import RegisterForm from './components/RegisterForm';
+import BubbleAnimation from '@/components/BubbleAnimation';
 
 const RegisterPage: React.FC = () => {
     const { register, error, loading } = useRegister();
@@ -14,7 +13,7 @@ const RegisterPage: React.FC = () => {
             <div className="flex bg-white w-full h-full min-h-screen overflow-hidden">
                 <div className="w-1/2 bg-blue-100 flex flex-col items-center justify-center p-8">
                     <img
-                        src="/assets/images/ButterflyLanding.png"
+                        src="/images/ButterflyLanding.png"
                         alt="A.M.Peralta Psychological Services"
                         className="h-24 w-24 mb-4"
                     />

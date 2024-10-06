@@ -2,6 +2,7 @@
 import { FC, useState } from 'react';
 import { FaVideo, FaSearch } from 'react-icons/fa'; // For icons
 import Link from 'next/link'; // Import Link for navigation
+import Sidebar from '@/psychotherapist/components/SideBar';
 
 interface Contact {
   id: number;
@@ -49,6 +50,8 @@ const chatMessages = {
 const ContactList: FC<{ onContactClick: (id: number) => void; selectedContact: number | null }> = ({ onContactClick, selectedContact }) => {
   return (
     <div className="w-1/4 bg-white p-4 border-r border-gray-200">
+      <div>
+      <Sidebar></Sidebar></div>
       {/* Search Bar */}
       <div className="flex items-center bg-gray-100 p-2 rounded-full mb-4">
         <FaSearch className="text-gray-400 ml-2" />

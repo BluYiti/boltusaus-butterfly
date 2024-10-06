@@ -1,4 +1,4 @@
-// admin/components/Loading.tsx
+// components/Sidebar/Loading.tsx
 "use client";
 
 import { FC } from "react";
