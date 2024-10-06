@@ -7,7 +7,6 @@ import termsContent from '@/constants/terms';
 import privacyContent from '@/constants/privacy';
 import TermsAndPrivacy from '@/register/components/TermsAndPrivacy';
 import Back from '@/components/Back';
-import Input from './components/Email';
 import { FaEnvelope, FaEye} from 'react-icons/fa';
 
 const LoginPage: React.FC = () => {

@@ -1,10 +1,11 @@
 'use client'
 
 // admin/pages/analytics/page.tsx
-import AdminLayout from "../../components/AdminLayout";
+import Layout from "@/components/Sidebar/Layout";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from 'recharts';
 import { useEffect, useState } from "react";
 import { client, databases } from "@/appwrite"; // Adjust the import based on your appwrite.ts location
+import items from "@/admin/data/Links";
 
 const userEngagementData = [
   { month: 'Jan', activeUsers: 1200, sessions: 2400 },
@@ -55,7 +56,7 @@ const Analytics = () => {
     fetchOnlineUsers();
   }, []);
   return (
-    <AdminLayout>
+    <Layout sidebarTitle="Admin" sidebarItems={items}>
       {/* User Engagement Section */}
       <section className="mb-8">
         <h2 className="text-2xl font-bold mb-6 text-black">User Engagement</h2>
@@ -156,7 +157,7 @@ const Analytics = () => {
           </div>
         </div>
       </section>
-    </AdminLayout>
+    </Layout>
   );
 };
 
