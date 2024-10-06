@@ -34,7 +34,7 @@ const Layout: React.FC<LayoutProps> = ({ children, sidebarTitle, sidebarItems })
           icon: item.icon as IconType // Casting icon to IconType
         }))}
       />
-      <div className={`flex-1 transition-all duration-300 ease-in-out p-6 bg-gray-100 ${isMinimized ? "ml-16" : "ml-60"}`}>
+      <div className={`flex-1 transition-all duration-300 ease-in-out bg-gray-100 ${isMinimized ? "ml-16" : "ml-60"}`}>
         {children}
       </div>
     </div>

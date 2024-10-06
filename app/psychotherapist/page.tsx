@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Sidebar from './components/SideBar';
+import Layout from '@/components/Sidebar/Layout';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { Client, Databases } from 'appwrite';
+import items from './data/Links';
 
 // Define types for the availability response
 interface Availability {
@@ -98,110 +99,106 @@ const Dashboard: React.FC = () => {
   const currentMonthWeeks = getCurrentMonthWeeks(date);
 
   return (
-    <div className="flex h-screen">
-      <Sidebar />
-
-      <div className="flex-1 bg-gray-100">
-        <div className="bg-white rounded-lg shadow-md mb-8">
-          <h2 className="text-2xl font-bold p-5">Hello, Psychotherapist!</h2>
-        </div>
-
+    <Layout sidebarTitle="Butterfly" sidebarItems={items}>
+      <div className="bg-gray-100"> {/* Ensure it can scroll if content exceeds height */}
+          <div className="bg-white rounded-b-lg shadow-md p-5 top-0 left-60 w-full z-10"> {/* Fixed position with full width */}
+            <h2 className="text-2xl font-bold">Hello, Psychotherapist!</h2>
+          </div>
+  
         {/* Main Dashboard Sections */}
-        <div className="grid grid-cols-3 gap-4 mx-10">
-          {/* To Be Evaluated Section */}
-          <div className="col-span-1 bg-white p-4 rounded-lg shadow-md">
-            <h3 className="text-lg font-semibold mb-4">To be Evaluated</h3>
-            <p>Placeholder for evaluation data fetched from Appwrite.</p>
-          </div>
-
-          {/* Upcoming Sessions Section */}
-          <div className="col-span-1 bg-white p-4 rounded-lg shadow-md">
-            <h3 className="text-lg font-semibold mb-4">Upcoming Sessions</h3>
-            <p>Placeholder for upcoming sessions data fetched from Appwrite.</p>
-          </div>
-
-          {/* Missed Appointments Section */}
-          <div className="col-span-1 bg-white p-4 rounded-lg shadow-md">
-            <h3 className="text-lg font-semibold mb-4 text-red-600">Missed Appointments</h3>
-            <p>Placeholder for missed appointments data fetched from Appwrite.</p>
-          </div>
-        </div>
-
-        {/* Availability Calendar */}
-        <div className="grid grid-cols-3 gap-4 mt-8 mx-10">
-          <div className="col-span-2 bg-white p-4 rounded-lg shadow-md">
-            <h3 className="text-lg font-semibold mb-4">Availability Calendar</h3>
-
-            <div className="flex justify-between mb-4">
-              <button
-                onClick={() => setDate(new Date(date.getFullYear(), date.getMonth() - 1, 1))}
-              >
-                <FaChevronLeft />
-              </button>
-              <h4 className="font-semibold">
-                {date.toLocaleString('default', { month: 'long' })} {date.getFullYear()}
-              </h4>
-              <button
-                onClick={() => setDate(new Date(date.getFullYear(), date.getMonth() + 1, 1))}
-              >
-                <FaChevronRight />
-              </button>
+        <div className="pt-10"> {/* Add padding to prevent overlap with the fixed header */}
+          <div className="grid grid-cols-3 gap-4 mx-10">
+            {/* To Be Evaluated Section */}
+            <div className="col-span-1 bg-white p-4 rounded-lg shadow-md">
+              <h3 className="text-lg font-semibold mb-4">To be Evaluated</h3>
+              <p>Placeholder for evaluation data fetched from Appwrite.</p>
             </div>
-
-            {/* Calendar Days */}
-            <div className="grid grid-cols-7 gap-2 text-gray-500 font-semibold">
-              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, index) => (
-                <div key={index} className="text-center font-semibold">{day}</div>
-              ))}
+  
+            {/* Upcoming Sessions Section */}
+            <div className="col-span-1 bg-white p-4 rounded-lg shadow-md">
+              <h3 className="text-lg font-semibold mb-4">Upcoming Sessions</h3>
+              <p>Placeholder for upcoming sessions data fetched from Appwrite.</p>
             </div>
-
-            {/* Calendar Weeks */}
-            <div className="grid grid-cols-7 gap-2">
-              {currentMonthWeeks.map((weekDate, index) => {
-                const isOutsideMonth = weekDate.getMonth() !== date.getMonth();
-                const slotsAvailable = getAvailabilityForDate(weekDate);
-
-                return (
-                  <button
-                    key={index}
-                    className={`p-2 text-center rounded
-                      ${isOutsideMonth ? 'text-gray-400' : ''}
-                      ${slotsAvailable === null ? 'bg-gray-200' : ''}
-                      ${slotsAvailable === 0 ? 'bg-red-200' : ''}
-                      ${slotsAvailable > 0 ? 'bg-green-200' : ''}
-                    `}
-                    disabled={slotsAvailable === null}  // Disable days with no availability data
-                    onClick={() => {
-                      if (slotsAvailable !== null) {
-                        handleDateClick(weekDate);
-                      }
-                    }}
-                  >
-                    {weekDate.getDate()}
-                  </button>
-                );
-              })}
+  
+            {/* Missed Appointments Section */}
+            <div className="col-span-1 bg-white p-4 rounded-lg shadow-md">
+              <h3 className="text-lg font-semibold mb-4 text-red-600">Missed Appointments</h3>
+              <p>Placeholder for missed appointments data fetched from Appwrite.</p>
             </div>
-
-            {/* Slots Information */}
-            {slotsInfo !== null && (
-              <p className="mt-4">
-                {slotsInfo === 0
-                  ? 'No slots available for the selected date.'
-                  : `${slotsInfo} slots available for the selected date.`}
-              </p>
-            )}
           </div>
-
-          {/* Payments Status (Placeholder section) */}
-          <div className="col-span-1 bg-white p-4 rounded-lg shadow-md">
-            <h3 className="text-lg font-semibold mb-4">Payment Status</h3>
-            <p>Placeholder for payment status information</p>
+  
+          {/* Availability Calendar */}
+          <div className="grid grid-cols-3 gap-4 mt-8 mx-10">
+            <div className="col-span-2 bg-white p-4 rounded-lg shadow-md">
+              <h3 className="text-lg font-semibold mb-4">Availability Calendar</h3>
+  
+              <div className="flex justify-between mb-4">
+                <button onClick={() => setDate(new Date(date.getFullYear(), date.getMonth() - 1, 1))}>
+                  <FaChevronLeft />
+                </button>
+                <h4 className="font-semibold">
+                  {date.toLocaleString('default', { month: 'long' })} {date.getFullYear()}
+                </h4>
+                <button onClick={() => setDate(new Date(date.getFullYear(), date.getMonth() + 1, 1))}>
+                  <FaChevronRight />
+                </button>
+              </div>
+  
+              {/* Calendar Days */}
+              <div className="grid grid-cols-7 gap-2 text-gray-500 font-semibold">
+                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, index) => (
+                  <div key={index} className="text-center font-semibold">{day}</div>
+                ))}
+              </div>
+  
+              {/* Calendar Weeks */}
+              <div className="grid grid-cols-7 gap-2">
+                {currentMonthWeeks.map((weekDate, index) => {
+                  const isOutsideMonth = weekDate.getMonth() !== date.getMonth();
+                  const slotsAvailable = getAvailabilityForDate(weekDate);
+  
+                  return (
+                    <button
+                      key={index}
+                      className={`p-2 text-center rounded
+                        ${isOutsideMonth ? 'text-gray-400' : ''}
+                        ${slotsAvailable === null ? 'bg-gray-200' : ''}
+                        ${slotsAvailable === 0 ? 'bg-red-200' : ''}
+                        ${slotsAvailable > 0 ? 'bg-green-200' : ''}
+                      `}
+                      disabled={slotsAvailable === null}  // Disable days with no availability data
+                      onClick={() => {
+                        if (slotsAvailable !== null) {
+                          handleDateClick(weekDate);
+                        }
+                      }}
+                    >
+                      {weekDate.getDate()}
+                    </button>
+                  );
+                })}
+              </div>
+  
+              {/* Slots Information */}
+              {slotsInfo !== null && (
+                <p className="mt-4">
+                  {slotsInfo === 0
+                    ? 'No slots available for the selected date.'
+                    : `${slotsInfo} slots available for the selected date.`}
+                </p>
+              )}
+            </div>
+  
+            {/* Payments Status (Placeholder section) */}
+            <div className="col-span-1 bg-white p-4 rounded-lg shadow-md">
+              <h3 className="text-lg font-semibold mb-4">Payment Status</h3>
+              <p>Placeholder for payment status information</p>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
-};
+    </Layout>
+  );  
+};  
 
 export default Dashboard;

@@ -1,20 +1,20 @@
-'use client';
+'use client'
 
+import Layout from "@/components/Sidebar/Layout";
+import items from "@/psychotherapist/data/Links";
 
-import React from 'react';
-import ClientList from '@/psychotherapist/components/ClientList';
-import Sidebar from '@/psychotherapist/components/SideBar';
-
-const ClientListPage: React.FC = () => {
+const Clients = () => {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Sidebar></Sidebar>
+    <Layout sidebarTitle="Butterfly" sidebarItems={items}>
+        <div className="bg-gray-100"> {/* Ensure it can scroll if content exceeds height */}
+          <div className="bg-white rounded-b-lg shadow-md p-5 top-0 left-60 w-full z-10"> {/* Fixed position with full width */}
+            <h2 className="text-2xl font-bold">Clients</h2>
+          </div>
 
-      <main className="p-8 bg-blue-100 min-h-screen">
-        <ClientList />
-      </main>
-    </div>
+          {/* Clients code*/}
+        </div>
+    </Layout>
   );
 };
 
-export default ClientListPage;
+export default Clients;
