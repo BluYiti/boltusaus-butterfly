@@ -11,7 +11,9 @@
   "dependencies": {
     "@react-google-maps/api": "^2.19.3",
     "appwrite": "^15.0.0",
+    "axios": "^1.7.7",
     "date-fns": "^4.1.0",
+    "gapi-script": "^1.2.0",
     "next": "^14.2.11",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -19,6 +21,8 @@
     "react-router-dom": "^6.26.2"
   },
   "devDependencies": {
+    "@types/gapi": "^0.0.47",
+    "@types/gapi.auth2": "^0.0.61",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
