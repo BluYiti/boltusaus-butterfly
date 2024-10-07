@@ -1,30 +1,6 @@
 export const SexOptions = ["Male", "Female"];
 
 export const RegisterFormDefaultValues = {
-  lastName: "",
-  firstName: "",
-  middleName: "",
-  suffixName: "None",
-  birthDate: new Date(Date.now() - 315360000000),
-  sex: "Male" as Sex,
-  nationality: "Filipino",
-  civilStatus: "Single",
-  email: "",
-  phone: "",
-  occupation: "",
-  address: "",
-  emergencyContactName: "",
-  emergencyContactNumber: "",
-  therapyReason: "",
-  currentMedication: "",
-  familyMedicalHistory: "",
-  pastMedicalHistory: "",
-  identificationType: "Birth Certificate",
-  identificationNumber: "",
-  identificationDocument: [],
-  therapyConsent: false,
-  disclosureConsent: false,
-  privacyConsent: false,
 };
 
 export const Psychotherapists = [

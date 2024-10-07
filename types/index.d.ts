@@ -32,7 +32,6 @@ declare interface RegisterUserParams extends SignUpUserParams {
   address: string;
   emergencyContactName: string;
   emergencyContactNumber: string;
-  therapyReason: string;
   currentMedication: string | undefined;
   familyMedicalHistory: string | undefined;
   pastMedicalHistory: string | undefined;
