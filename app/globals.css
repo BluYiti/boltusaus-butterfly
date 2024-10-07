@@ -175,7 +175,7 @@
   }
 
   .request-details {
-    @apply flex w-full flex-col items-center gap-8 border-y-2 border-dark-400 py-8 md:w-fit md:flex-row;
+    @apply flex w-full flex-col items-center gap-8 border-y-2 border-blue-300 py-8 md:w-fit md:flex-row;
   }
 
   /* ===== ADMIN */
@@ -219,7 +219,7 @@
 
   /* ==== FORM */
   .radio-group {
-    @apply flex h-full flex-1 items-center gap-2 rounded-md border border-dashed border-dark-700 bg-light-200 p-3;
+    @apply flex h-full flex-1 items-center gap-2 rounded-md border border-dashed border-blue-300 bg-light-200 p-3;
   }
 
   .checkbox-label {
@@ -228,7 +228,7 @@
 
   /* ==== File Upload */
   .file-upload {
-    @apply text-12-regular flex cursor-pointer  flex-col items-center justify-center gap-3 rounded-md border border-dashed border-dark-700 bg-light-200 p-5;
+    @apply text-12-regular flex cursor-pointer  flex-col items-center justify-center gap-3 rounded-md border border-dashed border-blue-300 bg-light-200 p-5;
   }
 
   .file-upload_label {
@@ -247,7 +247,7 @@
 
   /* Data Table */
   .data-table {
-    @apply z-10 w-full overflow-hidden rounded-lg border border-dark-700 shadow-lg;
+    @apply z-10 w-full overflow-hidden rounded-lg border border-blue-300 shadow-lg;
   }
 
   .table-actions {
@@ -306,11 +306,11 @@
 
   /* =====  SHADCN OVERRIDES */
   .shad-primary-btn {
-    @apply bg-light-200 text-blue-400 rounded-full !important;
+    @apply bg-light-200 text-blue-300 rounded-full !important;
   }
 
   .shad-primary-alt-btn {
-    @apply bg-blue-400 text-light-200 rounded-full !important;
+    @apply bg-blue-300 text-light-200 rounded-full !important;
   }
 
   .shad-danger-btn {
@@ -326,15 +326,15 @@
   }
 
   .shad-input {
-    @apply bg-light-200 placeholder:text-dark-600 border-dark-700 h-11 focus-visible:ring-0 focus-visible:ring-offset-0 !important;
+    @apply bg-light-200 placeholder:text-dark-600 border-blue-300 h-11 focus-visible:ring-0 focus-visible:ring-offset-0 !important;
   }
 
   .shad-input-icon {
-    @apply bg-light-200 placeholder:text-dark-600 border-dark-700 h-11 focus-visible:ring-0 focus-visible:ring-offset-0 !important;
+    @apply bg-light-200 placeholder:text-dark-600 border-blue-300 h-11 focus-visible:ring-0 focus-visible:ring-offset-0 !important;
   }
 
   .shad-textArea {
-    @apply bg-light-200 placeholder:text-dark-600 border-dark-700 focus-visible:ring-0 focus-visible:ring-offset-0 !important;
+    @apply bg-light-200 placeholder:text-dark-600 border-blue-300 focus-visible:ring-0 focus-visible:ring-offset-0 !important;
   }
 
   .shad-combobox-item {
@@ -346,15 +346,15 @@
   }
 
   .shad-select-trigger {
-    @apply bg-light-200  placeholder:text-dark-600 border-dark-700 h-11 focus:ring-0 focus:ring-offset-0 !important;
+    @apply bg-light-200  placeholder:text-dark-600 border-blue-300 h-11 focus:ring-0 focus:ring-offset-0 !important;
   }
 
   .shad-select-content {
-    @apply bg-light-200 border-dark-700 !important;
+    @apply bg-light-200 border-blue-300 !important;
   }
 
   .shad-dialog {
-    @apply bg-light-200 border-dark-700 !important;
+    @apply bg-light-200 border-blue-300 !important;
   }
 
   .shad-dialog button {
@@ -382,7 +382,7 @@
   }
 
   .shad-otp-slot {
-    @apply text-36-bold justify-center flex border border-dark-700 rounded-lg size-16 gap-4 !important;
+    @apply text-36-bold justify-center flex border border-blue-300 rounded-lg size-16 gap-4 !important;
   }
 
   .shad-alert-dialog {
@@ -395,7 +395,7 @@
 
   /* =====  REACT PHONE NUMBER INPUT OVERRIDES */
   .input-phone {
-    @apply mt-2 h-11 rounded-xl px-3 text-sm border bg-light-200 placeholder:text-dark-600 border-dark-700 !important;
+    @apply mt-2 h-11 rounded-xl px-3 text-sm border bg-light-200 placeholder:text-dark-600 border-blue-300 !important;
   }
 
   /* =====  REACT DATE PICKER OVERRIDES */
@@ -417,8 +417,8 @@
 .react-datepicker__day-name,
 .react-datepicker__day,
 .react-datepicker-time__header {
-  background-color: #e8e9e9 !important;
-  border-color: #abb8c4 !important;
+  background-color: theme("colors.light.200") !important;
+  border-color: theme("colors.blue.300") !important;
   color: #363a3d !important;
 }
 
@@ -429,33 +429,33 @@
 }
 
 .react-datepicker__triangle {
-  fill: #e8e9e9 !important;
-  color: #e8e9e9 !important;
-  stroke: #e8e9e9 !important;
+  fill: theme("colors.light.200") !important;
+  color: theme("colors.light.200") !important;
+  stroke: theme("colors.light.200") !important;
 }
 
 .react-datepicker__time-list-item:hover {
-  background-color: #3585FF !important;
+  background-color: #3585ff !important;
 }
 
 .react-datepicker__input-container input {
-  background-color: #e8e9e9 !important;
+  background-color: theme("colors.light.200") !important;
   width: 100%;
   outline: none;
 }
 
 .react-datepicker__day--selected {
-  background-color: #3585FF !important;
+  background-color: theme("colors.blue.300") !important;
   color: #ffffff !important;
   border-radius: 4px;
 }
 
 .react-datepicker__time-list-item--selected {
-  background-color: #38b6ff !important;
+  background-color: theme("colors.blue.300") !important;
 }
 
 .react-datepicker__time-container {
-  border-left: 1px solid #abb8c4 !important;
+  border-left: 1px solid theme("colors.blue.100") !important;
 }
 
 .react-datepicker__time-list-item {
@@ -467,11 +467,11 @@
 .PhoneInputInput {
   outline: none;
   margin-left: 4px;
-  background: #e8e9e9;
+  background: theme("colors.light.200");
   font-size: 14px;
   font-weight: 500;
 }
 
 .PhoneInputInput::placeholder {
-  color: #e8e9e9;
+  color: theme("colors.light.200");
 }
