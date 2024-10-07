@@ -95,6 +95,7 @@ const config: Config = {
         sans: ['Roboto', 'sans-serif'],
         paintbrush: ['PaintBrush'],
         montserrat: ['Montserrat'],
+        poppins: ['Poppins'],
       },
       backgroundImage: {
         appointments: "url('/assets/images/appointments-bg.png')",

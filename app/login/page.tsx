@@ -2,11 +2,12 @@
 
 import React, { useState } from 'react';
 import { useLogin } from './hooks/useLogin';
+import { useRouter } from 'next/navigation';
 import LoginForm from './components/LoginForm';
 import Back from '@/components/Back';
-import { FaEnvelope, FaEye} from 'react-icons/fa';
 
 const LoginPage: React.FC = () => {
+    const router = useRouter();
     const { login, error } = useLogin();
     const [loading, setLoading] = useState<boolean>(false);
 
@@ -15,6 +16,14 @@ const LoginPage: React.FC = () => {
         await login(email, password);
         setLoading(false);
     };
+
+    const handleForgot = () =>  {
+        router.push('/login/forgot');
+    }
+
+    const handleRegister = () =>  {
+        router.push('/register');
+    }
 
     return (
         <div className='overflow-hidden'>
@@ -29,9 +38,21 @@ const LoginPage: React.FC = () => {
                 </p>
                 <div className='absolute top-72 left-52'>
                     <LoginForm onLogin={handleLogin} error={error} loading={loading} />
+                    <div>
+                        <a className="absolute top-[10.5rem] left-[8.5rem] text-blue-500 text-sm">
+                            <button onClick={handleForgot} className='text-blue-400 underline'>Forgot password?</button>
+                        </a>
+                    </div>
+                    <div>
+                        <h2 className='absolute mt-20 ml-6 text-sm'>
+                            Don't have an account?
+                            <button onClick={handleRegister} className='text-blue-400 underline ml-2'>Register</button>
+                        </h2> 
+                    </div>
                 </div>
             </div>
-            <div className="absolute right-0 w-1/2 h-screen bg-cover bg-no-repeat" style={{ backgroundImage: `url('/images/loginfly.png')` }}></div>
+            <div className="absolute right-14 w-1/2 h-screen bg-cover bg-no-repeat" style={{ backgroundImage: `url('/images/manyfly.png')` }}></div>
+            <div className="absolute right-0 w-14 h-screen bg-cover bg-no-repeat" style={{ backgroundImage: `url('/images/rightblock.png')` }}></div>
         </div>
     );
 };
