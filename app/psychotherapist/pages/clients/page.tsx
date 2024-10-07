@@ -7,6 +7,7 @@ import items from "@/psychotherapist/data/Links";
 const Clients = () => {
   const [activeTab, setActiveTab] = useState("Current");
   const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState("All");
 
   const clients = [
     { name: "Bella Swan", email: "xxx@xxx.com", status: "Attached Certificate" },
@@ -23,9 +24,11 @@ const Clients = () => {
     { name: "Jennifer Lawrence", email: "xxx@xxx.com", status: "Pending . . . " },
   ];
 
-  const filteredClients = clients.filter((client) =>
-    client.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredClients = clients.filter((client) => {
+    const matchesSearchTerm = client.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesFilter = filterStatus === "All" || client.status === filterStatus;
+    return matchesSearchTerm && matchesFilter;
+  });
 
   const renderCurrentClients = () => (
     <div className="mt-4 space-y-3">
@@ -103,29 +106,29 @@ const Clients = () => {
                   </svg>
                   <span className="text-sm text-green-500">{client.status}</span>
                 </>
-              ) : (<>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 text-yellow-600 animate-spin"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <circle
-                    cx="12"
-                    cy="12"
-                    r="10"
+              ) : (
+                <>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 text-yellow-600 animate-spin"
+                    fill="none"
+                    viewBox="0 0 24 24"
                     stroke="currentColor"
                     strokeWidth={2}
-                    fill="none"
-                    strokeDasharray="10 10"
-                    strokeDashoffset="5"
-                  />
-                </svg>
-                <span className="text-sm text-yellow-600">{client.status}</span>
-              </>
-              
+                  >
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      fill="none"
+                      strokeDasharray="10 10"
+                      strokeDashoffset="5"
+                    />
+                  </svg>
+                  <span className="text-sm text-yellow-600">{client.status}</span>
+                </>
               )}
             </div>
           </div>
@@ -135,7 +138,7 @@ const Clients = () => {
         </div>
       ))}
     </div>
-  );  
+  );
 
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
@@ -162,62 +165,53 @@ const Clients = () => {
               ))}
             </div>
 
-            <div className="relative max-w-md">
-              <input
-                type="text"
-                placeholder="Search clients..."
-                className="px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="absolute top-2.5 right-3 h-5 w-5 text-gray-500"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M21 21l-4.35-4.35M11 18a7 7 0 110-14 7 7 0 010 14z"
+            {/* Search bar and dropdown filter aligned beside tabs */}
+            <div className="flex space-x-4">
+              <div className="relative w-80">
+                <input
+                  type="text"
+                  placeholder="Search clients..."
+                  className="w-full px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                 />
-              </svg>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="absolute top-2.5 right-3 h-5 w-5 text-gray-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M21 21l-4.35-4.35M11 18a7 7 0 110-14 7 7 0 010 14z"
+                  />
+                </svg>
+              </div>
+
+              {/* Dropdown filter, visible only on "For Referral" tab */}
+              {activeTab === "For Referral" && (
+                <div className="relative w-48">
+                  <select
+                    className="w-full px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    value={filterStatus}
+                    onChange={(e) => setFilterStatus(e.target.value)}
+                  >
+                    <option value="All">All</option>
+                    <option value="Attached Certificate">Attached Certificate</option>
+                    <option value="Pending . . . ">Pending</option>
+                  </select>
+                </div>
+              )}
             </div>
           </div>
 
-          <div className="mt-6">
-            <div
-              className={`transition-all duration-500 ease-in-out ${
-                activeTab === "Current"
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-10"
-              }`}
-            >
-              {activeTab === "Current" && renderCurrentClients()}
-            </div>
-
-            <div
-              className={`transition-all duration-500 ease-in-out ${
-                activeTab === "To Be Evaluated"
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-10"
-              }`}
-            >
-              {activeTab === "To Be Evaluated" && renderEvaluatedClients()}
-            </div>
-
-            <div
-              className={`transition-all duration-500 ease-in-out ${
-                activeTab === "For Referral"
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-10"
-              }`}
-            >
-              {activeTab === "For Referral" && renderReferralClients()}
-            </div>
-          </div>
+          {/* Render clients based on the active tab */}
+          {activeTab === "Current" && renderCurrentClients()}
+          {activeTab === "To Be Evaluated" && renderEvaluatedClients()}
+          {activeTab === "For Referral" && renderReferralClients()}
         </div>
       </div>
     </Layout>
