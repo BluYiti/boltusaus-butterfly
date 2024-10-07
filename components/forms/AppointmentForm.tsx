@@ -168,7 +168,7 @@ const AppointmentForm = ({
                       width={32}
                       height={32}
                       alt={psychotherapist.name}
-                      className="rounded-full border border-dark-500"
+                      className="rounded-full border border-blue-300"
                     />
                     <p>{psychotherapist.name}</p>
                   </div>
