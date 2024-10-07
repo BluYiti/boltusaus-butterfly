@@ -40,7 +40,7 @@ export default function RootLayout({
     <html lang="en">
       <body
         className={cn(
-          "min-h-screen bg-light-300 font-sans antialiases",
+          "min-h-screen bg-light-200 font-sans antialiases",
           fontSans.variable
         )}
       >
