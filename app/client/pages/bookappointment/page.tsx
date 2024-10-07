@@ -180,7 +180,7 @@ const AppointmentBooking = () => {
         />
         <div>
           <h3 className="text-xl font-bold">Mrs. Angelica Peralta</h3>  {/* Static Name */}
-          <p className="text-md text-gray-500">Psychotherapist and Counselor</p>  {/* Static Specialty */}
+          <p className="text-md text-gray-500">Senior Psychotherapist</p>  {/* Static Specialty */}
         </div>
       </div>
 
