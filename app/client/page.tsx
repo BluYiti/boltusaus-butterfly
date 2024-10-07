@@ -2,16 +2,10 @@
 import React, { useState } from "react";
 import {
   FaBell,
-  FaBars,
-  FaHome,
-  FaUserMd,
-  FaCalendarAlt,
-  FaCogs,
-  FaSignOutAlt,
   FaUser,
-  FaBullseye,
-  FaComments,
 } from "react-icons/fa";
+import Layout from "@/components/Sidebar/Layout";
+import items from "./data/Links";
 
 const Dashboard: React.FC = () => {
   // State for selected month (default: current month)
@@ -44,45 +38,8 @@ const Dashboard: React.FC = () => {
   const firstDayOfMonth = new Date(currentYear, selectedMonth, 1).getDay();
 
   return (
-    <div className="text-black min-h-screen flex">
-      {/* Sidebar */}
-      <div className="bg-white shadow-md w-64 min-h-screen px-4">
-        <div className="py-8">
-          {/* Logo */}
-          <div className="text-center mb-8">
-            <div className="text-3xl font-bold text-blue-500">Butterfly</div>
-          </div>
-
-          {/* Menu Items */}
-          <nav className="space-y-2">
-            <a href="#" className="flex items-center space-x-3 p-2 rounded-lg text-blue-600 hover:bg-gray-100">
-              <FaHome className="text-xl" />
-              <span className="font-medium">Home</span>
-            </a>
-            <a href="#" className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100">
-              <FaUser className="text-xl" />
-              <span className="font-medium">Profile</span>
-            </a>
-            <a href="#" className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100">
-              <FaComments className="text-xl" />
-              <span className="font-medium">Communication</span>
-            </a>
-            <a href="#" className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100">
-              <FaCogs className="text-xl" />
-              <span className="font-medium">Settings</span>
-            </a>
-            <a href="#" className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100">
-              <FaBullseye className="text-xl" />
-              <span className="font-medium">Goals</span>
-            </a>
-            <a href="#" className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100">
-              <FaSignOutAlt className="text-xl" />
-              <span className="font-medium">Logout</span>
-            </a>
-          </nav>
-        </div>
-      </div>
-
+    <Layout sidebarTitle="Butterfly" sidebarItems={items}>
+      <div className="text-black min-h-screen flex">  
       {/* Main Content */}
       <div className="flex-grow flex flex-col justify-between bg-gray-100">
         {/* Top Section with User Info and Header */}
@@ -108,21 +65,13 @@ const Dashboard: React.FC = () => {
         {/* Upcoming Sessions and Announcements Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 mx-8">
           {/* Upcoming Sessions Section */}
-          <div className="bg-white rounded-lg shadow-lg p-6 flex flex-col h-full">
+          <div className="bg-white rounded-lg shadow-lg p-6 flex flex-col h-">
             <h2 className="text-bold text-xl font-bold mb-4">Upcoming Sessions</h2>
             <div className="space-y-2 flex-grow overflow-y-auto max-h-[300px]">
               <div className="flex justify-between items-center p-2 rounded-lg bg-gradient-to-r from-blue-300 via-blue-400 to-blue-300 animate-gradient-x">
-                <span className="font-bold">First Session</span>
-                <span className="text-gray-600 font-bold">Oct 3, 2024, 10:00 AM</span>
-              </div>
-              <div className="flex justify-between items-center p-2 rounded-lg bg-gradient-to-r from-blue-300 via-blue-400 to-blue-300 animate-gradient-x">
-                <span className="font-bold">Second Session</span>
-                <span className="text-gray-600 font-bold">Oct 10, 2024, 2:00 PM</span>
-              </div>
-              <div className="flex justify-between items-center p-2 rounded-lg bg-gradient-to-r from-blue-300 via-blue-400 to-blue-300 animate-gradient-x">
-                <span className="font-bold">Third Session</span>
-                <span className="text-gray-600 font-bold">Oct 15, 2024, 1:00 PM</span>
-              </div>
+                <span className="font-bold">PLACEHOLDER FOR THE FIRST SESSION</span>
+                <span className="text-gray-600 font-bold">Date and Time</span>
+              </div>         
             </div>
           </div>
 
@@ -176,7 +125,7 @@ const Dashboard: React.FC = () => {
               {/* Calendar Grid */}
               <div className="mt-6">
                 <div className="text-center">
-                  <div className="font-bold text-xl">{months[selectedMonth]}</div>
+                  <div className="text-bold text-xl font-bold">{months[selectedMonth]}</div>
                   <div className="grid grid-cols-7 text-center mt-4">
                     {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
                       <div key={day} className="text-sm font-medium text-gray-700">
@@ -207,24 +156,74 @@ const Dashboard: React.FC = () => {
               </div>
             </div>
 
-            {/* What To Do Section */}
+          {/* What to do section */}
+          <div className="bg-white rounded-lg shadow-lg p-6">
+              <h2 className="text-lg font-semibold">What to do?</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                <ActivityCard
+                  title="Meditate"
+                  description="20-30 minutes/day"
+                  icon="🧘‍♀️"
+                />
+                <ActivityCard
+                  title="Pet Time"
+                  description="Be sure to have some play time with your beloved pets"
+                  icon="🐶"
+                />
+                <ActivityCard
+                  title="Exercise"
+                  description="30-35 minutes/day"
+                  icon="💪"
+                />
+                <ActivityCard
+                  title="Arts"
+                  description="Showcase your talent, express yourself!"
+                  icon="🎨"
+                />
+              </div>
+          </div>
+        </div>
+
+          {/* Mood Tracker Section */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+            {/* Mood Tracker */}
             <div className="bg-white rounded-lg shadow-lg p-6">
-              <h2 className="text-lg font-semibold">What To Do</h2>
-              <ul className="list-disc list-inside mt-4 space-y-2">
-                <li>Stay hydrated and take breaks throughout your day.</li>
-                <li>Review your progress on goals for the week.</li>
-                <li>Reach out to a friend or family member.</li>
-                <li>Practice a 5-minute breathing exercise to clear your mind.</li>
-                <li>Read or listen to something that inspires you.</li>
-              </ul>
+              <h2 className="text-xl font-semibold mb-4">Mood Tracker</h2>
+              <div className="flex justify-between items-center">
+                <p className="text-lg font-medium">How are you feeling today?</p>
+                <button className="bg-blue-500 text-white px-4 py-2 rounded-lg">START</button>
+              </div>
+            </div>
+
+            {/* Reading Resources */}
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              <h2 className="text-xl font-semibold mb-4">Reading Resources</h2>
+              <div className="flex justify-between items-center">
+                <p className="text-lg font-medium">Start your day by reading something inspiring!</p>
+                <button className="bg-blue-500 text-white px-4 py-2 rounded-lg">VIEW</button>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Footer */}
-        <footer className="bg-white py-4 text-center text-gray-600">
-          &copy; 2024 Butterfly. All Rights Reserved.
-        </footer>
+        <div className="bg-white shadow-lg py-4 px-6 text-center">
+          <p className="text-gray-500">© 2024 Butterfly Inc. All rights reserved.</p>
+        </div>
+      </div>
+      </div>
+    </Layout>
+  );
+};
+
+// ActivityCard Component
+const ActivityCard: React.FC<{ title: string; description: string; icon: string }> = ({ title, description, icon }) => {
+  return (
+    <div className="bg-gray-100 p-4 rounded-lg shadow flex items-center">
+      <span className="text-3xl mr-4">{icon}</span>
+      <div>
+        <h3 className="text-lg font-semibold">{title}</h3>
+        <p className="text-gray-600">{description}</p>
       </div>
     </div>
   );

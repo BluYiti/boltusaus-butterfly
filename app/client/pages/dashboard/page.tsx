@@ -2,16 +2,10 @@
 import React, { useState } from "react";
 import {
   FaBell,
-  FaBars,
-  FaHome,
-  FaUserMd,
-  FaCalendarAlt,
-  FaCogs,
-  FaSignOutAlt,
   FaUser,
-  FaBullseye,
-  FaComments,
 } from "react-icons/fa";
+import Layout from "@/components/Sidebar/Layout";
+import items from "@/client/data/Links";
 
 const Dashboard: React.FC = () => {
   // State for selected month (default: current month)
@@ -44,45 +38,8 @@ const Dashboard: React.FC = () => {
   const firstDayOfMonth = new Date(currentYear, selectedMonth, 1).getDay();
 
   return (
-    <div className="text-black min-h-screen flex">
-      {/* Sidebar */}
-      <div className="bg-white shadow-md w-64 min-h-screen px-4">
-        <div className="py-8">
-          {/* Logo */}
-          <div className="text-center mb-8">
-            <div className="text-3xl font-bold text-blue-500">Butterfly</div>
-          </div>
-
-          {/* Menu Items */}
-          <nav className="space-y-2">
-            <a href="#" className="flex items-center space-x-3 p-2 rounded-lg text-blue-600 hover:bg-gray-100">
-              <FaHome className="text-xl" />
-              <span className="font-medium">Home</span>
-            </a>
-            <a href="#" className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100">
-              <FaUser className="text-xl" />
-              <span className="font-medium">Profile</span>
-            </a>
-            <a href="#" className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100">
-              <FaComments className="text-xl" />
-              <span className="font-medium">Communication</span>
-            </a>
-            <a href="#" className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100">
-              <FaCogs className="text-xl" />
-              <span className="font-medium">Settings</span>
-            </a>
-            <a href="#" className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100">
-              <FaBullseye className="text-xl" />
-              <span className="font-medium">Goals</span>
-            </a>
-            <a href="#" className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100">
-              <FaSignOutAlt className="text-xl" />
-              <span className="font-medium">Logout</span>
-            </a>
-          </nav>
-        </div>
-      </div>
-
+    <Layout sidebarTitle="Butterfly" sidebarItems={items}>
+      <div className="text-black min-h-screen flex">  
       {/* Main Content */}
       <div className="flex-grow flex flex-col justify-between bg-gray-100">
         {/* Top Section with User Info and Header */}
@@ -199,8 +156,8 @@ const Dashboard: React.FC = () => {
               </div>
             </div>
 
-{/* What to do section */}
-<div className="bg-white rounded-lg shadow-lg p-6">
+          {/* What to do section */}
+          <div className="bg-white rounded-lg shadow-lg p-6">
               <h2 className="text-lg font-semibold">What to do?</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
                 <ActivityCard
@@ -224,8 +181,8 @@ const Dashboard: React.FC = () => {
                   icon="🎨"
                 />
               </div>
-            </div>
           </div>
+        </div>
 
           {/* Mood Tracker Section */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
@@ -254,7 +211,8 @@ const Dashboard: React.FC = () => {
           <p className="text-gray-500">© 2024 Butterfly Inc. All rights reserved.</p>
         </div>
       </div>
-    </div>
+      </div>
+    </Layout>
   );
 };
 
