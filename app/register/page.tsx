@@ -1,36 +1,48 @@
 'use client';
 
 import React from 'react';
-import { useRegister } from './hook/useRegister';
-import RegisterForm from './components/RegisterForm';
-import BubbleAnimation from '@/components/BubbleAnimation';
+import Back from '@/components/Back';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation'
 
 const RegisterPage: React.FC = () => {
-    const { register, error, loading } = useRegister();
+    const router = useRouter ();
+
+    const handleMinor = () => {
+        router.push('/register/minor');
+    }
+
+    const handleAdult = () => {
+        router.push('/register/adult')
+    }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-blue-500">
-            <div className="flex bg-white w-full h-full min-h-screen overflow-hidden">
-                <div className="w-1/2 bg-blue-100 flex flex-col items-center justify-center p-8">
-                    <img
-                        src="/images/ButterflyLanding.png"
-                        alt="A.M.Peralta Psychological Services"
-                        className="h-24 w-24 mb-4"
-                    />
-                    <h2 className="text-xl font-semibold text-center">
-                        A.M.Peralta Psychological Services
-                    </h2>
+        <div className='overflow-hidden flex flex-col items-center justify-center min-h-screen'>
+            <Back />
+            <h1 className="absolute top-5 left-20 text-[#2081c3] text-2xl md:text-3xl font-bold">Butterfly</h1>
+
+            {/* Register heading centered vertically */}
+            <h2 className='font-paintbrush absolute text-8xl text-[#2b4369] mb-96'>
+                Registering for
+            </h2>
+            
+            <div className='flex flex-col items-center mt-24'> {/* Add margin to push below the Register heading */}
+                {/* Flex container for images */}
+                <div className="flex justify-center space-x-60"> {/* Space between images */}
+                    <button onClick={handleMinor} className="transform transition-transform duration-300 hover:scale-125">
+                        <Image src={'/images/minor.png'} alt='minor2' width={225} height={225} />
+                    </button>
+                    <button onClick={handleAdult} className="transform transition-transform duration-300 hover:scale-125">
+                        <Image src={'/images/adult.png'} alt='adult' width={225} height={225} />
+                    </button>
                 </div>
-
-
-                <div className="w-1/2 flex items-center justify-center p-8">
-                    <div className="w-full max-w-md">
-                        <RegisterForm onRegister={register} error={error} loading={loading} />
-                    </div>
+                
+                {/* Flex container for headings */}
+                <div className="flex justify-center space-x-80 mt-12"> {/* Space for symmetrical alignment */}
+                    <h2 className='font-poppins text-blue-400 text-6xl'>Minor</h2>
+                    <h2 className='font-poppins text-blue-400 text-6xl'>Adult</h2>
                 </div>
             </div>
-
-            <BubbleAnimation />
         </div>
     );
 };
