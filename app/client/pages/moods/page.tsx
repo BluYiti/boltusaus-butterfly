@@ -1,6 +1,7 @@
 "use client"; // Add this line at the very top
 
 import React, { useState } from "react";
+import Link from "next/link"; // Import Link
 
 interface Mood {
   label: string;
@@ -42,11 +43,6 @@ const MoodSelection: React.FC = () => {
   const [confirmed, setConfirmed] = useState<boolean>(false); // New state to track if the mood is confirmed
   const [feedback, setFeedback] = useState<string>("");
 
-  const handleBack = () => {
-    console.log("Back button clicked");
-    setConfirmed(false); // Reset confirmation state if going back
-  };
-
   const handleConfirm = () => {
     const mood = moods.find((m) => m.label === selectedMood);
     let moodFeedback = mood?.feedback || "";
@@ -60,13 +56,10 @@ const MoodSelection: React.FC = () => {
 
   return (
     <div className="relative text-black flex flex-col items-center justify-center min-h-screen bg-blue-50 p-8">
-      {/* Back Button */}
-      <button
-        onClick={handleBack}
-        className="absolute top-4 left-4 bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-700"
-      >
+      {/* Back Button using Link */}
+      <Link href="/client" className="absolute top-4 left-4 bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-600">
         Back
-      </button>
+      </Link>
 
       {/* Mood Feedback Section */}
       {confirmed ? (
@@ -78,7 +71,7 @@ const MoodSelection: React.FC = () => {
           </div>
           <button
             onClick={() => setConfirmed(false)}
-            className="mt-6 bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-700"
+            className="mt-6 bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-600"
           >
             Done
           </button>
@@ -120,7 +113,7 @@ const MoodSelection: React.FC = () => {
       {!confirmed && (
         <button
           onClick={handleConfirm}
-          className="absolute bottom-4 right-4 bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-700"
+          className="absolute bottom-4 right-4 bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-600"
         >
           Confirm
         </button>
