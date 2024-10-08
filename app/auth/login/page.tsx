@@ -5,7 +5,7 @@ import { useLogin } from './hooks/useLogin';
 import LoginForm from './components/LoginForm';
 import termsContent from '@/constants/terms';
 import privacyContent from '@/constants/privacy';
-import TermsAndPrivacy from '@/register/components/TermsAndPrivacy';
+import TermsAndPrivacy from '@/auth/register/components/TermsAndPrivacy';
 import Back from '@/components/Back';
 import { FaEnvelope, FaEye} from 'react-icons/fa';
 

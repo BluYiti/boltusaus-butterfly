@@ -28,7 +28,7 @@ const FetchPreAssessmentDetails: React.FC<FetchPreAssessmentDetailsProps> = ({ u
         // API request to fetch pre-assessment data
         const response = await databases.listDocuments(
           process.env.NEXT_PUBLIC_DATABASE_ID!,
-          process.env.NEXT_PUBLIC_COLLECTION_ID!,
+          process.env.NEXT_PUBLIC_PRE_ASSESSMENT_COLLECTION_ID!,
           [Query.equal('userID', userID)]
         );
     
@@ -60,7 +60,6 @@ const FetchPreAssessmentDetails: React.FC<FetchPreAssessmentDetailsProps> = ({ u
 
   return (
     <div>
-      <h2>Pre-Assessment Answers for {userID}</h2>
       <ul>
         {preAssessmentData.map((answer, index) => (
           <li key={index}>
