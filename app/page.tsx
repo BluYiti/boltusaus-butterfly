@@ -169,156 +169,160 @@ const HomePage: React.FC = () => {
                 ))}
               </ol>
             </div>
-            <div className="md:col-span-1">
-              {/* You can put any additional content here if needed */}
+          </div>
+
+          {/* Reminders Section */}
+          <div className="bg-white rounded-lg shadow-lg p-6 flex flex-col h-full">
+            <h2 className="text-xl font-semibold mb-4">A Daily Reminder to Yourself</h2>
+            <div className="space-y-4 flex-grow overflow-y-auto max-h-[300px]">
+              <div className="bg-gray-50 p-4 rounded-lg shadow">
+                <h3 className="font-semibold text-lg">This Too Shall Pass</h3>
+                <p className="text-gray-700">Feelings are temporary. Hold on, better days are coming.</p>
+              </div>
+              <div className="bg-gray-50 p-4 rounded-lg shadow">
+                <h3 className="font-semibold text-lg">Breathe In, Let Go</h3>
+                <p className="text-gray-700">Take a moment to breathe. Release the tension in your mind and body.</p>
+              </div>
+              <div className="bg-gray-50 p-4 rounded-lg shadow">
+                <h3 className="font-semibold text-lg">You Are Enough.</h3>
+                <p className="text-gray-700">Your worth isn’t measured by your struggles. You are enough just as you are.</p>
+              </div>
             </div>
           </div>
         </div>
-      </section>
 
-      {/* Services Section */}
-      <section id="services" className="relative flex flex-col justify-center items-end h-screen bg-white">
-        <div className="absolute right-40 w-full h-full bg-contain bg-no-repeat" style={{ backgroundImage: `url('/images/cloud.png')`, backgroundPosition: 'right center' }}></div>
-        <div className="absolute bottom-0 left-20 w-screen h-3/5 bg-contain bg-no-repeat" style={{ backgroundImage: `url('/images/services.png')`, backgroundPosition: 'left bottom' }}></div>
+        {/* Main Dashboard Content */}
+        <div className="flex-grow overflow-auto p-8">
+          {/* Calendar and What to do section */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Calendar */}
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              <h2 className="text-lg font-semibold">Calendar</h2>
 
-        <h1 className="absolute top-16 left-48 text-8xl z-10 font-paintbrush text-blue-800">
-          Butterfly Offers
-        </h1>
-
-        <div className="relative z-10 flex flex-col items-end justify-center right-48 font-montserrat">
-          <ServiceItem 
-            title="Counseling and Psychotherapy" 
-            description="Counseling and psychotherapy involve talking with a trained professional to address mental health challenges. Counseling focuses on specific issues for guidance, while psychotherapy explores deeper emotional and psychological aspects for overall healing and personal growth." 
-          />
-          <ServiceItem 
-            title="Reading Modules" 
-            description="Reading modules are structured educational units that provide curated texts and resources on counseling and psychotherapy. They enhance understanding of theories and practices through case studies, exercises, and reflective questions." 
-          />
-          <ServiceItem 
-            title="Goals and Mood Tracking" 
-            description="Goals and mood tracking is a practice that helps individuals set personal goals while monitoring their emotional states. It fosters self-awareness and accountability, enabling clients to identify mood patterns and assess the impact of their actions on mental health." 
-          />
-        </div>
-      </section>
-
-      {/* FAQ Section */}
-      <section id="faq" className="px-4 md:px-8 py-8 md:py-32 bg-[#c2dffd] text-center md:text-left">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl md:text-6xl lg:text-8xl font-paintbrush mb-8 text-blue-800">Frequently Asked Questions</h1>
-          <div className="space-y-4 md:space-y-8">
-            {faqItems.map((faq, index) => (
-              <div key={index} className="space-y-2">
-                <button
-                  onClick={() => toggleOpen(index)}
-                  className="flex justify-between items-center w-full text-left text-lg md:text-xl font-semibold"
+              {/* Dropdown to select month */}
+              <div className="mt-4">
+                <label htmlFor="month-select" className="font-medium text-gray-700">
+                  Choose a month:
+                </label>
+                <select
+                  id="month-select"
+                  value={selectedMonth}
+                  onChange={handleMonthChange}
+                  className="ml-2 p-2 border border-gray-300 rounded-lg"
                 >
-                  {faq.question}
-                  <span>{open === index ? '-' : '+'}</span>
-                </button>
-                {open === index && <p className="text-base md:text-lg mt-2">{faq.answer}</p>}
+                  {months.map((month, index) => (
+                    <option key={index} value={index}>
+                      {month}
+                    </option>
+                  ))}
+                </select>
               </div>
-            ))}
+
+              {/* Calendar Grid */}
+              <div className="mt-6">
+                <div className="text-center">
+                  <div className="text-bold text-xl font-bold">{months[selectedMonth]}</div>
+                  <div className="grid grid-cols-7 text-center mt-4">
+                    {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+                      <div key={day} className="text-sm font-medium text-gray-700">
+                        {day}
+                      </div>
+                    ))}
+                  </div>
+                  <div className="grid grid-cols-7 text-center gap-y-4 mt-4">
+                    {/* Fill the empty spaces before the first day of the month */}
+                    {[...Array(firstDayOfMonth)].map((_, index) => (
+                      <div key={index}></div>
+                    ))}
+                    {/* Fill the days of the selected month */}
+                    {[...Array(daysInMonth[selectedMonth])].map((_, dayIndex) => (
+                      <div
+                        key={dayIndex}
+                        className={`p-2 rounded-full cursor-pointer ${
+                          dayIndex + 1 === currentDay && selectedMonth === currentMonth
+                            ? "bg-blue-500 text-white"
+                            : "text-gray-700"
+                        }`}
+                      >
+                        {dayIndex + 1}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          {/* What to do section */}
+          <div className="bg-white rounded-lg shadow-lg p-6">
+              <h2 className="text-lg font-semibold">What to do?</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                <ActivityCard
+                  title="Meditate"
+                  description="20-30 minutes/day"
+                  icon="🧘‍♀️"
+                />
+                <ActivityCard
+                  title="Pet Time"
+                  description="Be sure to have some play time with your beloved pets"
+                  icon="🐶"
+                />
+                <ActivityCard
+                  title="Exercise"
+                  description="30-35 minutes/day"
+                  icon="💪"
+                />
+                <ActivityCard
+                  title="Arts"
+                  description="Showcase your talent, express yourself!"
+                  icon="🎨"
+                />
+              </div>
           </div>
         </div>
-      </section>
 
-      {/* Contacts Section */}
-      <section id="contacts" className="py-8 md:py-32 bg-[#c2dffd]">
-        <div className="max-w-4xl mx-auto text-center md:text-left">
-          <h1 className="text-4xl md:text-6xl lg:text-8xl font-paintbrush mb-8 text-blue-800">Get in Touch</h1>
-          <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-8">
-            <ContactInfo 
-              Icon={FaMapMarkerAlt} 
-              title="Visit Us" 
-              description="Our Clinic is located at Unit 303 Sam-son's Building, Lower Mabini St., Baguio City" 
-            />
-            <ContactInfo 
-              Icon={FaEnvelope} 
-              title="Email Us" 
-              description="Feel free to send us an email at amperaltapsychservices@gmail.com" 
-            />
-            <ContactInfo 
-              Icon={FaPhone} 
-              title="Call Us" 
-              description="You can reach us at +63 9266 696 242" 
-            />
-          </div>
-          <div className="text-center my-10">
-            <a href="https://maps.app.goo.gl/yiV8BHgQP4zqpPta8" className="relative inline-block hover:transition-colors duration-300 group mr-4" target="_blank" rel="noopener noreferrer">
-              <div className="w-12 h-12 flex items-center justify-center bg-white rounded-full">
-                <FaMap className="text-blue-800 text-3xl" />
+          {/* Mood Tracker Section */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+            {/* Mood Tracker */}
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              <h2 className="text-xl font-semibold mb-4">Mood Tracker</h2>
+              <div className="flex justify-between items-center">
+                <p className="text-lg font-medium">How are you feeling today?</p>
+                <button className="bg-blue-500 text-white px-4 py-2 rounded-lg">START</button>
               </div>
-              <span className="absolute inset-0 bg-blue-300 rounded-full opacity-0 transition-opacity duration-300 group-hover:opacity-50"></span>
-            </a>
-            <a href="https://www.facebook.com/amperaltapsychservices" className="relative inline-block hover:transition-colors duration-300 group" target="_blank" rel="noopener noreferrer">
-              <div className="w-12 h-12 flex items-center justify-center bg-white rounded-full">
-                <FaFacebookF className="text-blue-800 text-3xl" />
+            </div>
+
+            {/* Reading Resources */}
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              <h2 className="text-xl font-semibold mb-4">Reading Resources</h2>
+              <div className="flex justify-between items-center">
+                <p className="text-lg font-medium">Start your day by reading something inspiring!</p>
+                <button className="bg-blue-500 text-white px-4 py-2 rounded-lg">VIEW</button>
               </div>
-              <span className="absolute inset-0 bg-blue-300 rounded-full opacity-0 transition-opacity duration-300 group-hover:opacity-50"></span>
-            </a>
+            </div>
           </div>
         </div>
 
+        {/* Footer */}
+        <div className="bg-white shadow-lg py-4 px-6 text-center">
+          <p className="text-gray-500">© 2024 Butterfly Inc. All rights reserved.</p>
+        </div>
+      </div>
+      </div>
+    </Layout>
+  );
+};
 
-  <div className="text-left mt-4 ml-36 flex justify-between items-center">
-    <div>
-      <a href="#" className="text-sm">Terms and Conditions</a> | <a href="#" className="text-sm">Privacy Policy</a>
-    </div>
-
-  </div>
-      </section>
+// ActivityCard Component
+const ActivityCard: React.FC<{ title: string; description: string; icon: string }> = ({ title, description, icon }) => {
+  return (
+    <div className="bg-gray-100 p-4 rounded-lg shadow flex items-center">
+      <span className="text-3xl mr-4">{icon}</span>
+      <div>
+        <h3 className="text-lg font-semibold">{title}</h3>
+        <p className="text-gray-600">{description}</p>
+      </div>
     </div>
   );
 };
 
-// ServiceItem Component
-interface ServiceItemProps {
-  title: string;
-  description: string;
-}
-
-const ServiceItem: React.FC<ServiceItemProps> = ({ title, description }) => (
-  <div className="rounded-xl p-6 w-2/6">
-    <h3 className="text-2xl mb-4 font-bold text-gray-800">{title}</h3>
-    <p>{description}</p>
-  </div>
-);
-
-// ContactInfo Component
-interface ContactInfoProps {
-  Icon: React.ComponentType<{ className?: string; size?: number | string }>;
-  title: string;
-  description: string;
-}
-
-const ContactInfo: React.FC<ContactInfoProps> = ({ Icon, title, description }) => (
-  <div className="flex items-start space-x-4">
-    <Icon size={32} className="text-blue-800" />
-    <div>
-      <h4 className="text-lg font-bold">{title}</h4>
-      <p className="text-base">{description}</p>
-    </div>
-  </div>
-);
-
-// FAQ Data
-const faqItems = [
-  {
-    question: "How can I book an appointment?",
-    answer: "You can book an appointment through our website by clicking on the 'Book an Appointment' button and filling out the necessary information.",
-  },
-  {
-    question: "What services do you offer?",
-    answer: "We offer counseling and psychotherapy, reading modules, and goals and mood tracking to support your mental health journey.",
-  },
-  {
-    question: "How can I contact you?",
-    answer: "You can reach us via email at contact@butterfly.com or call us at +639171234567.",
-  },
-  {
-    question: "Where is your clinic located?",
-    answer: "Our clinic is located at 33 B Apple Street Brgy. St. Joseph, San Juan, Manila.",
-  },
-];
-
-export default HomePage;
+export default Dashboard;
