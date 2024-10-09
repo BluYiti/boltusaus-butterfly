@@ -44,7 +44,7 @@ export const useRegister = () => {
 
             // Optionally, store the role and status in the user preferences
             await account.updatePrefs({
-                role: 'client',
+                role: 'New Client',
                 status: 'To Be Evaluated',
             });
 

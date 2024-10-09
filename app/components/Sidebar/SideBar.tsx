@@ -1,41 +1,21 @@
-// components/Sidebar.tsx
-"use client";
-
-import { useEffect, useState } from "react";
-import { FiMenu, FiChevronLeft } from "react-icons/fi";
-import { IconType } from "react-icons"; // Import IconType from react-icons
 import SidebarItem from "./SidebarItem";
-import Loading from "./Loading";
+import { FiMenu, FiChevronLeft } from "react-icons/fi";
 import LogoutButton from '@/auth/logout/component/logoutButton';
+import { IconType } from "react-icons";
 
 interface SidebarProps {
   title: string;
-  items: Array<{ href: string; label: string; icon: IconType; }>;
+  items: Array<{ href: string; label: string; icon: IconType; isDisabled?: boolean; }>;
   isMinimized: boolean;
   setIsMinimized: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ title, items, isMinimized, setIsMinimized }) => {
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const savedState = localStorage.getItem('sidebarMinimized');
-    if (savedState) {
-      setIsMinimized(JSON.parse(savedState));
-    } else {
-      setIsMinimized(false);
-    }
-  }, []);
-
   const toggleSidebar = () => {
     const newState = !isMinimized;
     setIsMinimized(newState);
     localStorage.setItem('sidebarMinimized', JSON.stringify(newState));
   };
-
-  if (isMinimized === null) {
-    return <Loading fullPage={true} />;
-  }
 
   return (
     <div className={`fixed top-0 left-0 h-full bg-white text-black transition-all duration-300 ease-in-out ${isMinimized ? "w-16" : "w-60"}`}>
@@ -56,6 +36,7 @@ const Sidebar: React.FC<SidebarProps> = ({ title, items, isMinimized, setIsMinim
             icon={item.icon}
             label={item.label}
             isMinimized={isMinimized}
+            isDisabled={item.isDisabled}
           />
         ))}
       </nav>

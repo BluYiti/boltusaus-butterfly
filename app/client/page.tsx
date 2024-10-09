@@ -1,17 +1,38 @@
 "use client";
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import { FaBell, FaUser } from "react-icons/fa";
 import Layout from "@/components/Sidebar/Layout";
 import items from "@/client/data/Links";
-import Link from 'next/link'; // Import Link
+import Link from 'next/link';
+import { account } from "@/appwrite";
+import { useRouter } from 'next/navigation';
 
 const Dashboard: React.FC = () => {
+  const router = useRouter(); // Initialize router for navigation
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
+  const [userName, setUserName] = useState("Client");
+  const [role, setRole] = useState('');
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const user = await account.get();
+        setUserName(user.name);
+        if (user?.prefs?.role) {
+          setRole(user.prefs.role);
+        }
+      } catch (error) {
+        console.error("Failed to fetch user data:", error);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
   const today = new Date();
   const currentDay = today.getDate();
   const currentMonth = today.getMonth();
   const currentYear = today.getFullYear();
-  const userName = "John"; // Placeholder for dynamic user data
 
   const months = [
     "January", "February", "March", "April", "May", "June",
@@ -26,11 +47,16 @@ const Dashboard: React.FC = () => {
 
   const firstDayOfMonth = new Date(currentYear, selectedMonth, 1).getDay();
 
+  // Handler for Pre-Assessment button click
+  const handlePreAssessmentClick = () => {
+    router.push("/preassessment"); // Navigate to the Pre-Assessment page
+  };
+
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
       <div className="text-black min-h-screen flex flex-col">
         {/* Main Content */}
-        <div className="flex-grow flex flex-col justify-between bg-gray-100">
+        <div className="flex-grow flex flex-col justify-between bg-gray-100 overflow-auto">
           {/* Top Section with User Info and Header */}
           <div className="bg-white shadow-lg py-4 px-6 flex justify-between items-center">
             <div className="flex items-center space-x-3">
@@ -48,146 +74,222 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Upcoming Sessions and Announcements Section */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 mx-8">
-            {/* Upcoming Sessions Section */}
-            <div className="bg-white rounded-lg shadow-lg p-6 flex flex-col">
-              <h2 className="text-bold text-xl font-bold mb-4">Upcoming Sessions</h2>
-              <div className="space-y-2 flex-grow overflow-y-auto max-h-[300px]">
-                <div className="flex justify-between items-center p-2 rounded-lg bg-gradient-to-r from-blue-300 via-blue-400 to-blue-300 animate-gradient-x">
-                  <span className="font-bold">PLACEHOLDER FOR THE FIRST SESSION</span>
-                  <span className="text-gray-600 font-bold">Date and Time</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Reminders Section */}
-            <div className="bg-white rounded-lg shadow-lg p-6 flex flex-col h-full">
-              <h2 className="text-xl font-semibold mb-4">A Daily Reminder to Yourself</h2>
-              <div className="space-y-4 flex-grow overflow-y-auto max-h-[300px]">
-                <div className="bg-gray-50 p-4 rounded-lg shadow">
-                  <h3 className="font-semibold text-lg">This Too Shall Pass</h3>
-                  <p className="text-gray-700">Feelings are temporary. Hold on, better days are coming.</p>
-                </div>
-                <div className="bg-gray-50 p-4 rounded-lg shadow">
-                  <h3 className="font-semibold text-lg">Breathe In, Let Go</h3>
-                  <p className="text-gray-700">Take a moment to breathe. Release the tension in your mind and body.</p>
-                </div>
-                <div className="bg-gray-50 p-4 rounded-lg shadow">
-                  <h3 className="font-semibold text-lg">You Are Enough.</h3>
-                  <p className="text-gray-700">Your worth isn’t measured by your struggles. You are enough just as you are.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Main Dashboard Content */}
-          <div className="flex-grow overflow-auto p-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Calendar */}
-              <div className="bg-white rounded-lg shadow-lg p-6">
-                <h2 className="text-lg font-semibold">Calendar</h2>
-                <div className="mt-4">
-                  <label htmlFor="month-select" className="font-medium text-gray-700">
-                    Choose a month:
-                  </label>
-                  <select
-                    id="month-select"
-                    value={selectedMonth}
-                    onChange={handleMonthChange}
-                    className="ml-2 p-2 border border-gray-300 rounded-lg"
-                  >
-                    {months.map((month, index) => (
-                      <option key={index} value={index}>
-                        {month}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="mt-6">
+          {/* Display Pre-Assessment button if the user is a New Client */}
+          {role === "New Client" && (
+            <div className="mt-6 mx-8">
+              <div className="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center">
+                <button
+                  className="bg-blue-400 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-500"
+                  onClick={handlePreAssessmentClick} 
+                >
+                  Start Pre-Assessment
+                </button>
+                <p className="mt-4 text-lg font-bold text-gray-700">Meet our caring psychotherapists, here to guide your healing!</p>
+                <div className="flex space-x-6 mt-4">
                   <div className="text-center">
-                    <div className="text-bold text-xl font-bold">{months[selectedMonth]}</div>
-                    <div className="grid grid-cols-7 text-center mt-4">
-                      {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
-                        <div key={day} className="text-sm font-medium text-gray-700">
-                          {day}
-                        </div>
-                      ))}
+                    <div className="bg-white p-4 rounded-lg shadow-lg">
+                      <p className="text-xl font-semibold">DR. Psychotherapist</p>
+                      <p>Psychotherapist</p>
                     </div>
-                    <div className="grid grid-cols-7 text-center gap-y-4 mt-4">
-                      {[...Array(firstDayOfMonth)].map((_, index) => (
-                        <div key={index}></div>
-                      ))}
-                      {[...Array(daysInMonth[selectedMonth])].map((_, dayIndex) => (
-                        <div
-                          key={dayIndex}
-                          className={`p-2 rounded-full cursor-pointer ${
-                            dayIndex + 1 === currentDay && selectedMonth === currentMonth
-                              ? "bg-blue-500 text-white"
-                              : "text-gray-700"
-                          }`}
-                        >
-                          {dayIndex + 1}
-                        </div>
-                      ))}
+                  </div>
+                  <div className="text-center">
+                    <div className="bg-white p-4 rounded-lg shadow-lg">
+                      <p className="text-xl font-semibold">DR. Psychotherapist</p>
+                      <p>Psychotherapist</p>
                     </div>
                   </div>
                 </div>
               </div>
-
-              {/* What to do section */}
-              <div className="bg-white rounded-lg shadow-lg p-6">
-                <h2 className="text-lg font-semibold">What to do?</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-                  <ActivityCard
-                    title="Meditate"
-                    description="20-30 minutes/day"
-                    icon="🧘‍♀️"
-                  />
-                  <ActivityCard
-                    title="Pet Time"
-                    description="Be sure to have some playtime with your beloved pets"
-                    icon="🐶"
-                  />
-                  <ActivityCard
-                    title="Exercise"
-                    description="30-35 minutes/day"
-                    icon="💪"
-                  />
-                  <ActivityCard
-                    title="Arts"
-                    description="Showcase your talent, express yourself!"
-                    icon="🎨"
-                  />
-                </div>
-              </div>
             </div>
+          )}
 
-            {/* Mood Tracker Section */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-              <div className="bg-white rounded-lg shadow-lg p-6">
-                <h2 className="text-xl font-semibold mb-4">Mood Tracker</h2>
-                <div className="flex justify-between items-center">
-                  <p className="text-lg font-medium">How are you feeling today?</p>
-                  <Link href="/client/pages/moods">
-                    <button className="bg-blue-500 text-white px-4 py-2 rounded-lg">
-                      START
-                    </button>
-                  </Link>
+          {/* Grid Layout for Sections */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6 mx-8">
+            {/* Render full functionality (Upcoming Sessions, Calendar, etc.) if the user is Client */}
+            {role === "client" && (
+              <>
+                {/* Top Row: Upcoming Sessions and Daily Reminder */}
+                <div className="bg-white rounded-lg shadow-lg p-6">
+                  <h2 className="text-bold text-xl font-bold mb-4">Upcoming Sessions</h2>
+                  <div className="space-y-2 flex-grow overflow-y-auto max-h-[300px]">
+                    <div className="flex justify-between items-center p-2 rounded-lg bg-gradient-to-r from-blue-300 via-blue-400 to-blue-300 animate-gradient-x">
+                      <span className="font-bold">PLACEHOLDER FOR THE FIRST SESSION</span>
+                      <span className="text-gray-600 font-bold">Date and Time</span>
+                    </div>
+                  </div>
                 </div>
-              </div>
 
-              {/* Updated Reading Resources Section */}
-              <div className="bg-white rounded-lg shadow-lg p-6">
-                <h2 className="text-xl font-semibold mb-4">Reading Resources</h2>
-                <div className="flex justify-between items-center">
-                  <p className="text-lg font-medium">Start your day by reading something inspiring!</p>
-                  <Link href="/client/pages/explore">
-                    <button className="bg-blue-500 text-white px-4 py-2 rounded-lg">
-                      VIEW
-                    </button>
-                  </Link>
+                <div className="bg-white rounded-lg shadow-lg p-6">
+                  <h2 className="text-xl font-semibold mb-4">A Daily Reminder to Yourself</h2>
+                  <div className="space-y-4 flex-grow overflow-y-auto max-h-[300px]">
+                    <div className="bg-gray-50 p-4 rounded-lg shadow">
+                      <h3 className="font-semibold text-lg">This Too Shall Pass</h3>
+                      <p className="text-gray-700">Feelings are temporary. Hold on, better days are coming.</p>
+                    </div>
+                    <div className="bg-gray-50 p-4 rounded-lg shadow">
+                      <h3 className="font-semibold text-lg">Breathe In, Let Go</h3>
+                      <p className="text-gray-700">Take a moment to breathe. Release the tension in your mind and body.</p>
+                    </div>
+                    <div className="bg-gray-50 p-4 rounded-lg shadow">
+                      <h3 className="font-semibold text-lg">You Are Enough.</h3>
+                      <p className="text-gray-700">Your worth isn’t measured by your struggles. You are enough just as you are.</p>
+                    </div>
+                  </div>
                 </div>
+
+                {/* Middle Row: Calendar and What to Do */}
+                <div className="bg-white rounded-lg shadow-lg p-6">
+                  <h2 className="text-lg font-semibold">Calendar</h2>
+                  <div className="mt-4">
+                    <label htmlFor="month-select" className="font-medium text-gray-700">
+                      Choose a month:
+                    </label>
+                    <select
+                      id="month-select"
+                      value={selectedMonth}
+                      onChange={handleMonthChange}
+                      className="ml-2 p-2 border border-gray-300 rounded-lg"
+                    >
+                      {months.map((month, index) => (
+                        <option key={index} value={index}>
+                          {month}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="mt-6">
+                    <div className="text-center">
+                      <div className="text-bold text-xl font-bold">{months[selectedMonth]}</div>
+                      <div className="grid grid-cols-7 text-center mt-4">
+                        {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+                          <div key={day} className="text-sm font-medium text-gray-700">
+                            {day}
+                          </div>
+                        ))}
+                      </div>
+                      <div className="grid grid-cols-7 text-center gap-y-4 mt-4">
+                        {[...Array(firstDayOfMonth)].map((_, index) => (
+                          <div key={index}></div>
+                        ))}
+                        {[...Array(daysInMonth[selectedMonth])].map((_, dayIndex) => (
+                          <div
+                            key={dayIndex}
+                            className={`p-2 rounded-full cursor-pointer ${
+                              dayIndex + 1 === currentDay && selectedMonth === currentMonth
+                                ? "bg-blue-500 text-white"
+                                : "text-gray-700"
+                            }`}
+                          >
+                            {dayIndex + 1}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-lg shadow-lg p-6">
+                  <h2 className="text-lg font-semibold">What to do?</h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                    <ActivityCard
+                      title="Meditate"
+                      description="20-30 minutes/day"
+                      icon="🧘‍♀️"
+                    />
+                    <ActivityCard
+                      title="Pet Time"
+                      description="Be sure to have some playtime with your beloved pets"
+                      icon="🐶"
+                    />
+                    <ActivityCard
+                      title="Exercise"
+                      description="30-35 minutes/day"
+                      icon="💪"
+                    />
+                    <ActivityCard
+                      title="Arts"
+                      description="Showcase your talent, express yourself!"
+                      icon="🎨"
+                    />
+                  </div>
+                </div>
+
+                {/* Bottom Row: Mood Tracker and Reading Resources */}
+                <div className="bg-white rounded-lg shadow-lg p-6 lg:col-span-2">
+                  <h2 className="text-xl font-semibold mb-4">Mood Tracker</h2>
+                  <div className="flex justify-between items-center">
+                    <p className="text-lg font-medium">How are you feeling today?</p>
+                    <Link href="/client/pages/moods">
+                      <button className="bg-blue-500 text-white px-4 py-2 rounded-lg">
+                        START
+                      </button>
+                    </Link>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* If New Client, show only What to Do and Daily Reminder */}
+            {role === "New Client" && (
+              <>
+                {/* Daily Reminder */}
+                <div className="bg-white rounded-lg shadow-lg p-6">
+                  <h2 className="text-xl font-semibold mb-4">A Daily Reminder to Yourself</h2>
+                  <div className="space-y-4 flex-grow overflow-y-auto max-h-[300px]">
+                    <div className="bg-gray-50 p-4 rounded-lg shadow">
+                      <h3 className="font-semibold text-lg">This Too Shall Pass</h3>
+                      <p className="text-gray-700">Feelings are temporary. Hold on, better days are coming.</p>
+                    </div>
+                    <div className="bg-gray-50 p-4 rounded-lg shadow">
+                      <h3 className="font-semibold text-lg">Breathe In, Let Go</h3>
+                      <p className="text-gray-700">Take a moment to breathe. Release the tension in your mind and body.</p>
+                    </div>
+                    <div className="bg-gray-50 p-4 rounded-lg shadow">
+                      <h3 className="font-semibold text-lg">You Are Enough.</h3>
+                      <p className="text-gray-700">Your worth isn’t measured by your struggles. You are enough just as you are.</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* What to Do Section */}
+                <div className="bg-white rounded-lg shadow-lg p-6">
+                  <h2 className="text-lg font-semibold">What to do?</h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                    <ActivityCard
+                      title="Meditate"
+                      description="20-30 minutes/day"
+                      icon="🧘‍♀️"
+                    />
+                    <ActivityCard
+                      title="Pet Time"
+                      description="Be sure to have some playtime with your beloved pets"
+                      icon="🐶"
+                    />
+                    <ActivityCard
+                      title="Exercise"
+                      description="30-35 minutes/day"
+                      icon="💪"
+                    />
+                    <ActivityCard
+                      title="Arts"
+                      description="Showcase your talent, express yourself!"
+                      icon="🎨"
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* Always Render Reading Resources */}
+            <div className="bg-white rounded-lg shadow-lg p-6 lg:col-span-2">
+              <h2 className="text-xl font-semibold mb-4">Reading Resources</h2>
+              <div className="flex justify-between items-center">
+                <p className="text-lg font-medium">Start your day by reading something inspiring!</p>
+                <Link href="/client/pages/explore">
+                  <button className="bg-blue-500 text-white px-4 py-2 rounded-lg">
+                    VIEW
+                  </button>
+                </Link>
               </div>
             </div>
           </div>
@@ -201,7 +303,6 @@ const Dashboard: React.FC = () => {
     </Layout>
   );
 };
-
 
 // ActivityCard component to reuse for tasks
 const ActivityCard: React.FC<{ title: string; description: string; icon: string }> = ({ title, description, icon }) => {

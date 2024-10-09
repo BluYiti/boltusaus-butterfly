@@ -1,5 +1,3 @@
-'use client';
-
 import { useState, useEffect } from 'react';
 import { Question } from '@/preassessment/data/questions';
 import { databases, account, ID } from '@/appwrite';
@@ -106,7 +104,7 @@ export const useAssessment = (questions: Question[] = []) => {
   const closeModal = () => {
     if (modalType === 'success') {
       setModalOpen(false);
-      router.push('/auth/login');
+      router.push('/client');
     } else {
       setModalOpen(false);
     }
