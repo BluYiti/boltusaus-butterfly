@@ -1,197 +1,111 @@
-"use client"; // Client Component
+"use client"; // Client Component 
+import { FaUserCircle, FaBars, FaHeart, FaBell, FaUser, FaCamera, FaPen, FaTimes, FaArrowRight } from 'react-icons/fa'; 
+import Layout from "@/components/Sidebar/Layout"; // Assuming Layout is the component that wraps sidebar and content 
+import items from "@/client/data/Links"; 
+import React, { useState, useEffect } from 'react'; 
 
-import React, { useState, useEffect } from 'react';
+const userName = "John"; // Placeholder for dynamic user data 
 
-const ProfilePage: React.FC = () => {
-  const [name, setName] = useState<string>(''); // Name from the database
-  const [newName, setNewName] = useState<string>(''); // Temporary state for editing
-  const [profilePic, setProfilePic] = useState<string>(''); // Profile picture URL
-  const [isEditingName, setIsEditingName] = useState<boolean>(false); // Toggle name edit mode
-  const [isEditingPic, setIsEditingPic] = useState<boolean>(false); // Toggle profile pic edit mode
-  const [selectedFile, setSelectedFile] = useState<File | null>(null); // For file upload
+const ProfilePage: React.FC = () => { 
+  const [name, setName] = useState<string>(''); // Name from the database 
+  const [profilePic, setProfilePic] = useState<string>(''); // Profile picture URL 
 
-  // Fetch user data from the API (name, profile picture)
-  useEffect(() => {
-    async function fetchUserData() {
-      const response = await fetch('/api/user'); // Replace with your API endpoint
-      const data = await response.json();
-      setName(data.name);
-      setNewName(data.name); // Set newName initially as the current name
-      setProfilePic(data.profilePic); // Set profilePic from database
-    }
+  useEffect(() => { 
+    async function fetchUserData() { 
+      const response = await fetch('/api/user'); // Replace with your API endpoint 
+      const data = await response.json(); 
+      setName(data.name); 
+      setProfilePic(data.profilePic); // Set profilePic from database 
+    } 
 
-    fetchUserData();
-  }, []);
+    fetchUserData(); 
+  }, []); 
 
-  // Handle name edit and save
-  const handleSaveName = async () => {
-    // Update the name in the database (API request)
-    await fetch('/api/user/update', {
-      method: 'POST', // Or PUT
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ name: newName }),
-    });
+  const handleEditProfile = () => { 
+    // Navigate to Edit Profile page or open an Edit Profile modal 
+    console.log("Edit Profile clicked"); 
+  }; 
 
-    setName(newName); // Update UI after saving
-    setIsEditingName(false);
-  };
+  const handleGoalTrackedClick = () => { 
+    // Handle the click event for Goals Tracked 
+    console.log("Goals Tracked clicked"); 
+  }; 
 
-  // Handle profile picture upload
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files[0]) {
-      setSelectedFile(event.target.files[0]);
-    }
-  };
+  return ( 
+    <Layout sidebarTitle="Butterfly" sidebarItems={items}> 
+      <div className="text-black min-h-screen flex bg-gray-50"> 
+        {/* Sidebar is wrapped inside Layout */} 
 
-  // Handle profile picture upload to server
-  const handleUploadPic = async () => {
-    if (selectedFile) {
-      const formData = new FormData();
-      formData.append('profilePic', selectedFile);
+        {/* Main Content */} 
+        <div className="flex-grow flex flex-col bg-gray-50 px-10 py-8 overflow-y-auto"> 
+          {/* Top Section with User Info */} 
+          <div className="bg-white shadow-lg py-4 px-6 flex justify-between items-center rounded-md mb-6"> 
+            <div className="flex items-center space-x-3"> 
+              <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white"> 
+                <FaUser size={28} /> 
+              </div> 
+              <h1 className="text-2xl font-semibold text-gray-800">Profile</h1> 
+            </div> 
+          </div> 
 
-      const response = await fetch('/api/user/uploadProfilePic', {
-        method: 'POST',
-        body: formData,
-      });
+          {/* Profile Section */} 
+          <div className="bg-white shadow-md p-6 rounded-lg flex flex-col md:flex-row justify-between items-start space-y-6 md:space-y-0 md:space-x-8"> 
+            {/* Profile Picture and Edit Button */} 
+            <div className="flex flex-col items-center"> 
+              <img 
+                src={profilePic || '/mnt/data/image.png'} // Default if no profile picture 
+                alt="Profile" 
+                className="rounded-full w-32 h-32 object-cover" 
+              /> 
+              {/* Edit Profile Button */} 
+              <button 
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition mt-4" 
+                onClick={handleEditProfile} 
+              > 
+                Edit Profile 
+              </button> 
+            </div> 
 
-      const data = await response.json();
-      setProfilePic(data.profilePic); // Update UI with new profile picture URL
-      setIsEditingPic(false); // Close the edit modal after uploading
-    }
-  };
+            {/* Personal Information Section */} 
+            <div className="mt-4 md:mt-0"> 
+              <h2 className="text-xl font-bold mb-4 text-gray-800">Personal Information</h2> 
+              <p><strong>Full Name:</strong> {name}</p> 
+              <p><strong>Date of Birth:</strong> March 17, 2000</p> 
+              <p><strong>Gender:</strong> Male</p> 
+              <p><strong>Age:</strong> 23</p> 
+              <p><strong>Contact Number:</strong> +639884023464</p> 
+            </div> 
+          </div> 
 
-  return (
-    <div className="text-black min-h-screen bg-gray-100 flex flex-col">
-      {/* Header */}
-      <header className="bg-blue-600 p-4 text-white flex items-center justify-between">
-        <button className="text-white text-lg">&larr;</button>
-        <h1 className="text-xl font-bold">Profile</h1>
-        <button className="text-white text-lg">&#9776;</button> {/* Menu */}
-      </header>
+          {/* Tracked Items Section */} 
+          <div className="mt-6 flex flex-col space-y-4 max-w-xs"> {/* Set a maximum width */} 
+            <button 
+              className="flex items-center bg-blue-600 text-white rounded-lg p-4 shadow-sm hover:bg-blue-700 transition cursor-pointer" 
+              onClick={handleGoalTrackedClick} 
+            > 
+              <span className="bg-green-500 rounded-full h-10 w-10 flex items-center justify-center text-xl font-bold mr-4"> 
+                0 
+              </span> 
+              <span className="text-lg font-semibold">Goals Tracked</span> 
+              <FaArrowRight className="ml-2" /> 
+            </button> 
+            <div className="flex items-center bg-blue-100 rounded-lg p-4 shadow-sm"> 
+              <span className="bg-green-500 text-white rounded-full h-10 w-10 flex items-center justify-center text-xl font-bold"> 
+                0 
+              </span> 
+              <span className="ml-4 text-lg text-blue-800 font-semibold">Moods Tracked</span> 
+            </div> 
+            <div className="flex items-center bg-blue-100 rounded-lg p-4 shadow-sm"> 
+              <span className="bg-green-500 text-white rounded-full h-10 w-10 flex items-center justify-center text-xl font-bold"> 
+                0 
+              </span> 
+              <span className="ml-4 text-lg text-blue-800 font-semibold">Resources Read</span> 
+            </div> 
+          </div> 
+        </div> 
+      </div> 
+    </Layout> 
+  ); 
+}; 
 
-      {/* Profile Content */}
-      <div className="p-4 flex flex-col items-center">
-        {/* Profile Picture */}
-        <div className="relative">
-          <img
-            src={profilePic || 'https://via.placeholder.com/100'} // Default if no profile picture
-            alt="Profile"
-            className="rounded-full w-24 h-24"
-          />
-          <button
-            className="absolute bottom-0 right-0 bg-gray-200 rounded-full p-1"
-            onClick={() => setIsEditingPic(true)} // Open profile pic edit container
-          >
-            📷 {/* Camera Icon */}
-          </button>
-
-          {/* Edit Profile Pic Prompt */}
-          {isEditingPic && (
-            <div className="absolute top-0 left-0 bg-white shadow-lg p-4 rounded-lg flex flex-col items-center">
-              <input type="file" onChange={handleFileChange} />
-              <div className="flex justify-between mt-2">
-                <button
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg"
-                  onClick={handleUploadPic}
-                >
-                  Save
-                </button>
-                <button
-                  className="bg-red-600 text-white px-4 py-2 rounded-lg ml-2"
-                  onClick={() => setIsEditingPic(false)}
-                >
-                  X {/* Close Button */}
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Name Display */}
-        <div className="relative mt-4">
-          {!isEditingName ? (
-            <>
-              <h2 className="text-lg font-bold text-center text-blue-800">
-                {name || 'Loading...'}
-              </h2>
-              <button
-                className="absolute -right-6 top-1 bg-gray-200 rounded-full p-1"
-                onClick={() => setIsEditingName(true)} // Open name edit container
-              >
-                ✏️ {/* Pencil Icon */}
-              </button>
-            </>
-          ) : (
-            // Name Edit Prompt
-            <div className="flex flex-col items-center bg-white p-4 rounded-lg shadow-md">
-              <input
-                type="text"
-                className="p-2 border border-gray-300 rounded-lg mb-2"
-                value={newName}
-                onChange={(e) => setNewName(e.target.value)}
-              />
-              <div className="flex justify-between">
-                <button
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg"
-                  onClick={handleSaveName}
-                >
-                  Save
-                </button>
-                <button
-                  className="bg-red-600 text-white px-4 py-2 rounded-lg ml-2"
-                  onClick={() => setIsEditingName(false)}
-                >
-                  X {/* Close Button */}
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Flex container to hold Personal Information and Tracked Items side by side */}
-      <div className="px-6 py-4 flex flex-row justify-between items-start space-x-4 mx-4">
-        {/* Personal Information */}
-        <div className="flex-1 bg-white rounded-lg shadow-md p-4">
-          <h2 className="text-lg font-bold mb-2">Personal Information</h2>
-          <p><strong>Full Name:</strong> {name}</p>
-          <p><strong>Date of Birth:</strong></p>
-          <p><strong>Gender:</strong></p>
-          <p><strong>Age:</strong></p>
-          <p><strong>Contact Number:</strong></p>
-        </div>
-
-        {/* Tracked Items */}
-        <div className="flex-1 flex flex-col space-y-3">
-          {/* Goal Tracked */}
-          <div className="flex items-center bg-blue-100 rounded-lg p-3">
-            <span className="bg-green-500 text-white rounded-full h-8 w-8 flex items-center justify-center text-lg mr-4">
-              0
-            </span>
-            <span className="text-blue-700 font-semibold">Goal Tracked</span>
-          </div>
-
-          {/* Mood Tracked */}
-          <div className="flex items-center bg-blue-100 rounded-lg p-3">
-            <span className="bg-green-500 text-white rounded-full h-8 w-8 flex items-center justify-center text-lg mr-4">
-              0
-            </span>
-            <span className="text-blue-700 font-semibold">Mood Tracked</span>
-          </div>
-
-          {/* Resource Read */}
-          <div className="flex items-center bg-blue-100 rounded-lg p-3">
-            <span className="bg-green-500 text-white rounded-full h-8 w-8 flex items-center justify-center text-lg mr-4">
-              0
-            </span>
-            <span className="text-blue-700 font-semibold">Resource Read</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default ProfilePage;
+export default ProfilePage; 
