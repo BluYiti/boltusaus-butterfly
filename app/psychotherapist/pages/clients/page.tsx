@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import Layout from "@/components/Sidebar/Layout";
 import items from "@/psychotherapist/data/Links";
 import { databases } from "@/appwrite";
+import ClientProfileModal from "@/psychotherapist/components/ClientProfileModal";
 
 interface ClientType {
   id: string;
@@ -32,6 +33,10 @@ const Clients = () => {
   const [filterStatus, setFilterStatus] = useState("All");
   const [clients, setClients] = useState<(ClientType & AccountType)[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchClientsAndAccounts = async () => {
@@ -79,10 +84,9 @@ const Clients = () => {
       client.lastname.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    // Apply status filter only in the "For Referral" tab
     if (activeTab === "For Referral") {
       searchFiltered = searchFiltered.filter(client => {
-        const status = client.status?.toLowerCase(); // Use optional chaining
+        const status = client.status?.toLowerCase();
         if (filterStatus === "Attached Certificate") {
           return status === "attached" && client.state === "referred";
         } else if (filterStatus === "Pending") {
@@ -154,7 +158,13 @@ const Clients = () => {
                 <p className="text-sm text-gray-500">{client.email}</p>
               </div>
             </div>
-            <button className="px-4 py-2 text-sm font-semibold text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition">
+            <button
+              onClick={() => {
+                setSelectedClientId(client.id);
+                setIsModalOpen(true);
+              }}
+              className="px-4 py-2 text-sm font-semibold text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition"
+            >
               View Profile
             </button>
           </div>
@@ -234,6 +244,15 @@ const Clients = () => {
           {renderClientList()}
         </div>
       </div>
+
+      <ClientProfileModal
+        clientId={selectedClientId}
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedClientId(null);
+        }}
+      />
     </Layout>
   );
 };
