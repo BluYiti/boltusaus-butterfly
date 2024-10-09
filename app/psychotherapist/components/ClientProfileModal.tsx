@@ -15,8 +15,8 @@ const ClientProfileModal = ({ clientId, isOpen, onClose }) => {
       try {
         setLoading(true);
         const response = await databases.getDocument(
-          'YOUR_DATABASE_ID', // Replace with your Appwrite database ID
-          'YOUR_COLLECTION_ID', // Replace with your collection ID
+          'Butterfly-Database', // Replace with your Appwrite database ID
+          'Client', // Replace with your collection ID
           clientId // The clientId passed in as prop
         );
         setClientData(response);
