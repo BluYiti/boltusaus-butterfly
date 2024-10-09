@@ -11,16 +11,17 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children, sidebarTitle, sidebarItems }) => {
   const [isMinimized, setIsMinimized] = useState(false);
-  const [isAcceptedClient, setIsAcceptedClient] = useState(false);
+  const [role, setRole] = useState<string | null>(null); // Use role instead of a boolean flag
 
-  // Check user status
+  // Fetch user role and status
   useEffect(() => {
     const fetchUserStatus = async () => {
       try {
         const user = await account.get();
 
-        if (user?.prefs?.position === "Accepted Client") {
-          setIsAcceptedClient(true);
+        // Safely get the role from user preferences
+        if (user?.prefs?.role) {
+          setRole(user.prefs.role); // Set role to either "New Client" or "Client"
         }
       } catch (error) {
         console.error("Failed to fetch user", error);
@@ -37,17 +38,20 @@ const Layout: React.FC<LayoutProps> = ({ children, sidebarTitle, sidebarItems })
     }
   }, []);
 
+  // Dynamically handle the items based on the role
+  const filteredItems = sidebarItems.map((item) => ({
+    ...item,
+    icon: item.icon as IconType,
+    isDisabled: role === "New Client" && ["Book Appointment", "Communication", "Goals"].includes(item.label),
+  }));
+
   return (
     <div className="flex h-screen">
       <Sidebar
         isMinimized={isMinimized}
         setIsMinimized={setIsMinimized}
         title={sidebarTitle}
-        items={sidebarItems.map((item) => ({
-          ...item,
-          icon: item.icon as IconType,
-          isDisabled: !isAcceptedClient && ["Book Appointment", "Communication", "Goals"].includes(item.label),
-        }))}
+        items={filteredItems}
       />
       <div className={`flex-1 transition-all duration-300 ease-in-out bg-gray-100 ${isMinimized ? "ml-16" : "ml-60"}`}>
         {children}
