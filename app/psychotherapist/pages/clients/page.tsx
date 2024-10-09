@@ -1,12 +1,11 @@
-'use client';
-
+'use client'
 import { useState, useEffect } from "react";
 import Layout from "@/components/Sidebar/Layout";
 import items from "@/psychotherapist/data/Links";
 import { databases } from "@/appwrite";
 
 interface ClientType {
-  id: string; // Document ID
+  id: string;
   clientid: string;
   userid: string;
   firstname: string;
@@ -16,37 +15,38 @@ interface ClientType {
   age: number;
   address: string;
   type: string;
-  state: string; // This will be used to filter clients by their state
+  state: string;
   emergencyContact: string;
   status: string;
 }
 
 interface AccountType {
-  id: string; // Document ID
+  id: string;
   username: string;
   email: string;
 }
 
-
 const Clients = () => {
   const [activeTab, setActiveTab] = useState("Current");
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterStatus, setFilterStatus] = useState("All");  const [clients, setClients] = useState<(ClientType & AccountType)[]>([]);
+  const [filterStatus, setFilterStatus] = useState("All");
+  const [clients, setClients] = useState<(ClientType & AccountType)[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchClientsAndAccounts = async () => {
+      setLoading(true);
       try {
         const clientResponse = await databases.listDocuments('Butterfly-Database', 'Client');
-    
+        
         const combinedClients = clientResponse.documents.map((clientDoc) => {
-          // Accessing email and username directly from the userid object
-          const email = clientDoc.userid.email; // Get email from the userid object
-          const username = clientDoc.userid.username; // Get username if needed
-    
+          const email = clientDoc.userid.email;
+          const username = clientDoc.userid.username;
+
           return {
             id: clientDoc.$id,
             clientid: clientDoc.clientid,
-            userid: clientDoc.userid.$id, // Keep the userid if needed
+            userid: clientDoc.userid.$id,
             firstname: clientDoc.firstname,
             lastname: clientDoc.lastname,
             phonenum: clientDoc.phonenum,
@@ -57,33 +57,43 @@ const Clients = () => {
             state: clientDoc.state,
             emergencyContact: clientDoc.emergencyContact,
             status: clientDoc.status,
-            email: email || "No email available", // Use email from the nested userid object
-            username: username || "", // Optionally get username as well
+            email: email || "No email available",
+            username: username || "",
           };
         });
-    
+
         setClients(combinedClients);
       } catch (error) {
         console.error(error);
+      } finally {
+        setLoading(false);
       }
-    };    
+    };
 
     fetchClientsAndAccounts();
   }, [databases]);
-  
 
   const filteredClients = () => {
-    const searchFiltered = clients.filter(client =>
+    let searchFiltered = clients.filter(client =>
       client.firstname.toLowerCase().includes(searchTerm.toLowerCase()) ||
       client.lastname.toLowerCase().includes(searchTerm.toLowerCase())
     );
-  
-    return searchFiltered.filter(client => {
-      const matchesFilter = filterStatus === "All" || client.status === filterStatus;
-      return matchesFilter;
-    });
+
+    // Apply status filter only in the "For Referral" tab
+    if (activeTab === "For Referral") {
+      searchFiltered = searchFiltered.filter(client => {
+        const status = client.status?.toLowerCase(); // Use optional chaining
+        if (filterStatus === "Attached Certificate") {
+          return status === "attached" && client.state === "referred";
+        } else if (filterStatus === "Pending") {
+          return status === "pending" && client.state === "referred";
+        }
+        return true; // For "All"
+      });
+    }
+
+    return searchFiltered;
   };
-  
 
   const renderClients = () => {
     const stateFilteredClients = filteredClients();
@@ -99,24 +109,59 @@ const Clients = () => {
     }
   };
 
-  const renderClientList = () => (
-    <div className="mt-4 space-y-3">
-      {renderClients().map((client, index) => (
-        <div key={index} className="flex items-center justify-between p-4 bg-white shadow rounded-lg">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-full bg-gray-200"></div>
-            <div>
-              <h4 className="font-semibold">{client.firstname} {client.lastname}</h4>
-              <p className="text-sm text-gray-500">{client.email}</p> {/* Displaying the email */}
+  const renderClientList = () => {
+    if (loading) {
+      return <div className="text-center">Loading clients...</div>;
+    }
+
+    return (
+      <div className="mt-4 space-y-3">
+        {renderClients().map((client, index) => (
+          <div key={index} className="flex items-center justify-between p-4 bg-white shadow rounded-lg">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 rounded-full bg-gray-200"></div>
+              <div>
+                <h4 className="font-semibold flex items-center">
+                  {client.firstname} {client.lastname}
+                  {client.state === "referred" && client.status === "pending" ? (
+                    <span className="ml-2 text-yellow-600 flex items-center" aria-label="Pending">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v8l4 4" />
+                      </svg>
+                      Pending...
+                    </span>
+                  ) : client.state === "referred" && client.status === "attached" ? (
+                    <span className="ml-2 text-green-700 flex items-center" aria-label="Attached Certificate">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span className="ml-1">Attached Certificate</span>
+                    </span>
+                  ) : null}
+                </h4>
+                <p className="text-sm text-gray-500">{client.email}</p>
+              </div>
             </div>
+            <button className="px-4 py-2 text-sm font-semibold text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition">
+              View Profile
+            </button>
           </div>
-          <button className="px-4 py-2 text-sm font-semibold text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition">
-            View Profile
-          </button>
-        </div>
-      ))}
-    </div>
-  );  
+        ))}
+      </div>
+    );
+  };
 
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
@@ -145,10 +190,26 @@ const Clients = () => {
 
             <div className="flex space-x-4">
               <div className="relative w-80">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 text-gray-400"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M11 4a7 7 0 100 14 7 7 0 000-14zM21 21l-4.35-4.35"
+                    />
+                  </svg>
+                </div>
                 <input
                   type="text"
                   placeholder="Search clients..."
-                  className="w-full px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  className="w-full pl-10 pr-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -163,7 +224,7 @@ const Clients = () => {
                   >
                     <option value="All">All</option>
                     <option value="Attached Certificate">Attached Certificate</option>
-                    <option value="Pending . . . ">Pending</option>
+                    <option value="Pending">Pending</option>
                   </select>
                 </div>
               )}
