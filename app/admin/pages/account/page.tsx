@@ -1,10 +1,11 @@
 'use client';
 
 import { useEffect, useState } from "react";
-import AddAccountModal from "../../components/AddAccountModal";
-import AdminLayout from "../../components/AdminLayout";
+import AddAccountModal from "@/admin/components/AddAccountModal";
+import Layout from "@/components/Sidebar/Layout";
 import { PencilIcon, TrashIcon } from "@heroicons/react/solid"; // Heroicons for pencil and trash icons
 import { databases } from "@/appwrite"; // Import the databases instance from appwrite.tsx
+import items from "@/admin/data/Links";
 
 interface User {
   id: string; // Assuming user ID is a string, adjust as needed
@@ -84,7 +85,7 @@ const Account = () => {
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
   return (
-    <AdminLayout>
+    <Layout sidebarTitle="Butterfly" sidebarItems={items}>
       {/* Flex container for Tabs, Search Input, and Add Account Button */}
       <div className="flex justify-between items-center mb-6 space-x-4">
         {/* Tabs for Client, Associate, Psychotherapist */}
@@ -194,7 +195,7 @@ const Account = () => {
         onClose={closeModal}
         selectedTab={selectedTab}
       />
-    </AdminLayout>
+    </Layout>
   );
 };
 

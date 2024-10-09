@@ -116,6 +116,12 @@ html {
   font-weight: normal;
   font-style: normal;
 }
+@font-face {
+  font-family: 'Poppins';
+  src: url('/fonts/Poppins.otf') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
 
 /* ========================================== TAILWIND STYLES */
 @layer base {

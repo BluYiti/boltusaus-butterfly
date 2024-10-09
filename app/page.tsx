@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from 'next/link';
 import { motion } from "framer-motion";
 import BackToTopButton from './components/BackToTop';
@@ -22,12 +22,50 @@ const navVariants = {
   }),
 };
 
+const aboutVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+};
+
 const HomePage: React.FC = () => {
   const [open, setOpen] = useState<number | null>(null);
 
   const toggleOpen = (index: number) => {
     setOpen(open === index ? null : index);
   };
+  
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [contentType, setContentType] = useState<'terms' | 'privacy'>('terms');
+
+  const openModal = (type: 'terms' | 'privacy') => {
+    setContentType(type);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const aboutRef = useRef<HTMLDivElement | null>(null);
+  const [hasAnimated, setHasAnimated] = useState(false);
+
+  const handleScroll = () => {
+    if (aboutRef.current && !hasAnimated) {
+      const rect = aboutRef.current.getBoundingClientRect();
+      const isVisible = rect.top >= 0 && rect.bottom <= window.innerHeight;
+
+      if (isVisible) {
+        setHasAnimated(true); // Set to true to trigger the animation
+      }
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [hasAnimated]); // Depend on hasAnimated to avoid unnecessary re-renders
 
   return (
     <div className='overflow-x-hidden'>
@@ -46,7 +84,7 @@ const HomePage: React.FC = () => {
             We believe that mental health is a collaborative effort. Together, we can navigate the path towards emotional well-being and strength.
           </p>
           <Link href={'/register'}>
-            <button className="mt-6 w-full md:w-auto bg-[#2081c3] text-white font-bold py-3 px-6 rounded-full border border-transparent hover:border-[#2081c3] hover:bg-transparent hover:text-[#2081c3] transform hover:scale-105 transition-all duration-300">
+            <button className="mt-6 w-full md:w-auto bg-[#2081c3] text-white font-bold py-3 px-6 rounded-full border-2 border-transparent hover:border-[#2081c3] hover:bg-transparent transform hover:scale-110 transition-all duration-300">
               Book an Appointment
             </button>
           </Link>
@@ -83,20 +121,26 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* About Section */}
-      <section id="about" className="py-8 md:py-32 bg-white text-center md:text-left h-[80vh]">
-        <div className="flex flex-col md:flex-row md:items-center max-w-4xl mx-auto">
-          <div className="md:w-2/3 px-2">
-            <h1 className="text-3xl md:text-4xl lg:text-7xl font-paintbrush text-blue-800 mb-4 md:mb-8">
-              What is Butterfly?
-            </h1>
-            <p className="text-base md:text-lg mb-8">
-              Butterfly is a psychological wellness web application of A.M. Peralta Psychological Services that offers the features: enhanced appointment system with an automated interactive SMS service, refined remote psychotherapy counseling, and a comprehensive client monitoring and management. These integrated services will allow clients and psychotherapists to book appointments and communicate remotely at any time. Butterfly aims to deliver more efficient, effective, and reliable mental healthcare digital service.
-            </p>
+      <section ref={aboutRef} id="about" className="py-8 md:py-32 bg-white text-center md:text-left h-[80vh]">
+        <motion.div
+          initial="hidden"
+          animate={hasAnimated ? "visible" : "hidden"}
+          variants={aboutVariants}
+        >
+          <div className="flex flex-col md:flex-row md:items-center max-w-4xl mx-auto">
+            <div className="md:w-2/3 px-2">
+              <h1 className="text-3xl md:text-4xl lg:text-7xl font-paintbrush text-blue-800 mb-4 md:mb-8">
+                What is Butterfly?
+              </h1>
+              <p className="text-base md:text-lg mb-8">
+                Butterfly is a psychological wellness web application of A.M. Peralta Psychological Services that offers the features: enhanced appointment system with an automated interactive SMS service, refined remote psychotherapy counseling, and a comprehensive client monitoring and management. These integrated services will allow clients and psychotherapists to book appointments and communicate remotely at any time. Butterfly aims to deliver more efficient, effective, and reliable mental healthcare digital service.
+              </p>
+            </div>
+            <div className="md:w-1/3 flex justify-right md:justify-end md:ml-2">
+              <img src="/images/amperalta.jpg" alt="A.M. Peralta Psychological Services" className="w-48 h-48 md:w-64 md:h-64 rounded-full" />
+            </div>
           </div>
-          <div className="md:w-1/3 flex justify-right md:justify-end md:ml-2">
-            <img src="/images/amperalta.jpg" alt="A.M. Peralta Psychological Services" className="w-48 h-48 md:w-64 md:h-64 rounded-full" />
-          </div>
-        </div>
+        </motion.div>
       </section>
 
       {/* Booking Section */}

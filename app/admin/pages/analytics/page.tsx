@@ -1,10 +1,11 @@
 'use client'
 
 // admin/pages/analytics/page.tsx
-import AdminLayout from "../../components/AdminLayout";
+import Layout from "@/components/Sidebar/Layout";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from 'recharts';
 import { useEffect, useState } from "react";
 import { client, databases } from "@/appwrite"; // Adjust the import based on your appwrite.ts location
+import items from "@/admin/data/Links";
 
 const userEngagementData = [
   { month: 'Jan', activeUsers: 1200, sessions: 2400 },
@@ -55,12 +56,14 @@ const Analytics = () => {
     fetchOnlineUsers();
   }, []);
   return (
-    <AdminLayout>
+    <Layout sidebarTitle="Butterfly" sidebarItems={items}>
+      <div className="bg-white rounded-b-lg shadow-md p-5 top-0 left-60 w-full z-10"> {/* Fixed position with full width */}
+        <h2 className="text-2xl font-bold">About Me</h2>
+      </div>
       {/* User Engagement Section */}
-      <section className="mb-8">
-        <h2 className="text-2xl font-bold mb-6 text-black">User Engagement</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          
+      <section className="bg-gray-100">
+        <h2 className="text-2xl font-bold text-black px-10 pt-5">Analytics</h2>
+        <div className="px-10 pt-5 grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Active Users & Sessions Card */}
           <div className="p-5 bg-white shadow-lg rounded-lg transition-transform transform hover:scale-105">
             <h3 className="text-xl font-semibold mb-3">Active Users & Sessions</h3>
@@ -101,12 +104,6 @@ const Analytics = () => {
               </BarChart>
             </ResponsiveContainer>
           </div>
-
-        </div>
-
-        {/* Total Users and Online Users Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-          
           {/* Total Users Card */}
           <div className="bg-white shadow-lg rounded-lg p-4 h-32 flex flex-col justify-center items-center transition-transform transform hover:scale-105">
             <h2 className="text-lg font-semibold text-gray-800">Total Users</h2>
@@ -122,13 +119,12 @@ const Analytics = () => {
               {onlineUsers !== null ? onlineUsers : 'Loading...'}
             </p>
           </div>
-
         </div>
       </section>
 
       {/* Revenue Data Section */}
-      <section className="mb-8">
-        <h2 className="text-xl font-semibold mb-4">Revenue Data</h2>
+      <section className="mb-8 px-10 bg-gray-100">
+        <h2 className="text-2xl font-bold text-black pt-10 pb-5">Revenue Data</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="p-4 bg-white shadow-md rounded-lg">
             <h3 className="text-lg font-medium">Total Revenue</h3>
@@ -156,7 +152,7 @@ const Analytics = () => {
           </div>
         </div>
       </section>
-    </AdminLayout>
+    </Layout>
   );
 };
 

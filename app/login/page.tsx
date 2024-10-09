@@ -2,18 +2,14 @@
 
 import React, { useState } from 'react';
 import { useLogin } from './hooks/useLogin';
+import { useRouter } from 'next/navigation';
 import LoginForm from './components/LoginForm';
-import termsContent from '@/constants/terms';
-import privacyContent from '@/constants/privacy';
-import TermsAndPrivacy from '@/auth/register/components/TermsAndPrivacy';
 import Back from '@/components/Back';
-import BubbleAnimation from '@/components/BubbleAnimation';
 
 const LoginPage: React.FC = () => {
+    const router = useRouter();
     const { login, error } = useLogin();
     const [loading, setLoading] = useState<boolean>(false);
-    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-    const [contentType, setContentType] = useState<'terms' | 'privacy'>('terms');
 
     const handleLogin = async (email: string, password: string) => {
         setLoading(true);
@@ -21,71 +17,42 @@ const LoginPage: React.FC = () => {
         setLoading(false);
     };
 
-    const openModal = (type: 'terms' | 'privacy') => {
-        setContentType(type);
-        setIsModalOpen(true);
-    };
+    const handleForgot = () =>  {
+        router.push('/login/forgot');
+    }
 
-    const closeModal = () => {
-        setIsModalOpen(false);
-    };
+    const handleRegister = () =>  {
+        router.push('/register');
+    }
 
     return (
-        <div className="min-h-screen flex bg-blue-100">
-            <Back />
-            <div className="flex w-full min-h-screen overflow-hidden">
-                {/* Left side */}
-                <div className="w-1/2 flex flex-col items-center justify-center bg-blue-100 p-8">
-                    <div className="flex flex-col items-center">
-                        <img
-                            src="/images/ButterflyLanding.png"
-                            alt="A.M.Peralta Psychological Services"
-                            className="h-24 w-24 mb-4"
-                        />
+        <div className='overflow-hidden'>
+            <Back/>
+            <h1 className="absolute top-5 left-20 text-[#2081c3] text-2xl md:text-3xl font-bold ">Butterfly</h1>
+            <h2 className='absolute font-paintbrush text-8xl text-[#2b4369] top-32 left-20'>
+                Start your Journey
+            </h2>
+            <div className='absolute w-2/5 h-screen'>
+                <p className='absolute top-60 text-center left-24 text-[#2081c3] font-poppins'>
+                    We believe that mental health is a collaborative effort. Together, we can navigate the path toward emotional well-being and mental strength.
+                </p>
+                <div className='absolute top-72 left-52'>
+                    <LoginForm onLogin={handleLogin} error={error} loading={loading} />
+                    <div>
+                        <a className="absolute top-[10.5rem] left-[8.5rem] text-blue-500 text-sm">
+                            <button onClick={handleForgot} className='text-blue-400 underline'>Forgot password?</button>
+                        </a>
                     </div>
-                    <h2 className="text-2xl font-semibold text-center">
-                        A.M.Peralta Psychological Services
-                    </h2>
-                </div>
-
-                {/* Right side - center the login form */}
-                <div className="w-1/2 flex items-center justify-center p-8">
-                    <div className="w-full max-w-md">
-                        <LoginForm onLogin={handleLogin} error={error} loading={loading} />
-
-                        <div className="text-center mt-4">
-                            <p className="text-gray-500 text-sm">
-                                By logging in, you agree to our
-                                <button
-                                    type="button"
-                                    onClick={() => openModal('terms')}
-                                    className="text-blue-500 hover:underline ml-1"
-                                >
-                                    Terms and Conditions
-                                </button>
-                                &nbsp;and&nbsp;
-                                <button
-                                    type="button"
-                                    onClick={() => openModal('privacy')}
-                                    className="text-blue-500 hover:underline"
-                                >
-                                    Privacy Policy
-                                </button>.
-                            </p>
-                        </div>
+                    <div>
+                        <h2 className='absolute mt-20 ml-6 text-sm'>
+                            Don't have an account?
+                            <button onClick={handleRegister} className='text-blue-400 underline ml-2'>Register</button>
+                        </h2> 
                     </div>
                 </div>
             </div>
-
-            <BubbleAnimation />
-
-            <TermsAndPrivacy
-                isOpen={isModalOpen}
-                onClose={closeModal}
-                contentType={contentType}
-                termsContent={termsContent}
-                privacyContent={privacyContent}
-            />
+            <div className="absolute right-14 w-1/2 h-screen bg-cover bg-no-repeat" style={{ backgroundImage: `url('/images/manyfly.png')` }}></div>
+            <div className="absolute right-0 w-14 h-screen bg-cover bg-no-repeat" style={{ backgroundImage: `url('/images/rightblock.png')` }}></div>
         </div>
     );
 };

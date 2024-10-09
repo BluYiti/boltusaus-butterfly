@@ -5,9 +5,12 @@ const termsContent = `
 
 Welcome to [App Name] (the "App"). These Terms and Conditions ("Terms") govern your access to and use of our App and related services. By using the App, you agree to comply with and be bound by these Terms. If you do not agree with these Terms, please do not use the App.
 
+I am to participate in telebehavioral health with A.M.Peralta Psychological Services as part of my consultation/counseling and psychotherapy. I understand that telebehavioral health is the practice of delivering mental health care services via technology between a licensed mental health care practitioner and a client such as myself. Furthermore, I understand the guidelines indicated below with respect to telebehavioral health.
+
 ## 1. Acceptance of Terms
 
 By accessing or using [App Name], you confirm that you are at least 18 years old and have the legal capacity to enter into these Terms. If you are using the App on behalf of an organization, you represent that you have the authority to bind that organization to these Terms.
+I understand that there are risks, benefits, and consequences associated with telebehavioral health, including but not limited to, disruption of transmission by technology failures, interruption and/or breaches of confidentiality by unauthorized persons, and/or limited ability to respond to emergencies.
 
 ## 2. Purpose of the App
 

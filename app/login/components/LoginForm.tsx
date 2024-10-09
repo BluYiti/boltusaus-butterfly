@@ -1,4 +1,7 @@
+'use client'
+
 import React, { useState } from 'react';
+import { FaEnvelope, FaEye } from 'react-icons/fa';
 
 interface LoginFormProps {
     onLogin: (email: string, password: string) => void;
@@ -17,10 +20,12 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin, error, loading }) => {
 
     return (
         <div>
-            <h2 className="text-center text-2xl font-semibold">WELCOME!</h2>
             <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
                 {error && <div className="text-red-500 text-sm">{error}</div>}
-                <div className="rounded-md shadow-sm">
+                <div className="relative mt-8">
+                    <label htmlFor="email" className="absolute -top-3 left-2 bg-white px-1 text-[#38b6ff]">
+                        Email
+                    </label>
                     <input
                         id="email"
                         name="email"
@@ -30,35 +35,47 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin, error, loading }) => {
                         placeholder="Email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="input-style"
+                        className="border border-[#38b6ff] rounded-xl pl-3 pr-10 pt-4 pb-3 w-64 text-gray-500"
                     />
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                        <FaEnvelope/>
+                    </div>
+                </div>
+                <div className="relative mt-8">
+                    <label htmlFor="password" className="absolute -top-3 left-2 bg-white px-1 text-[#38b6ff]">
+                        Password
+                    </label>
                     <input
                         id="password"
                         name="password"
                         type="password"
-                        autoComplete="current-password"
+                        autoComplete="password"
                         required
                         placeholder="Password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="input-style"
+                        className="border border-[#38b6ff] rounded-xl pl-3 pr-10 pt-4 pb-3 w-64 text-gray-500"
                     />
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                        <button>
+                            <FaEye/>
+                        </button>
+                    </div>
                 </div>
-                <button
-                    type="submit"
-                    className="btn-submit"
-                    disabled={loading}
-                >
-                    {loading ? 'Logging in...' : 'Login'}
-                </button>
-                <div className="text-center">
-                    <label className="block text-gray-500">
-                        <input type="checkbox" className="mr-1" />
+                <div>
+                    <label className="text-sm absolute top-[10.5rem] text-gray-500">
+                        <input type="checkbox"/>
                         Remember Me
                     </label>
-                    <a href="#" className="text-blue-500 text-sm">
-                        Forgot your password?
-                    </a>
+                </div>
+                <div>
+                    <button
+                        type="submit"
+                        className="btn-submit absolute mt-3 ml-6 text-lg rounded-xl bg-[#38b6ff] w-52 py-2 text-white"
+                        disabled={loading}
+                    >
+                        {loading ? 'Logging in...' : 'Login'}
+                    </button>
                 </div>
             </form>
         </div>
