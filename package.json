@@ -24,6 +24,7 @@
     "@tanstack/react-table": "^8.20.5",
     "appwrite": "^15.0.0",
     "axios": "^1.7.7",
+    "canvas-confetti": "^1.9.3",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
@@ -35,6 +36,7 @@
     "node-appwrite": "^14.1.0",
     "react": "^18.3.1",
     "react-calendar": "^5.0.0",
+    "react-confetti": "^6.1.0",
     "react-date-picker": "^11.0.0",
     "react-datepicker": "^7.3.0",
     "react-dom": "^18.3.1",
@@ -47,6 +49,7 @@
     "recharts": "^2.12.7",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
+    "tailwindcss-animations": "^2.0.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {

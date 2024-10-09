@@ -1,8 +1,9 @@
 "use client"; // Add this at the top of the file
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Layout from "@/components/Sidebar/Layout"; // Adjust the path if necessary
 import items from "@/client/data/Links";
+import Confetti from "react-confetti"; // Import the Confetti component
 
 const months = [
   { name: "January", days: 31 },
@@ -24,9 +25,10 @@ const therapists = [
     name: "Mrs. Angelica Peralta",
     specialty: "Psychotherapy and Counseling",
     imgSrc: "https://via.placeholder.com/60",
-    bio: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
   },
 ];
+
+const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 const AppointmentBooking = () => {
   const [selectedMonth, setSelectedMonth] = useState("October");
@@ -35,8 +37,23 @@ const AppointmentBooking = () => {
   const [selectedTherapist] = useState(therapists[0]); // Default selection for the therapist
   const [appointmentBooked, setAppointmentBooked] = useState(false); // State for success message
   const [showPrompt, setShowPrompt] = useState(false); // State to control the confirmation prompt
+  const [width, setWidth] = useState(window.innerWidth);
+  const [height, setHeight] = useState(window.innerHeight);
 
   const currentYear = new Date().getFullYear(); // Get the current year dynamically
+
+  // Handle window resizing
+  useEffect(() => {
+    const handleResize = () => {
+      setWidth(window.innerWidth);
+      setHeight(window.innerHeight);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   const handleMonthChange = (event) => {
     setSelectedMonth(event.target.value);
@@ -60,6 +77,9 @@ const AppointmentBooking = () => {
 
   const daysInSelectedMonth = months.find((month) => month.name === selectedMonth)?.days || 31;
 
+  // Get the weekday of the 1st day of the selected month
+  const firstDayOfMonth = new Date(`${selectedMonth} 1, ${currentYear}`).getDay();
+
   const isFormComplete = selectedDay && selectedTime;
 
   const handleProceedToPayment = () => {
@@ -72,13 +92,11 @@ const AppointmentBooking = () => {
         <div className="flex-grow flex flex-col justify-between bg-gray-100">
           <div className="bg-white shadow-lg py-4 px-6 flex justify-between items-center">
             <div className="text-black flex flex-col flex-grow p-6 space-y-6 mx-auto w-3/4"> {/* Set width to 75% */}
-              
+
               {/* Display Psychotherapist */}
-              <h3 className="text-3xl font-bold text-blue-900">
-                Your Psychotherapist
-              </h3>
+              <h3 className="text-3xl font-bold text-blue-900">Your Psychotherapist</h3>
               <div className="flex space-x-6 mt-4">
-                <div className={`w-full bg-white p-4 rounded shadow-lg border border-gray-200`}>
+                <div className="w-full bg-white p-4 rounded shadow-lg border border-gray-200">
                   <div className="flex items-center space-x-4">
                     <img
                       src={selectedTherapist.imgSrc}
@@ -87,20 +105,17 @@ const AppointmentBooking = () => {
                     />
                     <div>
                       <h3 className="text-lg font-bold">{selectedTherapist.name}</h3>
-                      <p className="text-sm text-gray-500">
-                        Specialty: {selectedTherapist.specialty}
-                      </p>
+                      <p className="text-sm text-gray-500">Specialty: {selectedTherapist.specialty}</p>
+                      <p className="text-sm text-gray-500 mt-2">{selectedTherapist.bio}</p>
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Select Month and Date */}
-              <h2 className="text-3xl font-bold text-left text-blue-900 mt-8">
-                Counseling and Therapy Sessions
-              </h2>
+              <h2 className="text-3xl font-bold text-left text-blue-900 mt-8">Counseling and Therapy Sessions</h2>
 
-              <div className="bg-white p-6 rounded shadow-lg border border-gray-200 w-full">
+              <div className="bg-white p-6 rounded shadow-lg border border-gray-200 w-30">
                 <div className="mb-4">
                   <label className="block mb-2 text-lg font-medium text-gray-700">
                     Select Month and Date {!selectedDay && <span className="text-red-500">*</span>}
@@ -118,7 +133,20 @@ const AppointmentBooking = () => {
                   </select>
                 </div>
 
+                {/* Display Weekday Headers Above the Dates */}
+                <div className="grid grid-cols-7 gap-4 text-center font-bold text-gray-600">
+                  {weekdays.map((day) => (
+                    <div key={day}>{day.slice(0, 3)}</div> // Show the first 3 letters of the day
+                  ))}
+                </div>
+
+                {/* Calendar with Dates */}
                 <div className="grid grid-cols-7 gap-4 mb-4 p-4 rounded shadow-md bg-gray-100">
+                  {/* Empty divs to shift the 1st day to the correct weekday */}
+                  {Array.from({ length: firstDayOfMonth }).map((_, index) => (
+                    <div key={index}></div>
+                  ))}
+                  {/* Display days of the selected month */}
                   {Array.from({ length: daysInSelectedMonth }, (_, i) => i + 1).map((day) => (
                     <button
                       key={day}
@@ -186,21 +214,15 @@ const AppointmentBooking = () => {
                 </div>
               )}
 
-              {/* Success Message */}
+              {/* Success Message and Confetti */}
               {appointmentBooked && (
                 <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
+                  <Confetti width={width} height={height} /> {/* Render Confetti */}
                   <div className="bg-white p-8 rounded-lg shadow-xl max-w-md w-full text-center relative border border-gray-300">
-                    <h3 className="text-2xl font-bold text-green-600">
-                      Your Appointment was Booked Successfully!
-                    </h3>
-                    <p className="mt-4">We have sent your booking information to your SMS.</p>
-                    <p className="mt-2">
-                      Service: Counseling and Therapy<br />
-                      Date & Time: {selectedMonth} {selectedDay}, {currentYear} | {selectedTime}<br />
-                      Name: {selectedTherapist.name}
-                    </p>
+                  <h2 className="text-3xl font-bold text-green-600 mb-4">Your appointment has been booked!</h2>
+                    <p className="text-lg text-gray-700">You can proceed to payment to complete the booking.</p>
                     <button
-                      className="mt-6 bg-blue-500 text-white py-2 px-4 rounded-lg transition-transform duration-300 hover:scale-105 hover:bg-blue-600"
+                      className="mt-6 bg-blue-500 text-white py-2 px-6 rounded-full"
                       onClick={handleProceedToPayment}
                     >
                       Proceed to Payment
@@ -208,7 +230,6 @@ const AppointmentBooking = () => {
                   </div>
                 </div>
               )}
-
             </div>
           </div>
         </div>
