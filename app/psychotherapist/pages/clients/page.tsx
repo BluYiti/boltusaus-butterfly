@@ -1,27 +1,24 @@
-'use client';
+'use client'
 
 import { useState } from "react";
 import Layout from "@/components/Sidebar/Layout";
 import items from "@/psychotherapist/data/Links";
+import ClientProfileModal from "@/psychotherapist/components/ClientProfileModal"; // Adjust import path
 
 const Clients = () => {
   const [activeTab, setActiveTab] = useState("Current");
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
+  const [selectedClientId, setSelectedClientId] = useState(null);
+  const [isModalOpen, setModalOpen] = useState(false);
 
   const clients = [
-    { name: "Bella Swan", email: "xxx@xxx.com", status: "Attached Certificate" },
-    { name: "Michael Bieber", email: "xxx@xxx.com", status: "Pending . . . " },
-    { name: "Nicki Minaj", email: "xxx@xxx.com", status: "Attached Certificate" },
-    { name: "Ana Smith", email: "xxx@xxx.com", status: "Pending . . . " },
-    { name: "Chris Grey", email: "xxx@xxx.com", status: "Attached Certificate" },
-    { name: "Lana Dress", email: "xxx@xxx.com", status: "Pending . . . " },
-    { name: "Sza Padilla", email: "xxx@xxx.com", status: "Attached Certificate" },
-    { name: "Case Oh", email: "xxx@xxx.com", status: "Pending . . . " },
-    { name: "Jennie Kim", email: "xxx@xxx.com", status: "Attached Certificate" },
-    { name: "Denzel White", email: "xxx@xxx.com", status: "Pending . . . " },
-    { name: "Angel Wong", email: "xxx@xxx.com", status: "Attached Certificate" },
-    { name: "Jennifer Lawrence", email: "xxx@xxx.com", status: "Pending . . . " },
+    { id: "bella-swan", name: "Bella Swan", email: "xxx@xxx.com", status: "Attached Certificate" },
+    { id: "michael-bieber", name: "Michael Bieber", email: "xxx@xxx.com", status: "Pending . . . " },
+    { id: "nicki-minaj", name: "Nicki Minaj", email: "xxx@xxx.com", status: "Attached Certificate" },
+    { id: "ana-smith", name: "Ana Smith", email: "xxx@xxx.com", status: "Pending . . . " },
+    { id: "chris-grey", name: "Chris Grey", email: "xxx@xxx.com", status: "Attached Certificate" },
+    // Add more clients as needed
   ];
 
   const filteredClients = clients.filter((client) => {
@@ -30,13 +27,21 @@ const Clients = () => {
     return matchesSearchTerm && matchesFilter;
   });
 
+  const openModal = (clientId) => {
+    setSelectedClientId(clientId);
+    setModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setSelectedClientId(null);
+    setModalOpen(false);
+  };
+
+  // Render clients for the "Current" tab
   const renderCurrentClients = () => (
     <div className="mt-4 space-y-3">
       {filteredClients.map((client, index) => (
-        <div
-          key={index}
-          className="flex items-center justify-between p-4 bg-white shadow rounded-lg"
-        >
+        <div key={index} className="flex items-center justify-between p-4 bg-white shadow rounded-lg">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 rounded-full bg-gray-200"></div>
             <div>
@@ -44,7 +49,10 @@ const Clients = () => {
               <p className="text-sm text-gray-500">{client.email}</p>
             </div>
           </div>
-          <button className="px-4 py-2 text-sm font-semibold text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition">
+          <button
+            className="px-4 py-2 text-sm font-semibold text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition"
+            onClick={() => openModal(client.id)}
+          >
             View Profile
           </button>
         </div>
@@ -52,13 +60,11 @@ const Clients = () => {
     </div>
   );
 
+  // Render clients for the "To Be Evaluated" tab
   const renderEvaluatedClients = () => (
     <div className="mt-4 space-y-3">
       {filteredClients.map((client, index) => (
-        <div
-          key={index}
-          className="flex items-center justify-between p-4 bg-white shadow rounded-lg"
-        >
+        <div key={index} className="flex items-center justify-between p-4 bg-white shadow rounded-lg">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 rounded-full bg-gray-200"></div>
             <div>
@@ -74,13 +80,11 @@ const Clients = () => {
     </div>
   );
 
+  // Render clients for the "For Referral" tab
   const renderReferralClients = () => (
     <div className="mt-4 space-y-3">
       {filteredClients.map((client, index) => (
-        <div
-          key={index}
-          className="flex items-center justify-between p-4 bg-white shadow rounded-lg"
-        >
+        <div key={index} className="flex items-center justify-between p-4 bg-white shadow rounded-lg">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 rounded-full bg-gray-200"></div>
             <div>
@@ -90,42 +94,15 @@ const Clients = () => {
             <div className="flex items-center space-x-2 ml-4">
               {client.status === "Attached Certificate" ? (
                 <>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 text-green-500"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M9 12l2 2 4-4m-1-7h6a2 2 0 012 2v12a2 2 0 01-2 2h-6m-3 0H5a2 2 0 01-2-2V5a2 2 0 012-2h6"
-                    />
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m1-7h6a2 2 0 012 2v12a2 2 0 01-2 2h-6m-3 0H5a2 2 0 01-2-2V5a2 2 0 012-2h6" />
                   </svg>
                   <span className="text-sm text-green-500">{client.status}</span>
                 </>
               ) : (
                 <>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 text-yellow-600 animate-spin"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <circle
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                      fill="none"
-                      strokeDasharray="10 10"
-                      strokeDashoffset="5"
-                    />
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-600 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth={2} fill="none" strokeDasharray="10 10" strokeDashoffset="5" />
                   </svg>
                   <span className="text-sm text-yellow-600">{client.status}</span>
                 </>
@@ -165,7 +142,6 @@ const Clients = () => {
               ))}
             </div>
 
-            {/* Search bar and dropdown filter aligned beside tabs */}
             <div className="flex space-x-4">
               <div className="relative w-80">
                 <input
@@ -175,23 +151,8 @@ const Clients = () => {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="absolute top-2.5 right-3 h-5 w-5 text-gray-500"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M21 21l-4.35-4.35M11 18a7 7 0 110-14 7 7 0 010 14z"
-                  />
-                </svg>
               </div>
 
-              {/* Dropdown filter, visible only on "For Referral" tab */}
               {activeTab === "For Referral" && (
                 <div className="relative w-48">
                   <select
@@ -214,6 +175,15 @@ const Clients = () => {
           {activeTab === "For Referral" && renderReferralClients()}
         </div>
       </div>
+
+      {/* Client Profile Modal */}
+      {isModalOpen && selectedClientId && (
+        <ClientProfileModal
+          clientId={selectedClientId}
+          isOpen={isModalOpen}
+          onClose={closeModal}
+        />
+      )}
     </Layout>
   );
 };
