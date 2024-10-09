@@ -85,6 +85,8 @@ const PaymentsHistory: React.FC = () => {
       <div className="flex-grow p-8">
         <h2 className="text-4xl font-bold text-gray-800 mb-8">Payment History</h2>
 
+        
+
         {/* Tabs with underline effect */}
         <div className="flex space-x-6 mb-8 relative">
           {['All', 'Current Clients', 'Referred Clients'].map(tab => (
