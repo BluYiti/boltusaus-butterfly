@@ -1,6 +1,7 @@
 "use client"; // Ensure compatibility with Next.js
 
 import React, { useState } from "react";
+import Link from "next/link";
 import {
   format,
   addMonths,
@@ -41,14 +42,12 @@ const Calendar: React.FC = () => {
   const [selectedGoals, setSelectedGoals] = useState<Goal | null>(null);
   const [newActivity, setNewActivity] = useState<string>("");
   const [isConfirmed, setIsConfirmed] = useState<boolean>(false);
-  const [showGoalModal, setShowGoalModal] = useState<boolean>(false); // Modal visibility state
-  const [isEditing, setIsEditing] = useState<boolean>(false); // State for editing goals
+  const [showGoalModal, setShowGoalModal] = useState<boolean>(false);
+  const [isEditing, setIsEditing] = useState<boolean>(false);
 
-  // Navigate between months
   const nextMonth = () => setSelectedDate(addMonths(selectedDate, 1));
   const prevMonth = () => setSelectedDate(subMonths(selectedDate, 1));
 
-  // Get the month and year
   const monthStart = startOfMonth(selectedDate);
   const monthEnd = endOfMonth(monthStart);
   const startDate = startOfWeek(monthStart);
@@ -56,9 +55,8 @@ const Calendar: React.FC = () => {
 
   const dateFormat = "d";
 
-  // Generate the calendar matrix (days of the month)
   const renderDays = () => {
-    const dayFormat = "EEEE"; // Full day names (Sunday, Monday, etc.)
+    const dayFormat = "EEEE";
     const days = [];
     const startDate = startOfWeek(new Date());
     for (let i = 0; i < 7; i++) {
@@ -71,7 +69,6 @@ const Calendar: React.FC = () => {
     return <div className="grid grid-cols-7 gap-2 mb-4">{days}</div>;
   };
 
-  // Add or update goal
   const handleAddGoal = () => {
     const formattedDate = format(selectedDate, "yyyy-MM-dd");
     const existingGoal = goals.find((goal) => goal.date === formattedDate);
@@ -80,35 +77,30 @@ const Calendar: React.FC = () => {
     } else {
       setGoals([...goals, { date: formattedDate, activities: [newActivity] }]);
     }
-    setNewActivity(""); // Clear input after adding
+    setNewActivity(""); 
   };
 
-  // Confirm and close the modal
   const handleConfirm = () => {
-    handleAddGoal(); // Add the new goal
-    setShowGoalModal(false); // Close the modal
-    setIsEditing(false); // Reset the editing mode
+    handleAddGoal();
+    setShowGoalModal(false); 
+    setIsEditing(false); 
   };
 
-  // Get goals for the selected day
   const handleDateClick = (day: Date) => {
     const formattedDate = format(day, "yyyy-MM-dd");
     const dayGoals = goals.find((goal) => goal.date === formattedDate);
     setSelectedGoals(dayGoals || { date: formattedDate, activities: [] });
-    setSelectedDate(day); // Set selected date for adding new goals
+    setSelectedDate(day); 
 
-    // If no goals exist, show input for adding new goals
     if (!dayGoals || dayGoals.activities.length === 0) {
-      setIsEditing(true); // Enable editing mode to show input box
+      setIsEditing(true); 
     } else {
-      setIsEditing(false); // Disable editing mode when goals exist
+      setIsEditing(false); 
     }
 
-    // Show the goal modal
     setShowGoalModal(true);
   };
 
-  // Render the dates for the calendar
   const renderCells = () => {
     const rows = [];
     let days = [];
@@ -119,7 +111,6 @@ const Calendar: React.FC = () => {
         formattedDate = format(day, dateFormat);
         const cloneDay = day;
 
-        // Find if there's a goal for the current day
         const dayGoal = goals.find(
           (goal) => goal.date === format(day, "yyyy-MM-dd")
         );
@@ -137,7 +128,6 @@ const Calendar: React.FC = () => {
             onClick={() => handleDateClick(cloneDay)}
           >
             <span className="text-center">{formattedDate}</span>
-            {/* Show activities as emojis */}
             <div className="flex justify-center mt-2">
               {dayGoal && dayGoal.activities.length > 0 && (
                 <div>
@@ -165,8 +155,12 @@ const Calendar: React.FC = () => {
 
   return (
     <div className="min-h-screen h-full bg-gradient-to-r from-blue-300 via-blue-500 to-blue-700 animate-gradient-x flex items-center justify-center">
-      <div className="container mx-auto p-4 bg-white rounded-lg shadow-lg max-w-5xl">
-        {/* Month Navigation */}
+      <div className="container mx-auto p-4 bg-white rounded-lg shadow-lg max-w-5xl relative">
+        {/* Back Button */}
+        <Link href="/client" className="absolute top-4 left-4 bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-600">
+          Back
+        </Link>
+
         <div className="mt-8 flex justify-between items-center mb-4">
           <button
             onClick={prevMonth}
@@ -185,13 +179,9 @@ const Calendar: React.FC = () => {
           </button>
         </div>
 
-        {/* Render days of the week */}
         {renderDays()}
-
-        {/* Render dates of the month */}
         {renderCells()}
 
-        {/* Display selected day activities */}
         {selectedGoals && (
           <div className="text-gray-500 mt-6 p-4 bg-gray-100 rounded-lg">
             <h3 className="text-lg font-bold mb-2 text-blue-900">
@@ -232,7 +222,6 @@ const Calendar: React.FC = () => {
           </div>
         )}
 
-        {/* Modal for viewing or adding goals */}
         {showGoalModal && (
           <div className="text-black fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
             <div className="bg-white p-6 rounded-lg shadow-lg relative max-w-md w-full">
@@ -255,7 +244,6 @@ const Calendar: React.FC = () => {
                 )}
               </ul>
 
-              {/* Show input box for adding goals if in editing mode */}
               {isEditing && (
                 <div className="flex items-center">
                   <input
