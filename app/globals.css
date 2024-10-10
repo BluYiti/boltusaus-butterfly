@@ -2,33 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@keyframes gradient-x {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-.animate-gradient-x {
-  background: linear-gradient(
-    45deg,
-    #2c67f2,
-    #62cff4,
-    #45a0e6,
-    #03a9f4,
-    #0689b3,
-    rgb(46, 105, 241),
-    #87ceeb
-  );
-  background-size: 400% 400%;
-  animation: gradient-x 15s ease infinite;
-}
-
 /* Fly animation */
 @keyframes fly {
   0% {
@@ -52,51 +25,6 @@
   100% {
     transform: translate(0, 0) rotate(0deg);
   }
-}
-
-/* Bubble animation */
-@keyframes bubble-float {
-  0% {
-    transform: translateY(0);
-    opacity: 0.8;
-  }
-  100% {
-    transform: translateY(-200px);
-    opacity: 0;
-  }
-}
-
-.bubble-container {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-}
-
-.bubble {
-  position: absolute;
-  bottom: 0;
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.6);
-  opacity: 0.7;
-}
-
-.bubble-1 {
-  left: 20%;
-  animation: bubble-float 6s ease-in infinite;
-}
-
-.bubble-2 {
-  left: 50%;
-  animation: bubble-float 8s ease-in infinite;
-}
-
-.bubble-3 {
-  left: 80%;
-  animation: bubble-float 7s ease-in infinite;
 }
 
 /* ========================================== TAILWIND STYLES */
@@ -126,7 +54,7 @@
 @layer utilities {
   /* ===== UTILITIES */
   .sidebar {
-    @apply remove-scrollbar w-full max-w-72 flex-col overflow-auto bg-black-800 px-7 py-10;
+    @apply remove-scrollbar w-full max-w-72 flex-col overflow-auto bg-dark-800 px-7 py-10;
   }
 
   .left-sidebar {
@@ -225,7 +153,7 @@
   .checkbox-label {
     @apply cursor-pointer text-sm font-medium text-dark-600 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 md:leading-none;
   }
-
+  
   /* ==== File Upload */
   .file-upload {
     @apply text-12-regular flex cursor-pointer  flex-col items-center justify-center gap-3 rounded-md border border-dashed border-blue-300 bg-light-200 p-5;
