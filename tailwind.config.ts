@@ -72,6 +72,7 @@ const config: Config = {
           210: "#83B0E1",
           220: "#71A5DE",
           300: "#38B6FF",
+          310: "#1BABFF",
           400: "#01C5F2",
           410: "#5ADBE4",
           500: "#0486FF",
@@ -95,8 +96,9 @@ const config: Config = {
         },
         light: {
           200: "#F8F9F8",
-          300: "#E8E9E9",
-          400: "#D0D5DD"
+          300: "#F2F3F5",
+          400: "#E8E9E9",
+          500: "#D0D5DD"
         },
         dark: {
           200: "#0D0F10",
