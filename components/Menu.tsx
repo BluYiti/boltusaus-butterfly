@@ -14,6 +14,12 @@ const menuItems = [
         visible: ["admin", "psychotherapist", "client", "associate"],
       },
       {
+        icon: "/assets/icons/goals.svg",
+        label: "Goals",
+        href: "/client/goals",
+        visible: ["client"],
+      },
+      {
         icon: "/assets/icons/appointments.svg",
         label: "Appointments",
         href: "/client/new-appointment",
@@ -59,7 +65,7 @@ const Menu = () => {
                 <Link
                   href={item.href}
                   key={item.label}
-                  className="flex items-center justify-center lg:justify-start gap-4 text-gray-500 py-2 md:px-2 rounded-xl hover:bg-blue-600"
+                  className="flex items-center justify-center lg:justify-start gap-4 text-gray-500 py-2 md:px-2 rounded-xl hover:text-blue-300"
                 >
                   <Image src={item.icon} alt="" width={20} height={20} />
                   <span className="hidden lg:block">{item.label}</span>
