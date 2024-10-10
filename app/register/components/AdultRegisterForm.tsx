@@ -3,53 +3,46 @@ import termsContent from '@/constants/terms';
 import privacyContent from '@/constants/privacy';
 import TermsAndPrivacy from './TermsAndPrivacy';
 import PhoneInput from 'react-phone-input-2';
+import { RegisterFormProps } from '../hook/RegisterFormProps';
+import useRegisterForm from '@/register/hook/RegisterComponents';
 import 'react-phone-input-2/lib/style.css';
-import { Country, Region, Province, City, Barangay } from '@/register/hook/AddressInterface';
 import { createSubmitHandler } from '@/register/hook/handleSubmitAdult';
-
-interface RegisterFormProps {
-    onRegister: (data: {
-        firstName: string;
-        lastName: string;
-        birthday: string;
-        address: string;
-        contactNumber: string;
-        emergencyContactName: string;
-        emergencyContactNumber: string;
-        idFile: File | null;
-        email: string;
-        password: string;
-    }) => void;
-    error: string | null;
-    loading: boolean;
-}
+import { useFetchCountries } from '@/register/hook/fetch/useFetchCountries';
+import { useFetchRegions } from '@/register/hook/fetch/useFetchRegions';
+import { useFetchProvinces } from '@/register/hook/fetch/useFetchProvinces';
+import { useFetchCities } from '@/register/hook/fetch/useFetchCities';
+import { useFetchBarangays } from '@/register/hook/fetch/useFetchBarangays';
 
 const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading }) => {
-    const [firstName, setFirstName] = useState<string>('');
-    const [lastName, setLastName] = useState<string>('');
-    const [birthday, setBirthday] = useState<string>('');
-    const [country, setCountry] = useState<string>('');
-    const [region, setRegion] = useState<string>('');
-    const [province, setProvince] = useState<string>('');
-    const [city, setCity] = useState<string>('');
-    const [barangay, setBarangay] = useState<string>('');
-    const [street, setStreet] = useState<string>('');
-    const [contactNumber, setContactNumber] = useState<string>('');
-    const [emergencyContactName, setEmergencyContactName] = useState<string>('');
-    const [emergencyContactNumber, setEmergencyContactNumber] = useState<string>('');
-    const [idFile, setIdFile] = useState<File | null>(null);
-    const [email, setEmail] = useState<string>('');
-    const [password, setPassword] = useState<string>('');
-    const [rePassword, setRePassword] = useState<string>('');
-    const [agreeToTerms, setAgreeToTerms] = useState<boolean>(false);
-    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-    const [validationError, setValidationError] = useState<string | null>(null);
-    const [age, setAge] = useState<number | null>(null);
-    const [countries, setCountries] = useState<Country[]>([]);
-    const [regions, setRegions] = useState<Region[]>([]);
-    const [provinces, setProvinces] = useState<Province[]>([]);
-    const [cities, setCities] = useState<City[]>([]);
-    const [barangays, setBarangays] = useState<Barangay[]>([]);
+    const {
+        firstName, setFirstName,
+        lastName, setLastName,
+        birthday, setBirthday,
+        country, setCountry,
+        region, setRegion,
+        province, setProvince,
+        city, setCity,
+        barangay, setBarangay,
+        street, setStreet,
+        contactNumber, setContactNumber,
+        emergencyContactName, setEmergencyContactName,
+        emergencyContactNumber, setEmergencyContactNumber,
+        idFile, setIdFile,
+        email, setEmail,
+        password, setPassword,
+        rePassword, setRePassword,
+        agreeToTerms, setAgreeToTerms,
+        isModalOpen, setIsModalOpen,
+        validationError, setValidationError,
+        age, setAge,
+        countries, setCountries,
+        regions, setRegions,
+        selectedRegion, setSelectedRegion,
+        selectedRegionCode, setSelectedRegionCode,
+        provinces, setProvinces,
+        cities, setCities,
+        barangays, setBarangays,
+    } = useRegisterForm();
 
     // Inside your component
     const handleSubmit = createSubmitHandler({
@@ -66,64 +59,13 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
         setValidationError,
     });
 
-    // Fetch countries from API when component mounts
-    useEffect(() => {
-        fetch('https://restcountries.com/v3.1/all?fields=name,flags')
-            .then((response) => response.json())
-            .then((data) => {
-                setCountries(data);
-            })
-            .catch((error) => {
-                console.error('Error fetching country data:', error);
-            });
-    }, []);
-
-    // Fetch regions from PSGC API when component mounts
-    useEffect(() => {
-        fetch('https://psgc.gitlab.io/api/regions/')
-            .then((response) => response.json())
-            .then((data) => {
-                setRegions(data);
-            })
-            .catch((error) => {
-                console.error('Error fetching region data:', error);
-            });
-    }, []);
-
-    // Fetch provinces
-    useEffect(() => {
-        fetch('https://psgc.gitlab.io/api/provinces/')
-            .then((response) => response.json())
-            .then((data) => {
-                setProvinces(data);
-            })
-            .catch((error) => {
-                console.error('Error fetching province data:', error);
-            });
-    }, []);
-
-    // Fetch cities
-    useEffect(() => {
-        fetch('https://psgc.gitlab.io/api/cities/')
-            .then((response) => response.json())
-            .then((data) => {
-                setCities(data);
-            })
-            .catch((error) => {
-                console.error('Error fetching city data:', error);
-            });
-    }, []);
-
-    // Fetch barangays
-    useEffect(() => {
-        if (city) {
-            const filteredBarangays = barangays.filter(b => b.city === city); // Adjust the filtering based on your data structure
-            setBarangays(filteredBarangays);
-        } else {
-            setBarangays([]); // Reset if no city is selected
-        }
-    }, [city, barangays]);
-
+        // Use custom hooks to fetch data
+        useFetchCountries(setCountries);
+        useFetchRegions(setRegions);
+        useFetchProvinces(setSelectedRegionCode, setProvinces);
+        useFetchCities(province, provinces, setCities, setCity, setBarangays);
+        useFetchBarangays(city, cities, setBarangays);
+    
     const calculateAge = (birthDateString: string): number => {
         const birthDate = new Date(birthDateString);
         const today = new Date();
@@ -232,12 +174,22 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
                             </div>
 
                             {/* Region Dropdown */}
-                            <div className="mb-4">
+                            <div className='mb-4'>
                                 <label className="block text-[#38b6ff] mb-2">Region</label>
                                 <select
                                     className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
                                     value={region}
-                                    onChange={(e) => setRegion(e.target.value)}
+                                    onChange={(e) => {
+                                        const selectedRegion = regions.find(r => r.name === e.target.value);
+                                        setRegion(e.target.value);
+                                        setSelectedRegionCode(selectedRegion?.code ?? null); // Use nullish coalescing to handle undefined
+                                        setProvince(''); // Reset province when region changes
+                                        setCity(''); // Reset city when region changes
+                                        setBarangay(''); // Reset barangay when region changes
+                                        setProvinces([]); // Clear provinces
+                                        setCities([]); // Clear cities
+                                        setBarangays([]); // Clear barangays
+                                    }}
                                 >
                                     <option value="">Select Region</option>
                                     {regions
@@ -259,6 +211,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
                                     onChange={(e) => {
                                         setProvince(e.target.value);
                                         setCity(''); // Reset city when province changes
+                                        setBarangays([]); // Clear barangays when province changes
                                     }}
                                 >
                                     <option value="">Select Province</option>
@@ -282,7 +235,6 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
                                 >
                                     <option value="">Select City</option>
                                     {cities
-                                        .filter((c) => c.province === province) // Assuming each city has a 'province' property
                                         .sort((a, b) => a.name.localeCompare(b.name))
                                         .map((city) => (
                                             <option key={city.code} value={city.name}>
@@ -301,9 +253,11 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
                                     onChange={(e) => setBarangay(e.target.value)}
                                 >
                                     <option value="">Select Barangay</option>
-                                    {barangays.map((b) => (
-                                        <option key={b.code} value={b.name}>{b.name}</option> // Adjust based on your barangay object structure
-                                    ))}
+                                    {barangays
+                                        .sort((b1, b2) => b1.name.localeCompare(b2.name))
+                                        .map((b) => (
+                                            <option key={b.code} value={b.name}>{b.name}</option>
+                                        ))}
                                 </select>
                             </div>
                         </div>
