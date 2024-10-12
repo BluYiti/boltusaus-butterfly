@@ -129,6 +129,34 @@ const Clients = () => {
               <div>
                 <h4 className="font-semibold flex items-center">
                   {client.firstname} {client.lastname}
+                  {client.state === "referred" && client.status === "attached" && (
+                    <span className="ml-2 text-green-700 flex items-center" aria-label="Attached Certificate">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span className="ml-1">Attached Certificate</span>
+                    </span>
+                  )}
+                  {client.status === "pending" && (
+                    <span className="ml-2 text-yellow-600 flex items-center" aria-label="Pending">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v8l4 4" />
+                      </svg>
+                      <span className="ml-1">Pending...</span>
+                    </span>
+                  )}
                 </h4>
                 <p className="text-sm text-gray-500">{client.email}</p>
               </div>

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { databases } from "@/appwrite"; // Adjust the import path to your appwrite service
+import { databases } from "@/appwrite"; // Ensure the import path is correct
+import { Permission, Role } from "appwrite"; // Import necessary components from Appwrite
 
 const ClientProfileModal = ({ clientId, isOpen, onClose }) => {
   const [clientData, setClientData] = useState(null);
@@ -13,14 +14,14 @@ const ClientProfileModal = ({ clientId, isOpen, onClose }) => {
       try {
         setLoading(true);
         const response = await databases.getDocument(
-          'Butterfly-Database', // Replace with your Appwrite database ID
-          'Client', // Replace with your collection ID
-          clientId // The clientId passed in as prop
+          'Butterfly-Database',
+          'Client',
+          clientId
         );
         setClientData(response);
       } catch (err) {
         setError("Error fetching client profile");
-        console.error(err);
+        console.error('Error fetching client data:', err);
       } finally {
         setLoading(false);
       }
@@ -28,6 +29,30 @@ const ClientProfileModal = ({ clientId, isOpen, onClose }) => {
 
     fetchClientData();
   }, [clientId, isOpen]);
+
+  const handleReferClient = async () => {
+    try {
+      console.log('Databases object:', databases); // Log the databases object
+      if (!clientData) {
+        console.error('No client data available');
+        return;
+      }
+
+      const updatedDocument = await databases.updateDocument(
+        'Butterfly-Database',
+        'Client',
+        clientId,
+        { state: 'referred' }
+      );
+
+      console.log('Document updated:', updatedDocument);
+      setClientData((prevData) => ({ ...prevData, state: 'referred' }));
+      alert('Client referred successfully!');
+    } catch (err) {
+      console.error("Error referring client:", err);
+      alert(`Error referring client: ${err.message || err.toString()}`);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -103,7 +128,7 @@ const ClientProfileModal = ({ clientId, isOpen, onClose }) => {
                   View Reports
                 </button>
                 <button
-                  onClick={() => console.log('Refer Client')}
+                  onClick={handleReferClient} // Call the refer client function
                   className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600"
                 >
                   Refer
