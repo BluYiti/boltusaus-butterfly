@@ -1,3 +1,5 @@
+'use client'
+
 import { useEffect } from 'react';
 
 export const useFetchProvinces = (selectedRegionCode: string, setProvinces: React.Dispatch<React.SetStateAction<any[]>>) => {

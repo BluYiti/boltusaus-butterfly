@@ -39,7 +39,7 @@ const LogoutButton: React.FC<LogoutButtonProps> = ({ isMinimized }) => {
 
             {/* Pop-up for error */}
             {isModalOpen && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
                     <div className="bg-white p-4 rounded shadow-lg">
                         <h2 className="text-red-600">Error</h2>
                         <p>{error || 'An unknown error occurred.'}</p>

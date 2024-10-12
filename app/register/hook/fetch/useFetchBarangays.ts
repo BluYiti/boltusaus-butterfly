@@ -1,3 +1,5 @@
+'use client'
+
 import { useEffect } from 'react';
 
 export const useFetchBarangays = (city: string, cities: any[], setBarangays: React.Dispatch<React.SetStateAction<any[]>>) => {

@@ -4,11 +4,8 @@ import React from 'react';
 import Back from '@/components/Back';
 import Image from 'next/image';
 import AdultRegisterForm from '../components/AdultRegisterForm';
-import { useRouter } from 'next/navigation'
 
 const RegisterPage: React.FC = () => {
-    const router = useRouter ();
-
     return (
         <div className='overflow-hidden flex flex-col items-center min-h-screen'>
             <Back />

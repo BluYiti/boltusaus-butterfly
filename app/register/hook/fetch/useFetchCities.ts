@@ -1,3 +1,5 @@
+'use client'
+
 import { useEffect } from 'react';
 
 export const useFetchCities = (province: string, provinces: any[], setCities: React.Dispatch<React.SetStateAction<any[]>>, setCity: React.Dispatch<React.SetStateAction<string>>, setBarangays: React.Dispatch<React.SetStateAction<any[]>>) => {

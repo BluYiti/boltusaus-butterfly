@@ -1,3 +1,5 @@
+'use client'
+
 import { useEffect } from 'react';
 
 export const useFetchCountries = (setCountries: React.Dispatch<React.SetStateAction<any[]>>) => {

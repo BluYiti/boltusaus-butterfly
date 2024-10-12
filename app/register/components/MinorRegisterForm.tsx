@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { FiEye, FiEyeOff } from 'react-icons/fi';
+import React from 'react';
 import termsContent from '@/constants/terms';
 import privacyContent from '@/constants/privacy';
 import TermsAndPrivacy from './TermsAndPrivacy';
