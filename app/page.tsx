@@ -97,7 +97,7 @@ const HomePage: React.FC = () => {
         src="/images/butterfly.gif" 
         alt="Butterfly Animation"
         className="absolute z-20 w-50 h-50" 
-        style={{ top: '45%', left: '36%', transform: 'translate(-60%, -50%)' }} // Fine-tune with your own adjustments
+        style={{ top: '45%', left: '36%', transform: 'translate(-60%, -50%)' }} 
         initial={{ opacity: 0, scale: 0.5 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.6, delay: 0.5 }}
