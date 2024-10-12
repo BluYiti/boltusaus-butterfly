@@ -37,7 +37,6 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
         age, setAge,
         countries, setCountries,
         regions, setRegions,
-        selectedRegion, setSelectedRegion,
         selectedRegionCode, setSelectedRegionCode,
         provinces, setProvinces,
         cities, setCities,
@@ -46,6 +45,9 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
 
     // Inside your component
     const handleSubmit = createSubmitHandler({
+        firstName,
+        lastName,
+        birthday,
         password,
         rePassword,
         agreeToTerms,
@@ -55,16 +57,24 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
         city,
         province,
         country,
-        onRegister,
+        contactNumber,
+        emergencyContactName,
+        emergencyContactNumber,
+        idFile,
+        email,
+        onRegister: (data) => {
+            // Handle the successful registration, e.g., API call or redirect
+            console.log('Registration successful:', data);
+        },
         setValidationError,
     });
 
-        // Use custom hooks to fetch data
-        useFetchCountries(setCountries);
-        useFetchRegions(setRegions);
-        useFetchProvinces(setSelectedRegionCode, setProvinces);
-        useFetchCities(province, provinces, setCities, setCity, setBarangays);
-        useFetchBarangays(city, cities, setBarangays);
+    // Use custom hooks to fetch data
+    useFetchCountries(setCountries);
+    useFetchRegions(setRegions);
+    useFetchProvinces(selectedRegionCode, setProvinces);
+    useFetchCities(province, provinces, setCities, setCity, setBarangays);
+    useFetchBarangays(city, cities, setBarangays);
     
     const calculateAge = (birthDateString: string): number => {
         const birthDate = new Date(birthDateString);
@@ -91,7 +101,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
     };
 
     return (
-        <div className="w-full p-8 bg-white border-0 shadow-none">
+        <div className="w-full p-8">
             <h2 className="text-center text-6xl text-[#4982ae] font-paintbrush">Register</h2>
             <form className="mt-8 space-y-4" onSubmit={handleSubmit}>
                 {error && <div className="text-red-600 text-lg font-bold">{error}</div>}
@@ -259,6 +269,18 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
                                             <option key={b.code} value={b.name}>{b.name}</option>
                                         ))}
                                 </select>
+                            </div>
+
+                            {/* Street Input */}
+                            <div className="mb-4">
+                                <label className="block text-[#38b6ff] mb-2">Street</label>
+                                <input
+                                    type="text"
+                                    className="border border-[#38b6ff] rounded-xl pl-3 pr-3 py-2 w-full text-gray-500"
+                                    value={street}
+                                    onChange={(e) => setStreet(e.target.value)}
+                                    placeholder="Enter your street"
+                                />
                             </div>
                         </div>
                     </div>

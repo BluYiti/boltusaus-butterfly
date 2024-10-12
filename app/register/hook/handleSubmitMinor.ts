@@ -44,9 +44,9 @@ export const handleSubmit = (e: React.FormEvent<HTMLFormElement>, formData: Form
         return;
     }
 
-    // Validate age
-    if (formData.age !== null && formData.age < 18) {
-        formData.setValidationError('You must be at least 18 years old to register.');
+    // Check if age is under 18
+    if (formData.age === null || formData.age < 18) {
+        formData.setValidationError('Only minors are allowed to register.');
         return;
     }
 
