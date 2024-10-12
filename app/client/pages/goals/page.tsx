@@ -21,8 +21,8 @@ const GoalsPage = () => {
     const [showModal, setShowModal] = useState(false);
     const [goals, setGoals] = useState([]);
 
-    const twoWeeksAgo = addDays(currentDate, -14);  // 2 weeks ago
-    const twoWeeksAhead = addDays(currentDate, 14); // 2 weeks ahead
+    // 2 weeks ago
+    const oneWeekAhead = addDays(currentDate, 7); // 1 week ahead
 
     const handleSave = () => {
         if (!selectedDate) {
@@ -62,20 +62,22 @@ const GoalsPage = () => {
         if (day) {
             const clickedDate = new Date(currentYear, currentMonth, day);
             const today = new Date();
+            today.setHours(0, 0, 0, 0); // Set the current time to midnight to avoid comparison issues.
     
             // Ensure the clicked date is within the allowed range
             if (isBefore(clickedDate, today)) {
                 alert("You cannot select a past date.");
                 return;
             }
-            if (isAfter(clickedDate, twoWeeksAhead)) {
-                alert("You cannot select a date more than two weeks in the future.");
+            if (isAfter(clickedDate, oneWeekAhead)) {
+                alert("You cannot select a date more than one week in the future.");
                 return;
             }
     
             setSelectedDate(clickedDate);
         }
     };
+    
 
     return (
         <Layout sidebarTitle="Butterfly" sidebarItems={items}>
@@ -100,8 +102,8 @@ const GoalsPage = () => {
                             <h2 className="text-xl font-medium">{format(new Date(currentYear, currentMonth), 'MMMM yyyy')}</h2>
                             <button
                                 onClick={() => changeMonth(1)}
-                                className={`text-gray-500 hover:text-blue-500 hover:scale-105 transition-transform duration-300 ${isAfter(new Date(currentYear, currentMonth), twoWeeksAhead) ? 'cursor-not-allowed opacity-50' : ''}`}
-                                disabled={isAfter(new Date(currentYear, currentMonth), twoWeeksAhead)}
+                                className={`text-gray-500 hover:text-blue-500 hover:scale-105 transition-transform duration-300 ${isAfter(new Date(currentYear, currentMonth), oneWeekAhead) ? 'cursor-not-allowed opacity-50' : ''}`}
+                                disabled={isAfter(new Date(currentYear, currentMonth), oneWeekAhead)}
                             >
                                 <MdArrowForward size={24} />
                             </button>
@@ -112,8 +114,11 @@ const GoalsPage = () => {
                             ))}
                             {totalDays.map((day, index) => {
                                 const dayDate = day ? new Date(currentYear, currentMonth, day) : null;
-                                const isPast = dayDate && isBefore(dayDate, new Date()); // Disable past dates
-                                const isTooFar = dayDate && isAfter(dayDate, twoWeeksAhead);
+                                const today = new Date();
+                                today.setHours(0, 0, 0, 0); // Ensure we're comparing only the date part.
+
+                                const isPast = dayDate && isBefore(dayDate, today) && dayDate.getTime() !== today.getTime(); // Disable past dates, except for today
+                                const isTooFar = dayDate && isAfter(dayDate, oneWeekAhead); // Disable dates more than one week in the future
 
                                 return (
                                     <div
@@ -126,6 +131,7 @@ const GoalsPage = () => {
                                     </div>
                                 );
                             })}
+
                         </div>
                     </div>
 
