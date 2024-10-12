@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
 import { databases } from "@/appwrite";
 import { useRouter } from "next/navigation";
-import { Models } from 'appwrite'; // Adjust the import according to your project structure
+import { Models } from 'appwrite';
 
-// Define the props type
 interface ClientProfileModalProps {
-  clientId: string; // Adjust the type based on your actual clientId type
+  clientId: string;
   isOpen: boolean;
   onClose: () => void;
 }
@@ -15,16 +14,16 @@ const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpe
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
-  const router = useRouter();
+  const [isReportsModalOpen, setIsReportsModalOpen] = useState(false);
+  const [selectedReportDetails, setSelectedReportDetails] = useState<string | null>(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
-  // Move fetchClientData function outside of useEffect
   const fetchClientData = async (id: string) => {
     try {
       const clientData = await databases.getDocument('Butterfly-Database', 'Client', id);
       return clientData;
     } catch (err: unknown) {
       console.error("Error fetching client data:", err);
-      // Type guard to check if err is an instance of Error
       if (err instanceof Error) {
         throw new Error(err.message);
       }
@@ -39,7 +38,7 @@ const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpe
       try {
         setLoading(true);
         const response = await fetchClientData(clientId);
-        setClientData(response); // response should be of type Models.Document
+        setClientData(response);
       } catch (err) {
         setError("Error fetching client profile");
         console.error('Error fetching client data:', err);
@@ -73,13 +72,17 @@ const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpe
       setIsConfirmModalOpen(false);
     } catch (err: unknown) {
       console.error("Error referring client:", err);
-      // Type guard to check if err is an instance of Error
       if (err instanceof Error) {
         alert(`Error referring client: ${err.message}`);
       } else {
         alert(`Error referring client: Unknown error occurred`);
       }
     }
+  };
+
+  const handleViewDetails = (details: string) => {
+    setSelectedReportDetails(details);
+    setIsDetailsModalOpen(true);
   };
 
   if (!isOpen) return null;
@@ -107,24 +110,21 @@ const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpe
           clientData && (
             <>
               <div className="flex space-x-12 items-center">
-                {/* Profile Image Section */}
                 <div className="flex-shrink-0 text-center">
                   <img
                     src={clientData.profilePictureUrl || '/default-profile.jpg'}
                     alt="Profile"
                     className="w-48 h-48 rounded-full object-cover mx-auto"
                     onError={(e) => {
-                      const target = e.target as HTMLImageElement; // Type assertion
-                      target.onerror = null; // Prevent looping
-                      target.src = '/default-profile.jpg'; // Fallback image
+                      const target = e.target as HTMLImageElement;
+                      target.onerror = null;
+                      target.src = '/default-profile.jpg';
                     }}
                   />
                   <h2 className="mt-4 text-2xl font-bold text-gray-800">
                     {clientData.firstname} {clientData.lastname}
                   </h2>
                 </div>
-
-                {/* Client Details Section */}
                 <div className="flex-grow">
                   <h3 className="text-xl font-bold mb-2 text-gray-900">Client’s Profile</h3>
                   <div className="grid grid-cols-2 gap-6 text-gray-700">
@@ -153,10 +153,9 @@ const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpe
                 </div>
               </div>
 
-              {/* Action Buttons */}
               <div className="mt-8 flex justify-center space-x-6">
                 <button
-                  onClick={() => console.log('View Reports')}
+                  onClick={() => setIsReportsModalOpen(true)}
                   className="bg-blue-400 text-white px-6 py-2 rounded-full shadow-md hover:shadow-lg hover:bg-blue-600 transition-all"
                 >
                   View Reports
@@ -173,22 +172,114 @@ const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpe
         )}
       </div>
 
+      {/* Reports Modal */}
+      {isReportsModalOpen && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white rounded-lg p-8 w-full max-w-4xl shadow-lg relative">
+            <button
+              onClick={() => {
+                setIsReportsModalOpen(false);
+                onClose();
+              }}
+              className="text-gray-400 hover:text-gray-600 absolute top-4 right-4"
+              aria-label="Close modal"
+            >
+              &#10005;
+            </button>
+            <h2 className="text-xl font-bold mb-6">Reports</h2>
+            <div className="max-h-[400px] overflow-y-auto">
+              <div className="space-y-4">
+                {/* Mock data for reports */}
+                <div>
+                  <h3 className="text-lg font-semibold">Sessions</h3>
+                  <table className="table-auto w-full">
+                    <thead>
+                      <tr>
+                        <th className="px-4 py-2 text-left">Session ID</th>
+                        <th className="px-4 py-2 text-left">Time and Date</th>
+                        <th className="px-4 py-2 text-left">Details</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {/* Example report data */}
+                      {Array.from({ length: 20 }, (_, index) => ({
+                        sessionId: `00${index + 1}A`,
+                        dateTime: new Date(Date.now() - index * 86400000).toLocaleString(),
+                        details: `Detailed report for session ${index + 1}`,
+                      })).map((report, index) => (
+                        <tr key={index}>
+                          <td className="px-4 py-2">{report.sessionId}</td>
+                          <td className="px-4 py-2">{report.dateTime}</td>
+                          <td className="px-4 py-2">
+                            <button
+                              onClick={() => handleViewDetails(report.details)}
+                              className="text-blue-500 hover:text-blue-700"
+                            >
+                              View Details
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <div className="mt-4">
+              <button
+                onClick={() => setIsReportsModalOpen(false)}
+                className="bg-gray-300 text-gray-800 px-4 py-2 rounded-full hover:bg-gray-400 transition-all"
+              >
+                Back
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Details Modal */}
+      {isDetailsModalOpen && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white rounded-lg p-8 w-full max-w-4xl shadow-lg relative">
+            <button
+              onClick={() => setIsDetailsModalOpen(false)}
+              className="text-gray-400 hover:text-gray-600 absolute top-4 right-4"
+              aria-label="Close modal"
+            >
+              &#10005;
+            </button>
+            <h2 className="text-xl font-bold mb-4">Report Details</h2>
+            <p>{selectedReportDetails}</p>
+            <div className="mt-4">
+              <button
+                onClick={() => setIsDetailsModalOpen(false)}
+                className="bg-gray-300 text-gray-800 px-4 py-2 rounded-full hover:bg-gray-400 transition-all"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Modal */}
       {isConfirmModalOpen && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg">
-            <h2 className="text-lg font-semibold mb-4">Are you sure you want to refer this client?</h2>
-            <div className="flex justify-center space-x-4">
-              <button
-                onClick={handleReferClient}
-                className="bg-blue-400 text-white px-8 py-3 rounded-full shadow-lg hover:bg-blue-600 transition-all duration-300 ease-in-out"
-              >
-                Yes
-              </button>
+          <div className="bg-white rounded-lg p-8 w-full max-w-sm shadow-lg relative">
+            <h2 className="text-xl font-bold mb-4">Confirm Referral</h2>
+            <p>Are you sure you want to refer this client?</p>
+            <div className="mt-6 flex justify-end space-x-4">
               <button
                 onClick={() => setIsConfirmModalOpen(false)}
-                className="bg-red-500 text-white px-8 py-3 rounded-full shadow-lg hover:bg-red-600 transition-all duration-300 ease-in-out"
+                className="bg-gray-300 text-gray-800 px-4 py-2 rounded-full hover:bg-gray-400 transition-all"
               >
                 Cancel
+              </button>
+              <button
+                onClick={handleReferClient}
+                className="bg-green-500 text-white px-4 py-2 rounded-full hover:bg-green-600 transition-all"
+              >
+                Confirm
               </button>
             </div>
           </div>
