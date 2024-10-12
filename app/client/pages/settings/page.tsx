@@ -24,6 +24,7 @@ const SettingsPage = () => {
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
+  const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
 
   // State variables for profile fields and password fields
   const [contactNumber, setContactNumber] = useState("");
@@ -35,6 +36,11 @@ const SettingsPage = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
+   // State for cookie settings
+   const [trackingCookies, setTrackingCookies] = useState(false);
+   const [analyticsCookies, setAnalyticsCookies] = useState(false);
+   const [functionalCookies, setFunctionalCookies] = useState(true); // Assuming these are enabled by default
+
   // Validation check for the password
   const isPasswordValid = newPassword.match(
     /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,12}$/
@@ -42,9 +48,38 @@ const SettingsPage = () => {
 
   const isProfileValid = contactNumber.trim() !== "" && address.trim() !== "";
 
+
+  const ToggleSwitch = ({ label, isChecked, onToggle }) => (
+    <div className="flex items-center justify-between mb-4">
+      <span className="text-gray-700">{label}</span>
+      <div
+        className={`relative w-12 h-6 flex items-center cursor-pointer ${isChecked ? 'bg-green-500' : 'bg-gray-300'} rounded-full p-1`}
+        onClick={onToggle}
+      >
+        <div
+          className={`bg-white w-4 h-4 rounded-full shadow-md transform duration-300 ease-in-out ${isChecked ? 'translate-x-6' : 'translate-x-0'}`}
+        ></div>
+      </div>
+    </div>
+  );
+  
   const toggleSection = (section: string) => {
     setActiveSection(activeSection === section ? null : section);
   };
+
+  const handlePrivacyClick = () => {
+    setIsPrivacyModalOpen(true);
+  };
+
+    // Handler for saving cookie settings
+    const handleSavePrivacySettings = () => {
+      console.log("Privacy settings saved:", {
+        trackingCookies,
+        analyticsCookies,
+        functionalCookies,
+      });
+      handleModalClose();
+    };
 
   const handleEditProfileClick = () => {
     setIsProfileModalOpen(true);
@@ -57,6 +92,7 @@ const SettingsPage = () => {
   const handleModalClose = () => {
     setIsProfileModalOpen(false);
     setIsChangePasswordModalOpen(false);
+    setIsPrivacyModalOpen(false);
   };
 
   // Handler for saving profile changes
@@ -122,20 +158,28 @@ const SettingsPage = () => {
           )}
         </div>
 
-        {/* Privacy and Security Section */}
+           {/* Privacy and Security Section */}
         <div className="bg-white shadow-md rounded-lg p-6 mb-6">
           <h3
             className="text-xl font-semibold text-gray-700 cursor-pointer flex justify-between items-center"
             onClick={() => toggleSection("privacy")}
           >
             Privacy and Security
-            <button className="text-sm text-blue-400 underline">Manage</button>
+            <button
+              className="text-sm text-blue-400 underline"
+              onClick={handlePrivacyClick} // Open the privacy modal
+            >
+              Manage
+            </button>
           </h3>
           {activeSection === "privacy" && (
             <div className="mt-4 text-gray-600">
               <div className="flex justify-between items-center">
                 <p>Manage your data-sharing preferences:</p>
-                <button className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
+                <button
+                  className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+                  onClick={handlePrivacyClick} // Open the privacy modal
+                >
                   Manage Privacy
                 </button>
               </div>
@@ -245,7 +289,7 @@ const SettingsPage = () => {
           </div>
           <button
             onClick={handleSaveProfile}
-            className={`px-4 py-2 text-white rounded ${isProfileValid ? 'bg-blue-500 hover:bg-blue-600' : 'bg-gray-400 cursor-not-allowed'}`}
+            className={`px-4 py-2 text-white rounded ${isProfileValid ? 'bg-blue-400 hover:bg-blue-600' : 'bg-gray-400 cursor-not-allowed'}`}
             disabled={!isProfileValid}
           >
             Save Changes
@@ -293,6 +337,36 @@ const SettingsPage = () => {
             Update Password
           </button>
         </Modal>
+
+        {/* Modal for Managing Privacy Settings */}
+        <Modal isOpen={isPrivacyModalOpen} onClose={handleModalClose} title="Privacy Settings">
+        <p className="mb-4"> {/* Add margin-bottom for spacing */}
+    When you visit a website, it may store or retrieve information in your browser, primarily through cookies, which enhance your browsing experience and are used to tailor the site to your preferences; however, you have the option to reject certain cookies, although doing so may affect your overall experience and the services available to you.
+  </p>
+          <ToggleSwitch
+            label="Enable Tracking Cookies"
+            isChecked={trackingCookies}
+            onToggle={() => setTrackingCookies(!trackingCookies)}
+          />
+          <ToggleSwitch
+            label="Enable Analytics Cookies"
+            isChecked={analyticsCookies}
+            onToggle={() => setAnalyticsCookies(!analyticsCookies)}
+          />
+          <ToggleSwitch
+            label="Enable Functional Cookies"
+            isChecked={functionalCookies}
+            onToggle={() => setFunctionalCookies(!functionalCookies)}
+          />
+          <button
+            onClick={handleSavePrivacySettings}
+            className="px-4 py-2 mt-4 bg-blue-400 text-white rounded hover:bg-blue-500"
+          >
+            Save Changes
+          </button>
+        </Modal>
+
+
       </div>
     </Layout>
   );
