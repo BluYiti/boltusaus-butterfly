@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Layout from "@/components/Sidebar/Layout"; // Adjust the path if necessary
 import items from "@/client/data/Links";
-import Confetti from "react-confetti"; // Import the Confetti component
+
 
 const months = [
   { name: "January", days: 31 },
