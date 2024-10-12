@@ -1,11 +1,16 @@
 import { useEffect, useState } from "react";
-import { databases } from "@/appwrite"; // Ensure the import path is correct
-import { Permission, Role } from "appwrite"; // Import necessary components from Appwrite
+import { databases } from "@/appwrite"; // Ensure this path points correctly to your Appwrite instance configuration
 
-const ClientProfileModal = ({ clientId, isOpen, onClose }) => {
-  const [clientData, setClientData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+interface ClientProfileModalProps {
+  clientId: string;
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpen, onClose }) => {
+  const [clientData, setClientData] = useState<any>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isOpen || !clientId) return;
@@ -14,14 +19,14 @@ const ClientProfileModal = ({ clientId, isOpen, onClose }) => {
       try {
         setLoading(true);
         const response = await databases.getDocument(
-          'Butterfly-Database',
-          'Client',
-          clientId
+          'Butterfly-Database', // Replace with your actual Appwrite database ID
+          'Client', // Replace with your actual collection ID
+          clientId // The clientId passed in as a prop
         );
         setClientData(response);
       } catch (err) {
         setError("Error fetching client profile");
-        console.error('Error fetching client data:', err);
+        console.error(err);
       } finally {
         setLoading(false);
       }
@@ -29,30 +34,6 @@ const ClientProfileModal = ({ clientId, isOpen, onClose }) => {
 
     fetchClientData();
   }, [clientId, isOpen]);
-
-  const handleReferClient = async () => {
-    try {
-      console.log('Databases object:', databases); // Log the databases object
-      if (!clientData) {
-        console.error('No client data available');
-        return;
-      }
-
-      const updatedDocument = await databases.updateDocument(
-        'Butterfly-Database',
-        'Client',
-        clientId,
-        { state: 'referred' }
-      );
-
-      console.log('Document updated:', updatedDocument);
-      setClientData((prevData) => ({ ...prevData, state: 'referred' }));
-      alert('Client referred successfully!');
-    } catch (err) {
-      console.error("Error referring client:", err);
-      alert(`Error referring client: ${err.message || err.toString()}`);
-    }
-  };
 
   if (!isOpen) return null;
 
@@ -85,7 +66,7 @@ const ClientProfileModal = ({ clientId, isOpen, onClose }) => {
                     src={clientData.profilePictureUrl || '/default-profile.jpg'}
                     alt="Profile"
                     className="w-32 h-32 rounded-full object-cover"
-                    onError={(e) => { e.target.onerror = null; e.target.src = '/default-profile.jpg'; }}
+                    onError={(e) => { (e.target as HTMLImageElement).src = '/default-profile.jpg'; }}
                   />
                 </div>
 
@@ -93,6 +74,7 @@ const ClientProfileModal = ({ clientId, isOpen, onClose }) => {
                 <div>
                   <h3 className="text-3xl font-bold mb-2">{clientData.firstname} {clientData.lastname}</h3>
                   <p className="text-gray-600"><strong>Email:</strong> {clientData.email}</p>
+                  <p className="text-gray-600"><strong>Referral Status:</strong> {clientData.status}</p>
                   <p className="text-gray-600"><strong>Date of Birth:</strong> {clientData.birthdate}</p>
                   <p className="text-gray-600"><strong>Contact Number:</strong> {clientData.phonenum}</p>
                   <p className="text-gray-600"><strong>Address:</strong> {clientData.address}</p>
@@ -109,7 +91,7 @@ const ClientProfileModal = ({ clientId, isOpen, onClose }) => {
                   <h3 className="font-semibold">Conditions</h3>
                   <ul className="list-disc pl-4">
                     {Array.isArray(clientData.conditions) && clientData.conditions.length > 0 ? (
-                      clientData.conditions.map((condition, index) => (
+                      clientData.conditions.map((condition: string, index: number) => (
                         <li key={index}>{condition}</li>
                       ))
                     ) : (
@@ -128,7 +110,7 @@ const ClientProfileModal = ({ clientId, isOpen, onClose }) => {
                   View Reports
                 </button>
                 <button
-                  onClick={handleReferClient} // Call the refer client function
+                  onClick={() => console.log('Refer Client')}
                   className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600"
                 >
                   Refer
