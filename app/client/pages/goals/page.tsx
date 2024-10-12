@@ -61,17 +61,18 @@ const GoalsPage = () => {
     const handleDateClick = (day: number | null) => {
         if (day) {
             const clickedDate = new Date(currentYear, currentMonth, day);
-
+            const today = new Date();
+    
             // Ensure the clicked date is within the allowed range
-            if (isBefore(clickedDate, twoWeeksAgo)) {
-                alert("You cannot select a date more than two weeks in the past.");
+            if (isBefore(clickedDate, today)) {
+                alert("You cannot select a past date.");
                 return;
             }
             if (isAfter(clickedDate, twoWeeksAhead)) {
                 alert("You cannot select a date more than two weeks in the future.");
                 return;
             }
-
+    
             setSelectedDate(clickedDate);
         }
     };
@@ -107,15 +108,15 @@ const GoalsPage = () => {
                             ))}
                             {totalDays.map((day, index) => {
                                 const dayDate = day ? new Date(currentYear, currentMonth, day) : null;
-                                const isPast = dayDate && isBefore(dayDate, twoWeeksAgo);
+                                const isPast = dayDate && isBefore(dayDate, new Date()); // Disable past dates
                                 const isTooFar = dayDate && isAfter(dayDate, twoWeeksAhead);
 
                                 return (
                                     <div
                                         key={index}
                                         onClick={() => !isPast && !isTooFar && handleDateClick(day)}
-                                        className={`h-16 flex items-center justify-center border rounded-lg cursor-pointer ${day ? 'hover:bg-blue-500 hover:text-white transition-colors duration-300' : ''} ${selectedDate && selectedDate.getDate() === day ? 'bg-blue-400 text-white' : ''} 
-                                        ${isPast || isTooFar ? 'cursor-not-allowed opacity-50' : ''}`}
+                                        className={`h-16 flex items-center justify-center border rounded-lg ${day ? 'hover:bg-blue-500 hover:text-white transition-colors duration-300' : ''} ${selectedDate && selectedDate.getDate() === day ? 'bg-blue-400 text-white' : ''} 
+                                        ${isPast || isTooFar ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
                                     >
                                         {day}
                                     </div>
@@ -124,8 +125,8 @@ const GoalsPage = () => {
                         </div>
                     </div>
 
-                     {/* Activity Section */}
-                     <div className="flex-1 bg-white shadow-lg rounded-lg p-6">
+                    {/* Activity Section */}
+                    <div className="flex-1 bg-white shadow-lg rounded-lg p-6">
                         <h3 className="text-lg font-semibold">Activity</h3>
                         <select
                             value={activity}
