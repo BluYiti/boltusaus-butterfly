@@ -117,7 +117,7 @@ const Dashboard: React.FC = () => {
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
       <div className="flex-grow p-8">
-        <h2 className="text-3xl font-bold mb-8 text-gray-800">Hello, Associate!</h2>
+        <h2 className="text-3xl font-bold mb-8 text-blue-800">Hello, Associate!</h2>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Client List for Reschedule */}
