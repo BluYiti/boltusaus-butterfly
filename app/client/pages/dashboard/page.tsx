@@ -169,7 +169,7 @@ const Dashboard: React.FC = () => {
                 <h2 className="text-xl font-semibold mb-4">Mood Tracker</h2>
                 <div className="flex justify-between items-center">
                   <p className="text-lg font-medium">How are you feeling today?</p>
-                  <Link href="/client/pages/moods">
+                  <Link href="/client/pages/goals">
                     <button className="bg-blue-500 text-white px-4 py-2 rounded-lg">
                       START
                     </button>
