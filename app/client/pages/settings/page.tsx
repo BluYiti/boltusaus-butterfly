@@ -28,6 +28,8 @@ const SettingsPage = () => {
   // State variables for profile fields and password fields
   const [contactNumber, setContactNumber] = useState("");
   const [address, setAddress] = useState("");
+  const [emergencyPerson, setEmergencyPerson] = useState("");
+  const [emergencyContact, setEmergencyContact] = useState("");
   const [profilePhoto, setProfilePhoto] = useState<File | null>(null);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -219,6 +221,26 @@ const SettingsPage = () => {
               value={address}
               onChange={(e) => setAddress(e.target.value)}
               placeholder="Enter your address"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700">Emergency Contact:</label>
+            <input
+              type="text"
+              className="w-full px-3 py-2 border rounded"
+              value={emergencyContact}
+              onChange={(e) => setEmergencyContact(e.target.value)}
+              placeholder="Enter your emergency contact"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700">Emergency Contact Person:</label>
+            <input
+              type="text"
+              className="w-full px-3 py-2 border rounded"
+              value={emergencyPerson}
+              onChange={(e) => setEmergencyPerson(e.target.value)}
+              placeholder="Enter your emergency contact person"
             />
           </div>
           <button
