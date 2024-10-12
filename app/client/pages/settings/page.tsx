@@ -28,6 +28,7 @@ const SettingsPage = () => {
   // State variables for profile fields and password fields
   const [contactNumber, setContactNumber] = useState("");
   const [address, setAddress] = useState("");
+  const [profilePhoto, setProfilePhoto] = useState<File | null>(null);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -59,7 +60,7 @@ const SettingsPage = () => {
   // Handler for saving profile changes
   const handleSaveProfile = () => {
     // Placeholder function for saving to the database
-    console.log("Profile saved:", { contactNumber, address });
+    console.log("Profile saved:", { contactNumber, address, profilePhoto });
     handleModalClose();
   };
 
@@ -68,6 +69,13 @@ const SettingsPage = () => {
     // Placeholder function for saving the new password to the database
     console.log("Password updated:", newPassword);
     handleModalClose();
+  };
+
+  // Handler for profile photo change
+  const handleProfilePhotoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      setProfilePhoto(event.target.files[0]);
+    }
   };
 
   return (
@@ -111,8 +119,6 @@ const SettingsPage = () => {
             </div>
           )}
         </div>
-
-        
 
         {/* Privacy and Security Section */}
         <div className="bg-white shadow-md rounded-lg p-6 mb-6">
@@ -184,8 +190,17 @@ const SettingsPage = () => {
         </div>
 
 
-       {/* Modal for Editing Profile */}
-       <Modal isOpen={isProfileModalOpen} onClose={handleModalClose} title="Edit Profile">
+         {/* Modal for Editing Profile */}
+         <Modal isOpen={isProfileModalOpen} onClose={handleModalClose} title="Edit Profile">
+          <div className="mb-4">
+            <label className="block text-gray-700">Profile Photo:</label>
+            <input
+              type="file"
+              className="w-full px-3 py-2 border rounded"
+              accept="image/*"
+              onChange={handleProfilePhotoChange}
+            />
+          </div>
           <div className="mb-4">
             <label className="block text-gray-700">Contact Number:</label>
             <input
