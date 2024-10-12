@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
-import { databases } from "@/appwrite"; // Ensure the import path is correct
-import { Permission, Role } from "appwrite"; // Import necessary components from Appwrite
+import { databases } from "@/appwrite";
+import { useRouter } from "next/navigation";
 
 const ClientProfileModal = ({ clientId, isOpen, onClose }) => {
   const [clientData, setClientData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     if (!isOpen || !clientId) return;
@@ -32,7 +34,6 @@ const ClientProfileModal = ({ clientId, isOpen, onClose }) => {
 
   const handleReferClient = async () => {
     try {
-      console.log('Databases object:', databases); // Log the databases object
       if (!clientData) {
         console.error('No client data available');
         return;
@@ -46,11 +47,24 @@ const ClientProfileModal = ({ clientId, isOpen, onClose }) => {
       );
 
       console.log('Document updated:', updatedDocument);
-      setClientData((prevData) => ({ ...prevData, state: 'referred' }));
+      const refreshedClientData = await fetchClientData(clientId);
+      setClientData(refreshedClientData);
+
       alert('Client referred successfully!');
+      setIsConfirmModalOpen(false); 
     } catch (err) {
       console.error("Error referring client:", err);
       alert(`Error referring client: ${err.message || err.toString()}`);
+    }
+  };
+
+  const fetchClientData = async (id) => {
+    try {
+      const clientData = await databases.getDocument('Butterfly-Database', 'Client', id);
+      return clientData;
+    } catch (err) {
+      console.error("Error fetching client data:", err);
+      throw err;
     }
   };
 
@@ -61,7 +75,7 @@ const ClientProfileModal = ({ clientId, isOpen, onClose }) => {
       <div
         role="dialog"
         aria-modal="true"
-        className="bg-white rounded-lg p-8 w-full max-w-2xl shadow-lg relative"
+        className="bg-white rounded-lg p-8 w-full max-w-4xl shadow-lg relative"
       >
         <button
           onClick={onClose}
@@ -78,74 +92,92 @@ const ClientProfileModal = ({ clientId, isOpen, onClose }) => {
         ) : (
           clientData && (
             <>
-              <div className="flex space-x-8">
-                {/* Profile Image */}
-                <div className="flex-shrink-0">
+              <div className="flex space-x-12 items-center">
+                {/* Profile Image Section */}
+                <div className="flex-shrink-0 text-center">
                   <img
                     src={clientData.profilePictureUrl || '/default-profile.jpg'}
                     alt="Profile"
-                    className="w-32 h-32 rounded-full object-cover"
+                    className="w-48 h-48 rounded-full object-cover mx-auto"
                     onError={(e) => { e.target.onerror = null; e.target.src = '/default-profile.jpg'; }}
                   />
+                  <h2 className="mt-4 text-2xl font-bold text-gray-800">
+                    {clientData.firstname} {clientData.lastname}
+                  </h2>
                 </div>
 
-                {/* Client Info */}
-                <div>
-                  <h3 className="text-3xl font-bold mb-2">{clientData.firstname} {clientData.lastname}</h3>
-                  <p className="text-gray-600"><strong>Email:</strong> {clientData.email}</p>
-                  <p className="text-gray-600"><strong>Date of Birth:</strong> {clientData.birthdate}</p>
-                  <p className="text-gray-600"><strong>Contact Number:</strong> {clientData.phonenum}</p>
-                  <p className="text-gray-600"><strong>Address:</strong> {clientData.address}</p>
-                </div>
-              </div>
-
-              {/* Emergency Contact & Conditions */}
-              <div className="mt-6 grid grid-cols-2 gap-4 text-gray-700">
-                <div>
-                  <h3 className="font-semibold">Emergency Contact Person</h3>
-                  <p>{clientData.emergencyContact}</p>
-                </div>
-                <div>
-                  <h3 className="font-semibold">Conditions</h3>
-                  <ul className="list-disc pl-4">
-                    {Array.isArray(clientData.conditions) && clientData.conditions.length > 0 ? (
-                      clientData.conditions.map((condition, index) => (
-                        <li key={index}>{condition}</li>
-                      ))
-                    ) : (
-                      <li>No conditions available</li>
-                    )}
-                  </ul>
+                {/* Client Details Section */}
+                <div className="flex-grow">
+                  <h3 className="text-xl font-bold mb-2 text-gray-900">Client’s Profile</h3>
+                  <div className="grid grid-cols-2 gap-6 text-gray-700">
+                    <div>
+                      <p><strong>Home Address:</strong> {clientData.address}</p>
+                      <p><strong>Date of Birth:</strong> {clientData.birthdate}</p>
+                      <p><strong>Contact Number:</strong> {clientData.phonenum}</p>
+                      <p><strong>Sex:</strong> {clientData.sex || 'Not Specified'}</p>
+                      <p><strong>Age:</strong> {clientData.age || 'Not Specified'}</p>
+                      <p><strong>Email Address:</strong> {clientData.email}</p>
+                    </div>
+                    <div>
+                      <p><strong>Emergency Contact Person:</strong> {clientData.emergencyContact}</p>
+                      <p><strong>Conditions:</strong></p>
+                      <ul className="list-disc pl-4">
+                        {Array.isArray(clientData.conditions) && clientData.conditions.length > 0 ? (
+                          clientData.conditions.map((condition, index) => (
+                            <li key={index}>{condition}</li>
+                          ))
+                        ) : (
+                          <li>No conditions available</li>
+                        )}
+                      </ul>
+                    </div>
+                  </div>
                 </div>
               </div>
 
               {/* Action Buttons */}
-              <div className="mt-8 flex justify-center space-x-4">
+              <div className="mt-8 flex justify-center space-x-6">
                 <button
                   onClick={() => console.log('View Reports')}
-                  className="bg-blue-400 text-white px-6 py-2 rounded-lg hover:bg-blue-600"
+                  className="bg-blue-400 text-white px-6 py-2 rounded-full shadow-md hover:shadow-lg hover:bg-blue-600 transition-all"
                 >
                   View Reports
                 </button>
                 <button
-                  onClick={handleReferClient} // Call the refer client function
-                  className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600"
+                  onClick={() => setIsConfirmModalOpen(true)}
+                  className="bg-green-500 text-white px-6 py-2 rounded-full shadow-md hover:shadow-lg hover:bg-green-600 transition-all"
                 >
                   Refer
                 </button>
               </div>
 
-              {/* Back Button */}
-              <button
-                onClick={onClose}
-                className="mt-6 bg-gray-300 px-4 py-2 rounded-lg hover:bg-gray-400 block mx-auto"
-              >
-                Back
-              </button>
+
             </>
           )
         )}
       </div>
+
+      {isConfirmModalOpen && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg">
+            <h2 className="text-lg font-semibold mb-4">Are you sure you want to refer this client?</h2>
+            <div className="flex justify-center space-x-4">
+              <button
+                onClick={handleReferClient}
+                className="bg-blue-400 text-white px-8 py-3 rounded-full shadow-lg hover:bg-blue-600 transition-all duration-300 ease-in-out"
+              >
+                Yes
+              </button>
+              <button
+                onClick={() => setIsConfirmModalOpen(false)}
+                className="bg-red-500 text-white px-8 py-3 rounded-full shadow-lg hover:bg-red-600 transition-all duration-300 ease-in-out"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
