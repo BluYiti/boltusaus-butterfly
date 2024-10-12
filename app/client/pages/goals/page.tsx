@@ -79,8 +79,12 @@ const GoalsPage = () => {
 
     return (
         <Layout sidebarTitle="Butterfly" sidebarItems={items}>
-            <div className="flex-grow p-8 bg-gray-100">
-                <h2 className="text-3xl font-bold mb-8 text-gray-800">Hello, Client!</h2>
+        <div className="flex-grow p-8 bg-gray-100">
+            
+            {/* Container for "Hello, Client!" */}
+            <div className="bg-white shadow-md rounded-lg p-6 mb-8">
+                <h2 className="text-3xl font-bold text-blue-800">Hello, Client!</h2>
+            </div>
 
                 <div className="flex space-x-6">
                     {/* Calendar Section */}
