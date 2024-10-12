@@ -1,26 +1,45 @@
 import { useEffect, useState } from "react";
 import { databases } from "@/appwrite";
 import { useRouter } from "next/navigation";
+import { Models } from 'appwrite'; // Adjust the import according to your project structure
 
-const ClientProfileModal = ({ clientId, isOpen, onClose }) => {
-  const [clientData, setClientData] = useState(null);
+// Define the props type
+interface ClientProfileModalProps {
+  clientId: string; // Adjust the type based on your actual clientId type
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpen, onClose }) => {
+  const [clientData, setClientData] = useState<Models.Document | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const router = useRouter();
+
+  // Move fetchClientData function outside of useEffect
+  const fetchClientData = async (id: string) => {
+    try {
+      const clientData = await databases.getDocument('Butterfly-Database', 'Client', id);
+      return clientData;
+    } catch (err: unknown) {
+      console.error("Error fetching client data:", err);
+      // Type guard to check if err is an instance of Error
+      if (err instanceof Error) {
+        throw new Error(err.message);
+      }
+      throw new Error("Unknown error occurred");
+    }
+  };
 
   useEffect(() => {
     if (!isOpen || !clientId) return;
 
-    const fetchClientData = async () => {
+    const fetchClientProfile = async () => {
       try {
         setLoading(true);
-        const response = await databases.getDocument(
-          'Butterfly-Database',
-          'Client',
-          clientId
-        );
-        setClientData(response);
+        const response = await fetchClientData(clientId);
+        setClientData(response); // response should be of type Models.Document
       } catch (err) {
         setError("Error fetching client profile");
         console.error('Error fetching client data:', err);
@@ -29,7 +48,7 @@ const ClientProfileModal = ({ clientId, isOpen, onClose }) => {
       }
     };
 
-    fetchClientData();
+    fetchClientProfile();
   }, [clientId, isOpen]);
 
   const handleReferClient = async () => {
@@ -51,20 +70,15 @@ const ClientProfileModal = ({ clientId, isOpen, onClose }) => {
       setClientData(refreshedClientData);
 
       alert('Client referred successfully!');
-      setIsConfirmModalOpen(false); 
-    } catch (err) {
+      setIsConfirmModalOpen(false);
+    } catch (err: unknown) {
       console.error("Error referring client:", err);
-      alert(`Error referring client: ${err.message || err.toString()}`);
-    }
-  };
-
-  const fetchClientData = async (id) => {
-    try {
-      const clientData = await databases.getDocument('Butterfly-Database', 'Client', id);
-      return clientData;
-    } catch (err) {
-      console.error("Error fetching client data:", err);
-      throw err;
+      // Type guard to check if err is an instance of Error
+      if (err instanceof Error) {
+        alert(`Error referring client: ${err.message}`);
+      } else {
+        alert(`Error referring client: Unknown error occurred`);
+      }
     }
   };
 
@@ -99,7 +113,11 @@ const ClientProfileModal = ({ clientId, isOpen, onClose }) => {
                     src={clientData.profilePictureUrl || '/default-profile.jpg'}
                     alt="Profile"
                     className="w-48 h-48 rounded-full object-cover mx-auto"
-                    onError={(e) => { e.target.onerror = null; e.target.src = '/default-profile.jpg'; }}
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement; // Type assertion
+                      target.onerror = null; // Prevent looping
+                      target.src = '/default-profile.jpg'; // Fallback image
+                    }}
                   />
                   <h2 className="mt-4 text-2xl font-bold text-gray-800">
                     {clientData.firstname} {clientData.lastname}
@@ -150,8 +168,6 @@ const ClientProfileModal = ({ clientId, isOpen, onClose }) => {
                   Refer
                 </button>
               </div>
-
-
             </>
           )
         )}
