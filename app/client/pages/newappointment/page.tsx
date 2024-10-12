@@ -103,8 +103,8 @@ const AppointmentBooking = () => {
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
       <div className="text-black min-h-screen flex">
         <div className="flex-grow flex flex-col justify-between bg-gray-100 w-3/4">
-          <div className="bg-white shadow-lg py-4 px-6 flex justify-between items-center">
-            <div className="text-black min-h-screen flex flex-col bg-gray-100 w-100">
+          <div className="bg-blue-100 shadow-lg py-4 px-6 flex justify-between items-center">
+            <div className="text-black w-full flex flex-col bg-gray-100 w-100">
               <div className="flex flex-col p-6 space-y-6">
 
                 {/* Choose Psychotherapist */}
@@ -234,7 +234,7 @@ const AppointmentBooking = () => {
                     Selected: {selectedMonth} {selectedDay}, {currentYear} | {selectedTime}
                   </p>
                   <button
-                    className={`mt-4 py-2 px-4 rounded-lg ${isFormComplete ? "bg-blue-500 text-white" : "bg-gray-400 text-gray-700 cursor-not-allowed"}`}
+                    className={`mt-4 py-2 px-4 rounded-lg ${isFormComplete ? "bg-blue-400 text-white hover:bg-blue-500" : "bg-gray-300 text-gray-700 cursor-not-allowed"}`}
                     onClick={handleBookAppointment}
                     disabled={!isFormComplete}
                   >
@@ -243,8 +243,8 @@ const AppointmentBooking = () => {
                 </div>
               </div>
 
-              {/* Confirmation Prompt */}
-              {showPrompt && (
+    {/* Confirmation Prompt */}
+    {showPrompt && (
                 <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
                   <div className="bg-white p-8 rounded-xl shadow-xl max-w-md w-full text-center relative border border-gray-300">
                     <h3 className="text-2xl font-bold text-blue-900 mb-4">
@@ -252,16 +252,16 @@ const AppointmentBooking = () => {
                     </h3>
                     <div className="mt-6 flex justify-around">
                       <button
-                        className="bg-gradient-to-r from-red-400 to-red-600 text-white py-2 px-5 rounded-full shadow-md hover:shadow-lg transition duration-200 w-28 hover:bg-gradient-to-l"
+                        className="bg-gray-500 text-white py-2 px-4 rounded hover:bg-gray-400"
                         onClick={cancelBooking}
                       >
                         Cancel
                       </button>
                       <button
-                        className="bg-gradient-to-r from-green-400 to-green-600 text-white py-2 px-5 rounded-full shadow-md hover:shadow-lg transition duration-200 w-28 hover:bg-gradient-to-l"
+                        className="bg-blue-400 text-white py-2 px-4 rounded hover:bg-blue-500"
                         onClick={confirmBooking}
                       >
-                        Yes
+                        Confirm
                       </button>
                     </div>
                   </div>
@@ -273,25 +273,31 @@ const AppointmentBooking = () => {
                 <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
                   <Confetti width={width} height={height} /> {/* Render Confetti */}
                   <div className="bg-white p-8 rounded-lg shadow-xl max-w-md w-full text-center relative border border-gray-300">
+                       {/* Add the small 'X' button to close the success message */}
+                  <button
+                      className="absolute top-2 right-2 bg-gray-300 rounded-full w-6 h-6 flex items-center justify-center text-black hover:bg-gray-400"
+                      onClick={() => setAppointmentBooked(false)} // Close the pop-up
+                       >
+                       &times; {/* 'X' symbol */}
+                  </button>
                   <h3 className="text-2xl font-bold text-green-600">
                         Your Appointment was Booked Successfully!
                       </h3>
-                      <p className="mt-4">We have sent your booking information to your SMS.</p>
                       <p className="mt-2">
                         Service: Counseling and Therapy<br />
                         Date & Time: {selectedMonth} {selectedDay}, 2024 | {selectedTime}<br />
                         Psychotherapist: {selectedTherapist ? selectedTherapist.name : "No therapist selected"}
                       </p>
                       <p className="text-lg text-gray-700">You can proceed to payment to complete the booking.</p>
-                    <button
-                      className="mt-6 bg-blue-500 text-white py-2 px-6 rounded-full"
-                      onClick={handleProceedToPayment}
-                    >
-                      Proceed to Payment
-                    </button>
-                  </div>
+                      <button
+                         className="mt-6 bg-blue-400 text-white py-2 px-6 rounded-full hover:bg-blue-500"
+                          onClick={handleProceedToPayment}
+                          >
+                          Proceed to Payment
+                          </button>
+                   </div>
                 </div>
-              )}
+               )}
               </div>
             </div>
           </div>

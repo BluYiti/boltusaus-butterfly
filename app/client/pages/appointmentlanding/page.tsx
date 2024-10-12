@@ -81,8 +81,8 @@ const AppointmentBooking = () => {
 
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
-      <div className="text-black min-h-screen flex bg-gradient-to-b from-blue-200 to-blue-600">
-        <div className="flex-grow flex flex-col justify-between bg-gray-100">
+      <div className="text-black min-h-screen flex bg-gradient-to-b from-blue-100 to-blue-600">
+        <div className="flex-grow flex flex-col justify-between bg-blue-100">
           <div className="bg-white shadow-lg py-4 px-6 flex justify-between items-center">
             <div className="text-black flex flex-col flex-grow p-6 space-y-6 mx-auto w-3/4">
               <div className="text-left mb-8">
@@ -140,23 +140,25 @@ const AppointmentBooking = () => {
 
               {/* What to do section */}
               <div className="bg-white rounded-lg shadow-lg p-6 mt-8">
-                <h2 className="text-lg font-semibold text-blue-800">What to do?</h2>
+                <h2 className="text-lg font-semibold text-blue-800">What to do during your freetime?</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
                   <div className="bg-gray-100 p-4 rounded-lg shadow transition-all duration-300 hover:shadow-xl">
-                    <div className="font-semibold text-blue-800">Meditate</div>
+                    <div className="font-semibold text-blue-800">Take time to Meditate</div>
                     <p className="text-sm">20-30 minutes/day 🧘‍♀️</p>
                   </div>
                   <div className="bg-gray-100 p-4 rounded-lg shadow transition-all duration-300 hover:shadow-xl">
-                    <div className="font-semibold text-blue-800">Pet Time</div>
+                    <div className="font-semibold text-blue-800">Have Time with your pets</div>
                     <p className="text-sm">Be sure to have some playtime with your beloved pets 🐶</p>
                   </div>
                   <div className="bg-gray-100 p-4 rounded-lg shadow transition-all duration-300 hover:shadow-xl">
-                    <div className="font-semibold text-blue-800">Exercise</div>
+                    <div className="font-semibold text-blue-800">Workout and Exercise</div>
+
                     <p className="text-sm">30-35 minutes/day 💪</p>
                   </div>
                   <div className="bg-gray-100 p-4 rounded-lg shadow transition-all duration-300 hover:shadow-xl">
-                    <div className="font-semibold text-blue-800">Arts</div>
-                    <p className="text-sm">Showcase your talent, express yourself! 🎨</p>
+                    <div className="font-semibold text-blue-800">Paint something colorful</div>
+
+                    <p className="text-sm">Showcase your talent, be unique and creative! 🎨</p>
                   </div>
                 </div>
               </div>

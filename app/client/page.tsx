@@ -30,7 +30,7 @@ const Dashboard: React.FC = () => {
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
       <div className="text-black min-h-screen flex">
         {/* Main Content */}
-        <div className="flex-grow flex flex-col justify-between bg-gray-100">
+        <div className="flex-grow flex flex-col justify-between bg-blue-100">
           {/* Top Section with User Info and Header */}
           <div className="bg-white shadow-lg py-4 px-6 flex justify-between items-center">
             <div className="flex items-center space-x-3">
@@ -47,7 +47,7 @@ const Dashboard: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 mx-8">
             <div className="bg-white rounded-lg shadow-lg p-6 flex flex-col">
               <h2 className="text-bold text-xl font-bold mb-4">
-                <span className="bg-blue-500 text-white p-2 rounded-lg">Upcoming Sessions</span>
+                <span className="bg-blue-500 text-white p-2 px-10 rounded-lg">Upcoming Sessions</span>
               </h2>
               <div className="space-y-2 flex-grow overflow-y-auto max-h-[300px]">
                 <div className="flex justify-between items-center p-2 rounded-lg text-black py-2 px-4">
@@ -82,7 +82,7 @@ const Dashboard: React.FC = () => {
             {/* Missed Sessions */}
             <div className="bg-white rounded-lg shadow-lg p-6 flex flex-col">
               <h2 className="text-bold text-xl font-bold mb-4">
-                <span className="bg-blue-500 text-white p-2 rounded-lg">Missed Sessions</span>
+                <span className="bg-blue-500 text-white p-2 px-14 rounded-lg">Missed Sessions</span>
               </h2>
               <div className="space-y-2 flex-grow overflow-y-auto max-h-[300px]">
                 <div className="flex justify-between items-center p-2 rounded-lg bg-white text-black py-2 px-4">
@@ -147,7 +147,7 @@ const Dashboard: React.FC = () => {
           {/* What to do section */}
           <div className="grid grid-cols-1 gap-6 mt-6 mx-8">
             <div className="bg-white rounded-lg shadow-lg p-6">
-              <h2 className="text-lg font-semibold">What to do?</h2>
+              <h2 className="text-xl font-semibold">What to do?</h2>
               <div className="space-y-4 mt-4">
                 {/* Mood Tracker */}
                 <div className="bg-white rounded-lg shadow-lg p-6">
@@ -155,7 +155,7 @@ const Dashboard: React.FC = () => {
                   <div className="flex justify-between items-center">
                     <p className="text-lg font-medium">How are you feeling today?</p>
                     <Link href="/client/pages/goals">
-                      <button className="bg-blue-400 text-white py-2 px-4 rounded hover:bg-blue-600">
+                      <button className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
                         START
                       </button>
                     </Link>
@@ -168,7 +168,7 @@ const Dashboard: React.FC = () => {
                   <div className="flex justify-between items-center">
                     <p className="text-lg font-medium">Start your day by reading something inspiring!</p>
                     <Link href="/client/pages/explore">
-                      <button className="bg-blue-400 text-white py-2 px-4 rounded hover:bg-blue-600">
+                      <button className="bg-blue-500 text-white py-2 px-5 rounded hover:bg-blue-600">
                         VIEW
                       </button>
                     </Link>
