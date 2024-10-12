@@ -17,6 +17,7 @@ const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpe
   const [isReportsModalOpen, setIsReportsModalOpen] = useState(false);
   const [selectedReportDetails, setSelectedReportDetails] = useState<string | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<'sessions' | 'goals'>('sessions');
 
   const fetchClientData = async (id: string) => {
     try {
@@ -88,7 +89,7 @@ const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpe
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50">
+    <div className="fixed inset-0 bg-blue-600 bg-opacity-50 flex justify-center items-center z-50">
       <div
         role="dialog"
         aria-modal="true"
@@ -96,7 +97,7 @@ const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpe
       >
         <button
           onClick={onClose}
-          className="text-gray-400 hover:text-gray-600 absolute top-4 right-4"
+          className="text-blue-400 hover:text-blue-600 absolute top-4 right-4"
           aria-label="Close modal"
         >
           &#10005;
@@ -156,7 +157,7 @@ const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpe
               <div className="mt-8 flex justify-center space-x-6">
                 <button
                   onClick={() => setIsReportsModalOpen(true)}
-                  className="bg-blue-400 text-white px-6 py-2 rounded-full shadow-md hover:shadow-lg hover:bg-blue-600 transition-all"
+                  className="bg-blue-400 text-white px-6 py-2 rounded-full shadow-md hover:shadow-lg hover:bg-blue-500 transition-all"
                 >
                   View Reports
                 </button>
@@ -174,57 +175,91 @@ const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpe
 
       {/* Reports Modal */}
       {isReportsModalOpen && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50">
+        <div className="fixed inset-0 bg-blue-600 bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white rounded-lg p-8 w-full max-w-4xl shadow-lg relative">
             <button
               onClick={() => {
                 setIsReportsModalOpen(false);
                 onClose();
               }}
-              className="text-gray-400 hover:text-gray-600 absolute top-4 right-4"
+              className="text-blue-400 hover:text-blue-600 absolute top-4 right-4"
               aria-label="Close modal"
             >
               &#10005;
             </button>
-            <h2 className="text-xl font-bold mb-6">Reports</h2>
-            <div className="max-h-[400px] overflow-y-auto">
-              <div className="space-y-4">
-                {/* Mock data for reports */}
-                <div>
-                  <h3 className="text-lg font-semibold">Sessions</h3>
-                  <table className="table-auto w-full">
-                    <thead>
-                      <tr>
-                        <th className="px-4 py-2 text-left">Session ID</th>
-                        <th className="px-4 py-2 text-left">Time and Date</th>
-                        <th className="px-4 py-2 text-left">Details</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {/* Example report data */}
-                      {Array.from({ length: 20 }, (_, index) => ({
-                        sessionId: `00${index + 1}A`,
-                        dateTime: new Date(Date.now() - index * 86400000).toLocaleString(),
-                        details: `Detailed report for session ${index + 1}`,
-                      })).map((report, index) => (
-                        <tr key={index}>
-                          <td className="px-4 py-2">{report.sessionId}</td>
-                          <td className="px-4 py-2">{report.dateTime}</td>
-                          <td className="px-4 py-2">
-                            <button
-                              onClick={() => handleViewDetails(report.details)}
-                              className="text-blue-500 hover:text-blue-700"
-                            >
-                              View Details
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+            <h2 className="text-2xl text-blue-400 font-bold mb-6">Reports</h2>
+
+            {/* Tabs */}
+            <div className="flex space-x-4 mb-4">
+              <div
+                onClick={() => setActiveTab('sessions')}
+                className={`cursor-pointer px-4 py-2 rounded-lg ${activeTab === 'sessions' ? 'bg-blue-400 text-white' : 'bg-gray-200 text-gray-800'}`}
+              >
+                Sessions
+              </div>
+              <div
+                onClick={() => setActiveTab('goals')}
+                className={`cursor-pointer px-4 py-2 rounded-lg ${activeTab === 'goals' ? 'bg-blue-400 text-white' : 'bg-gray-200 text-gray-800'}`}
+              >
+                Goals
               </div>
             </div>
+
+            {/* Tab Content with Transitions */}
+            <div className={`transition-opacity duration-300 ${activeTab === 'sessions' ? 'opacity-100' : 'opacity-0'}`}>
+              {activeTab === 'sessions' && (
+                <div className="max-h-[400px] overflow-y-auto">
+                  <div className="space-y-4">
+                    <table className="table-auto w-full">
+                      <thead>
+                        <tr>
+                          <th className="px-4 py-2 text-left">Session ID</th>
+                          <th className="px-4 py-2 text-left">Time and Date</th>
+                          <th className="px-4 py-2 text-left">Details</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {Array.from({ length: 20 }, (_, index) => ({
+                          sessionId: `00${index + 1}A`,
+                          dateTime: new Date(Date.now() - index * 86400000).toLocaleString(),
+                          details: `Detailed report for session ${index + 1}`,
+                        })).map((report, index) => (
+                          <tr key={index}>
+                            <td className="px-4 py-2">{report.sessionId}</td>
+                            <td className="px-4 py-2">{report.dateTime}</td>
+                            <td className="px-4 py-2">
+                              <button
+                                onClick={() => handleViewDetails(report.details)}
+                                className="text-blue-500 hover:text-blue-700"
+                              >
+                                View Details
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className={`transition-opacity duration-300 ${activeTab === 'goals' ? 'opacity-100' : 'opacity-0'}`}>
+              {activeTab === 'goals' && (
+                <div className="max-h-[400px] overflow-y-auto">
+                  <div className="space-y-4">
+                    <ul className="list-disc pl-4">
+                      {/* Replace with actual goals data */}
+                      <li>Goal 1: Description of goal 1</li>
+                      <li>Goal 2: Description of goal 2</li>
+                      <li>Goal 3: Description of goal 3</li>
+                      <li>Goal 4: Description of goal 4</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+            </div>
+
             <div className="mt-4">
               <button
                 onClick={() => setIsReportsModalOpen(false)}
@@ -239,11 +274,11 @@ const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpe
 
       {/* Details Modal */}
       {isDetailsModalOpen && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50">
+        <div className="fixed inset-0 bg-blue-600 bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white rounded-lg p-8 w-full max-w-4xl shadow-lg relative">
             <button
               onClick={() => setIsDetailsModalOpen(false)}
-              className="text-gray-400 hover:text-gray-600 absolute top-4 right-4"
+              className="text-blue-400 hover:text-blue-600 absolute top-4 right-4"
               aria-label="Close modal"
             >
               &#10005;
@@ -264,7 +299,7 @@ const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpe
 
       {/* Confirmation Modal */}
       {isConfirmModalOpen && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50">
+        <div className="fixed inset-0 bg-blue-600 bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white rounded-lg p-8 w-full max-w-sm shadow-lg relative">
             <h2 className="text-xl font-bold mb-4">Confirm Referral</h2>
             <p>Are you sure you want to refer this client?</p>
