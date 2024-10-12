@@ -72,7 +72,8 @@ const HomePage: React.FC = () => {
       <BackToTopButton />
       
       {/* Top Section */}
-      <section className="relative h-screen flex flex-col justify-center items-start bg-cover bg-center px-4 md:px-8" style={{ backgroundImage: `url('/images/landingbg.jpg')` }}>
+      <section className="relative h-screen flex flex-col justify-center items-start bg-cover bg-center px-4 md:px-8" style={{ backgroundImage: `url('/images/landingbg.png')` }}>
+        
         <motion.div
           className="relative z-10 text-left text-white max-w-md ml-4 md:ml-10"
           initial={{ opacity: 0, y: -50 }}
@@ -89,6 +90,19 @@ const HomePage: React.FC = () => {
             </button>
           </Link>
         </motion.div>
+
+        {/* Butterfly GIF - Positioned */}
+        {/* Butterfly GIF - Positioned on hands */}
+        <motion.img
+        src="/images/butterfly.gif" 
+        alt="Butterfly Animation"
+        className="absolute z-20 w-50 h-50" 
+        style={{ top: '45%', left: '36%', transform: 'translate(-60%, -50%)' }} // Fine-tune with your own adjustments
+        initial={{ opacity: 0, scale: 0.5 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.6, delay: 0.5 }}
+        />
+
 
         {/* Centered Navbar */}
         <nav className="absolute top-6 left-1/2 transform -translate-x-1/2 flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4 text-white">
