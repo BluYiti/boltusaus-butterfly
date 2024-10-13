@@ -90,78 +90,85 @@ const AppointmentBooking = () => {
                   <span className="text-green-600 animate-bounce">✔️</span>
                   <span className="ml-2 text-lg font-bold">Evaluation Completed!</span>
                 </div>
-                <p className="text-xl font-semibold">
-                  {/* Update the href to navigate to the new appointment page */}
-                  <Link href="/client/pages/newappointment" className="text-blue-500 font-bold underline">
-                    Book your appointment
-                  </Link>
-                </p>
+                <div className="text-xl font-semibold">
+  <Link href="/client/pages/newappointment">
+    <button className="bg-blue-500 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded">
+      Book your appointment
+    </button>
+  </Link>
+</div>
               </div>
 
-              <h3 className="text-3xl font-bold text-blue-800 text-left mb-6">
-                Meet our caring psychotherapists, here to guide your healing!
-              </h3>
-
+              {/* Flex container to display both sections side by side */}
               <div className="flex justify-left space-x-6">
-                {therapists.map((therapist, index) => (
-                  <div
-                    key={index}
-                    className="relative bg-white border border-blue-400 shadow-lg p-6 rounded-lg w-60 text-center overflow-hidden transform transition-shadow duration-500 hover:shadow-2xl"
-                  >
-                    <img
-                      src={therapist.imgSrc}
-                      alt={therapist.name}
-                      className="rounded-full mx-auto w-24 h-24 mb-4 transition-transform duration-300 transform hover:scale-110"
-                    />
-                    <h4 className="text-lg font-bold text-blue-900">{therapist.name}</h4>
-                    <p className="text-sm text-gray-600">{therapist.specialty}</p>
+                {/* Meet our caring psychotherapists section */}
+                <div className="flex-1">
+                  <h3 className="text-3xl font-bold text-blue-500 text-left mb-6">
+                    Meet our caring psychotherapists, here to guide your healing!
+                  </h3>
+                  <div className="flex justify-left space-x-6">
+                    {therapists.map((therapist, index) => (
+                      <div
+                        key={index}
+                        className="relative bg-blue-100 border border-blue-500 shadow-lg p-6 rounded-lg w-60 text-center overflow-hidden transform transition-shadow duration-500 hover:shadow-2xl"
+                      >
+                        <img
+                          src={therapist.imgSrc}
+                          alt={therapist.name}
+                          className="rounded-full mx-auto w-24 h-24 mb-4 transition-transform duration-300 transform hover:scale-110"
+                        />
+                        <h4 className="text-lg font-bold text-blue-500">{therapist.name}</h4>
+                        <p className="text-sm text-gray-600">{therapist.specialty}</p>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </div>
 
-              {/* Reminders Section */}
-              <div className="bg-white rounded-lg shadow-lg p-6 flex flex-col h-full mt-8">
-                <h2 className="text-xl font-semibold text-blue-800 mb-4">A Daily Reminder to Yourself</h2>
-                <div className="space-y-4 flex-grow overflow-y-auto max-h-[300px]">
-                  <div className="bg-gray-50 p-4 rounded-lg shadow transition-all duration-300 hover:shadow-xl">
-                    <h3 className="font-semibold text-lg text-blue-800">This Too Shall Pass</h3>
-                    <p className="text-gray-700">Feelings are temporary. Hold on, better days are coming.</p>
-                  </div>
-                  <div className="bg-gray-50 p-4 rounded-lg shadow transition-all duration-300 hover:shadow-xl">
-                    <h3 className="font-semibold text-lg text-blue-800">Breathe In, Let Go</h3>
-                    <p className="text-gray-700">Take a moment to breathe. Release the tension in your mind and body.</p>
-                  </div>
-                  <div className="bg-gray-50 p-4 rounded-lg shadow transition-all duration-300 hover:shadow-xl">
-                    <h3 className="font-semibold text-lg text-blue-800">You Are Enough.</h3>
-                    <p className="text-gray-700">Your worth isn’t measured by your struggles. You are enough just as you are.</p>
+                {/* A Daily Reminder to Yourself section */}
+                <div className="flex-1">
+                  <div className="bg-white rounded-lg shadow-lg p-6 flex flex-col h-full">
+                    <h2 className="text-xl font-semibold text-blue-500 mb-4">A Daily Reminder to Yourself</h2>
+                    <div className="space-y-4 flex-grow overflow-y-auto max-h-[300px]">
+                      <div className="bg-gray-50 p-4 rounded-lg shadow transition-all duration-300 hover:shadow-xl">
+                        <h3 className="font-semibold text-lg text-blue-500">This Too Shall Pass</h3>
+                        <p className="text-gray-700">Feelings are temporary. Hold on, better days are coming.</p>
+                      </div>
+                      <div className="bg-gray-50 p-4 rounded-lg shadow transition-all duration-300 hover:shadow-xl">
+                        <h3 className="font-semibold text-lg text-blue-500">Breathe In, Let Go</h3>
+                        <p className="text-gray-700">Take a moment to breathe. Release the tension in your mind and body.</p>
+                      </div>
+                      <div className="bg-gray-50 p-4 rounded-lg shadow transition-all duration-300 hover:shadow-xl">
+                        <h3 className="font-semibold text-lg text-blue-500">You Are Enough.</h3>
+                        <p className="text-gray-700">Your worth isn’t measured by your struggles. You are enough just as you are.</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
 
               {/* What to do section */}
-              <div className="bg-white rounded-lg shadow-lg p-6 mt-8">
-                <h2 className="text-lg font-semibold text-blue-800">What to do during your freetime?</h2>
+              <div className="bg-blue-100 rounded-lg shadow-lg p-6 mt-8">
+                <h2 className="text-lg font-semibold text-blue-500">What to do during your freetime?</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-                  <div className="bg-gray-100 p-4 rounded-lg shadow transition-all duration-300 hover:shadow-xl">
-                    <div className="font-semibold text-blue-800">Take time to Meditate</div>
+                  <div className="bg-white p-4 rounded-lg shadow transition-all duration-300 hover:shadow-xl">
+                    <div className="font-semibold text-blue-500">Take time to Meditate</div>
                     <p className="text-sm">20-30 minutes/day 🧘‍♀️</p>
                   </div>
-                  <div className="bg-gray-100 p-4 rounded-lg shadow transition-all duration-300 hover:shadow-xl">
-                    <div className="font-semibold text-blue-800">Have Time with your pets</div>
+                  <div className="bg-white p-4 rounded-lg shadow transition-all duration-300 hover:shadow-xl">
+                    <div className="font-semibold text-blue-500">Have Time with your pets</div>
                     <p className="text-sm">Be sure to have some playtime with your beloved pets 🐶</p>
                   </div>
-                  <div className="bg-gray-100 p-4 rounded-lg shadow transition-all duration-300 hover:shadow-xl">
-                    <div className="font-semibold text-blue-800">Workout and Exercise</div>
-
+                  <div className="bg-white p-4 rounded-lg shadow transition-all duration-300 hover:shadow-xl">
+                    <div className="font-semibold text-blue-500">Workout and Exercise</div>
                     <p className="text-sm">30-35 minutes/day 💪</p>
                   </div>
-                  <div className="bg-gray-100 p-4 rounded-lg shadow transition-all duration-300 hover:shadow-xl">
-                    <div className="font-semibold text-blue-800">Paint something colorful</div>
-
+                  <div className="bg-white p-4 rounded-lg shadow transition-all duration-300 hover:shadow-xl">
+                    <div className="font-semibold text-blue-500">Paint something colorful</div>
                     <p className="text-sm">Showcase your talent, be unique and creative! 🎨</p>
                   </div>
                 </div>
               </div>
+
             </div>
           </div>
         </div>

@@ -26,7 +26,7 @@ const ProfilePage: React.FC = () => {
           </div>
 
           {/* Profile Section */}
-          <div className="bg-white shadow-md p-6 rounded-lg flex flex-col items-center space-y-6">
+          <div className="shadow-md p-6 rounded-lg flex flex-col items-center space-y-6">
             {/* Profile Picture and Name */}
             <div className="relative flex flex-col items-center text-center">
               <img
