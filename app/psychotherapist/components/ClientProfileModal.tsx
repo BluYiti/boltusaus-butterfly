@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { databases } from "@/appwrite";
 import { useRouter } from "next/navigation";
 import { Models } from 'appwrite';
+import ReportsModal from './ReportsModal'; // Import the new ReportsModal
+
 
 interface ClientProfileModalProps {
   clientId: string;
@@ -244,17 +246,40 @@ const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpe
               )}
             </div>
 
-            <div className={`transition-opacity duration-300 ${activeTab === 'goals' ? 'opacity-100' : 'opacity-0'}`}>
+                 {/* Tab Content with Transitions */}
+                 <div className={`transition-opacity duration-300 ${activeTab === 'goals' ? 'opacity-100' : 'opacity-0'}`}>
               {activeTab === 'goals' && (
                 <div className="max-h-[400px] overflow-y-auto">
                   <div className="space-y-4">
-                    <ul className="list-disc pl-4">
-                      {/* Replace with actual goals data */}
-                      <li>Goal 1: Description of goal 1</li>
-                      <li>Goal 2: Description of goal 2</li>
-                      <li>Goal 3: Description of goal 3</li>
-                      <li>Goal 4: Description of goal 4</li>
-                    </ul>
+                    <table className="table-auto w-full">
+                      <thead>
+                        <tr>
+                          <th className="px-4 py-2 text-left">Goal ID</th>
+                          <th className="px-4 py-2 text-left">Time and Date</th>
+                          <th className="px-4 py-2 text-left">Details</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {Array.from({ length: 30 }, (_, index) => ({
+                          sessionId: `00${index + 1}A`,
+                          dateTime: new Date(Date.now() - index * 86400000).toLocaleString(),
+                          details: `Detailed report for goal ${index + 1}`,
+                        })).map((report, index) => (
+                          <tr key={index}>
+                            <td className="px-4 py-2">{report.sessionId}</td>
+                            <td className="px-4 py-2">{report.dateTime}</td>
+                            <td className="px-4 py-2">
+                              <button
+                                onClick={() => handleViewDetails(report.details)}
+                                className="text-blue-500 hover:text-blue-700"
+                              >
+                                View Details
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               )}
