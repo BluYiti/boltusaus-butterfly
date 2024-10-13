@@ -2,8 +2,6 @@ import { useEffect, useState } from "react";
 import { databases } from "@/appwrite";
 import { useRouter } from "next/navigation";
 import { Models } from 'appwrite';
-import ReportsModal from './ReportsModal'; // Import the new ReportsModal
-
 
 interface ClientProfileModalProps {
   clientId: string;
@@ -215,9 +213,9 @@ const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpe
                     <table className="table-auto w-full">
                       <thead>
                         <tr>
-                          <th className="px-4 py-2 text-left">Session ID</th>
-                          <th className="px-4 py-2 text-left">Time and Date</th>
-                          <th className="px-4 py-2 text-left">Details</th>
+                          <th className="px-4 py-2 text-left border-blue-400 border-[1px] bg-blue-200">Session ID</th>
+                          <th className="px-4 py-2 text-left border-blue-400 border-[1px] bg-blue-200">Time and Date</th>
+                          <th className="px-4 py-2 text-left border-blue-400 border-[1px] bg-blue-200">Details</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -227,9 +225,9 @@ const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpe
                           details: `Detailed report for session ${index + 1}`,
                         })).map((report, index) => (
                           <tr key={index}>
-                            <td className="px-4 py-2">{report.sessionId}</td>
-                            <td className="px-4 py-2">{report.dateTime}</td>
-                            <td className="px-4 py-2">
+                            <td className="px-4 py-2 border-blue-400 border-[1px]">{report.sessionId}</td>
+                            <td className="px-4 py-2 border-blue-400 border-[1px]">{report.dateTime}</td>
+                            <td className="px-4 py-2 border-blue-400 border-[1px]">
                               <button
                                 onClick={() => handleViewDetails(report.details)}
                                 className="text-blue-500 hover:text-blue-700"
@@ -254,9 +252,9 @@ const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpe
                     <table className="table-auto w-full">
                       <thead>
                         <tr>
-                          <th className="px-4 py-2 text-left">Goal ID</th>
-                          <th className="px-4 py-2 text-left">Time and Date</th>
-                          <th className="px-4 py-2 text-left">Details</th>
+                          <th className="px-4 py-2 text-left border-blue-400 border-[1px] bg-blue-200">Goal ID</th>
+                          <th className="px-4 py-2 text-left border-blue-400 border-[1px] bg-blue-200">Time and Date</th>
+                          <th className="px-4 py-2 text-left border-blue-400 border-[1px] bg-blue-200">Details</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -266,12 +264,12 @@ const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpe
                           details: `Detailed report for goal ${index + 1}`,
                         })).map((report, index) => (
                           <tr key={index}>
-                            <td className="px-4 py-2">{report.sessionId}</td>
-                            <td className="px-4 py-2">{report.dateTime}</td>
-                            <td className="px-4 py-2">
+                            <td className="px-4 py-2 border-blue-400 border-[1px]">{report.sessionId}</td>
+                            <td className="px-4 py-2 border-blue-400 border-[1px]">{report.dateTime}</td>
+                            <td className="px-4 py-2 border-blue-400 border-[1px]">
                               <button
                                 onClick={() => handleViewDetails(report.details)}
-                                className="text-blue-500 hover:text-blue-700"
+                                className="text-blue-500 underline hover:text-blue-700"
                               >
                                 View Details
                               </button>
