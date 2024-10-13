@@ -36,6 +36,7 @@ const GoalsPage = () => {
             duration,
             date: format(selectedDate, 'yyyy-MM-dd'),
             goalReminder,
+            status: 'To Do',
         };
 
         setGoals([...goals, newGoal]);
@@ -145,7 +146,9 @@ const GoalsPage = () => {
                             <option value="Exercise">Exercise</option>
                             <option value="Read">Read</option>
                             <option value="Listen to Music">Music</option>
-                            <option value="Walk">Walk</option>
+                            <option value="Stroll">Stroll</option>
+                            <option value="Pet time">Pet time</option>
+                            <option value="Arts">Arts</option>
                         </select>
                         <div className="mt-4">
                             <label className="block font-semibold text-gray-700">Duration:</label>
@@ -250,19 +253,53 @@ const GoalsPage = () => {
 
                 {/* Logged Goals Section */}
                 <div className="mt-12 bg-white shadow-md rounded-lg p-6 border border-gray-200">
-                    <h3 className="text-lg font-semibold text-blue-400">Logged Goals</h3>
-                    {goals.length > 0 ? (
-                        <ul className="mt-4 space-y-3">
-                            {goals.map((goal) => (
-                                <li key={goal.id} className="p-4 bg-gray-100 rounded-lg shadow-md">
-                                    {goal.activity} for {goal.duration} minutes on {goal.date} (Mood: {goal.mood})
-                                </li>
-                            ))}
-                        </ul>
-                    ) : (
-                        <p className="mt-2 text-gray-600">No goals logged yet.</p>
-                    )}
-                </div>
+    <h3 className="text-lg font-semibold text-blue-400">Logged Goals</h3>
+    {goals.length > 0 ? (
+        <ul className="mt-4 space-y-3">
+            {goals.map((goal) => {
+                // Automatically mark the goal as "Missed" if the date has passed and the goal is not done
+                const goalDate = new Date(goal.date);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                if (goalDate < today && goal.status !== 'Done') {
+                    goal.status = 'Missed';
+                }
+
+                return (
+                    <li
+                        key={goal.id}
+                        className="p-4 bg-gray-50 rounded-lg shadow-md flex justify-between items-center"
+                    >
+                        <div>
+                            <p className="text-sm">
+                                {goal.activity} for {goal.duration} minutes on {goal.date} (Mood: {goal.mood})
+                            </p>
+                            <p className="text-xs text-gray-500">Status: {goal.status}</p>
+                        </div>
+                        <select
+                            value={goal.status}
+                            onChange={(e) => {
+                                setGoals(goals.map((g) =>
+                                    g.id === goal.id ? { ...g, status: e.target.value } : g
+                                ));
+                            }}
+                            className="border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white hover:bg-gray-100 text-gray-700 transition-colors duration-200"
+                        >
+                            <option value="To Do" className="text-blue-500">To Do</option>
+                            <option value="Doing" className="text-yellow-500">Doing</option>
+                            <option value="Done" className="text-green-500">Done</option>
+                            <option value="Missed" className="text-red-500">Missed</option>
+                        </select>
+                    </li>
+                );
+            })}
+        </ul>
+    ) : (
+        <p className="mt-2 text-gray-600">No goals logged yet.</p>
+    )}
+</div>
+
             </div>
         </Layout>
     );
