@@ -14,8 +14,11 @@ import { useFetchRegions } from '@/register/hook/fetch/useFetchRegions';
 import { useFetchProvinces } from '@/register/hook/fetch/useFetchProvinces';
 import { useFetchCities } from '@/register/hook/fetch/useFetchCities';
 import { useFetchBarangays } from '@/register/hook/fetch/useFetchBarangays';
+import { useRouter } from 'next/navigation';
 
 const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading }) => {
+    const router = useRouter();
+
     const {
         firstName, setFirstName,
         lastName, setLastName,
@@ -67,6 +70,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
         onRegister: (data) => {
             // Handle the successful registration, e.g., API call or redirect
             console.log('Registration successful:', data);
+            router.push(`/register/verify/email/?email=${encodeURIComponent(email)}&phone=${encodeURIComponent(contactNumber)}`);
         },
         setValidationError,
     });

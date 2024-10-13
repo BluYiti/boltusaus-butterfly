@@ -1,7 +1,6 @@
 'use client';
 
-import { client, account, databases } from '@/appwrite';
-import { Users } from 'node-appwrite'; // Import Client and Users directly
+import { account, databases } from '@/appwrite';
 import React from 'react';
 
 interface FormData {
@@ -40,8 +39,6 @@ const validatePhoneNumber = (number: string) => {
     const phonePattern = /^\+?[0-9]{10,15}$/; // Adjust based on expected phone format
     return phonePattern.test(number) ? null : 'Please enter a valid contact number.';
 };
-
-const users = new Users(client);
 
 const handleSubmit = async (e: React.FormEvent<HTMLFormElement>, formData: FormData) => {
     e.preventDefault();
