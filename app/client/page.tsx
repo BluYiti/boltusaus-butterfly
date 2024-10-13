@@ -3,10 +3,12 @@ import React, { useState } from "react";
 import { FaUser } from "react-icons/fa";
 import Layout from "@/components/Sidebar/Layout";
 import items from "@/client/data/Links";
-import Link from "next/link"; // Import Link
+import Link from "next/link";
+import RescheduleModal from "@/components/Reschedule"; // Assuming you have this component
 
 const Dashboard: React.FC = () => {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
+  const [showModal, setShowModal] = useState(false);
   const today = new Date();
   const currentDay = today.getDate();
   const currentMonth = today.getMonth();
@@ -26,10 +28,17 @@ const Dashboard: React.FC = () => {
 
   const firstDayOfMonth = new Date(currentYear, selectedMonth, 1).getDay();
 
+  const handleRescheduleClick = () => {
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+  };
+
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
       <div className="text-black min-h-screen flex">
-        {/* Main Content */}
         <div className="flex-grow flex flex-col justify-between bg-blue-100">
           {/* Top Section with User Info and Header */}
           <div className="bg-white shadow-lg py-4 px-6 flex justify-between items-center">
@@ -79,7 +88,6 @@ const Dashboard: React.FC = () => {
 
           {/* Missed Sessions and Calendar Section */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 mx-8">
-            {/* Missed Sessions */}
             <div className="bg-white rounded-lg shadow-lg p-6 flex flex-col">
               <h2 className="text-bold text-xl font-bold mb-4">
                 <span className="bg-blue-500 text-white p-2 px-14 rounded-lg">Missed Sessions</span>
@@ -87,7 +95,12 @@ const Dashboard: React.FC = () => {
               <div className="space-y-2 flex-grow overflow-y-auto max-h-[300px]">
                 <div className="flex justify-between items-center p-2 rounded-lg bg-white text-black py-2 px-4">
                   <span className="font-bold">PLACEHOLDER FOR MISSED SESSION</span>
-                  <span className="text-gray-600 font-semibold">Date and Time</span>
+                  <button
+                    className="bg-blue-300 font-bold text-white py-1 px-3 rounded-xl hover:bg-blue-500"
+                    onClick={handleRescheduleClick}
+                  >
+                    Reschedule
+                  </button>
                 </div>
               </div>
             </div>
@@ -180,10 +193,12 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Footer */}
-      <div className="bg-white shadow-lg py-4 px-6 text-center">
-        <p className="text-gray-500">© 2024 Butterfly Inc. All rights reserved.</p>
-      </div>
+      {/* Modal for rescheduling */}
+      {showModal && (
+        <RescheduleModal onClose={closeModal}>
+          <img src="/mnt/data/image.png" alt="Reschedule Details" />
+        </RescheduleModal>
+      )}
     </Layout>
   );
 };

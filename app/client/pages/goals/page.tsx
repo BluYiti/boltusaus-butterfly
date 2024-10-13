@@ -21,8 +21,7 @@ const GoalsPage = () => {
     const [showModal, setShowModal] = useState(false);
     const [goals, setGoals] = useState([]);
 
-    const twoWeeksAgo = addDays(currentDate, -14);  // 2 weeks ago
-    const twoWeeksAhead = addDays(currentDate, 14); // 2 weeks ahead
+    const oneWeekAhead = addDays(currentDate, 7);
 
     const handleSave = () => {
         if (!selectedDate) {
@@ -37,6 +36,7 @@ const GoalsPage = () => {
             duration,
             date: format(selectedDate, 'yyyy-MM-dd'),
             goalReminder,
+            status: 'To Do',
         };
 
         setGoals([...goals, newGoal]);
@@ -62,93 +62,100 @@ const GoalsPage = () => {
         if (day) {
             const clickedDate = new Date(currentYear, currentMonth, day);
             const today = new Date();
-    
-            // Ensure the clicked date is within the allowed range
+            today.setHours(0, 0, 0, 0);
+
             if (isBefore(clickedDate, today)) {
                 alert("You cannot select a past date.");
                 return;
             }
-            if (isAfter(clickedDate, twoWeeksAhead)) {
-                alert("You cannot select a date more than two weeks in the future.");
+            if (isAfter(clickedDate, oneWeekAhead)) {
+                alert("You cannot select a date more than one week in the future.");
                 return;
             }
-    
+
             setSelectedDate(clickedDate);
         }
     };
 
     return (
         <Layout sidebarTitle="Butterfly" sidebarItems={items}>
-        <div className="flex-grow p-8 bg-blue-100">
-            
-            {/* Container for "Hello, Client!" */}
-            <div className="bg-white shadow-md rounded-lg p-6 mb-8">
-                <h2 className="text-3xl font-bold text-blue-800">Hello, Client!</h2>
+            <div className="flex-grow p-8 bg-gradient-to-br from-blue-50 to-blue-100">
+                <div className="bg-white shadow-lg rounded-xl p-8 mb-10 border border-blue-200">
+                    <h2 className="text-4xl font-bold text-blue-500 mb-4">Hello, Client!</h2>
+                    <p className="text-gray-600 text-lg">Set and track your personal goals with ease.</p>
+                </div>
+
+                <div className="flex space-x-8">
+                <div className="flex-1 bg-white shadow-md rounded-lg p-6 border border-gray-200">
+    <div className="flex justify-between items-center mb-6">
+        <button
+            onClick={() => changeMonth(-1)}
+            className={`text-gray-400 hover:text-blue-500 hover:scale-105 transition-transform duration-300 ${currentYear === currentYearReal && currentMonth === currentMonthReal ? 'cursor-not-allowed opacity-50' : ''}`}
+            disabled={currentYear === currentYearReal && currentMonth === currentMonthReal}
+        >
+            <MdArrowBack size={24} />
+        </button>
+        <h2 className="text-2xl font-semibold text-blue-400">{format(new Date(currentYear, currentMonth), 'MMMM yyyy')}</h2>
+        <button
+            onClick={() => changeMonth(1)}
+            className={`text-gray-800 hover:text-blue-500 hover:scale-105 transition-transform duration-300 ${isAfter(new Date(currentYear, currentMonth), oneWeekAhead) ? 'cursor-not-allowed opacity-50' : ''}`}
+            disabled={isAfter(new Date(currentYear, currentMonth), oneWeekAhead)}
+        >
+            <MdArrowForward size={24} />
+        </button>
+    </div>
+    <div className="grid grid-cols-7 gap-3 mt-2">
+    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+        <div key={day} className="font-semibold text-center text-gray-600">{day}</div>
+    ))}
+    {totalDays.map((day, index) => {
+        const dayDate = day ? new Date(currentYear, currentMonth, day) : null;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const isPast = dayDate && isBefore(dayDate, today) && dayDate.getTime() !== today.getTime();
+        const isTooFar = dayDate && isAfter(dayDate, oneWeekAhead);
+        const isSelected = selectedDate && selectedDate.getDate() === day;
+
+        return (
+            <div
+                key={index}
+                onClick={() => !isPast && !isTooFar && handleDateClick(day)}
+                className={`h-16 flex items-center justify-center border rounded-lg transition-colors duration-300
+                ${day ? '' : ''} 
+                ${isSelected ? 'bg-blue-400 text-white' : 'bg-gray-100'} 
+                ${!isSelected && !isPast && !isTooFar ? 'hover:bg-blue-500 hover:text-white' : ''} 
+                ${isPast || isTooFar ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
+            >
+                {day}
             </div>
-
-                <div className="flex space-x-6">
-                    {/* Calendar Section */}
-                    <div className="flex-1 bg-white shadow-lg rounded-lg p-6">
-                        <div className="flex justify-between items-center mb-6">
-                            <button
-                                onClick={() => changeMonth(-1)}
-                                className={`text-gray-500 hover:text-blue-500 hover:scale-105 transition-transform duration-300 ${currentYear === currentYearReal && currentMonth === currentMonthReal ? 'cursor-not-allowed opacity-50' : ''}`}
-                                disabled={currentYear === currentYearReal && currentMonth === currentMonthReal}
-                            >
-                                <MdArrowBack size={24} />
-                            </button>
-                            <h2 className="text-xl font-medium">{format(new Date(currentYear, currentMonth), 'MMMM yyyy')}</h2>
-                            <button
-                                onClick={() => changeMonth(1)}
-                                className={`text-gray-500 hover:text-blue-500 hover:scale-105 transition-transform duration-300 ${isAfter(new Date(currentYear, currentMonth), twoWeeksAhead) ? 'cursor-not-allowed opacity-50' : ''}`}
-                                disabled={isAfter(new Date(currentYear, currentMonth), twoWeeksAhead)}
-                            >
-                                <MdArrowForward size={24} />
-                            </button>
-                        </div>
-                        <div className="grid grid-cols-7 gap-3 mt-2">
-                            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-                                <div key={day} className="font-semibold text-center text-gray-600">{day}</div>
-                            ))}
-                            {totalDays.map((day, index) => {
-                                const dayDate = day ? new Date(currentYear, currentMonth, day) : null;
-                                const isPast = dayDate && isBefore(dayDate, new Date()); // Disable past dates
-                                const isTooFar = dayDate && isAfter(dayDate, twoWeeksAhead);
-
-                                return (
-                                    <div
-                                        key={index}
-                                        onClick={() => !isPast && !isTooFar && handleDateClick(day)}
-                                        className={`h-16 flex items-center justify-center border rounded-lg ${day ? 'hover:bg-blue-500 hover:text-white transition-colors duration-300' : ''} ${selectedDate && selectedDate.getDate() === day ? 'bg-blue-400 text-white' : ''} 
-                                        ${isPast || isTooFar ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
-                                    >
-                                        {day}
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
+        );
+    })}
+</div>
+</div>
 
                     {/* Activity Section */}
-                    <div className="flex-1 bg-white shadow-lg rounded-lg p-6">
-                        <h3 className="text-lg font-semibold">Activity</h3>
+                    <div className="flex-1 bg-white shadow-md rounded-lg p-6 border border-gray-200">
+                        <h3 className="text-lg font-semibold text-blue-400">Activity</h3>
                         <select
                             value={activity}
                             onChange={(e) => setActivity(e.target.value)}
-                            className="border rounded p-2 mt-2 w-full focus:outline-none focus:ring focus:ring-blue-300"
+                            className="border rounded-lg p-2 mt-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-300"
                         >
                             <option value="Meditate">Meditate</option>
                             <option value="Exercise">Exercise</option>
                             <option value="Read">Read</option>
                             <option value="Listen to Music">Music</option>
-                            <option value="Walk">Walk</option>
+                            <option value="Stroll">Stroll</option>
+                            <option value="Pet time">Pet time</option>
+                            <option value="Arts">Arts</option>
                         </select>
                         <div className="mt-4">
-                            <label className="block font-semibold">Duration:</label>
+                            <label className="block font-semibold text-gray-700">Duration:</label>
                             <select
                                 value={duration}
                                 onChange={(e) => setDuration(Number(e.target.value))}
-                                className="border rounded p-2 mt-1 w-full focus:outline-none focus:ring focus:ring-blue-300"
+                                className="border rounded-lg p-2 mt-1 w-full focus:outline-none focus:ring-2 focus:ring-blue-300"
                             >
                                 <option value={10}>10 minutes</option>
                                 <option value={15}>15 minutes</option>
@@ -160,7 +167,7 @@ const GoalsPage = () => {
                             </select>
                         </div>
                         <div className="mt-4">
-                            <label className="flex items-center font-semibold">
+                            <label className="flex items-center font-semibold text-gray-700">
                                 <input
                                     type="checkbox"
                                     checked={goalReminder}
@@ -173,10 +180,16 @@ const GoalsPage = () => {
                     </div>
 
                     {/* Mood Tracker Section */}
-                    <div className="flex-1 bg-white shadow-lg rounded-lg p-6">
-                        <h3 className="font-semibold">Mood Tracker</h3>
-                        <div className="flex flex-col mt-4">
-                            {['HAPPY', 'SAD', 'ANXIOUS', 'FEAR', 'FRUSTRATED'].map((moodOption) => {
+                    <div className="flex-1 bg-white shadow-md rounded-lg p-6 border border-gray-200">
+                        <h3 className="font-semibold text-blue-400">Mood Tracker</h3>
+                        <div className="grid grid-cols-2 gap-3 mt-4">
+                            {[
+                                { label: 'HAPPY', emoji: '😊' },
+                                { label: 'SAD', emoji: '😢' },
+                                { label: 'ANXIOUS', emoji: '😰' },
+                                { label: 'FEAR', emoji: '😨' },
+                                { label: 'FRUSTRATED', emoji: '😠' },
+                            ].map((moodOption) => {
                                 const moodColors = {
                                     HAPPY: 'bg-yellow-200 hover:bg-yellow-400 hover:text-white',
                                     SAD: 'bg-blue-200 hover:bg-blue-400 hover:text-white',
@@ -195,43 +208,42 @@ const GoalsPage = () => {
 
                                 return (
                                     <button
-                                        key={moodOption}
-                                        onClick={() => setMood(moodOption as typeof mood)}
-                                        className={`py-2 px-4 rounded-lg mt-2 transition-colors duration-300 ${mood === moodOption ? selectedMoodColors[moodOption] : moodColors[moodOption]}`}
+                                        key={moodOption.label}
+                                        onClick={() => setMood(moodOption.label as typeof mood)}
+                                        className={`py-2 px-4 rounded-lg mt-2 transition-colors duration-300 shadow-md ${mood === moodOption.label ? selectedMoodColors[moodOption.label] : moodColors[moodOption.label]}`}
                                     >
-                                        {moodOption}
+                                        {moodOption.emoji} {moodOption.label}
                                     </button>
                                 );
                             })}
                         </div>
                         <button
                             onClick={() => setMood('')}
-                            className="mt-6 bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 transition-colors duration-300"
+                            className="mt-6 bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition-colors duration-300 shadow-md"
                         >
                             Cancel Mood Selection
                         </button>
                     </div>
                 </div>
 
-                {/* Save Button */}
+                {/* Save Button and Modal */}
                 <div className="flex justify-end mt-8">
                     <button
                         onClick={handleSave}
-                        className="bg-blue-400 text-white py-2 px-6 rounded-lg hover:bg-blue-500 transition-colors duration-300"
+                        className="bg-blue-400 text-white py-2 px-6 rounded-lg hover:bg-blue-500 transition-colors duration-300 shadow-lg"
                     >
                         Save Goal
                     </button>
                 </div>
 
-                {/* Success Modal */}
                 {showModal && (
                     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 transition-opacity duration-300">
-                        <div className="bg-white p-6 rounded-lg shadow-lg animate-fade-in">
-                            <h2 className="text-lg font-bold text-green-600">Goal Saved Successfully!</h2>
+                        <div className="bg-white p-8 rounded-lg shadow-xl">
+                            <h2 className="text-xl font-bold text-green-600">Goal Saved Successfully!</h2>
                             <p className="mt-4 text-gray-700">Your goal for {format(selectedDate!, 'MMMM dd, yyyy')} has been saved.</p>
                             <button
                                 onClick={() => setShowModal(false)}
-                                className="mt-4 bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 transition-colors duration-300"
+                                className="mt-4 bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition-colors duration-300"
                             >
                                 Close
                             </button>
@@ -239,21 +251,54 @@ const GoalsPage = () => {
                     </div>
                 )}
 
-                {/* Displaying Saved Goals */}
-                <div className="mt-12">
-                    <h3 className="text-lg font-semibold">Logged Goals</h3>
-                    {goals.length > 0 ? (
-                        <ul className="mt-4 space-y-3">
-                            {goals.map((goal) => (
-                                <li key={goal.id} className="p-3 border-b bg-white shadow rounded-lg">
-                                    {goal.activity} for {goal.duration} minutes on {goal.date} (Mood: {goal.mood})
-                                </li>
-                            ))}
-                        </ul>
-                    ) : (
-                        <p className="mt-2 text-gray-600">No goals logged yet.</p>
-                    )}
-                </div>
+                {/* Logged Goals Section */}
+                <div className="mt-12 bg-white shadow-md rounded-lg p-6 border border-gray-200">
+    <h3 className="text-lg font-semibold text-blue-400">Logged Goals</h3>
+    {goals.length > 0 ? (
+        <ul className="mt-4 space-y-3">
+            {goals.map((goal) => {
+                // Automatically mark the goal as "Missed" if the date has passed and the goal is not done
+                const goalDate = new Date(goal.date);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                if (goalDate < today && goal.status !== 'Done') {
+                    goal.status = 'Missed';
+                }
+
+                return (
+                    <li
+                        key={goal.id}
+                        className="p-4 bg-gray-50 rounded-lg shadow-md flex justify-between items-center"
+                    >
+                        <div>
+                            <p className="text-sm">
+                                {goal.activity} for {goal.duration} minutes on {goal.date} (Mood: {goal.mood})
+                            </p>
+                            <p className="text-xs text-gray-500">Status: {goal.status}</p>
+                        </div>
+                        <select
+                            value={goal.status}
+                            onChange={(e) => {
+                                setGoals(goals.map((g) =>
+                                    g.id === goal.id ? { ...g, status: e.target.value } : g
+                                ));
+                            }}
+                            className="border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white hover:bg-gray-100 text-gray-700 transition-colors duration-200"
+                        >
+                            <option value="To Do" className="text-blue-500">To Do</option>
+                            <option value="Doing" className="text-yellow-500">Doing</option>
+                            <option value="Done" className="text-green-500">Done</option>
+                        </select>
+                    </li>
+                );
+            })}
+        </ul>
+    ) : (
+        <p className="mt-2 text-gray-600">No goals logged yet.</p>
+    )}
+</div>
+
             </div>
         </Layout>
     );

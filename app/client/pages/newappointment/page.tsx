@@ -252,13 +252,13 @@ const AppointmentBooking = () => {
                     </h3>
                     <div className="mt-6 flex justify-around">
                       <button
-                        className="bg-gray-500 text-white py-2 px-4 rounded hover:bg-gray-400"
+                        className="bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-400"
                         onClick={cancelBooking}
                       >
                         Cancel
                       </button>
                       <button
-                        className="bg-blue-400 text-white py-2 px-4 rounded hover:bg-blue-500"
+                        className="bg-blue-400 text-white py-2 px-4 rounded-lg hover:bg-blue-500"
                         onClick={confirmBooking}
                       >
                         Confirm
