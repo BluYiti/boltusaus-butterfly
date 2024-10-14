@@ -48,7 +48,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
         barangays, setBarangays,
     } = useRegisterForm();
 
-    // Inside your component
+    // Handle form submission
     const handleSubmit = createSubmitHandler({
         firstName,
         lastName,
@@ -68,9 +68,13 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
         idFile,
         email,
         onRegister: (data) => {
-            // Handle the successful registration, e.g., API call or redirect
+            // Now you have access to the userId
             console.log('Registration successful:', data);
-            router.push(`/register/verify/email/?email=${encodeURIComponent(email)}&phone=${encodeURIComponent(contactNumber)}`);
+            const { userId } = data; // Extract the userId from data
+            console.log('User ID:', userId); // You can see the userId here
+            
+            // Now use the userId in the URL param for verification
+            router.push(`/register/verify/email/?user=${encodeURIComponent(userId)}`);
         },
         setValidationError,
     });

@@ -23,5 +23,38 @@ const account = new Account(client); // For user authentication and sessions
 const databases = new Databases(client); // For database operations
 const storage = new Storage(client); // For file storage operations
 
-// Export the initialized services for use in other modules
-export { client, account, databases, storage, ID };
+// JWT Function: Create a JWT for the current authenticated user
+async function createJWT() {
+  try {
+    const jwtResponse = await account.createJWT();
+    return jwtResponse.jwt; // Return the generated JWT
+  } catch (error) {
+    console.error('Error creating JWT:', error);
+    throw error;
+  }
+}
+
+// JWT Function: Verify JWT (for backend or token validation)
+async function verifyJWT() {
+  try {
+    const session = await account.getSession('current'); // Fetch the current session
+    return session; // Returns the current session details
+  } catch (error) {
+    console.error('Error verifying JWT:', error);
+    throw error;
+  }
+}
+
+// Function to fetch session
+async function getSession() {
+  try {
+    const session = await account.getSession('current');
+    return session; // Returns the current session
+  } catch (error) {
+    console.error('Error fetching session:', error);
+    throw error;
+  }
+}
+
+// Export the initialized services and JWT functions for use in other modules
+export { client, account, databases, storage, ID, createJWT, verifyJWT, getSession };

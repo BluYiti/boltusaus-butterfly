@@ -1,17 +1,33 @@
 'use client'
 
 import { useSearchParams } from 'next/navigation';  // Import from 'next/navigation' in Next.js 14
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { account } from '@/appwrite';
 import Back from '@/components/Back';
 import Image from 'next/image';
 
 const RegisterPage: React.FC = () => {
     const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
     const [error, setError] = useState<boolean>(false);
+    const [email, setEmail] = useState<string | null>(null);
     const searchParams = useSearchParams(); // Access search params
-
     // Safely get the email from searchParams if it's not null
-    const email = searchParams ? searchParams.get('email') : null;
+    const userId = searchParams ? searchParams.get('user') : null;
+
+    useEffect(() => {
+        const fetchUserEmail = async () => {
+            if (userId) {
+                try {
+                    const user = await account.get();
+                    setEmail(user.email);
+                } catch (error) {
+                    console.error('Failed to fetch user:', error);
+                }
+            }
+        };
+
+        fetchUserEmail();
+    }, [userId]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
         const value = e.target.value;
@@ -57,7 +73,7 @@ const RegisterPage: React.FC = () => {
                     <div className="relative z-10 text-center font-poppins font-medium">
                         <h2 className="text-2xl text-[#333] mb-4">Verify your account</h2>
                         <p className="text-sm text-[#555] mb-6">
-                            {email ? (
+                            {userId ? (
                                 <>
                                     We emailed you the six-digit code to <strong>{email}</strong><br />
                                     Enter the code below to verify your email address
