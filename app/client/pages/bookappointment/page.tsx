@@ -140,7 +140,7 @@ const AppointmentBooking = () => {
                 {Array.from({ length: daysInSelectedMonth }, (_, i) => i + 1).map((day) => (
                   <button
                     key={day}
-                    className={`py-2 px-1 rounded-lg ${selectedDay === day ? "bg-blue-500 text-white" : "bg-gray-300 text-black hover:bg-blue-300"}`}
+                    className={`py-2 px-1 rounded-lg ${selectedDay === day ? "bg-blue-300 text-white" : "bg-gray-300 text-black hover:bg-blue-500"}`}
                     onClick={() => setSelectedDay(day)}
                   >
                     {day}
@@ -156,7 +156,7 @@ const AppointmentBooking = () => {
                 {["9:00", "10:00", "11:00", "12:00", "1:00", "2:00", "3:00", "4:00"].map((time) => (
                   <button
                     key={time}
-                    className={`py-2 rounded-lg ${selectedTime === time ? "bg-blue-500 text-white" : "bg-gray-300 text-black hover:bg-blue-300"}`}
+                    className={`py-2 rounded-lg ${selectedTime === time ? "bg-blue-300 text-white" : "bg-gray-300 text-black hover:bg-blue-500"}`}
                     onClick={() => setSelectedTime(time)}
                   >
                     {time}

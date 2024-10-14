@@ -203,7 +203,7 @@ const AppointmentBooking = () => {
                       <button
                         key={day}
                         className={`py-2 px-4 rounded-lg ${
-                          selectedDay === day.toString() ? "bg-blue-500 text-white" : "bg-gray-300 text-black"
+                          selectedDay === day.toString() ? "bg-blue-500 text-white" : "bg-gray-300 text-black hover:bg-blue-500"
                         }`}
                         onClick={() => setSelectedDay(day.toString())}
                       >
@@ -219,7 +219,7 @@ const AppointmentBooking = () => {
                       <button
                         key={time}
                         className={`py-2 px-4 rounded-lg ${
-                          selectedTime === time ? "bg-blue-500 text-white" : "bg-gray-300 text-black"
+                          selectedTime === time ? "bg-blue-500 text-white" : "bg-gray-300 text-black hover:bg-blue-500"
                         }`}
                         onClick={() => setSelectedTime(time)}
                       >
