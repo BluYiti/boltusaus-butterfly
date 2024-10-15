@@ -1,10 +1,12 @@
+'use client'
+
 import React from 'react';
 import termsContent from '@/constants/terms';
 import privacyContent from '@/constants/privacy';
 import TermsAndPrivacy from './TermsAndPrivacy';
+import PhoneInput from 'react-phone-input-2';
 import { RegisterFormProps } from '../hook/RegisterFormProps';
 import useRegisterForm from '@/register/hook/RegisterComponents';
-import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 import { createSubmitHandler } from '@/register/hook/handleSubmitMinor';
 import { useFetchCountries } from '@/register/hook/fetch/useFetchCountries';
@@ -12,8 +14,11 @@ import { useFetchRegions } from '@/register/hook/fetch/useFetchRegions';
 import { useFetchProvinces } from '@/register/hook/fetch/useFetchProvinces';
 import { useFetchCities } from '@/register/hook/fetch/useFetchCities';
 import { useFetchBarangays } from '@/register/hook/fetch/useFetchBarangays';
+import { useRouter } from 'next/navigation';
 
 const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading }) => {
+    const router = useRouter();
+
     const {
         firstName, setFirstName,
         lastName, setLastName,
@@ -63,12 +68,16 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
         idFile,
         email,
         onRegister: (data) => {
-            // Handle the successful registration, e.g., API call or redirect
+            // Now you have access to the userId
             console.log('Registration successful:', data);
+            const { userId } = data; // Extract the userId from data
+            console.log('User ID:', userId); // You can see the userId here
+            
+            // Now use the userId in the URL param for verification
+            router.push(`/register/verify/email/?user=${encodeURIComponent(userId)}`);
         },
         setValidationError,
     });
-
 
     // Use custom hooks to fetch data
     useFetchCountries(setCountries);
@@ -393,7 +402,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
                     <label htmlFor="terms" className="text-gray-500 text-xs">
                         I agree to the
                         <button type="button" onClick={() => setIsModalOpen(true)} className="text-blue-500 hover:underline ml-1">Terms and Conditions</button>
-                        &nbsp;and the&nbsp;
+                        &nbsp;and the
                         <button type="button" onClick={() => setIsModalOpen(true)} className="text-blue-500 hover:underline ml-1">Privacy Policy</button>.
                     </label>
                 </div>

@@ -1,4 +1,6 @@
-"use client";
+'use client'
+
+import useAuthCheck from "@/auth/page";
 import React, { useState } from "react";
 import { FaBell, FaUser } from "react-icons/fa";
 import Layout from "@/components/Sidebar/Layout";
@@ -12,6 +14,12 @@ const Dashboard: React.FC = () => {
   const currentMonth = today.getMonth();
   const currentYear = today.getFullYear();
   const userName = "John"; // Placeholder for dynamic user data
+
+  const { loading, LoadingScreen } = useAuthCheck();
+
+  if (loading) {
+    return <LoadingScreen />; // Show loading screen
+  }
 
   const months = [
     "January", "February", "March", "April", "May", "June",

@@ -56,5 +56,12 @@ async function getSession() {
   }
 }
 
-// Export the initialized services and JWT functions for use in other modules
-export { client, account, databases, storage, ID, createJWT, verifyJWT, getSession };
+// Initialize the Appwrite SDK using named export if applicable
+const sdk = new Client(); // Replace Appwrite with Client if it's not constructible
+
+sdk
+  .setEndpoint(APPWRITE_ENDPOINT) // Use the environment variable for the API Endpoint
+  .setProject(PROJECT_ID); // Use the environment variable for the project ID
+
+// Export the initialized services, JWT functions, and SDK for use in other modules
+export { client, account, databases, storage, ID, createJWT, verifyJWT, getSession, sdk };

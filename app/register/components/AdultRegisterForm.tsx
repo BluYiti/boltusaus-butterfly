@@ -434,7 +434,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
                     <label htmlFor="terms" className="text-gray-500 text-xs">
                         I agree to the
                         <button type="button" onClick={() => setIsModalOpen(true)} className="text-blue-500 hover:underline ml-1">Terms and Conditions</button>
-                        &nbsp;and the&nbsp;
+                        &nbsp;and the
                         <button type="button" onClick={() => setIsModalOpen(true)} className="text-blue-500 hover:underline ml-1">Privacy Policy</button>.
                     </label>
                 </div>

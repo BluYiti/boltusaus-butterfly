@@ -23,7 +23,7 @@ const RegisterPage: React.FC = () => {
                 </div>
                 <div className="ml-10">
                     <AdultRegisterForm 
-                        onRegister={function (data: { firstName: string; lastName: string; birthday: string; address: string; contactNumber: string; idFile: File | null; email: string; password: string; }): void {
+                        onRegister={function (): void {
                             throw new Error('Function not implemented.');
                         }} 
                         error={null} 

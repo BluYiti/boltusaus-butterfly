@@ -27,6 +27,13 @@ const aboutVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
 };
 
+const bookingSteps = [
+  "Click on the 'Book an Appointment' button and follow the steps to register a new account. Make sure to fill out all required fields to complete the registration process.",
+  "Once registered, log in with your credentials to access your account and continue the booking process.",
+  "Begin the pre-assessment by answering the necessary questions. This will help us better understand your needs and assign the appropriate service.",
+  "Wait for your pre-assessment result, which will be available within 1 business day. Once approved, you'll be able to book an appointment with us at your preferred time."
+];
+
 const HomePage: React.FC = () => {
   const [open, setOpen] = useState<number | null>(null);
 
@@ -153,24 +160,20 @@ const HomePage: React.FC = () => {
           <p className="mb-8 text-base md:text-lg text-left max-w-2xl">
             Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
           </p>
-
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="md:col-span-2">
               <ol className="space-y-4">
-                {Array.from({ length: 4 }, (_, index) => (
-                  <li key={index} className="flex items-start space-x-4">
-                    <span className={`text-6xl font-paintbrush text-gray-${500 + index * 100}`}>
+                {bookingSteps.map((step, index) => (
+                  <li key={index} className="flex items-start">
+                    <span className={`text-6xl font-paintbrush text-gray-${500 + index * 100} w-10 text-center mr-4`}>
                       {index + 1}
                     </span>
-                    <div>
-                      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+                    <div className="flex-1">
+                      <p className="text-left">{step}</p>
                     </div>
                   </li>
                 ))}
               </ol>
-            </div>
-            <div className="md:col-span-1">
-              {/* You can put any additional content here if needed */}
             </div>
           </div>
         </div>

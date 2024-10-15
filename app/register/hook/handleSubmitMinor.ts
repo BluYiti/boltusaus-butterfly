@@ -1,6 +1,6 @@
 'use client';
 
-import { account, databases } from '@/appwrite';
+import { account, databases, createJWT, ID } from '@/appwrite';
 import React from 'react';
 
 interface FormData {
@@ -21,6 +21,7 @@ interface FormData {
     emergencyContactNumber: string;
     idFile: File | null;
     email: string;
+    userId?: string; // Add userId to track user creation
     onRegister: (data: FormData) => void;
     setValidationError: (error: string | null) => void;
 }
@@ -78,27 +79,40 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>, formData: FormD
     const address = `${formData.street}, ${formData.barangay}, ${formData.city}, ${formData.province}, ${formData.country}`
 
     try {
-        const userResponse = await account.create('unique()', formData.email, formData.password, fullName);
-        
-        const accountId = userResponse.$id; // Get user ID
+        // Create the user
+        const userResponse = await account.create(ID.unique(), formData.email, formData.password, fullName);
+        const accountId = userResponse.$id;
+
+        // Log in the user immediately after creating the account
+        await account.createEmailPasswordSession(formData.email, formData.password);
+        console.log('User logged in successfully.');
+
+        // Generate JWT after account creation
+        const jwtToken: any = await createJWT();
+        console.log('JWT created:', jwtToken);
+
+        // Store JWT in an HTTP-only cookie
+        document.cookie = `jwtToken=${jwtToken}; Secure; HttpOnly; SameSite=Strict`;
+        console.log('JWT stored');
+
         const accountData = {
             ...formData,
             userId: accountId,
-            fullName,
-            username: fullName,
+            fullName: `${formData.firstName} ${formData.lastName}`,
+            username: `${formData.firstName} ${formData.lastName}`,
             role: 'client',
         };
 
-        // Create a new document in the Accounts collection
+        // Create the user in the "Accounts" collection
         await databases.createDocument('Butterfly-Database', 'Accounts', accountId, {
             username: accountData.username,
             email: formData.email,
             role: accountData.role,
         });
-        
-        console.log('User and account created successfully');
 
-        // Now create a client document in the Client collection
+        console.log('Accounts Collection document added');
+
+        // Create the user in the "Client" collection
         const clientData = {
             userid: accountId,
             firstname: formData.firstName,
@@ -106,25 +120,35 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>, formData: FormD
             phonenum: formData.contactNumber,
             birthdate: formData.birthday,
             age: formData.age,
-            address: address,
+            address,
             type: 'minor',
             emergencyContactName: formData.emergencyContactName,
-            state: null,
             emergencyContact: formData.emergencyContactNumber,
+            state: null,
             status: null
         };
 
-        await databases.createDocument('Butterfly-Database', 'Client','unique()', clientData);
-        
-        console.log('Client document created successfully:', clientData);
-        
-        formData.onRegister(accountData); // Call the onRegister handler with the account data
+        await databases.createDocument('Butterfly-Database', 'Client', 'unique()', clientData);
+        console.log('Client Collection document added');
 
-    } catch (error) {
+        // Redirect or perform further actions after successful login and JWT creation
+        formData.onRegister({ ...accountData, userId: accountId });
+
+    } catch (error: any) {
         console.error('Error during registration:', error);
-        formData.setValidationError('An error occurred during registration');
+        let errorMessage;
+    
+        // Customize error message for 409 Conflict
+        if (error.code === 409) {
+            errorMessage = 'Duplicate User detected.';
+        } else {
+            errorMessage = error.message || 'An error occurred during registration.';
+        }
+    
+        formData.setValidationError(errorMessage);
     }
 };
+
 
 // Wrapper function to use in the component
 export const createSubmitHandler = (formData: FormData) => {
