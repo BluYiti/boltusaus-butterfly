@@ -98,18 +98,15 @@ const HomePage: React.FC = () => {
           </Link>
         </motion.div>
 
-        {/* Butterfly GIF - Positioned */}
-        {/* Butterfly GIF - Positioned on hands */}
+        {/* Butterfly GIF */}
         <motion.img
-        src="/images/butterfly.gif" 
+        src="/gifs/butterfly.gif" 
         alt="Butterfly Animation"
-        className="absolute z-20 w-50 h-50" 
-        style={{ top: '45%', left: '36%', transform: 'translate(-60%, -50%)' }} 
+        className="absolute z-20 w-[35rem] h-[35rem] 2xl:right-[14rem] 3xl:right-[22rem]" 
         initial={{ opacity: 0, scale: 0.5 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.6, delay: 0.5 }}
         />
-
 
         {/* Centered Navbar */}
         <nav className="absolute top-6 left-1/2 transform -translate-x-1/2 flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4 text-white">
