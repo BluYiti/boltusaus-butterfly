@@ -1,39 +1,22 @@
 const privacyContent = `
 # Privacy Policy
 
-**Effective Date: [Insert Date]**
+PRIVACY POLICY
+I am to participate in telebehavioral health with A.M.Peralta Psychological Services as part of my consultation/counseling and psychotherapy. I understand that telebehavioral health is the practice of delivering mental health care services via technology between a licensed mental health care practitioner and a client such as myself. Furthermore, I understand the guidelines indicated below with respect to telebehavioral health.
 
-[App Name] (the "App") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and share your information when you use our App.
+1) I understand that there are risks, benefits, and consequences associated with telebehavioral health, including but not limited to, disruption of transmission by technology failures, interruption and/or breaches of confidentiality by unauthorized persons, and/or limited ability to respond to emergencies.
 
-## 1. Information We Collect
+2) I understand that there will be no recording of any of the online sessions by either party. All information disclosed within sessions and written records pertaining to those sessions are confidential and may not be disclosed to anyone without written authorization, except where the disclosure is permitted and/or required by law.
 
-We may collect the following types of information:
-- Personal Information: such as your name, email address, and any other information you provide to us.
-- Usage Data: information about how you use the App, including your IP address, browser type, and pages visited.
+3) I understand that the privacy laws that protect the confidentiality of my protected health
+information also apply to telebehavioral health unless an exception to confidentiality applies (i.e. mandatory reporting of child, elder, or vulnerable adult abuse, danger to self or others; I raise mental/emotional health as an issue in a legal proceeding).
 
-## 2. How We Use Your Information
+4) I understand that if I am having suicidal or homicidal thoughts, actively experiencing psychotic symptoms or experiencing a mental health crisis that cannot be resolved remotely, it may be determined that telebehavioral health services are not appropriate and a higher level of care is required.
 
-We may use your information for the following purposes:
-- To provide and maintain our App.
-- To notify you about changes to our App.
-- To provide customer support.
-- To gather analysis or valuable information so that we can improve our App.
+5) I understand that during a telebehavioral health session, we could encounter technical difficulties resulting in service interruptions. If this occurs, end and restart the session. If we are unable to reconnect within ten minutes, please call me at 09266696242 to discuss since we may have to re-schedule.
 
-## 3. Sharing Your Information
+6) I understand that my therapist may need to contact my emergency contact and/or appropriate authorities in case of an emergency but in the event that my therapist is not available when I happen to be in an emergency situation, I understand that I am to contact other emergency providers and follow necessary emergency procedures that my therapist is to give to me upon my consent.
 
-We do not sell or rent your personal information to third parties. We may share your information with third-party service providers to facilitate our services.
-
-## 4. Security of Your Information
-
-The security of your personal information is important to us, but remember that no method of transmission over the Internet or method of electronic storage is 100% secure.
-
-## 5. Changes to This Privacy Policy
-
-We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page.
-
-## 6. Contact Us
-
-If you have any questions about this Privacy Policy, please contact us at [Contact Email] or [Contact Phone Number].
 `;
 
 export default privacyContent;
