@@ -167,7 +167,7 @@ const Clients = () => {
                   setSelectedClientId(client.id);
                   setIsProfileModalOpen(true);
                 }}
-                className="px-4 py-2 text-sm font-semibold text-white bg-blue-400 rounded-lg hover:bg-blue-600 transition"
+                className="px-4 py-2 text-sm font-semibold text-white bg-blue-400 rounded-full hover:bg-blue-600 transition"
               >
                 View Profile
               </button>
@@ -178,7 +178,7 @@ const Clients = () => {
                   setSelectedClientId(client.id);
                   setIsReferredProfileModalOpen(true);
                 }}
-                className="px-4 py-2 text-sm font-semibold text-white bg-blue-400 rounded-lg hover:bg-blue-600 transition"
+                className="px-4 py-2 text-sm font-semibold text-white bg-blue-400 rounded-full hover:bg-blue-600 transition"
               >
                 View Profile
               </button>
@@ -188,7 +188,7 @@ const Clients = () => {
                 onClick={() => {
                   // Handle viewing pre-assessment logic here
                 }}
-                className="px-4 py-2 text-sm font-semibold text-white bg-blue-400 rounded-lg hover:bg-blue-600 transition"
+                className="px-4 py-2 text-sm font-semibold text-white bg-blue-400 rounded-full hover:bg-blue-600 transition"
               >
                 View Pre-Assessment
               </button>
