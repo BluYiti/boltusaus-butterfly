@@ -1,9 +1,8 @@
-"use client"; // Mark this file as a Client Component
+'use client'
 
 import React, { useState } from "react";
 import Layout from "@/components/Sidebar/Layout"; // Adjust the path if necessary
 import items from "@/client/data/Links";
-import Confetti from "react-confetti"; // Import the Confetti component
 import Link from "next/link"; // Import Link for navigation
 
 const months = [

@@ -1,7 +1,8 @@
-"use client"; // Add this at the top of the file
+'use client'
 
 import React, { useState, useEffect } from "react";
 import Layout from "@/components/Sidebar/Layout"; // Adjust the path if necessary
+import Confetti from "react-confetti"; // Import the Confetti component
 import items from "@/client/data/Links";
 
 
