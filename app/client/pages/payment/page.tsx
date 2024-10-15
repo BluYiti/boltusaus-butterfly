@@ -23,7 +23,7 @@ const PaymentsPage: React.FC = () => {
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
       <div className="text-black min-h-screen flex bg-gray-50">
         {/* Main Content */}
-        <div className="flex-grow flex flex-col bg-white px-10 py-8 overflow-y-auto">
+        <div className="flex-grow flex flex-col bg-blue-100 px-10 py-8 overflow-y-auto">
           {/* Top Section with Title */}
           <div className="bg-white shadow-lg py-4 px-6 flex justify-between items-center rounded-md mb-6">
             <h1 className="text-xl font-bold text-gray-800">Ana Smith <span className="text-gray-500">(under Mrs. Angelica Peralta)</span></h1>

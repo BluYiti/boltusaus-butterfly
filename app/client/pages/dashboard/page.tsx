@@ -1,12 +1,14 @@
 "use client";
 import React, { useState } from "react";
-import { FaBell, FaUser } from "react-icons/fa";
+import { FaUser } from "react-icons/fa";
 import Layout from "@/components/Sidebar/Layout";
 import items from "@/client/data/Links";
-import Link from 'next/link'; // Import Link
+import Link from "next/link";
+import RescheduleModal from "@/components/Reschedule"; // Assuming you have this component
 
 const Dashboard: React.FC = () => {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
+  const [showModal, setShowModal] = useState(false);
   const today = new Date();
   const currentDay = today.getDate();
   const currentMonth = today.getMonth();
@@ -26,11 +28,18 @@ const Dashboard: React.FC = () => {
 
   const firstDayOfMonth = new Date(currentYear, selectedMonth, 1).getDay();
 
+  const handleRescheduleClick = () => {
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+  };
+
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
       <div className="text-black min-h-screen flex">
-        {/* Main Content */}
-        <div className="flex-grow flex flex-col justify-between bg-gray-100">
+        <div className="flex-grow flex flex-col justify-between bg-blue-100">
           {/* Top Section with User Info and Header */}
           <div className="bg-white shadow-lg py-4 px-6 flex justify-between items-center">
             <div className="flex items-center space-x-3">
@@ -41,175 +50,156 @@ const Dashboard: React.FC = () => {
                 Good Morning, <span className="font-bold">{userName}!</span>
               </h1>
             </div>
-            <div className="flex items-center space-x-4">
-              <button className="text-gray-600 hover:text-gray-800">
-                <FaBell size={24} />
-              </button>
-            </div>
           </div>
 
-          {/* Upcoming Sessions and Announcements Section */}
+          {/* Upcoming Sessions Section */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 mx-8">
-            {/* Upcoming Sessions Section */}
             <div className="bg-white rounded-lg shadow-lg p-6 flex flex-col">
-              <h2 className="text-bold text-xl font-bold mb-4">Upcoming Sessions</h2>
+              <h2 className="text-bold text-xl font-bold mb-4">
+                <span className="bg-blue-500 text-white p-2 px-10 rounded-lg">Upcoming Sessions</span>
+              </h2>
               <div className="space-y-2 flex-grow overflow-y-auto max-h-[300px]">
-                <div className="flex justify-between items-center p-2 rounded-lg bg-gradient-to-r from-blue-300 via-blue-400 to-blue-300 animate-gradient-x">
+                <div className="flex justify-between items-center p-2 rounded-lg text-black py-2 px-4">
                   <span className="font-bold">PLACEHOLDER FOR THE FIRST SESSION</span>
-                  <span className="text-gray-600 font-bold">Date and Time</span>
+                  <span className="text-gray-600 font-semibold">Date and Time</span>
                 </div>
               </div>
             </div>
 
-            {/* Reminders Section */}
+            {/* Announcements & Reminders Section */}
             <div className="bg-white rounded-lg shadow-lg p-6 flex flex-col h-full">
-              <h2 className="text-xl font-semibold mb-4">A Daily Reminder to Yourself</h2>
+              <h2 className="text-xl font-semibold mb-4">Announcements & Reminders:</h2>
               <div className="space-y-4 flex-grow overflow-y-auto max-h-[300px]">
                 <div className="bg-gray-50 p-4 rounded-lg shadow">
-                  <h3 className="font-semibold text-lg">This Too Shall Pass</h3>
-                  <p className="text-gray-700">Feelings are temporary. Hold on, better days are coming.</p>
+                  <h3 className="font-semibold text-lg"></h3>
+                  <p className="text-gray-700">Placeholder for announcement</p>
                 </div>
                 <div className="bg-gray-50 p-4 rounded-lg shadow">
-                  <h3 className="font-semibold text-lg">Breathe In, Let Go</h3>
-                  <p className="text-gray-700">Take a moment to breathe. Release the tension in your mind and body.</p>
+                  <h3 className="font-semibold text-lg"></h3>
+                  <p className="text-gray-700">Placeholder for announcement</p>
                 </div>
                 <div className="bg-gray-50 p-4 rounded-lg shadow">
-                  <h3 className="font-semibold text-lg">You Are Enough.</h3>
-                  <p className="text-gray-700">Your worth isn’t measured by your struggles. You are enough just as you are.</p>
+                  <h3 className="font-semibold text-lg"></h3>
+                  <p className="text-gray-700">Placeholder for announcement</p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Main Dashboard Content */}
-          <div className="flex-grow overflow-auto p-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Calendar */}
-              <div className="bg-white rounded-lg shadow-lg p-6">
-                <h2 className="text-lg font-semibold">Calendar</h2>
-                <div className="mt-4">
-                  <label htmlFor="month-select" className="font-medium text-gray-700">
-                    Choose a month:
-                  </label>
-                  <select
-                    id="month-select"
-                    value={selectedMonth}
-                    onChange={handleMonthChange}
-                    className="ml-2 p-2 border border-gray-300 rounded-lg"
+          {/* Missed Sessions and Calendar Section */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 mx-8">
+            <div className="bg-white rounded-lg shadow-lg p-6 flex flex-col">
+              <h2 className="text-bold text-xl font-bold mb-4">
+                <span className="bg-blue-500 text-white p-2 px-14 rounded-lg">Missed Sessions</span>
+              </h2>
+              <div className="space-y-2 flex-grow overflow-y-auto max-h-[300px]">
+                <div className="flex justify-between items-center p-2 rounded-lg bg-white text-black py-2 px-4">
+                  <span className="font-bold">PLACEHOLDER FOR MISSED SESSION</span>
+                  <button
+                    className="bg-blue-300 font-bold text-white py-1 px-3 rounded-xl hover:bg-blue-500"
+                    onClick={handleRescheduleClick}
                   >
-                    {months.map((month, index) => (
-                      <option key={index} value={index}>
-                        {month}
-                      </option>
-                    ))}
-                  </select>
+                    Reschedule
+                  </button>
                 </div>
-                <div className="mt-6">
-                  <div className="text-center">
-                    <div className="text-bold text-xl font-bold">{months[selectedMonth]}</div>
-                    <div className="grid grid-cols-7 text-center mt-4">
-                      {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
-                        <div key={day} className="text-sm font-medium text-gray-700">
-                          {day}
-                        </div>
-                      ))}
-                    </div>
-                    <div className="grid grid-cols-7 text-center gap-y-4 mt-4">
-                      {[...Array(firstDayOfMonth)].map((_, index) => (
-                        <div key={index}></div>
-                      ))}
-                      {[...Array(daysInMonth[selectedMonth])].map((_, dayIndex) => (
-                        <div
-                          key={dayIndex}
-                          className={`p-2 rounded-full cursor-pointer ${
-                            dayIndex + 1 === currentDay && selectedMonth === currentMonth
-                              ? "bg-blue-500 text-white"
-                              : "text-gray-700"
-                          }`}
-                        >
-                          {dayIndex + 1}
-                        </div>
-                      ))}
-                    </div>
+              </div>
+            </div>
+
+            {/* Calendar */}
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              <h2 className="text-lg font-semibold">Calendar</h2>
+              <div className="mt-4">
+                <label htmlFor="month-select" className="font-medium text-gray-700">
+                  Choose a month:
+                </label>
+                <select
+                  id="month-select"
+                  value={selectedMonth}
+                  onChange={handleMonthChange}
+                  className="ml-2 p-2 border border-gray-300 rounded-lg"
+                >
+                  {months.map((month, index) => (
+                    <option key={index} value={index}>
+                      {month}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="mt-6">
+                <div className="text-center">
+                  <div className="text-bold text-xl font-bold">{months[selectedMonth]}</div>
+                  <div className="grid grid-cols-7 text-center mt-4">
+                    {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+                      <div key={day} className="text-sm font-medium text-gray-700">
+                        {day}
+                      </div>
+                    ))}
+                  </div>
+                  <div className="grid grid-cols-7 text-center gap-y-4 mt-4">
+                    {[...Array(firstDayOfMonth)].map((_, index) => (
+                      <div key={index}></div>
+                    ))}
+                    {[...Array(daysInMonth[selectedMonth])].map((_, dayIndex) => (
+                      <div
+                        key={dayIndex}
+                        className={`p-2 rounded-full cursor-pointer ${
+                          dayIndex + 1 === currentDay && selectedMonth === currentMonth
+                            ? "bg-blue-500 text-white"
+                            : "text-gray-700"
+                        }`}
+                      >
+                        {dayIndex + 1}
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
-
-              {/* What to do section */}
-              <div className="bg-white rounded-lg shadow-lg p-6">
-                <h2 className="text-lg font-semibold">What to do?</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-                  <ActivityCard
-                    title="Meditate"
-                    description="20-30 minutes/day"
-                    icon="🧘‍♀️"
-                  />
-                  <ActivityCard
-                    title="Pet Time"
-                    description="Be sure to have some playtime with your beloved pets"
-                    icon="🐶"
-                  />
-                  <ActivityCard
-                    title="Exercise"
-                    description="30-35 minutes/day"
-                    icon="💪"
-                  />
-                  <ActivityCard
-                    title="Arts"
-                    description="Showcase your talent, express yourself!"
-                    icon="🎨"
-                  />
-                </div>
-              </div>
             </div>
+          </div>
 
-            {/* Mood Tracker Section */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-              <div className="bg-white rounded-lg shadow-lg p-6">
-                <h2 className="text-xl font-semibold mb-4">Mood Tracker</h2>
-                <div className="flex justify-between items-center">
-                  <p className="text-lg font-medium">How are you feeling today?</p>
-                  <Link href="/client/pages/moods">
-                    <button className="bg-blue-500 text-white px-4 py-2 rounded-lg">
-                      START
-                    </button>
-                  </Link>
+          {/* What to do section */}
+          <div className="grid grid-cols-1 gap-6 mt-6 mx-8">
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              <h2 className="text-xl font-semibold">What to do?</h2>
+              <div className="space-y-4 mt-4">
+                {/* Mood Tracker */}
+                <div className="bg-white rounded-lg shadow-lg p-6">
+                  <h2 className="text-xl font-semibold mb-4">Mood Tracker</h2>
+                  <div className="flex justify-between items-center">
+                    <p className="text-lg font-medium">How are you feeling today?</p>
+                    <Link href="/client/pages/goals">
+                      <button className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
+                        START
+                      </button>
+                    </Link>
+                  </div>
                 </div>
-              </div>
 
-              {/* Updated Reading Resources Section */}
-              <div className="bg-white rounded-lg shadow-lg p-6">
-                <h2 className="text-xl font-semibold mb-4">Reading Resources</h2>
-                <div className="flex justify-between items-center">
-                  <p className="text-lg font-medium">Start your day by reading something inspiring!</p>
-                  <Link href="/client/pages/explore">
-                    <button className="bg-blue-500 text-white px-4 py-2 rounded-lg">
-                      VIEW
-                    </button>
-                  </Link>
+                {/* Reading Resources */}
+                <div className="bg-white rounded-lg shadow-lg p-6">
+                  <h2 className="text-xl font-semibold mb-4">Reading Resources</h2>
+                  <div className="flex justify-between items-center">
+                    <p className="text-lg font-medium">Start your day by reading something inspiring!</p>
+                    <Link href="/client/pages/explore">
+                      <button className="bg-blue-500 text-white py-2 px-5 rounded hover:bg-blue-600">
+                        VIEW
+                      </button>
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Modal for rescheduling */}
+      {showModal && (
+        <RescheduleModal onClose={closeModal}>
+          <img src="/mnt/data/image.png" alt="Reschedule Details" />
+        </RescheduleModal>
+      )}
     </Layout>
-  );
-};
-
-  {/* Footer */}
-  <div className="bg-white shadow-lg py-4 px-6 text-center">
-  <p className="text-gray-500">© 2024 Butterfly Inc. All rights reserved.</p>
-</div>
-
-// ActivityCard component to reuse for tasks
-const ActivityCard: React.FC<{ title: string; description: string; icon: string }> = ({ title, description, icon }) => {
-  return (
-    <div className="bg-gray-100 p-4 rounded-lg shadow hover:bg-gray-200 transition duration-300">
-      <div className="text-2xl">{icon}</div>
-      <h3 className="font-semibold text-lg">{title}</h3>
-      <p className="text-gray-600">{description}</p>
-    </div>
   );
 };
 

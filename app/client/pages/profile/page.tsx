@@ -22,11 +22,11 @@ const ProfilePage: React.FC = () => {
           
           {/* Top Section with Welcome Message */}
           <div className="bg-white shadow-lg py-4 px-6 flex justify-between items-center rounded-md mb-6">
-            <h1 className="text-xl font-bold text-gray-800">Welcome, Client!</h1>
+            <h1 className="text-xl font-bold text-blue-500">Account Profile</h1>
           </div>
 
           {/* Profile Section */}
-          <div className="bg-white shadow-md p-6 rounded-lg flex flex-col items-center space-y-6">
+          <div className="shadow-md p-6 rounded-lg flex flex-col items-center space-y-6">
             {/* Profile Picture and Name */}
             <div className="relative flex flex-col items-center text-center">
               <img

@@ -44,9 +44,6 @@ const App = () => {
               </h1>
             </div>
             <div className="flex items-center space-x-4">
-              <button className="text-gray-600 hover:text-gray-800">
-                <FaBell size={24} />
-              </button>
             </div>
           </div>
           <div className="text-black min-h-screen bg-white">
@@ -73,9 +70,6 @@ const App = () => {
                           <p className="text-sm">{item.time}</p>
                           <p className="text-sm text-gray-600">{item.description}</p>
                         </div>
-                        <button className="absolute top-2 right-2 p-1 bg-white rounded-full">
-                          <FaHeart className="text-gray-500 hover:text-red-500 transition-colors duration-200" />
-                        </button>
                       </div>
                     ))}
                   </div>

@@ -84,7 +84,6 @@ const GoalsPage = () => {
                     <h2 className="text-4xl font-bold text-blue-500 mb-4">Hello, Client!</h2>
                     <p className="text-gray-600 text-lg">Set and track your personal goals with ease.</p>
                 </div>
-
                 <div className="flex space-x-8">
                 <div className="flex-1 bg-white shadow-md rounded-lg p-6 border border-gray-200">
     <div className="flex justify-between items-center mb-6">
@@ -289,7 +288,6 @@ const GoalsPage = () => {
                             <option value="To Do" className="text-blue-500">To Do</option>
                             <option value="Doing" className="text-yellow-500">Doing</option>
                             <option value="Done" className="text-green-500">Done</option>
-                            <option value="Missed" className="text-red-500">Missed</option>
                         </select>
                     </li>
                 );

@@ -109,7 +109,7 @@ const SettingsPage = () => {
       <div className="flex-grow p-8 bg-gray-50">
         <div className="bg-white shadow-md rounded-lg p-6 mb-8 text-left">
           <h2 className="text-3xl font-bold text-blue-800">Settings</h2>
-          <p className="text-gray-600 mt-2">Manage your account, privacy, and application settings below.</p>
+          <p className="text-gray-600 mt-2">Manage your account, privacy, and application settings.</p>
         </div>
 
         <div className="bg-white shadow-md rounded-lg p-6 mb-6">
