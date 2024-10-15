@@ -36,7 +36,7 @@ const Dashboard: React.FC = () => {
 
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
-      <div className="text-black min-h-screen flex flex-col">
+      <div className="text-black min-h-screen flex">
         {/* Main Content */}
         <div className="flex-grow flex flex-col justify-between bg-gray-100">
           {/* Top Section with User Info and Header */}
@@ -56,8 +56,8 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Upcoming Sessions and Announcements Section */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 mx-8">
+    {/* Upcoming Sessions and Announcements Section */}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 mx-8">
             {/* Upcoming Sessions Section */}
             <div className="bg-white rounded-lg shadow-lg p-6 flex flex-col">
               <h2 className="text-bold text-xl font-bold mb-4">Upcoming Sessions</h2>
@@ -68,6 +68,7 @@ const Dashboard: React.FC = () => {
                 </div>
               </div>
             </div>
+
 
             {/* Reminders Section */}
             <div className="bg-white rounded-lg shadow-lg p-6 flex flex-col h-full">
@@ -200,16 +201,15 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
         </div>
-
-        {/* Footer */}
-        <div className="bg-white shadow-lg py-4 px-6 text-center">
-          <p className="text-gray-500">© 2024 Butterfly Inc. All rights reserved.</p>
-        </div>
       </div>
     </Layout>
   );
 };
 
+  {/* Footer */}
+  <div className="bg-white shadow-lg py-4 px-6 text-center">
+  <p className="text-gray-500">© 2024 Butterfly Inc. All rights reserved.</p>
+</div>
 
 // ActivityCard component to reuse for tasks
 const ActivityCard: React.FC<{ title: string; description: string; icon: string }> = ({ title, description, icon }) => {
