@@ -158,7 +158,7 @@ const HomePage: React.FC = () => {
             How to Book a Session
           </h2>
           <p className="mb-8 text-base md:text-lg text-left max-w-2xl">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+          A.M. Peralta Psychological Services' web application is designed to help you easily book an appointment in just a few simple steps.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="md:col-span-2">
