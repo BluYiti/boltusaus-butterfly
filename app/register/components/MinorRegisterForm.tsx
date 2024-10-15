@@ -1,42 +1,90 @@
-import React, { useState } from 'react';
-import { FiEye, FiEyeOff } from 'react-icons/fi';
+'use client'
+
+import React from 'react';
 import termsContent from '@/constants/terms';
 import privacyContent from '@/constants/privacy';
 import TermsAndPrivacy from './TermsAndPrivacy';
 import PhoneInput from 'react-phone-input-2';
+import { RegisterFormProps } from '../hook/RegisterFormProps';
+import useRegisterForm from '@/register/hook/RegisterComponents';
 import 'react-phone-input-2/lib/style.css';
-
-interface RegisterFormProps {
-    onRegister: (data: {
-        firstName: string;
-        lastName: string;
-        birthday: string;
-        address: string;
-        guardianName: string;
-        guardianContactNumber: string;
-        idFile: File | null;
-        email: string;
-        password: string;
-    }) => void;
-    error: string | null;
-    loading: boolean;
-}
+import { createSubmitHandler } from '@/register/hook/handleSubmitMinor';
+import { useFetchCountries } from '@/register/hook/fetch/useFetchCountries';
+import { useFetchRegions } from '@/register/hook/fetch/useFetchRegions';
+import { useFetchProvinces } from '@/register/hook/fetch/useFetchProvinces';
+import { useFetchCities } from '@/register/hook/fetch/useFetchCities';
+import { useFetchBarangays } from '@/register/hook/fetch/useFetchBarangays';
+import { useRouter } from 'next/navigation';
 
 const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading }) => {
-    const [firstName, setFirstName] = useState<string>('');
-    const [lastName, setLastName] = useState<string>('');
-    const [birthday, setBirthday] = useState<string>('');
-    const [address, setAddress] = useState<string>('');
-    const [guardianName, setGuardianName] = useState<string>('');
-    const [guardianContactNumber, setGuardianContactNumber] = useState<string>('');
-    const [idFile, setIdFile] = useState<File | null>(null);
-    const [email, setEmail] = useState<string>('');
-    const [password, setPassword] = useState<string>('');
-    const [rePassword, setRePassword] = useState<string>('');
-    const [agreeToTerms, setAgreeToTerms] = useState<boolean>(false);
-    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-    const [validationError, setValidationError] = useState<string | null>(null);
-    const [age, setAge] = useState<number | null>(null);
+    const router = useRouter();
+
+    const {
+        firstName, setFirstName,
+        lastName, setLastName,
+        birthday, setBirthday,
+        country, setCountry,
+        region, setRegion,
+        province, setProvince,
+        city, setCity,
+        barangay, setBarangay,
+        street, setStreet,
+        contactNumber, setContactNumber,
+        emergencyContactName, setEmergencyContactName,
+        emergencyContactNumber, setEmergencyContactNumber,
+        idFile, setIdFile,
+        email, setEmail,
+        password, setPassword,
+        rePassword, setRePassword,
+        agreeToTerms, setAgreeToTerms,
+        isModalOpen, setIsModalOpen,
+        validationError, setValidationError,
+        age, setAge,
+        countries, setCountries,
+        regions, setRegions,
+        selectedRegionCode, setSelectedRegionCode,
+        provinces, setProvinces,
+        cities, setCities,
+        barangays, setBarangays,
+    } = useRegisterForm();
+
+    // Inside your component
+    const handleSubmit = createSubmitHandler({
+        firstName,
+        lastName,
+        birthday,
+        password,
+        rePassword,
+        agreeToTerms,
+        age,
+        street,
+        barangay,
+        city,
+        province,
+        country,
+        contactNumber,
+        emergencyContactName,
+        emergencyContactNumber,
+        idFile,
+        email,
+        onRegister: (data) => {
+            // Now you have access to the userId
+            console.log('Registration successful:', data);
+            const { userId } = data; // Extract the userId from data
+            console.log('User ID:', userId); // You can see the userId here
+            
+            // Now use the userId in the URL param for verification
+            router.push(`/register/verify/email/?user=${encodeURIComponent(userId)}`);
+        },
+        setValidationError,
+    });
+
+    // Use custom hooks to fetch data
+    useFetchCountries(setCountries);
+    useFetchRegions(setRegions);
+    useFetchProvinces(selectedRegionCode, setProvinces);
+    useFetchCities(province, provinces, setCities, setCity, setBarangays);
+    useFetchBarangays(city, cities, setBarangays);
 
     const calculateAge = (birthDateString: string): number => {
         const birthDate = new Date(birthDateString);
@@ -53,40 +101,6 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
         setBirthday(date);
         const calculatedAge = calculateAge(date);
         setAge(calculatedAge);
-    };
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        setValidationError(null);
-
-        // Check if age is under 18
-        if (age === null || age >= 18) {
-            setValidationError('Only minors are allowed to register.');
-            return;
-        }
-
-        // Check password length
-        if (password.length < 8) {
-            setValidationError('Password must be at least 8 characters long.');
-            return;
-        }
-
-        if (rePassword.length < 8) {
-            setValidationError('Re-enter Password must be at least 8 characters long.');
-            return;
-        }
-
-        if (password !== rePassword) {
-            setValidationError('Passwords do not match.');
-            return;
-        }
-
-        if (!agreeToTerms) {
-            alert('You must agree to the terms and conditions before registering.');
-            return;
-        }
-
-        onRegister({ firstName, lastName, birthday, address, guardianName, guardianContactNumber, idFile, email, password });
     };
 
     return (
@@ -152,52 +166,170 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
                     {/* Address */}
                     <div>
                         <label htmlFor="address" className="block text-[#38b6ff] mb-1">Address</label>
-                        <input
-                            id="address"
-                            type="text"
-                            required
-                            placeholder="Address"
-                            value={address}
-                            onChange={(e) => setAddress(e.target.value)}
-                            className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
-                        />
+                        <div className="ml-4">
+                            {/* Country Dropdown */}
+                            <div className="mb-4">
+                                <label className="block text-[#38b6ff] mb-2">Country</label>
+                                <select
+                                    className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
+                                    value={country}
+                                    onChange={(e) => setCountry(e.target.value)}
+                                >
+                                    <option value="">Select Country</option>
+                                    {countries
+                                        .sort((a, b) => a.name.common.localeCompare(b.name.common))
+                                        .map((country) => (
+                                            <option key={country.name.common} value={country.name.common}>
+                                                {country.name.common}
+                                            </option>
+                                        ))}
+                                </select>
+                            </div>
+
+                            {/* Region Dropdown */}
+                            <div className='mb-4'>
+                                <label className="block text-[#38b6ff] mb-2">Region</label>
+                                <select
+                                    className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
+                                    value={region}
+                                    onChange={(e) => {
+                                        const selectedRegion = regions.find(r => r.name === e.target.value);
+                                        setRegion(e.target.value);
+                                        setSelectedRegionCode(selectedRegion?.code ?? null); // Use nullish coalescing to handle undefined
+                                        setProvince(''); // Reset province when region changes
+                                        setCity(''); // Reset city when region changes
+                                        setBarangay(''); // Reset barangay when region changes
+                                        setProvinces([]); // Clear provinces
+                                        setCities([]); // Clear cities
+                                        setBarangays([]); // Clear barangays
+                                    }}
+                                >
+                                    <option value="">Select Region</option>
+                                    {regions
+                                        .sort((a, b) => a.name.localeCompare(b.name))
+                                        .map((region) => (
+                                            <option key={region.code} value={region.name}>
+                                                {region.name}
+                                            </option>
+                                        ))}
+                                </select>
+                            </div>
+
+                            {/* Province Dropdown */}
+                            <div className="mb-4">
+                                <label className="block text-[#38b6ff] mb-2">Province</label>
+                                <select
+                                    className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
+                                    value={province}
+                                    onChange={(e) => {
+                                        setProvince(e.target.value);
+                                        setCity(''); // Reset city when province changes
+                                        setBarangays([]); // Clear barangays when province changes
+                                    }}
+                                >
+                                    <option value="">Select Province</option>
+                                    {provinces
+                                        .sort((a, b) => a.name.localeCompare(b.name))
+                                        .map((province) => (
+                                            <option key={province.code} value={province.name}>
+                                                {province.name}
+                                            </option>
+                                        ))}
+                                </select>
+                            </div>
+
+                            {/* City Dropdown */}
+                            <div className="mb-4">
+                                <label className="block text-[#38b6ff] mb-2">City</label>
+                                <select
+                                    className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
+                                    value={city}
+                                    onChange={(e) => setCity(e.target.value)}
+                                >
+                                    <option value="">Select City</option>
+                                    {cities
+                                        .sort((a, b) => a.name.localeCompare(b.name))
+                                        .map((city) => (
+                                            <option key={city.code} value={city.name}>
+                                                {city.name}
+                                            </option>
+                                        ))}
+                                </select>
+                            </div>
+
+                            {/* Barangay Dropdown */}
+                            <div>
+                                <label className="block text-[#38b6ff] mb-2">Barangay</label>
+                                <select
+                                    className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
+                                    value={barangay}
+                                    onChange={(e) => setBarangay(e.target.value)}
+                                >
+                                    <option value="">Select Barangay</option>
+                                    {barangays
+                                        .sort((b1, b2) => b1.name.localeCompare(b2.name))
+                                        .map((b) => (
+                                            <option key={b.code} value={b.name}>{b.name}</option>
+                                        ))}
+                                </select>
+                            </div>
+
+                            {/* Street Input */}
+                            <div className="mb-4">
+                                <label className="block text-[#38b6ff] mb-2">Street</label>
+                                <input
+                                    type="text"
+                                    className="border border-[#38b6ff] rounded-xl pl-3 pr-3 py-2 w-full text-gray-500"
+                                    value={street}
+                                    onChange={(e) => setStreet(e.target.value)}
+                                    placeholder="Enter your street"
+                                />
+                            </div>
+                        </div>
                     </div>
 
                     {/* Guardian Name */}
                     <div>
-                        <label htmlFor="guardianName" className="block text-[#38b6ff] mb-1">Name of Guardian</label>
+                        <label htmlFor="emergencyContactName" className="block text-[#38b6ff] mb-1">Name of Guardian</label>
                         <input
-                            id="guardianName"
+                            id="emergencyContactName"
                             type="text"
                             required
-                            placeholder="Guardian's Name"
-                            value={guardianName}
-                            onChange={(e) => setGuardianName(e.target.value)}
+                            placeholder="Emergency Contact Name"
+                            value={emergencyContactName}
+                            onChange={(e) => setEmergencyContactName(e.target.value)}
                             className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
                         />
                     </div>
 
                     {/* Contact Number of Guardian */}
                     <div>
-                        <label htmlFor="guardianContactNumber" className="block text-[#38b6ff] mb-1">Contact Number of Guardian:</label>
+                        <label htmlFor="emergencyContactNumber" className="block text-[#38b6ff] mb-1">Contact Number of Guardian</label>
                         <PhoneInput
                             country={'ph'}
-                            value={guardianContactNumber}
-                            onChange={setGuardianContactNumber}
+                            value={emergencyContactNumber}
+                            onChange={(phone) => {
+                                let formattedPhone = phone;
+                                if (!phone.startsWith('+')) {
+                                    formattedPhone = `+${phone}`;
+                                }
+                                formattedPhone = formattedPhone.replace(/[^\d+]/g, '');
+                                setEmergencyContactNumber(formattedPhone);
+                            }}
                             inputClass="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500 mt-1"
                             containerClass="phone-input-container"
                             buttonClass="phone-input-button"
                             inputProps={{
-                                name: 'guardianContactNumber',
+                                name: 'emergencyContactNumber',
                                 required: true,
                                 autoComplete: 'tel',
                             }}
                         />
                     </div>
 
-                    {/* Upload ID of User */}
+                    {/* Upload ID of Guardian */}
                     <div>
-                        <label htmlFor="idFile" className="block text-[#38b6ff] mb-1">Upload ID of User</label>
+                        <label htmlFor="idFile" className="block text-[#38b6ff] mb-1">Upload ID of Guardian</label>
                         <input
                             id="idFile"
                             type="file"
@@ -270,7 +402,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
                     <label htmlFor="terms" className="text-gray-500 text-xs">
                         I agree to the
                         <button type="button" onClick={() => setIsModalOpen(true)} className="text-blue-500 hover:underline ml-1">Terms and Conditions</button>
-                        &nbsp;and the&nbsp;
+                        &nbsp;and the
                         <button type="button" onClick={() => setIsModalOpen(true)} className="text-blue-500 hover:underline ml-1">Privacy Policy</button>.
                     </label>
                 </div>

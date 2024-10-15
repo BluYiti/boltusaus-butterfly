@@ -4,6 +4,7 @@ import Layout from "@/components/Sidebar/Layout";
 import items from "@/psychotherapist/data/Links";
 import { databases } from "@/appwrite";
 import ClientProfileModal from "@/psychotherapist/components/ClientProfileModal";
+import ReferredClientProfileModal from "@/psychotherapist/components/ReferredClientProfileModal"; // Import your new modal
 
 interface ClientType {
   id: string;
@@ -33,9 +34,10 @@ const Clients = () => {
   const [filterStatus, setFilterStatus] = useState("All");
   const [clients, setClients] = useState<(ClientType & AccountType)[]>([]);
   const [loading, setLoading] = useState(true);
-  
+
   // Modal state
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isReferredProfileModalOpen, setIsReferredProfileModalOpen] = useState(false);
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -43,7 +45,7 @@ const Clients = () => {
       setLoading(true);
       try {
         const clientResponse = await databases.listDocuments('Butterfly-Database', 'Client');
-        
+
         const combinedClients = clientResponse.documents.map((clientDoc) => {
           const email = clientDoc.userid.email;
           const username = clientDoc.userid.username;
@@ -127,20 +129,7 @@ const Clients = () => {
               <div>
                 <h4 className="font-semibold flex items-center">
                   {client.firstname} {client.lastname}
-                  {client.state === "referred" && client.status === "pending" ? (
-                    <span className="ml-2 text-yellow-600 flex items-center" aria-label="Pending">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v8l4 4" />
-                      </svg>
-                      Pending...
-                    </span>
-                  ) : client.state === "referred" && client.status === "attached" ? (
+                  {client.state === "referred" && client.status === "attached" && (
                     <span className="ml-2 text-green-700 flex items-center" aria-label="Attached Certificate">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -153,20 +142,57 @@ const Clients = () => {
                       </svg>
                       <span className="ml-1">Attached Certificate</span>
                     </span>
-                  ) : null}
+                  )}
+                  {client.status === "pending" && (
+                    <span className="ml-2 text-yellow-600 flex items-center" aria-label="Pending">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v8l4 4" />
+                      </svg>
+                      <span className="ml-1">Pending...</span>
+                    </span>
+                  )}
                 </h4>
                 <p className="text-sm text-gray-500">{client.email}</p>
               </div>
             </div>
-            <button
-              onClick={() => {
-                setSelectedClientId(client.id);
-                setIsModalOpen(true);
-              }}
-              className="px-4 py-2 text-sm font-semibold text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition"
-            >
-              View Profile
-            </button>
+            {activeTab === "Current" && (
+              <button
+                onClick={() => {
+                  setSelectedClientId(client.id);
+                  setIsProfileModalOpen(true);
+                }}
+                className="px-4 py-2 text-sm font-semibold text-white bg-blue-400 rounded-full hover:bg-blue-600 transition"
+              >
+                View Profile
+              </button>
+            )}
+            {activeTab === "For Referral" && (
+              <button
+                onClick={() => {
+                  setSelectedClientId(client.id);
+                  setIsReferredProfileModalOpen(true);
+                }}
+                className="px-4 py-2 text-sm font-semibold text-white bg-blue-400 rounded-full hover:bg-blue-600 transition"
+              >
+                View Profile
+              </button>
+            )}
+            {activeTab === "To Be Evaluated" && (
+              <button
+                onClick={() => {
+                  // Handle viewing pre-assessment logic here
+                }}
+                className="px-4 py-2 text-sm font-semibold text-white bg-blue-400 rounded-full hover:bg-blue-600 transition"
+              >
+                View Pre-Assessment
+              </button>
+            )}
           </div>
         ))}
       </div>
@@ -188,8 +214,8 @@ const Clients = () => {
                   key={tab}
                   className={`pb-2 text-lg font-medium transition ${
                     activeTab === tab
-                      ? "border-b-4 border-blue-500 text-blue-500"
-                      : "text-gray-500 hover:text-gray-700"
+                      ? "border-b-4 border-blue-400 text-blue-500"
+                      : "text-gray-500 hover:text-blue-400"
                   }`}
                   onClick={() => setActiveTab(tab)}
                 >
@@ -247,9 +273,17 @@ const Clients = () => {
 
       <ClientProfileModal
         clientId={selectedClientId}
-        isOpen={isModalOpen}
+        isOpen={isProfileModalOpen}
         onClose={() => {
-          setIsModalOpen(false);
+          setIsProfileModalOpen(false);
+          setSelectedClientId(null);
+        }}
+      />
+      <ReferredClientProfileModal
+        clientId={selectedClientId}
+        isOpen={isReferredProfileModalOpen}
+        onClose={() => {
+          setIsReferredProfileModalOpen(false);
           setSelectedClientId(null);
         }}
       />

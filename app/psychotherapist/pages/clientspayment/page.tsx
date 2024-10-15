@@ -1,31 +1,55 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Layout from "@/components/Sidebar/Layout";
 import items from "@/psychotherapist/data/Links";
+import PaymentModal from "@/psychotherapist/components/PaymentModal"; // Import the new modal component
 
 const ClientsPayment = () => {
   const [activeTab, setActiveTab] = useState("Pending");
   const [searchTerm, setSearchTerm] = useState("");
+  const [clients, setClients] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false); // State for modal visibility
+  const [selectedClient, setSelectedClient] = useState(null); // State for selected client's payment details
 
-  const clients = [
-    { name: "Bella Swan", email: "xxx@xxx.com", status: "Paid" },
-    { name: "Michael Bieber", email: "xxx@xxx.com", status: "Pending" },
-    { name: "Nicki Minaj", email: "xxx@xxx.com", status: "Paid" },
-    { name: "Ana Smith", email: "xxx@xxx.com", status: "Pending" },
-    { name: "Chris Grey", email: "xxx@xxx.com", status: "Paid" },
-    { name: "Lana Dress", email: "xxx@xxx.com", status: "Pending" },
-    { name: "Sza Padilla", email: "xxx@xxx.com", status: "Paid" },
-    { name: "Case Oh", email: "xxx@xxx.com", status: "Pending" },
-    { name: "Jennie Kim", email: "xxx@xxx.com", status: "Paid" },
-    { name: "Denzel White", email: "xxx@xxx.com", status: "Pending" },
-    { name: "Angel Wong", email: "xxx@xxx.com", status: "Paid" },
-    { name: "Jennifer Lawrence", email: "xxx@xxx.com", status: "Pending" },
-  ];
+  // Mock data for clients
+  useEffect(() => {
+    // Simulating fetching data from Appwrite with a delay
+    const mockClients = [
+      { name: "Bella Swan", email: "bella@twilight.com", status: "Paid" },
+      { name: "Michael Bieber", email: "michael@bieber.com", status: "Pending" },
+      { name: "Nicki Minaj", email: "nicki@minaj.com", status: "Paid" },
+      { name: "Ana Smith", email: "ana@smith.com", status: "Pending" },
+      { name: "Chris Grey", email: "chris@grey.com", status: "Paid" },
+      { name: "Lana Dress", email: "lana@dress.com", status: "Pending" },
+      { name: "Sza Padilla", email: "sza@padilla.com", status: "Paid" },
+      { name: "Case Oh", email: "case@oh.com", status: "Pending" },
+      { name: "Jennie Kim", email: "jennie@kim.com", status: "Paid" },
+      { name: "Denzel White", email: "denzel@white.com", status: "Pending" },
+      { name: "Angel Wong", email: "angel@wong.com", status: "Paid" },
+      { name: "Jennifer Lawrence", email: "jennifer@lawrence.com", status: "Pending" },
+    ];
+
+    setTimeout(() => {
+      setClients(mockClients);
+      setLoading(false);
+    }, 1000);
+  }, []);
 
   const filteredClients = clients.filter((client) =>
     client.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const openModal = (client) => {
+    setSelectedClient(client);
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setSelectedClient(null);
+  };
 
   const renderPendingClients = () => (
     <div className="mt-4 space-y-3">
@@ -43,7 +67,10 @@ const ClientsPayment = () => {
                 <p className="text-sm text-gray-500">{client.email}</p>
               </div>
             </div>
-            <button className="px-4 py-2 text-sm font-semibold text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition">
+            <button
+              className="px-4 py-2 text-sm font-semibold text-white bg-blue-400 rounded-full hover:bg-blue-600 transition"
+              onClick={() => openModal(client)}
+            >
               View Payment
             </button>
           </div>
@@ -67,7 +94,7 @@ const ClientsPayment = () => {
                 <p className="text-sm text-gray-500">{client.email}</p>
               </div>
             </div>
-            <button className="px-4 py-2 text-sm font-semibold text-white bg-green-500 rounded-lg hover:bg-green-600 transition">
+            <button className="px-4 py-2 text-sm font-semibold text-white bg-blue-400 rounded-full hover:bg-green-600 transition">
               View Payment
             </button>
           </div>
@@ -75,11 +102,21 @@ const ClientsPayment = () => {
     </div>
   );
 
+  if (loading) {
+    return (
+      <Layout sidebarTitle="Butterfly" sidebarItems={items}>
+        <div className="bg-gray-100 min-h-screen overflow-auto flex justify-center items-center">
+          <p>Loading...</p>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
       <div className="bg-gray-100 min-h-screen overflow-auto">
         <div className="bg-white rounded-b-lg shadow-md p-5 top-0 left-60 w-full z-10 sticky">
-          <h2 className="text-2xl font-bold">Clients</h2>
+          <h2 className="text-2xl font-bold">Client's Payment</h2>
         </div>
 
         <div className="mt-6 px-5">
@@ -90,8 +127,8 @@ const ClientsPayment = () => {
                   key={tab}
                   className={`pb-2 text-lg font-medium transition ${
                     activeTab === tab
-                      ? "border-b-4 border-blue-500 text-blue-500"
-                      : "text-gray-500 hover:text-gray-700"
+                      ? "border-b-4 border-blue-400 text-blue-500"
+                      : "text-gray-500 hover:text-blue-400"
                   }`}
                   onClick={() => setActiveTab(tab)}
                 >
@@ -148,6 +185,13 @@ const ClientsPayment = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal for Payment Details */}
+      <PaymentModal 
+        isOpen={showModal} 
+        onClose={closeModal} 
+        client={selectedClient} 
+      />
     </Layout>
   );
 };

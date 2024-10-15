@@ -4,7 +4,7 @@
 import Layout from "@/components/Sidebar/Layout";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from 'recharts';
 import { useEffect, useState } from "react";
-import { client, databases } from "@/appwrite"; // Adjust the import based on your appwrite.ts location
+import { databases } from "@/appwrite"; // Adjust the import based on your appwrite.ts location
 import items from "@/admin/data/Links";
 
 const userEngagementData = [
@@ -32,7 +32,7 @@ const Analytics = () => {
     const fetchTotalUsers = async () => {
       try {
         // Fetch total users from the database (replace 'YOUR_DATABASE_ID' and 'YOUR_COLLECTION_ID' with actual values)
-        const response = await databases.listDocuments('YOUR_DATABASE_ID', 'YOUR_COLLECTION_ID');
+        const response = await databases.listDocuments('Butterfly-Database', 'Account');
         setTotalUsers(response.total); // Set total users count based on the response
       } catch (error) {
         console.error('Error fetching total users:', error);
@@ -57,7 +57,7 @@ const Analytics = () => {
   }, []);
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
-      <div className="bg-white rounded-b-lg shadow-md p-5 top-0 left-60 w-full z-10"> {/* Fixed position with full width */}
+      <div className="bg-white rounded-b-lg shadow-md p-5 top-0 left-60 w-full"> {/* Fixed position with full width */}
         <h2 className="text-2xl font-bold">About Me</h2>
       </div>
       {/* User Engagement Section */}

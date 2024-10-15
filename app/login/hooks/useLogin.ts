@@ -1,18 +1,49 @@
 'use client';
 
 import { useState } from 'react';
-import { account } from '@/appwrite';
+import { account, databases } from '@/appwrite'; // Make sure to import databases
 import { useRouter } from 'next/navigation';
 
 export const useLogin = () => {
     const [error, setError] = useState<string | null>(null);
     const router = useRouter();
 
+    // Fetch user role from the accounts collection
+    const fetchUserRole = async (userId: string) => {
+        try {
+            const response = await databases.getDocument('Butterfly-Database', 'Accounts', userId);
+            return response.role; // Adjust this based on your data structure
+        } catch (err) {
+            console.error('Failed to fetch user role:', err);
+            return null;
+        }
+    };
+
+    // Redirect based on user role
+    const handleUserRoleRedirect = (role: string, user: any) => {
+        switch (role) {
+            case 'admin':
+                router.push('/admin');
+                break;
+            case 'psychotherapist':
+                router.push('/psychotherapist');
+                break;
+            case 'associate':
+                router.push('/associate');
+                break;
+            case 'client':
+                router.push('/client');
+                break;
+            default:
+                setError('Unknown role. Please contact support.');
+        }
+    };
+
     const login = async (email: string, password: string) => {
         setError(null); // Reset error before trying to log in
 
         try {
-            // First, check if there is already an active session
+            // Check if there is already an active session
             let user = null;
             try {
                 user = await account.get();  // Check if a session exists
@@ -29,49 +60,24 @@ export const useLogin = () => {
                     user = await account.get();  // Fetch the user after successful login
                     console.log('Logged in user:', user.$id);
                 } catch (err: any) {
-                    // If an error occurs during login, catch and handle it here
                     console.error('Login failed:', err);
                     setError('Invalid email or password. Please try again.');
                     return;  // Stop further execution if login fails
                 }
             }
 
+            // Fetch user role from the accounts collection
+            const role = await fetchUserRole(user.$id);
+            if (!role) {
+                setError('No role assigned to the user. Contact support.');
+                return;
+            }
+
             // If login was successful, handle redirection based on user role
-            handleUserRoleRedirect(user);
+            handleUserRoleRedirect(role, user);
         } catch (err: any) {
             console.error('Error during login:', err);
             setError(`Login failed: ${err.message}`);
-        }
-    };
-
-    // Redirect based on user role
-    const handleUserRoleRedirect = (user: any) => {
-        const role = user.prefs?.role || user.labels?.[0];
-        if (!role) {
-            setError('No role assigned to the user. Contact support.');
-            return;
-        }
-        
-        switch (role) {
-            case 'admin':
-                router.push('/admin');
-                break;
-            case 'psychotherapist':
-                router.push('/psychotherapist');
-                break;
-            case 'associate':
-                router.push('/associate');
-                break;
-            case 'client':
-                const assignedPsychotherapist = user.prefs?.psychotherapist;
-                if (assignedPsychotherapist) {
-                    router.push('/client');
-                } else {
-                    router.push('/client/pages/therapist');
-                }
-                break;
-            default:
-                setError('Unknown role. Please contact support.');
         }
     };
 

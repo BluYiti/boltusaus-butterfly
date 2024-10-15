@@ -27,6 +27,13 @@ const aboutVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
 };
 
+const bookingSteps = [
+  "Click on the 'Book an Appointment' button and follow the steps to register a new account. Make sure to fill out all required fields to complete the registration process.",
+  "Once registered, log in with your credentials to access your account and continue the booking process.",
+  "Begin the pre-assessment by answering the necessary questions. This will help us better understand your needs and assign the appropriate service.",
+  "Wait for your pre-assessment result, which will be available within 1 business day. Once approved, you'll be able to book an appointment with us at your preferred time."
+];
+
 const HomePage: React.FC = () => {
   const [open, setOpen] = useState<number | null>(null);
 
@@ -72,7 +79,8 @@ const HomePage: React.FC = () => {
       <BackToTopButton />
       
       {/* Top Section */}
-      <section className="relative h-screen flex flex-col justify-center items-start bg-cover bg-center px-4 md:px-8" style={{ backgroundImage: `url('/images/landingbg.jpg')` }}>
+      <section className="relative h-screen flex flex-col justify-center items-start bg-cover bg-center px-4 md:px-8" style={{ backgroundImage: `url('/images/landingbg.png')` }}>
+        
         <motion.div
           className="relative z-10 text-left text-white max-w-md ml-4 md:ml-10"
           initial={{ opacity: 0, y: -50 }}
@@ -89,6 +97,16 @@ const HomePage: React.FC = () => {
             </button>
           </Link>
         </motion.div>
+
+        {/* Butterfly GIF */}
+        <motion.img
+        src="/gifs/butterfly.gif" 
+        alt="Butterfly Animation"
+        className="absolute z-20 w-[35rem] h-[35rem] 2xl:right-[14rem] 3xl:right-[22rem]" 
+        initial={{ opacity: 0, scale: 0.5 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.6, delay: 0.5 }}
+        />
 
         {/* Centered Navbar */}
         <nav className="absolute top-6 left-1/2 transform -translate-x-1/2 flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4 text-white">
@@ -151,26 +169,22 @@ const HomePage: React.FC = () => {
             How to Book a Session
           </h2>
           <p className="mb-8 text-base md:text-lg text-left max-w-2xl">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+          A.M. Peralta Psychological Services' web application is designed to help you easily book an appointment in just a few simple steps.
           </p>
-
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="md:col-span-2">
               <ol className="space-y-4">
-                {Array.from({ length: 4 }, (_, index) => (
-                  <li key={index} className="flex items-start space-x-4">
-                    <span className={`text-6xl font-paintbrush text-gray-${500 + index * 100}`}>
+                {bookingSteps.map((step, index) => (
+                  <li key={index} className="flex items-start">
+                    <span className={`text-6xl font-paintbrush text-gray-${500 + index * 100} w-10 text-center mr-4`}>
                       {index + 1}
                     </span>
-                    <div>
-                      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+                    <div className="flex-1">
+                      <p className="text-left">{step}</p>
                     </div>
                   </li>
                 ))}
               </ol>
-            </div>
-            <div className="md:col-span-1">
-              {/* You can put any additional content here if needed */}
             </div>
           </div>
         </div>
