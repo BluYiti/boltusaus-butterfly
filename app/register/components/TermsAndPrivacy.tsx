@@ -22,7 +22,7 @@ const TermsAndPrivacy: React.FC<TermsAndPrivacyProps> = ({ isOpen, onClose, cont
                 <h2 className="text-center text-2xl font-bold text-red-500 mb-4">{contentTitle}</h2>
 
                 <p className="text-sm text-gray-500 mb-2 text-center">
-                    {contentType === 'terms' ? 'Last updated: May 21, 2018' : 'Effective Date: May 21, 2018'}
+                    {contentType === 'terms' ? 'Last updated: November 13, 2024' : 'Effective Date: May 21, 2018'}
                 </p>
 
                 <div className="max-h-96 overflow-y-auto p-4 border border-gray-300 rounded mb-4">
