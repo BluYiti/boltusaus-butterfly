@@ -9,7 +9,7 @@ export const useFetchBarangays = (city: string, cities: any[], setBarangays: Rea
                 const selectedCity = cities.find(c => c.name === city);
                 if (selectedCity) {
                     try {
-                        const response = await fetch(`https://psgc.gitlab.io/api/cities/${selectedCity.code}/barangays/`);
+                        const response = await fetch(`https://psgc.gitlab.io/api/cities-municipalities/${selectedCity.code}/barangays/`);
                         const data = await response.json();
                         setBarangays(data);
                     } catch (error) {
