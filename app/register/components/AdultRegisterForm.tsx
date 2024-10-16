@@ -23,6 +23,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
         firstName, setFirstName,
         lastName, setLastName,
         birthday, setBirthday,
+        sex, setSex,
         country, setCountry,
         region, setRegion,
         province, setProvince,
@@ -53,6 +54,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
         firstName,
         lastName,
         birthday,
+        sex,
         password,
         rePassword,
         agreeToTerms,
@@ -168,6 +170,23 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
                                 className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
                             />
                         </div>
+                    </div>
+
+                    {/* Sex Dropdown */}
+                    <div className="mb-4">
+                        <label className="block text-[#38b6ff] mb-2">Sex</label>
+                        <select
+                            className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
+                            value={sex}
+                            onChange={(e) => setSex(e.target.value)}
+                        >
+                            <option value="">Select Sex</option>
+                            {["Male", "Female"].map((gender) => (
+                                <option key={gender} value={gender}>
+                                    {gender}
+                                </option>
+                            ))}
+                        </select>
                     </div>
 
                     {/* Address */}

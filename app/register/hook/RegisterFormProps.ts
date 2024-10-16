@@ -3,6 +3,7 @@ export interface RegisterFormProps {
         firstName: string;
         lastName: string;
         birthday: string;
+        sex: string;
         address: string;
         contactNumber: string;
         emergencyContactName: string;
