@@ -53,7 +53,7 @@ const Page: FC = () => {
 
   const handleCountdownComplete = () => {
     // Redirect to another page when countdown is complete
-    router.push('./pvideocall'); // Replace '/another-page' with the actual path you want to route to
+    router.push('./videocall'); // Replace '/another-page' with the actual path you want to route to
   };
 
   return (
