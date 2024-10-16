@@ -1,3 +1,5 @@
+'use client'
+
 import { account, ID } from '@/appwrite';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';

@@ -28,15 +28,15 @@ const LoginPage: React.FC = () => {
     return (
         <div className='overflow-hidden'>
             <Back/>
-            <h1 className="absolute top-5 left-20 text-[#2081c3] text-2xl md:text-3xl font-bold ">Butterfly</h1>
-            <h2 className='absolute font-paintbrush text-8xl text-[#2b4369] top-32 left-20'>
+            <h1 className="absolute top-5 left-20 text-[#2081c3] text-2xl font-bold">Butterfly</h1>
+            <h2 className='absolute font-paintbrush text-8xl text-[#2b4369] top-32 2xl:left-20 3xl:left-36'>
                 Start your Journey
             </h2>
             <div className='absolute w-2/5 h-screen'>
                 <p className='absolute top-60 text-center left-24 text-[#2081c3] font-poppins'>
                     We believe that mental health is a collaborative effort. Together, we can navigate the path toward emotional well-being and mental strength.
                 </p>
-                <div className='absolute top-72 left-52'>
+                <div className='absolute top-72 2xl:left-56 3xl:left-72'>
                     <LoginForm onLogin={handleLogin} error={error} loading={loading} />
                     <div>
                         <a className="absolute top-[10.5rem] left-[8.5rem] text-blue-500 text-sm">
@@ -51,7 +51,7 @@ const LoginPage: React.FC = () => {
                     </div>
                 </div>
             </div>
-            <div className="absolute right-14 w-1/2 h-screen bg-cover bg-no-repeat" style={{ backgroundImage: `url('/images/manyfly.png')` }}></div>
+            <div className="absolute right-14 w-1/2 h-screen bg-cover bg-no-repeat" style={{ backgroundImage: `url('/images/adultfly.png')` }}></div>
             <div className="absolute right-0 w-14 h-screen bg-cover bg-no-repeat" style={{ backgroundImage: `url('/images/rightblock.png')` }}></div>
         </div>
     );
