@@ -9,6 +9,7 @@ const AboutMe = () => {
   const [description, setDescription] = useState("As a psychologist, my mission is to nurture mental well-being, offering compassionate support and guiding individuals towards resilience and personal growth.");
   const [professionalBackground, setProfessionalBackground] = useState("Bachelor of Arts in Psychology");
   const [specialties, setSpecialties] = useState(["Health and Lifestyle", "Mindfulness"]);
+  const [phoneNumber, setPhoneNumber] = useState("123-456-7890"); // New phone number state
 
   const [isEditing, setIsEditing] = useState(false);
 
@@ -59,6 +60,18 @@ const AboutMe = () => {
                 <h3 className="text-xl font-bold">About me</h3>
                 <p className="text-gray-700">[Name]</p>
                 <span className="bg-green-200 text-green-800 text-sm px-3 py-1 rounded-full inline-block mt-2">Senior Psychotherapist</span>
+              </div>
+
+              {/* Phone Number */}
+              <div className="mb-6">
+                <h4 className="text-lg font-semibold">Phone Number</h4>
+                <input
+                  type="tel"
+                  className="border border-gray-300 rounded-md p-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  disabled={!isEditing}
+                />
               </div>
 
               {/* Professional Background */}
