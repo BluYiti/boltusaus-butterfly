@@ -9,7 +9,7 @@ export const useFetchCities = (province: string, provinces: any[], setCities: Re
                 const selectedProvince = provinces.find(p => p.name === province);
                 if (selectedProvince) {
                     try {
-                        const response = await fetch(`https://psgc.gitlab.io/api/provinces/${selectedProvince.code}/cities/`);
+                        const response = await fetch(`https://psgc.gitlab.io/api/provinces/${selectedProvince.code}/cities-municipalities/`);
                         const data = await response.json();
                         setCities(data);
                         setCity('');
