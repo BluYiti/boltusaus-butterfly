@@ -12,7 +12,7 @@ import { createSubmitHandler } from '@/register/hook/handleSubmitAdult';
 import { useFetchCountries } from '@/register/hook/fetch/useFetchCountries';
 import { useFetchRegions } from '@/register/hook/fetch/useFetchRegions';
 import { useFetchProvinces } from '@/register/hook/fetch/useFetchProvinces';
-import { useFetchCities } from '@/register/hook/fetch/useFetchCities';
+import { useFetchCities } from '@/register/hook/fetch/useFetchCitiesAndMunicipalities';
 import { useFetchBarangays } from '@/register/hook/fetch/useFetchBarangays';
 import { useRouter } from 'next/navigation';
 
