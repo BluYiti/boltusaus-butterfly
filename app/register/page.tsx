@@ -30,10 +30,12 @@ const RegisterPage: React.FC = () => {
                 {/* Flex container for images */}
                 <div className="flex justify-center space-x-60"> {/* Space between images */}
                     <button onClick={handleMinor} className="transform transition-transform duration-300 hover:scale-125">
-                        <Image src={'/images/minor.png'} alt='minor2' width={225} height={225} />
+                        <Image src={'/images/minor.png'} alt='minor2' width={225} height={225} /><br />
+                        <h2 className='font-poppins'>Ages 17 and below</h2>
                     </button>
                     <button onClick={handleAdult} className="transform transition-transform duration-300 hover:scale-125">
-                        <Image src={'/images/adult.png'} alt='adult' width={225} height={225} />
+                        <Image src={'/images/adult.png'} alt='adult' width={225} height={225} /><br />
+                        <h2 className='font-poppins'>Ages 18 and above</h2>
                     </button>
                 </div>
                 

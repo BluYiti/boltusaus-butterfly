@@ -22,8 +22,8 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, sele
 
     try {
       // Example collectionId and databaseId. Replace with your actual IDs
-      const databaseId = "your-database-id";
-      const collectionId = "your-collection-id";
+      const databaseId = "Butterfly-Database";
+      const collectionId = "Accounts";
 
       // Payload for creating a new user account
       const payload = {

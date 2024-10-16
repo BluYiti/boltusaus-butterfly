@@ -7,6 +7,7 @@ import Layout from "@/components/Sidebar/Layout";
 import items from "@/client/data/Links";
 import Link from "next/link";
 import RescheduleModal from "@/components/Reschedule"; // Assuming you have this component
+import LoadingScreen from "@/components/LoadingScreen";
 
 const Dashboard: React.FC = () => {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
@@ -17,7 +18,8 @@ const Dashboard: React.FC = () => {
   const currentYear = today.getFullYear();
   const userName = "John"; // Placeholder for dynamic user data
 
-  const { loading, LoadingScreen } = useAuthCheck();
+  {/* USER AUTHENTICATION PART */}
+  const { loading } = useAuthCheck(['client']); // Allowed roles
 
   if (loading) {
     return <LoadingScreen />; // Show loading screen
