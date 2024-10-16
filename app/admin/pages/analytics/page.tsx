@@ -6,6 +6,8 @@ import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, R
 import { useEffect, useState } from "react";
 import { databases } from "@/appwrite"; // Adjust the import based on your appwrite.ts location
 import items from "@/admin/data/Links";
+import useAuthCheck from "@/auth/page";
+import LoadingScreen from "@/components/LoadingScreen";
 
 const userEngagementData = [
   { month: 'Jan', activeUsers: 1200, sessions: 2400 },
@@ -55,10 +57,17 @@ const Analytics = () => {
     fetchTotalUsers();
     fetchOnlineUsers();
   }, []);
+
+  const { loading } = useAuthCheck(['admin']); // Allowed roles
+
+  if (loading) {
+    return <LoadingScreen />;
+  }
+
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
       <div className="bg-white rounded-b-lg shadow-md p-5 top-0 left-60 w-full"> {/* Fixed position with full width */}
-        <h2 className="text-2xl font-bold">About Me</h2>
+        <h2 className="text-2xl font-bold">Hello Admin!</h2>
       </div>
       {/* User Engagement Section */}
       <section className="bg-gray-100">
