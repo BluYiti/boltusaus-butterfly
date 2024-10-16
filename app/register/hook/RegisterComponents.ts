@@ -6,6 +6,7 @@ const useRegisterForm = () => {
     const [firstName, setFirstName] = useState<string>('');
     const [lastName, setLastName] = useState<string>('');
     const [birthday, setBirthday] = useState<string>('');
+    const [sex, setSex] = useState<string>('');
     const [country, setCountry] = useState<string>('');
     const [region, setRegion] = useState<string>('');
     const [province, setProvince] = useState<string>('');
@@ -35,6 +36,7 @@ const useRegisterForm = () => {
         firstName, setFirstName,
         lastName, setLastName,
         birthday, setBirthday,
+        sex, setSex,
         country, setCountry,
         region, setRegion,
         province, setProvince,

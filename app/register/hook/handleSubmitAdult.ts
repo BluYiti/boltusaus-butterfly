@@ -6,7 +6,8 @@ import React from 'react';
 interface FormData {
     firstName: string;
     lastName: string;
-    birthday: string; // Assuming you're using a date string format
+    birthday: string;
+    sex: string;
     password: string;
     rePassword: string;
     agreeToTerms: boolean;
@@ -52,6 +53,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>, formData: FormD
         validateName(formData.firstName, 'First Name'),
         validateName(formData.lastName, 'Last Name'),
         formData.birthday ? null : 'Birthday is required.',
+        formData.sex ? null : 'Sex is required.',
         formData.age !== null && formData.age < 18 ? 'You must be at least 18 years old to register.' : null,
         validateEmail(formData.email),
         formData.password.length < 8 ? 'Password must be at least 8 characters long.' : null,
@@ -125,7 +127,8 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>, formData: FormD
             emergencyContactName: formData.emergencyContactName,
             emergencyContact: formData.emergencyContactNumber,
             state: null,
-            status: null
+            status: null,
+            sex: formData.sex
         };
 
         await databases.createDocument('Butterfly-Database', 'Client', 'unique()', clientData);
