@@ -102,7 +102,7 @@ const HomePage: React.FC = () => {
         <motion.img
         src="/gifs/butterfly.gif" 
         alt="Butterfly Animation"
-        className="absolute z-20 w-[35rem] h-[35rem] 2xl:right-[14rem] 3xl:right-[22rem]" 
+        className="absolute z-20 w-[35rem] h-[35rem] sm:right-[14rem] 2xl:right-[14rem] 3xl:right-[22rem]" 
         initial={{ opacity: 0, scale: 0.5 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.6, delay: 0.5 }}
