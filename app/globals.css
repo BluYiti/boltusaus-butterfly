@@ -94,7 +94,7 @@
   }
 
   .copyright {
-    @apply text-14-regular justify-items-end text-center text-dark-600 xl:text-left;
+    @apply text-14-regular justify-items-end text-center text-dark-700 xl:text-center;
   }
 
   /* ==== SUCCESS */
@@ -153,7 +153,7 @@
   .checkbox-label {
     @apply cursor-pointer text-sm font-medium text-dark-600 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 md:leading-none;
   }
-  
+
   /* ==== File Upload */
   .file-upload {
     @apply text-12-regular flex cursor-pointer  flex-col items-center justify-center gap-3 rounded-md border border-dashed border-blue-300 bg-light-200 p-5;

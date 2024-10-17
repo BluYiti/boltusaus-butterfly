@@ -14,7 +14,7 @@ export default function Home() {
             Psychological Services
           </h4>
           <Image
-            src="/assets/images/butterfly-logo.svg"
+            src="/assets/icons/butterfly-main.svg"
             alt="Butterfly Logo"
             width={200}
             height={200}

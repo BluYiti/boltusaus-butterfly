@@ -1,12 +1,17 @@
 export const SexOptions = ["Male", "Female"];
 
-export const RegisterFormDefaultValues = {
-};
+export const RegisterFormDefaultValues = {};
 
 export const Psychotherapists = [
   {
+    id: 1,
     image: "/assets/images/am-peralta.png",
     name: "Angelica Peralta",
+  },
+  {
+    id: 2,
+    image: "/assets/images/am-peralta.png",
+    name: "Jhobet Batumbakal",
   },
 ];
 

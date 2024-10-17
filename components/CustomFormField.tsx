@@ -18,6 +18,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { Select, SelectContent, SelectTrigger, SelectValue } from "./ui/select";
 import { Textarea } from "./ui/textarea";
 import { Checkbox } from "./ui/checkbox";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { ReactNode } from "react";
 
 export enum FormFieldType {
@@ -29,6 +30,7 @@ export enum FormFieldType {
   DATE_PICKER = "datePicker",
   SELECT = "select",
   SKELETON = "skeleton",
+  TOGGLEGROUP = "toggleGroup",
 }
 
 interface CustomProps {
@@ -181,6 +183,14 @@ const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
               {props.label}
             </label>
           </div>
+        </FormControl>
+      );
+    case FormFieldType.TOGGLEGROUP:
+      return (
+        <FormControl>
+          <ToggleGroup type="single" name={props.name}>
+            {props.children}
+          </ToggleGroup>
         </FormControl>
       );
     default:

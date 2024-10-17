@@ -3,55 +3,56 @@ import Image from "next/image";
 import React from "react";
 import { role } from "@/lib/role/client.data";
 
-const menuItems = [
-  {
-    title: "MENU",
-    items: [
-      {
-        icon: "/assets/icons/home.svg",
-        label: "Home",
-        href: "`/client/dashboard`",
-        visible: ["admin", "psychotherapist", "client", "associate"],
-      },
-      {
-        icon: "/assets/icons/goals.svg",
-        label: "Goals",
-        href: "/client/goals",
-        visible: ["client"],
-      },
-      {
-        icon: "/assets/icons/appointments.svg",
-        label: "Appointments",
-        href: "/client/new-appointment",
-        visible: ["client"],
-      },
-    ],
-  },
-  {
-    title: "OTHERS",
-    items: [
-      {
-        icon: "/assets/icons/profile.svg",
-        label: "Profile",
-        href: `/client/profile`,
-        visible: ["admin", "psychotherapist", "client", "associate"],
-      },
-      {
-        icon: "/assets/icons/settings.svg",
-        label: "Settings",
-        href: "/client/settings",
-        visible: ["admin", "psychotherapist", "client", "associate"],
-      },
-      {
-        icon: "/assets/icons/logout.svg",
-        label: "Logout",
-        href: "/login",
-        visible: ["admin", "psychotherapist", "client", "associate"],
-      },
-    ],
-  },
-];
-const Menu = () => {
+const Menu = ({ userId, clientId }: { userId: string; clientId: string }) => {
+  const menuItems = [
+    {
+      title: "MENU",
+      items: [
+        {
+          icon: "/assets/icons/home.svg",
+          label: "Home",
+          href: `/client/${userId}/dashboard`,
+          visible: ["admin", "psychotherapist", "client", "associate"],
+        },
+        {
+          icon: "/assets/icons/goals.svg",
+          label: "Goals",
+          href: `/client/${userId}/goals`,
+          visible: ["client"],
+        },
+        {
+          icon: "/assets/icons/appointments.svg",
+          label: "Appointments",
+          href: `/client/${userId}/new-appointment`,
+          visible: ["client"],
+        },
+      ],
+    },
+    {
+      title: "OTHERS",
+      items: [
+        {
+          icon: "/assets/icons/profile.svg",
+          label: "Profile",
+          href: `/client/profile`,
+          visible: ["admin", "psychotherapist", "client", "associate"],
+        },
+        {
+          icon: "/assets/icons/settings.svg",
+          label: "Settings",
+          href: "/client/settings",
+          visible: ["admin", "psychotherapist", "client", "associate"],
+        },
+        {
+          icon: "/assets/icons/logout.svg",
+          label: "Logout",
+          href: "/login",
+          visible: ["admin", "psychotherapist", "client", "associate"],
+        },
+      ],
+    },
+  ];
+
   return (
     <div className="mt-4 text-sm">
       {menuItems.map((i) => (
@@ -75,6 +76,7 @@ const Menu = () => {
           })}
         </div>
       ))}
+      <p className="copyright mt-10 py-12">© 2024 Butterfly</p>
     </div>
   );
 };

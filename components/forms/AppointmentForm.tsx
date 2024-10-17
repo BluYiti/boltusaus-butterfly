@@ -19,6 +19,7 @@ import { CustomFormField, FormFieldType } from "../CustomFormField";
 import { SelectItem } from "../ui/select";
 import SubmitButton from "../SubmitButton";
 import Image from "next/image";
+import { ToggleGroup, ToggleGroupItem } from "../ui/toggle-group";
 
 const AppointmentForm = ({
   userId,
@@ -35,6 +36,8 @@ const AppointmentForm = ({
 }) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedPsychotherapist, setSelectedPsychotherapist] =
+    useState<string>("");
 
   const AppointmentFormValidation = getAppointmentSchema(type);
 
@@ -70,7 +73,6 @@ const AppointmentForm = ({
     }
 
     try {
-      // Create an Appointment
       if (type === "create" && clientId) {
         const appointmentData = {
           userId,
@@ -85,8 +87,6 @@ const AppointmentForm = ({
 
         const appointment = await createAppointment(appointmentData);
 
-        console.log(appointment);
-
         if (appointment) {
           form.reset();
           router.push(
@@ -94,7 +94,6 @@ const AppointmentForm = ({
           );
         }
       } else {
-        // Update an Appointment
         const appointmentToUpdate = {
           userId,
           appointmentId: appointment?.$id!,
@@ -130,10 +129,11 @@ const AppointmentForm = ({
       buttonLabel = "Cancel Appointment";
       break;
     case "create":
-      buttonLabel = "Create Appointment";
+      buttonLabel = "Proceed to Payment";
       break;
     case "schedule":
       buttonLabel = "Schedule Appointment";
+      break;
     default:
       break;
   }
@@ -143,7 +143,7 @@ const AppointmentForm = ({
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 flex-1">
         {type === "create" && (
           <section className="mb-12 space-y-4">
-            <h1 className="header"> New Appointment</h1>
+            <h1 className="header"> Counseling and Therapy</h1>
             <p className="text-dark-600">Schedule your appointment</p>
           </section>
         )}
@@ -151,18 +151,32 @@ const AppointmentForm = ({
         {type !== "cancel" && (
           <>
             <CustomFormField
-              fieldType={FormFieldType.SELECT}
+              fieldType={FormFieldType.TOGGLEGROUP}
               control={form.control}
               name="primaryPsychotherapist"
-              label="Primary Psychotherapist"
-              placeholder="Select your Psychotherapist"
+              label="Choose your psychotherapist"
             >
-              {Psychotherapists.map((psychotherapist) => (
-                <SelectItem
-                  key={psychotherapist.name}
-                  value={psychotherapist.name}
-                >
-                  <div className="flex cursor-pointer items-center gap-2">
+              <ToggleGroup
+                type="single"
+                value={selectedPsychotherapist}
+                onValueChange={(value) => {
+                  setSelectedPsychotherapist(value);
+                  form.setValue("primaryPsychotherapist", value);
+                }}
+                className="flex flex-wrap gap-4"
+              >
+                {Psychotherapists.map((psychotherapist) => (
+                  <ToggleGroupItem
+                    key={psychotherapist.id}
+                    value={psychotherapist.name}
+                    aria-label={`Toggle ${psychotherapist.name}`}
+                    className={`border border-gray-300 rounded-md p-2 hover:bg-gray-100 flex cursor-pointer items-center gap-2
+                    ${
+                      selectedPsychotherapist === psychotherapist.name
+                        ? "bg-blue-100 border-blue-400"
+                        : ""
+                    }`}
+                  >
                     <Image
                       src={psychotherapist.image}
                       width={32}
@@ -171,19 +185,11 @@ const AppointmentForm = ({
                       className="rounded-full border border-blue-300"
                     />
                     <p>{psychotherapist.name}</p>
-                  </div>
-                </SelectItem>
-              ))}
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
             </CustomFormField>
 
-            <CustomFormField
-              fieldType={FormFieldType.DATE_PICKER}
-              control={form.control}
-              name="schedule"
-              label="Available Dates"
-              showTimeSelect
-              dateFormat="MM/dd/yyyy - h:mm aa"
-            />
             <CustomFormField
               fieldType={FormFieldType.SELECT}
               control={form.control}
@@ -199,22 +205,14 @@ const AppointmentForm = ({
               ))}
             </CustomFormField>
 
-            <div className="flex flex-col gap-6 xl:flex-row">
-              <CustomFormField
-                fieldType={FormFieldType.TEXTAREA}
-                control={form.control}
-                name="reason"
-                label="Reason for appointment"
-                placeholder="How are you feeling?"
-              />
-              <CustomFormField
-                fieldType={FormFieldType.TEXTAREA}
-                control={form.control}
-                name="consultationNotes"
-                label="Notes"
-                placeholder="Enter Notes"
-              />
-            </div>
+            <CustomFormField
+              fieldType={FormFieldType.DATE_PICKER}
+              control={form.control}
+              name="schedule"
+              label="Available Dates"
+              showTimeSelect
+              dateFormat="MM/dd/yyyy - h:mm aa"
+            />
           </>
         )}
 
