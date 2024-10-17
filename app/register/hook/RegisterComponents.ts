@@ -19,7 +19,15 @@ const useRegisterForm = () => {
     const [idFile, setIdFile] = useState<File | null>(null);
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
+    const [passwordCriteria, setPasswordCriteria] = useState({
+        length: false,
+        number: false,
+        specialChar: false,
+        uppercase: false,
+        lowercase: false,
+    });
     const [rePassword, setRePassword] = useState<string>('');
+    const [isPasswordValid, setIsPasswordValid] = useState(false);
     const [agreeToTerms, setAgreeToTerms] = useState<boolean>(false);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [validationError, setValidationError] = useState<string | null>(null);
@@ -49,7 +57,9 @@ const useRegisterForm = () => {
         idFile, setIdFile,
         email, setEmail,
         password, setPassword,
+        passwordCriteria, setPasswordCriteria,
         rePassword, setRePassword,
+        isPasswordValid, setIsPasswordValid,
         agreeToTerms, setAgreeToTerms,
         isModalOpen, setIsModalOpen,
         validationError, setValidationError,

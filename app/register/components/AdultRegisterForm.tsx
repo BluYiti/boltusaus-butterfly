@@ -36,6 +36,8 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
         idFile, setIdFile,
         email, setEmail,
         password, setPassword,
+        passwordCriteria, setPasswordCriteria,
+        isPasswordValid, setIsPasswordValid,
         rePassword, setRePassword,
         agreeToTerms, setAgreeToTerms,
         isModalOpen, setIsModalOpen,
@@ -110,6 +112,30 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
         } else {
             setValidationError(null);
         }
+    };
+
+    const validatePassword = (password: string) => {
+        const length = password.length >= 8;
+        const number = /\d/.test(password);
+        const specialChar = /[@$!%*?&]/.test(password);
+        const uppercase = /[A-Z]/.test(password);
+        const lowercase = /[a-z]/.test(password);
+
+        setPasswordCriteria({
+            length,
+            number,
+            specialChar,
+            uppercase,
+            lowercase,
+        });
+
+        setIsPasswordValid(length && number && specialChar && uppercase && lowercase);
+    };
+
+    const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newPassword = e.target.value;
+        setPassword(newPassword);
+        validatePassword(newPassword);
     };
 
     return (
@@ -419,12 +445,31 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
                         <input
                             id="password"
                             type="password"
-                            required
-                            placeholder="********"
                             value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
+                            onChange={handlePasswordChange}
+                            placeholder="********"
+                            className={`border rounded-xl pl-3 pr-10 py-2 w-full text-gray-500 ${
+                                isPasswordValid ? 'border-green-500' : 'border-red-500'
+                            }`}
                         />
+
+                        <div className="mt-2">
+                            <p className={`text-sm ${passwordCriteria.length ? 'text-green-500' : 'text-red-500'}`}>
+                                - At least 8 characters
+                            </p>
+                            <p className={`text-sm ${passwordCriteria.number ? 'text-green-500' : 'text-red-500'}`}>
+                                - At least 1 number
+                            </p>
+                            <p className={`text-sm ${passwordCriteria.specialChar ? 'text-green-500' : 'text-red-500'}`}>
+                                - At least 1 special character (@, $, !, %, *, ?, &)
+                            </p>
+                            <p className={`text-sm ${passwordCriteria.uppercase ? 'text-green-500' : 'text-red-500'}`}>
+                                - At least 1 uppercase letter
+                            </p>
+                            <p className={`text-sm ${passwordCriteria.lowercase ? 'text-green-500' : 'text-red-500'}`}>
+                                - At least 1 lowercase letter
+                            </p>
+                        </div>
                     </div>
 
                     {/* Re-enter Password */}
