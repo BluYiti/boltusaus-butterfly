@@ -1,6 +1,6 @@
 'use client';
 
-import { account, databases, createJWT, ID } from '@/appwrite';
+import { account, databases, createJWT, ID, storage } from '@/appwrite';
 import React from 'react';
 
 interface FormData {
@@ -42,6 +42,20 @@ const validatePhoneNumber = (number: string) => {
     return phonePattern.test(number) ? null : 'Please enter a valid contact number.';
 };
 
+// Function to validate the uploaded file (ID)
+const validateFile = (file: File | null) => {
+    if (!file) return 'Please upload your ID file.';
+    const validTypes = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+        return 'Please upload a valid image file (PNG, JPEG, GIF, WEBP).';
+    }
+    const maxSize = 5 * 1024 * 1024; // 5 MB
+    if (file.size > maxSize) {
+        return 'The uploaded file size should not exceed 5 MB.';
+    }
+    return null;
+};
+
 const handleSubmit = async (e: React.FormEvent<HTMLFormElement>, formData: FormData) => {
     e.preventDefault();
     formData.setValidationError(null);
@@ -68,6 +82,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>, formData: FormD
         validatePhoneNumber(formData.contactNumber),
         validateName(formData.emergencyContactName, 'Emergency Contact Name'),
         validatePhoneNumber(formData.emergencyContactNumber),
+        validateFile(formData.idFile),
         !formData.idFile ? 'Please upload your ID file.' : null,
     ];
 
@@ -96,6 +111,13 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>, formData: FormD
         // Store JWT in an HTTP-only cookie
         document.cookie = `jwtToken=${jwtToken}; Secure; HttpOnly; SameSite=Strict`;
         console.log('JWT stored');
+
+        // Upload the ID file to Appwrite   
+        const bucketId = 'Images'; // Replace with your Appwrite bucket ID
+        const fileUpload = await storage.createFile(bucketId, ID.unique(), formData.idFile);
+
+        // Retrieve the file ID after uploading
+        const fileId = fileUpload.$id;
 
         const accountData = {
             ...formData,
@@ -128,7 +150,8 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>, formData: FormD
             emergencyContact: formData.emergencyContactNumber,
             state: null,
             status: null,
-            sex: formData.sex
+            sex: formData.sex,
+            idFile: fileId
         };
 
         await databases.createDocument('Butterfly-Database', 'Client', 'unique()', clientData);

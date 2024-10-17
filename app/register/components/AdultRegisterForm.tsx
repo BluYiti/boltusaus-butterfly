@@ -49,6 +49,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
         provinces, setProvinces,
         cities, setCities,
         barangays, setBarangays,
+        buttonClicked, setButtonClicked
     } = useRegisterForm();
 
     // Handle form submission
@@ -506,8 +507,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
                 <button
                     type="submit"
                     disabled={loading || !agreeToTerms}
-                    className={`bg-gradient-to-r from-[#38b6ff] to-[#4982ae] text-white font-bold py-2 px-4 rounded-xl transition-all duration-300 ease-in-out shadow-lg transform hover:scale-105 hover:shadow-xl ${!agreeToTerms ? 'opacity-50 cursor-not-allowed' : ''}`}
-                >
+                    className={`bg-gradient-to-r from-[#38b6ff] to-[#4982ae] text-white font-bold py-2 px-4 rounded-xl transition-all duration-300 ease-in-out shadow-lg transform hover:scale-105 hover:shadow-xl ${!agreeToTerms ? 'opacity-50 cursor-not-allowed' : ''} ${buttonClicked ? 'bg-green-500' : ''}`}>
                     {loading ? 'Registering...' : 'Register'}
                 </button>
             </form>
