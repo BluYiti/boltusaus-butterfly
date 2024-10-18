@@ -13,13 +13,27 @@ const GoalsPage = () => {
 
     const [mood, setMood] = useState<'HAPPY' | 'SAD' | 'ANXIOUS' | 'FEAR' | 'FRUSTRATED' | ''>('');
     const [activity, setActivity] = useState('Meditate');
-    const [duration, setDuration] = useState(30);
+ 
+    const [startHour, setStartHour] = useState(1); // Default start hour
+    const [startMinute, setStartMinute] = useState(0);
+    const [startPeriod, setStartPeriod] = useState('AM');
+    
+    const [endMinute, setEndMinute] = useState(0);
+    const [endPeriod, setEndPeriod] = useState('AM'); 
+    const [endHour, setEndHour] = useState(2); // End period can default to AM
+    
+    const [reminderTime, setReminderTime] = useState(0); // Default to no reminder
+
+    
+
     const [goalReminder, setGoalReminder] = useState(false);
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [currentMonth, setCurrentMonth] = useState(currentMonthReal);
     const [currentYear, setCurrentYear] = useState(currentYearReal);
     const [showModal, setShowModal] = useState(false);
     const [goals, setGoals] = useState<any[]>([]);
+    const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+
 
     const oneWeekAhead = addDays(currentDate, 7);
 
@@ -40,7 +54,7 @@ const GoalsPage = () => {
         };
 
         setGoals([...goals, newGoal]);
-        setShowModal(true);
+        setShowConfirmationModal(true); // Show the confirmation modal
     };
 
     const changeMonth = (increment: number) => {
@@ -72,7 +86,11 @@ const GoalsPage = () => {
                 alert("You cannot select a date more than one week in the future.");
                 return;
             }
-
+            if (isDayWithGoal(day)) {
+                alert("A goal is already set for this date.");
+                return;
+            }
+    
             setSelectedDate(clickedDate);
         }
     };
@@ -82,6 +100,29 @@ const GoalsPage = () => {
         const dayDate = new Date(currentYear, currentMonth, day);
         return goals.some((goal) => isSameDay(new Date(goal.date), dayDate));
     };
+
+    const hasGoalForSelectedDate = selectedDate ? isDayWithGoal(selectedDate.getDate()) : false;
+
+
+    const handleStartHourChange = (hour) => {
+        const hourNumber = Number(hour);
+        setStartHour(hourNumber);
+    
+        // Calculate end hour and period based on start hour
+        if (hourNumber === 12) {
+            // If starting at 12, set end hour to 1 and switch period
+            setEndHour(1);
+            setEndPeriod(startPeriod === 'AM' ? 'PM' : 'AM');
+        } else {
+            // Set end hour to one hour later, wrapping around at 12
+            const newEndHour = hourNumber + 1 > 12 ? 1 : hourNumber + 1;
+            setEndHour(newEndHour);
+            setEndPeriod(startPeriod); // Keep the same period
+        }
+    };
+    
+    
+    
 
     return (
         <Layout sidebarTitle="Butterfly" sidebarItems={items}>
@@ -141,61 +182,145 @@ const GoalsPage = () => {
                         </div>
                     </div>
 
-                    {/* Activity Section */}
-                    <div className="flex-1 bg-white shadow-md rounded-lg p-6 border border-gray-200">
-                        <h3 className="text-lg font-semibold text-blue-400">Activity</h3>
-                        <select
-                            value={activity}
-                            onChange={(e) => setActivity(e.target.value)}
-                            className="border rounded-lg p-2 mt-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-300"
-                        >
-                            <option value="Meditate">Meditate</option>
-                            <option value="Exercise">Exercise</option>
-                            <option value="Read">Read</option>
-                            <option value="Listen to Music">Music</option>
-                            <option value="Stroll">Stroll</option>
-                            <option value="Pet time">Pet time</option>
-                            <option value="Arts">Arts</option>
-                        </select>
-                        <div className="mt-4">
-                            <label className="block font-semibold text-gray-700">Duration:</label>
-                            <select
-                                value={duration}
-                                onChange={(e) => setDuration(Number(e.target.value))}
-                                className="border rounded-lg p-2 mt-1 w-full focus:outline-none focus:ring-2 focus:ring-blue-300"
-                            >
-                                <option value={10}>10 minutes</option>
-                                <option value={15}>15 minutes</option>
-                                <option value={30}>30 minutes</option>
-                                <option value={45}>45 minutes</option>
-                                <option value={50}>50 minutes</option>
-                                <option value={55}>55 minutes</option>
-                                <option value={60}>1 hour</option>
-                            </select>
-                        </div>
-                        <div className="mt-4">
-                            <label className="flex items-center font-semibold text-gray-700">
-                                <input
-                                    type="checkbox"
-                                    checked={goalReminder}
-                                    onChange={() => setGoalReminder(!goalReminder)}
-                                    className="mr-2"
-                                />
-                                Set Goal Reminder
-                            </label>
-                        </div>
-                    </div>
+                
+{/* Activity Section */}
+<div className="flex-1 bg-white shadow-md rounded-lg p-6 border border-gray-200">
+    <h3 className="text-lg font-semibold text-blue-400">Activity</h3>
+    
+    <select
+        value={activity}
+        onChange={(e) => setActivity(e.target.value)}
+        className="border rounded-lg p-2 mt-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-300"
+        disabled={hasGoalForSelectedDate}
+    >
+        <option value="Meditate">Meditate</option>
+        <option value="Exercise">Exercise</option>
+        <option value="Read">Read</option>
+        <option value="Listen to Music">Music</option>
+        <option value="Stroll">Stroll</option>
+        <option value="Pet time">Pet time</option>
+        <option value="Arts">Arts</option>
+    </select>
+
+{/* Start Time Selection */}
+<div className="mt-4">
+                <label className="block font-semibold text-gray-700">Start Time:</label>
+                <div className="flex space-x-2">
+                    <select
+                        value={startHour}
+                        onChange={(e) => handleStartHourChange(e.target.value)}
+                        className="border rounded-lg p-2 mt-1 w-full focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    >
+                        {[...Array(12).keys()].map((hour) => (
+                            <option key={hour + 1} value={hour + 1}>
+                                {hour + 1}
+                            </option>
+                        ))}
+                    </select>
+
+                    <select
+                        value={startMinute}
+                        onChange={(e) => setStartMinute(Number(e.target.value))}
+                        className="border rounded-lg p-2 mt-1 w-full focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    >
+                        {[0, 10, 15, 20, 30, 40, 45, 50, 55].map((minute) => (
+                            <option key={minute} value={minute}>
+                                {minute < 10 ? `0${minute}` : minute}
+                            </option>
+                        ))}
+                    </select>
+
+                    <select
+                        value={startPeriod}
+                        onChange={(e) => setStartPeriod(e.target.value)}
+                        className="border rounded-lg p-2 mt-1 w-full focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    >
+                        <option value="AM">AM</option>
+                        <option value="PM">PM</option>
+                    </select>
+                </div>
+            </div>
+
+            {/* End Time Selection */}
+            <div className="mt-4">
+                <label className="block font-semibold text-gray-700">End Time:</label>
+                <div className="flex space-x-2">
+                    <select
+                        value={endHour}
+                        className="border rounded-lg p-2 mt-1 w-full focus:outline-none focus:ring-2 focus:ring-blue-300"
+                        disabled={true} // Disable user interaction
+                    >
+                        <option value={endHour}>{endHour}</option> {/* Display end hour */}
+                    </select>
+
+                    <select
+                        value={endMinute}
+                        onChange={(e) => setEndMinute(Number(e.target.value))}
+                        className="border rounded-lg p-2 mt-1 w-full focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    >
+                        {[0, 10, 15, 20, 30, 40, 45, 50, 55].map((minute) => (
+                            <option key={minute} value={minute}>
+                                {minute < 10 ? `0${minute}` : minute}
+                            </option>
+                        ))}
+                    </select>
+
+                    <select
+                        value={endPeriod}
+                        className="border rounded-lg p-2 mt-1 w-full focus:outline-none focus:ring-2 focus:ring-blue-300"
+                        disabled={true} // Disable user interaction
+                    >
+                        <option value={endPeriod}>{endPeriod}</option> {/* Display end period */}
+                    </select>
+                </div>
+            </div>
+
+
+
+    {/* Reminder Selection */}
+<div className="mt-4">
+    <label className="block font-semibold text-gray-700">Reminder:</label>
+    <select
+        value={reminderTime}
+        onChange={(e) => setReminderTime(Number(e.target.value))}
+        className="border rounded-lg p-2 mt-1 w-full focus:outline-none focus:ring-2 focus:ring-blue-300"
+        disabled={hasGoalForSelectedDate}
+    >
+        <option value={0}>None</option>
+        <option value={5}>5 minutes before</option>
+        <option value={10}>10 minutes before</option>
+        <option value={15}>15 minutes before</option>
+        <option value={20}>20 minutes before</option>
+        <option value={30}>30 minutes before</option>
+    </select>
+</div>
+
+
+    <div className="mt-4">
+        <label className="flex items-center font-semibold text-gray-700">
+            <input
+                type="checkbox"
+                checked={goalReminder}
+                onChange={() => setGoalReminder(!goalReminder)}
+                className="mr-2"
+                disabled={hasGoalForSelectedDate}
+            />
+            Set Goal Reminder
+        </label>
+    </div>
+</div>
+
 
                     {/* Mood Tracker Section */}
                     <div className="flex-1 bg-white shadow-md rounded-lg p-6 border border-gray-200">
                         <h3 className="font-semibold text-blue-400">Mood Tracker</h3>
                         <div className="grid grid-cols-2 gap-3 mt-4">
-                            {[
-                                { label: 'HAPPY', emoji: '😊' },
-                                { label: 'SAD', emoji: '😢' },
-                                { label: 'ANXIOUS', emoji: '😰' },
-                                { label: 'FEAR', emoji: '😨' },
-                                { label: 'FRUSTRATED', emoji: '😠' },
+                            {[ 
+                                { label: 'HAPPY', emoji: '😊' }, 
+                                { label: 'SAD', emoji: '😢' }, 
+                                { label: 'ANXIOUS', emoji: '😰' }, 
+                                { label: 'FEAR', emoji: '😨' }, 
+                                { label: 'FRUSTRATED', emoji: '😠' }
                             ].map((moodOption) => {
                                 const moodColors = {
                                     HAPPY: 'bg-yellow-200 hover:bg-yellow-400 hover:text-white',
@@ -217,7 +342,9 @@ const GoalsPage = () => {
                                     <button
                                         key={moodOption.label}
                                         onClick={() => setMood(moodOption.label as typeof mood)}
-                                        className={`py-2 px-4 rounded-lg mt-2 transition-colors duration-300 shadow-md ${mood === moodOption.label ? selectedMoodColors[moodOption.label] : moodColors[moodOption.label]}`}
+                                        className={`py-2 px-4 rounded-lg mt-2 transition-colors duration-300 shadow-md 
+                                            ${mood === moodOption.label ? selectedMoodColors[moodOption.label] : 'bg-gray-200 text-gray-600'}`}
+                                        style={{ opacity: mood === moodOption.label ? 1 : 0.6 }} // Emphasize the selected mood
                                     >
                                         {moodOption.emoji} {moodOption.label}
                                     </button>
@@ -225,22 +352,65 @@ const GoalsPage = () => {
                             })}
                         </div>
                         <button
-                            onClick={() => setMood('')}
+                            onClick={() => setMood('')} // Remove the setMoodColors line
                             className="mt-6 bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition-colors duration-300 shadow-md"
                         >
                             Cancel Mood Selection
                         </button>
+
+
                     </div>
                 </div>
+
                 {/* Save Button and Modal */}
                 <div className="flex justify-end mt-8">
                     <button
                         onClick={handleSave}
                         className="bg-blue-400 text-white py-2 px-6 rounded-lg hover:bg-blue-500 transition-colors duration-300 shadow-lg"
+                        disabled={hasGoalForSelectedDate}
                     >
                         Save Goal
                     </button>
                 </div>
+
+                {showConfirmationModal && (
+                    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 transition-opacity duration-300">
+                        <div className="bg-white p-8 rounded-lg shadow-xl">
+                            <h2 className="text-xl font-bold text-blue-500">Are you sure?</h2>
+                            <p className="mt-4 text-gray-700">Do you want to save this goal for {format(selectedDate!, 'MMMM dd, yyyy')}?</p>
+                            <div className="flex justify-end mt-4">
+                                <button
+                                    onClick={() => {
+                                        // Save the goal here
+                                        const newGoal = {
+                                            id: goals.length + 1,
+                                            mood,
+                                            activity,
+                                            duration,
+                                            date: format(selectedDate, 'yyyy-MM-dd'),
+                                            goalReminder,
+                                            status: 'To Do',
+                                        };
+
+                                        setGoals([...goals, newGoal]);
+                                        setShowModal(true); // Show success modal
+                                        setShowConfirmationModal(false); // Close the confirmation modal
+                                    }}
+                                    className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors duration-300"
+                                >
+                                    Yes, Save
+                                </button>
+                                <button
+                                    onClick={() => setShowConfirmationModal(false)} // Close the modal
+                                    className="ml-4 bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition-colors duration-300"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
 
                 {showModal && (
                     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 transition-opacity duration-300">
@@ -310,3 +480,4 @@ const GoalsPage = () => {
 };
 
 export default GoalsPage;
+
