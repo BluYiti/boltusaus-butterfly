@@ -40,6 +40,7 @@ const useRegisterForm = () => {
     const [cities, setCities] = useState<City[]>([]);
     const [barangays, setBarangays] = useState<Barangay[]>([]);
     const [buttonClicked, setButtonClicked] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     return {
         firstName, setFirstName,
@@ -72,7 +73,8 @@ const useRegisterForm = () => {
         provinces, setProvinces,
         cities, setCities,
         barangays, setBarangays,
-        buttonClicked, setButtonClicked
+        buttonClicked, setButtonClicked,
+        loading, setLoading
     };
 };
 

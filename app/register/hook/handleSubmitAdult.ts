@@ -56,9 +56,17 @@ const validateFile = (file: File | null) => {
     return null;
 };
 
-const handleSubmit = async (e: React.FormEvent<HTMLFormElement>, formData: FormData) => {
+const handleSubmit = async (
+    e: React.FormEvent<HTMLFormElement>, 
+    formData: FormData, 
+    setLoading: (loading: boolean) => void, 
+    setButtonClicked: (clicked: boolean) => void
+) => {
     e.preventDefault();
     formData.setValidationError(null);
+
+    setLoading(true); // Set loading to true when submit starts
+    setButtonClicked(true); // Show the button as clicked
 
     console.log('Email being used for registration:', formData.email);
 
@@ -86,16 +94,18 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>, formData: FormD
         !formData.idFile ? 'Please upload your ID file.' : null,
     ];
 
-    const firstError = validations.find(error => error !== null);
+    const firstError = validations.find((error) => error !== null);
     if (firstError) {
-        formData.setValidationError(firstError);
-        return;
+      formData.setValidationError(firstError);
+      setLoading(false); // Reset loading state on validation error
+      setButtonClicked(false); // Reset button clicked state
+      return;
     }
 
-    const fullName = `${formData.firstName} ${formData.lastName}`;
-    const address = `${formData.street}, ${formData.barangay}, ${formData.city}, ${formData.province}, ${formData.country}`;
-
     try {
+        const fullName = `${formData.firstName} ${formData.lastName}`;
+        const address = `${formData.street}, ${formData.barangay}, ${formData.city}, ${formData.province}, ${formData.country}`;
+
         // Create the user
         const userResponse = await account.create(ID.unique(), formData.email, formData.password, fullName);
         const accountId = userResponse.$id;
@@ -172,11 +182,19 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>, formData: FormD
         }
     
         formData.setValidationError(errorMessage);
+
+        // Reset loading and button clicked states when an error occurs
+        setLoading(false);
+        setButtonClicked(false);
     }
 };
 
 
-// Wrapper function to use in the component
-export const createSubmitHandler = (formData: FormData) => {
-    return (e: React.FormEvent<HTMLFormElement>) => handleSubmit(e, formData);
+// Updated wrapper function to pass setLoading and setButtonClicked
+export const createSubmitHandler = (
+    formData: FormData, 
+    setLoading: (loading: boolean) => void, 
+    setButtonClicked: (clicked: boolean) => void
+) => {
+    return (e: React.FormEvent<HTMLFormElement>) => handleSubmit(e, formData, setLoading, setButtonClicked);
 };

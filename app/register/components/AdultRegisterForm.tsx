@@ -16,7 +16,7 @@ import { useFetchCities } from '@/register/hook/fetch/useFetchCitiesAndMunicipal
 import { useFetchBarangays } from '@/register/hook/fetch/useFetchBarangays';
 import { useRouter } from 'next/navigation';
 
-const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading }) => {
+const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error}) => {
     const router = useRouter();
 
     const {
@@ -49,7 +49,8 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
         provinces, setProvinces,
         cities, setCities,
         barangays, setBarangays,
-        buttonClicked, setButtonClicked
+        buttonClicked, setButtonClicked,
+        loading, setLoading
     } = useRegisterForm();
 
     // Handle form submission
@@ -82,7 +83,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
             router.push(`/register/verify/email/?user=${encodeURIComponent(userId)}`);
         },
         setValidationError,
-    });
+    }, setLoading, setButtonClicked); // Pass setLoading and setButtonClicked here
 
     // Use custom hooks to fetch data
     useFetchCountries(setCountries);
@@ -507,7 +508,8 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
                 <button
                     type="submit"
                     disabled={loading || !agreeToTerms}
-                    className={`bg-gradient-to-r from-[#38b6ff] to-[#4982ae] text-white font-bold py-2 px-4 rounded-xl transition-all duration-300 ease-in-out shadow-lg transform hover:scale-105 hover:shadow-xl ${!agreeToTerms ? 'opacity-50 cursor-not-allowed' : ''} ${buttonClicked ? 'bg-green-500' : ''}`}>
+                    className={`bg-gradient-to-r from-[#38b6ff] to-[#4982ae] text-white font-bold py-2 px-4 rounded-xl transition-all duration-300 ease-in-out shadow-lg transform hover:scale-105 hover:shadow-xl ${!agreeToTerms ? 'opacity-50 cursor-not-allowed' : ''} ${buttonClicked ? 'bg-green-500' : ''}`}
+                >
                     {loading ? 'Registering...' : 'Register'}
                 </button>
             </form>
