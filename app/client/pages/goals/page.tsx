@@ -1,7 +1,7 @@
-'use client';
+"use client"; // Add this at the top to mark it as a Client Component
 
 import React, { useState } from 'react';
-import { format, startOfMonth, endOfMonth, addMonths, addDays, isBefore, isAfter } from 'date-fns';
+import { format, startOfMonth, endOfMonth, addMonths, addDays, isBefore, isAfter, isSameDay } from 'date-fns';
 import Layout from '@/components/Sidebar/Layout';
 import items from '@/client/data/Links';
 import { MdArrowBack, MdArrowForward } from 'react-icons/md';
@@ -19,7 +19,7 @@ const GoalsPage = () => {
     const [currentMonth, setCurrentMonth] = useState(currentMonthReal);
     const [currentYear, setCurrentYear] = useState(currentYearReal);
     const [showModal, setShowModal] = useState(false);
-    const [goals, setGoals] = useState([]);
+    const [goals, setGoals] = useState<any[]>([]);
 
     const oneWeekAhead = addDays(currentDate, 7);
 
@@ -77,6 +77,12 @@ const GoalsPage = () => {
         }
     };
 
+    // Disable days that already have goals
+    const isDayWithGoal = (day: number) => {
+        const dayDate = new Date(currentYear, currentMonth, day);
+        return goals.some((goal) => isSameDay(new Date(goal.date), dayDate));
+    };
+
     return (
         <Layout sidebarTitle="Butterfly" sidebarItems={items}>
             <div className="flex-grow p-8 bg-gradient-to-br from-blue-50 to-blue-100">
@@ -85,53 +91,55 @@ const GoalsPage = () => {
                     <p className="text-gray-600 text-lg">Set and track your personal goals with ease.</p>
                 </div>
                 <div className="flex space-x-8">
-                <div className="flex-1 bg-white shadow-md rounded-lg p-6 border border-gray-200">
-    <div className="flex justify-between items-center mb-6">
-        <button
-            onClick={() => changeMonth(-1)}
-            className={`text-gray-400 hover:text-blue-500 hover:scale-105 transition-transform duration-300 ${currentYear === currentYearReal && currentMonth === currentMonthReal ? 'cursor-not-allowed opacity-50' : ''}`}
-            disabled={currentYear === currentYearReal && currentMonth === currentMonthReal}
-        >
-            <MdArrowBack size={24} />
-        </button>
-        <h2 className="text-2xl font-semibold text-blue-400">{format(new Date(currentYear, currentMonth), 'MMMM yyyy')}</h2>
-        <button
-            onClick={() => changeMonth(1)}
-            className={`text-gray-800 hover:text-blue-500 hover:scale-105 transition-transform duration-300 ${isAfter(new Date(currentYear, currentMonth), oneWeekAhead) ? 'cursor-not-allowed opacity-50' : ''}`}
-            disabled={isAfter(new Date(currentYear, currentMonth), oneWeekAhead)}
-        >
-            <MdArrowForward size={24} />
-        </button>
-    </div>
-    <div className="grid grid-cols-7 gap-3 mt-2">
-    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-        <div key={day} className="font-semibold text-center text-gray-600">{day}</div>
-    ))}
-    {totalDays.map((day, index) => {
-        const dayDate = day ? new Date(currentYear, currentMonth, day) : null;
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+                    <div className="flex-1 bg-white shadow-md rounded-lg p-6 border border-gray-200">
+                        <div className="flex justify-between items-center mb-6">
+                            <button
+                                onClick={() => changeMonth(-1)}
+                                className={`text-gray-400 hover:text-blue-500 hover:scale-105 transition-transform duration-300 ${currentYear === currentYearReal && currentMonth === currentMonthReal ? 'cursor-not-allowed opacity-50' : ''}`}
+                                disabled={currentYear === currentYearReal && currentMonth === currentMonthReal}
+                            >
+                                <MdArrowBack size={24} />
+                            </button>
+                            <h2 className="text-2xl font-semibold text-blue-400">{format(new Date(currentYear, currentMonth), 'MMMM yyyy')}</h2>
+                            <button
+                                onClick={() => changeMonth(1)}
+                                className={`text-gray-800 hover:text-blue-500 hover:scale-105 transition-transform duration-300 ${isAfter(new Date(currentYear, currentMonth), oneWeekAhead) ? 'cursor-not-allowed opacity-50' : ''}`}
+                                disabled={isAfter(new Date(currentYear, currentMonth), oneWeekAhead)}
+                            >
+                                <MdArrowForward size={24} />
+                            </button>
+                        </div>
+                        <div className="grid grid-cols-7 gap-3 mt-2">
+                            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+                                <div key={day} className="font-semibold text-center text-gray-600">{day}</div>
+                            ))}
+                            {totalDays.map((day, index) => {
+                                const dayDate = day ? new Date(currentYear, currentMonth, day) : null;
+                                const today = new Date();
+                                today.setHours(0, 0, 0, 0);
 
-        const isPast = dayDate && isBefore(dayDate, today) && dayDate.getTime() !== today.getTime();
-        const isTooFar = dayDate && isAfter(dayDate, oneWeekAhead);
-        const isSelected = selectedDate && selectedDate.getDate() === day;
+                                const isPast = dayDate && isBefore(dayDate, today) && dayDate.getTime() !== today.getTime();
+                                const isTooFar = dayDate && isAfter(dayDate, oneWeekAhead);
+                                const isSelected = selectedDate && selectedDate.getDate() === day;
+                                const hasGoal = day && isDayWithGoal(day);
 
-        return (
-            <div
-                key={index}
-                onClick={() => !isPast && !isTooFar && handleDateClick(day)}
-                className={`h-16 flex items-center justify-center border rounded-lg transition-colors duration-300
-                ${day ? '' : ''} 
-                ${isSelected ? 'bg-blue-400 text-white' : 'bg-gray-100'} 
-                ${!isSelected && !isPast && !isTooFar ? 'hover:bg-blue-500 hover:text-white' : ''} 
-                ${isPast || isTooFar ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
-            >
-                {day}
-            </div>
-        );
-    })}
-</div>
-</div>
+                                return (
+                                    <div
+                                        key={index}
+                                        onClick={() => !isPast && !isTooFar && !hasGoal && handleDateClick(day)}
+                                        className={`h-16 flex items-center justify-center border rounded-lg transition-colors duration-300
+                                        ${day ? '' : ''} 
+                                        ${isSelected ? 'bg-blue-400 text-white' : 'bg-gray-100'} 
+                                        ${hasGoal ? 'bg-green-400 text-white cursor-not-allowed opacity-50' : ''}
+                                        ${!isSelected && !isPast && !isTooFar && !hasGoal ? 'hover:bg-blue-500 hover:text-white' : ''} 
+                                        ${isPast || isTooFar || hasGoal ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
+                                    >
+                                        {day}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
 
                     {/* Activity Section */}
                     <div className="flex-1 bg-white shadow-md rounded-lg p-6 border border-gray-200">
@@ -224,7 +232,6 @@ const GoalsPage = () => {
                         </button>
                     </div>
                 </div>
-
                 {/* Save Button and Modal */}
                 <div className="flex justify-end mt-8">
                     <button
@@ -252,52 +259,51 @@ const GoalsPage = () => {
 
                 {/* Logged Goals Section */}
                 <div className="mt-12 bg-white shadow-md rounded-lg p-6 border border-gray-200">
-    <h3 className="text-lg font-semibold text-blue-400">Logged Goals</h3>
-    {goals.length > 0 ? (
-        <ul className="mt-4 space-y-3">
-            {goals.map((goal) => {
-                // Automatically mark the goal as "Missed" if the date has passed and the goal is not done
-                const goalDate = new Date(goal.date);
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
+                    <h3 className="text-lg font-semibold text-blue-400">Logged Goals</h3>
+                    {goals.length > 0 ? (
+                        <ul className="mt-4 space-y-3">
+                            {goals.map((goal) => {
+                                // Automatically mark the goal as "Missed" if the date has passed and the goal is not done
+                                const goalDate = new Date(goal.date);
+                                const today = new Date();
+                                today.setHours(0, 0, 0, 0);
 
-                if (goalDate < today && goal.status !== 'Done') {
-                    goal.status = 'Missed';
-                }
+                                if (goalDate < today && goal.status !== 'Done') {
+                                    goal.status = 'Missed';
+                                }
 
-                return (
-                    <li
-                        key={goal.id}
-                        className="p-4 bg-gray-50 rounded-lg shadow-md flex justify-between items-center"
-                    >
-                        <div>
-                            <p className="text-sm">
-                                {goal.activity} for {goal.duration} minutes on {goal.date} (Mood: {goal.mood})
-                            </p>
-                            <p className="text-xs text-gray-500">Status: {goal.status}</p>
-                        </div>
-                        <select
-                            value={goal.status}
-                            onChange={(e) => {
-                                setGoals(goals.map((g) =>
-                                    g.id === goal.id ? { ...g, status: e.target.value } : g
-                                ));
-                            }}
-                            className="border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white hover:bg-gray-100 text-gray-700 transition-colors duration-200"
-                        >
-                            <option value="To Do" className="text-blue-500">To Do</option>
-                            <option value="Doing" className="text-yellow-500">Doing</option>
-                            <option value="Done" className="text-green-500">Done</option>
-                        </select>
-                    </li>
-                );
-            })}
-        </ul>
-    ) : (
-        <p className="mt-2 text-gray-600">No goals logged yet.</p>
-    )}
-</div>
-
+                                return (
+                                    <li
+                                        key={goal.id}
+                                        className="p-4 bg-gray-50 rounded-lg shadow-md flex justify-between items-center"
+                                    >
+                                        <div>
+                                            <p className="text-sm">
+                                                {goal.activity} for {goal.duration} minutes on {goal.date} (Mood: {goal.mood})
+                                            </p>
+                                            <p className="text-xs text-gray-500">Status: {goal.status}</p>
+                                        </div>
+                                        <select
+                                            value={goal.status}
+                                            onChange={(e) => {
+                                                setGoals(goals.map((g) =>
+                                                    g.id === goal.id ? { ...g, status: e.target.value } : g
+                                                ));
+                                            }}
+                                            className="border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white hover:bg-gray-100 text-gray-700 transition-colors duration-200"
+                                        >
+                                            <option value="To Do" className="text-blue-500">To Do</option>
+                                            <option value="Doing" className="text-yellow-500">Doing</option>
+                                            <option value="Done" className="text-green-500">Done</option>
+                                        </select>
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                    ) : (
+                        <p className="mt-2 text-gray-600">No goals logged yet.</p>
+                    )}
+                </div>
             </div>
         </Layout>
     );
