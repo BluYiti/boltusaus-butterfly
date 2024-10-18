@@ -5,22 +5,6 @@ import Layout from "@/components/Sidebar/Layout"; // Adjust the path if necessar
 import Confetti from "react-confetti"; // Import the Confetti component
 import items from "@/client/data/Links";
 
-
-const months = [
-  { name: "January", days: 31 },
-  { name: "February", days: 29 }, // Leap year, so February has 29 days in 2024
-  { name: "March", days: 31 },
-  { name: "April", days: 30 },
-  { name: "May", days: 31 },
-  { name: "June", days: 30 },
-  { name: "July", days: 31 },
-  { name: "August", days: 31 },
-  { name: "September", days: 30 },
-  { name: "October", days: 31 },
-  { name: "November", days: 30 },
-  { name: "December", days: 31 },
-];
-
 const therapists = [
   {
     name: "Mrs. Angelica Peralta",
@@ -41,7 +25,29 @@ const AppointmentBooking = () => {
   const [width, setWidth] = useState(window.innerWidth);
   const [height, setHeight] = useState(window.innerHeight);
 
-  const currentYear = new Date().getFullYear(); // Get the current year dynamically
+  const today = new Date();
+  const currentYear = today.getFullYear();
+  const currentMonthIndex = today.getMonth(); // Get the index of the current month
+  const currentMonth = today.toLocaleString("default", { month: "long" });
+  const currentDate = today.getDate();
+
+  // Get the next month and its name
+  const nextMonthIndex = (currentMonthIndex + 1) % 12;
+  const nextMonth = new Date(currentYear, nextMonthIndex).toLocaleString("default", { month: "long" });
+
+  // Create an array with only the current and next months
+  const monthsToDisplay = [
+    { name: currentMonth, days: new Date(currentYear, currentMonthIndex + 1, 0).getDate() },
+    { name: nextMonth, days: new Date(currentYear, nextMonthIndex + 1, 0).getDate() },
+  ];
+
+  const firstDayOfCurrentMonth = new Date(currentYear, currentMonthIndex, 1).getDay();
+  const firstDayOfNextMonth = new Date(currentYear, nextMonthIndex, 1).getDay();
+
+  // Determine the first day of the selected month
+  const firstDayOfMonth = selectedMonth === currentMonth
+    ? new Date(currentYear, currentMonthIndex, 1).getDay()
+    : new Date(currentYear, nextMonthIndex, 1).getDay();
 
   // Handle window resizing
   useEffect(() => {
@@ -76,11 +82,6 @@ const AppointmentBooking = () => {
     setShowPrompt(false); // Close the prompt without booking
   };
 
-  const daysInSelectedMonth = months.find((month) => month.name === selectedMonth)?.days || 31;
-
-  // Get the weekday of the 1st day of the selected month
-  const firstDayOfMonth = new Date(`${selectedMonth} 1, ${currentYear}`).getDay();
-
   const isFormComplete = selectedDay !== null && selectedTime;
 
   const handleProceedToPayment = () => {
@@ -111,16 +112,16 @@ const AppointmentBooking = () => {
                 <label className="block mb-2 text-lg font-medium text-gray-700">
                   Select Month and Date {!selectedDay && <span className="text-red-500">*</span>}
                 </label>
+                {/* Month Selection (display current and next month only) */}
                 <select
                   value={selectedMonth}
-                  onChange={handleMonthChange}
-                  className="border w-1/2 border-gray-300 rounded-lg p-2"
+                  onChange={(e) => setSelectedMonth(e.target.value)}
+                  className="mb-4 p-2 rounded border border-gray-300"
                 >
-                  {months.map((month) => (
-                    <option key={month.name} value={month.name}>
-                      {month.name}
-                    </option>
-                  ))}
+                  <option value={currentMonth}>{currentMonth}</option>
+                  <option value={nextMonth} disabled={currentDate < 22}>
+                    {nextMonth}
+                  </option>
                 </select>
               </div>
 
@@ -137,16 +138,31 @@ const AppointmentBooking = () => {
                 {Array.from({ length: firstDayOfMonth }).map((_, index) => (
                   <div key={index}></div>
                 ))}
+
                 {/* Display days of the selected month */}
-                {Array.from({ length: daysInSelectedMonth }, (_, i) => i + 1).map((day) => (
-                  <button
-                    key={day}
-                    className={`py-2 px-1 rounded-lg ${selectedDay === day ? "bg-blue-300 text-white" : "bg-gray-300 text-black hover:bg-blue-500"}`}
-                    onClick={() => setSelectedDay(day)}
-                  >
-                    {day}
-                  </button>
-                ))}
+                {Array.from({ length: selectedMonth === currentMonth ? monthsToDisplay[0].days : monthsToDisplay[1].days }, (_, i) => {
+                  const day = i + 1;
+                  const date = new Date(currentYear, selectedMonth === currentMonth ? currentMonthIndex : nextMonthIndex, day);
+                  const isSunday = date.getDay() === 0; // Check if the date is Sunday
+                  const isPastDate = day < currentDate || day > currentDate + 10 || isSunday; // Disable Sundays and past dates
+
+                  return (
+                    <button
+                      key={day}
+                      className={`py-2 px-1 rounded-lg ${
+                        selectedDay === day
+                          ? "bg-blue-300 rounded-3xl text-white"
+                          : isPastDate
+                          ? "bg-gray-400 text-gray-700 rounded-3xl cursor-not-allowed"
+                          : "rounded-3xl bg-[#49c987] text-white font-poppins hover:bg-green-300 hover:text-black hover:scale-110"
+                      }`}
+                      onClick={() => !isPastDate && setSelectedDay(day)} // Prevent click if it's a past date or Sunday
+                      disabled={isPastDate} // Disable the button if it's a past date or Sunday
+                    >
+                      {day}
+                    </button>
+                  );
+                })}
               </div>
 
               {/* Time Selection */}
@@ -171,71 +187,59 @@ const AppointmentBooking = () => {
                   Selected: {selectedMonth} {selectedDay}, {currentYear} | {selectedTime}
                 </p>
                 <button
-                  className={`mt-4 py-2 px-4 rounded-lg ${isFormComplete ? "bg-blue-400 text-white hover:bg-blue-500" : "bg-gray-300 text-gray-700 cursor-not-allowed"}`}
+                  className={`mt-4 py-2 px-4 rounded-lg text-white ${
+                    isFormComplete ? "bg-blue-500 hover:bg-blue-700" : "bg-gray-300 cursor-not-allowed"
+                  }`}
                   onClick={handleBookAppointment}
                   disabled={!isFormComplete}
                 >
-                  Book
+                  Proceed to Payment
                 </button>
               </div>
             </div>
           </div>
 
-          {/* Confirmation Prompt */}
+          {/* Booking Prompt */}
           {showPrompt && (
-            <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
-              <div className="bg-white p-8 rounded-xl shadow-xl max-w-md w-full text-center relative border border-gray-300">
-                <h3 className="text-2xl font-bold text-blue-900 mb-4">
-                  Are you sure you want to proceed?
-                </h3>
-                <div className="mt-6 flex justify-around">
-                  <button
-                    className="bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-400"
-                    onClick={cancelBooking}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    className="bg-blue-400 text-white py-2 px-4 rounded-lg hover:bg-blue-500"
-                    onClick={confirmBooking}
-                  >
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+              <div className="bg-white p-6 rounded-lg shadow-lg">
+                <h2 className="text-xl font-bold mb-4">Confirm Booking</h2>
+                <p>
+                  You're booking a session with <strong>{selectedTherapist.name}</strong> on{" "}
+                  <strong>{selectedMonth} {selectedDay}, {currentYear}</strong> at <strong>{selectedTime}</strong>.
+                </p>
+                <div className="mt-4 flex justify-end space-x-4">
+                  <button className="bg-green-500 text-white py-2 px-4 rounded-lg" onClick={confirmBooking}>
                     Confirm
+                  </button>
+                  <button className="bg-red-500 text-white py-2 px-4 rounded-lg" onClick={cancelBooking}>
+                    Cancel
                   </button>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Success Message and Confetti */}
+          {/* Success Confetti */}
           {appointmentBooked && (
-                <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
-                  <Confetti width={width} height={height} /> {/* Render Confetti */}
-                  <div className="bg-white p-8 rounded-lg shadow-xl max-w-md w-full text-center relative border border-gray-300">
-                       {/* Add the small 'X' button to close the success message */}
-                  <button
-                      className="absolute top-2 right-2 bg-gray-300 rounded-full w-6 h-6 flex items-center justify-center text-black hover:bg-gray-400"
-                      onClick={() => setAppointmentBooked(false)} // Close the pop-up
-                       >
-                       &times; {/* 'X' symbol */}
-                  </button>
-                  <h3 className="text-2xl font-bold text-green-600">
-                        Your Appointment was Booked Successfully!
-                      </h3>
-                      <p className="mt-2">
-                        Service: Counseling and Therapy<br />
-                        Date & Time: {selectedMonth} {selectedDay}, 2024 | {selectedTime}<br />
-                        Psychotherapist: {selectedTherapist ? selectedTherapist.name : "No therapist selected"}
-                      </p>
-                      <p className="text-lg text-gray-700">You can proceed to payment to complete the booking.</p>
-                      <button
-                         className="mt-6 bg-blue-400 text-white py-2 px-6 rounded-full hover:bg-blue-500"
-                          onClick={handleProceedToPayment}
-                          >
-                          Proceed to Payment
-                          </button>
-                   </div>
+            <div>
+              <Confetti width={width} height={height} numberOfPieces={500} />
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                <div className="bg-white p-6 rounded-lg shadow-lg">
+                  <h2 className="text-3xl font-bold text-green-600">Booking Confirmed!</h2>
+                  <p className="mt-2">
+                    You have successfully booked a session with <strong>{selectedTherapist.name}</strong> on{" "}
+                    <strong>{selectedMonth} {selectedDay}, {currentYear}</strong> at <strong>{selectedTime}</strong>.
+                  </p>
+                  <div className="mt-4 flex justify-end space-x-4">
+                    <button className="bg-blue-500 text-white py-2 px-4 rounded-lg" onClick={handleProceedToPayment}>
+                      Proceed to Payment
+                    </button>
+                  </div>
                 </div>
-               )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </Layout>

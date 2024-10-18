@@ -8,7 +8,7 @@ import PhoneInput from 'react-phone-input-2';
 import { RegisterFormProps } from '../hook/RegisterFormProps';
 import useRegisterForm from '@/register/hook/RegisterComponents';
 import 'react-phone-input-2/lib/style.css';
-import { createSubmitHandler } from '@/register/hook/handleSubmitMinor';
+import { createSubmitHandler } from '@/register/hook/handleSubmitAdult';
 import { useFetchCountries } from '@/register/hook/fetch/useFetchCountries';
 import { useFetchRegions } from '@/register/hook/fetch/useFetchRegions';
 import { useFetchProvinces } from '@/register/hook/fetch/useFetchProvinces';
@@ -23,6 +23,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
         firstName, setFirstName,
         lastName, setLastName,
         birthday, setBirthday,
+        sex, setSex,
         country, setCountry,
         region, setRegion,
         province, setProvince,
@@ -35,6 +36,8 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
         idFile, setIdFile,
         email, setEmail,
         password, setPassword,
+        passwordCriteria, setPasswordCriteria,
+        isPasswordValid, setIsPasswordValid,
         rePassword, setRePassword,
         agreeToTerms, setAgreeToTerms,
         isModalOpen, setIsModalOpen,
@@ -48,11 +51,12 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
         barangays, setBarangays,
     } = useRegisterForm();
 
-    // Inside your component
+    // Handle form submission
     const handleSubmit = createSubmitHandler({
         firstName,
         lastName,
         birthday,
+        sex,
         password,
         rePassword,
         agreeToTerms,
@@ -85,7 +89,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
     useFetchProvinces(selectedRegionCode, setProvinces);
     useFetchCities(province, provinces, setCities, setCity, setBarangays);
     useFetchBarangays(city, cities, setBarangays);
-
+    
     const calculateAge = (birthDateString: string): number => {
         const birthDate = new Date(birthDateString);
         const today = new Date();
@@ -101,6 +105,37 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
         setBirthday(date);
         const calculatedAge = calculateAge(date);
         setAge(calculatedAge);
+
+        // Validate age
+        if (calculatedAge < 18) {
+            setValidationError('You must be at least 18 years old to register.');
+        } else {
+            setValidationError(null);
+        }
+    };
+
+    const validatePassword = (password: string) => {
+        const length = password.length >= 8;
+        const number = /\d/.test(password);
+        const specialChar = /[@$!%*?&]/.test(password);
+        const uppercase = /[A-Z]/.test(password);
+        const lowercase = /[a-z]/.test(password);
+
+        setPasswordCriteria({
+            length,
+            number,
+            specialChar,
+            uppercase,
+            lowercase,
+        });
+
+        setIsPasswordValid(length && number && specialChar && uppercase && lowercase);
+    };
+
+    const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newPassword = e.target.value;
+        setPassword(newPassword);
+        validatePassword(newPassword);
     };
 
     return (
@@ -109,7 +144,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
             <form className="mt-8 space-y-4" onSubmit={handleSubmit}>
                 {error && <div className="text-red-600 text-lg font-bold">{error}</div>}
                 {validationError && <div className="text-red-600 text-lg font-bold">{validationError}</div>}
-                
+
                 <div className="rounded-md shadow-sm space-y-2">
                     {/* First Name */}
                     <div>
@@ -163,9 +198,26 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
                         </div>
                     </div>
 
+                    {/* Sex Dropdown */}
+                    <div className="mb-4">
+                        <label className="block text-[#38b6ff] mb-2">Sex</label>
+                        <select
+                            className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
+                            value={sex}
+                            onChange={(e) => setSex(e.target.value)}
+                        >
+                            <option value="">Select Sex</option>
+                            {["Male", "Female"].map((gender) => (
+                                <option key={gender} value={gender}>
+                                    {gender}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
                     {/* Address */}
-                    <div>
-                        <label htmlFor="address" className="block text-[#38b6ff] mb-1">Address</label>
+                    <div className="mt-4">
+                        <label className="block text-[#38b6ff] mb-2">Address</label>
                         <div className="ml-4">
                             {/* Country Dropdown */}
                             <div className="mb-4">
@@ -288,23 +340,48 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
                         </div>
                     </div>
 
-                    {/* Guardian Name */}
+                    {/* Contact Number */}
                     <div>
-                        <label htmlFor="emergencyContactName" className="block text-[#38b6ff] mb-1">Name of Guardian</label>
+                        <label htmlFor="contactNumber" className="block text-[#38b6ff] mb-1">Contact Number:</label>
+                        <PhoneInput
+                            country={'ph'}
+                            value={contactNumber}
+                            onChange={(phone) => {
+                                let formattedPhone = phone;
+                                if (!phone.startsWith('+')) {
+                                    formattedPhone = `+${phone}`;
+                                }
+                                formattedPhone = formattedPhone.replace(/[^\d+]/g, '');
+                                setContactNumber(formattedPhone);
+                            }}
+                            inputClass="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500 mt-1"
+                            containerClass="phone-input-container"
+                            buttonClass="phone-input-button"
+                            inputProps={{
+                                name: 'contactNumber',
+                                required: true,
+                                autoComplete: 'tel',
+                            }}
+                        />
+                    </div>
+
+                    {/* Emergency Contact Name */}
+                    <div>
+                        <label htmlFor="emergencyContactName" className="block text-[#38b6ff] mb-1">Guardian Contact Name</label>
                         <input
                             id="emergencyContactName"
                             type="text"
                             required
-                            placeholder="Emergency Contact Name"
+                            placeholder="Guardian Contact Name"
                             value={emergencyContactName}
                             onChange={(e) => setEmergencyContactName(e.target.value)}
                             className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
                         />
                     </div>
 
-                    {/* Contact Number of Guardian */}
+                    {/* Emergency Contact Number */}
                     <div>
-                        <label htmlFor="emergencyContactNumber" className="block text-[#38b6ff] mb-1">Contact Number of Guardian</label>
+                        <label htmlFor="emergencyContactNumber" className="block text-[#38b6ff] mb-1">Guardian Contact Number</label>
                         <PhoneInput
                             country={'ph'}
                             value={emergencyContactNumber}
@@ -327,7 +404,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
                         />
                     </div>
 
-                    {/* Upload ID of Guardian */}
+                    {/* Upload ID */}
                     <div>
                         <label htmlFor="idFile" className="block text-[#38b6ff] mb-1">Upload ID of Guardian</label>
                         <input
@@ -368,12 +445,31 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
                         <input
                             id="password"
                             type="password"
-                            required
-                            placeholder="********"
                             value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
+                            onChange={handlePasswordChange}
+                            placeholder="********"
+                            className={`border rounded-xl pl-3 pr-10 py-2 w-full text-gray-500 ${
+                                isPasswordValid ? 'border-green-500' : 'border-red-500'
+                            }`}
                         />
+
+                        <div className="mt-2">
+                            <p className={`text-sm ${passwordCriteria.length ? 'text-green-500' : 'text-red-500'}`}>
+                                - At least 8 characters
+                            </p>
+                            <p className={`text-sm ${passwordCriteria.number ? 'text-green-500' : 'text-red-500'}`}>
+                                - At least 1 number
+                            </p>
+                            <p className={`text-sm ${passwordCriteria.specialChar ? 'text-green-500' : 'text-red-500'}`}>
+                                - At least 1 special character (@, $, !, %, *, ?, &)
+                            </p>
+                            <p className={`text-sm ${passwordCriteria.uppercase ? 'text-green-500' : 'text-red-500'}`}>
+                                - At least 1 uppercase letter
+                            </p>
+                            <p className={`text-sm ${passwordCriteria.lowercase ? 'text-green-500' : 'text-red-500'}`}>
+                                - At least 1 lowercase letter
+                            </p>
+                        </div>
                     </div>
 
                     {/* Re-enter Password */}
@@ -416,7 +512,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
                 </button>
             </form>
 
-            <TermsAndPrivacy 
+            <TermsAndPrivacy
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 contentType={'terms'}
@@ -428,3 +524,4 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
 };
 
 export default RegisterForm;
+
