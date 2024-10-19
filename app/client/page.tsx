@@ -1,13 +1,14 @@
 'use client'
 
 import useAuthCheck from "@/auth/page";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaUser } from "react-icons/fa";
 import Layout from "@/components/Sidebar/Layout";
 import items from "@/client/data/Links";
 import Link from "next/link";
-import RescheduleModal from "@/components/Reschedule"; // Assuming you have this component
+import RescheduleModal from "@/components/Reschedule";
 import LoadingScreen from "@/components/LoadingScreen";
+import { account } from "@/appwrite";
 
 const Dashboard: React.FC = () => {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
@@ -16,7 +17,23 @@ const Dashboard: React.FC = () => {
   const currentDay = today.getDate();
   const currentMonth = today.getMonth();
   const currentYear = today.getFullYear();
-  const userName = "John"; // Placeholder for dynamic user data
+  const [userName, setUserName] = useState("Client");
+  const [role, setRole] = useState('');
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const user = await account.get();
+        setUserName(user.name);
+        if (user?.prefs?.role) {
+          setRole(user.prefs.role);
+        }
+      } catch (error) {
+        console.error("Failed to fetch user data:", error);
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   {/* USER AUTHENTICATION PART */}
   const { loading } = useAuthCheck(['client']); // Allowed roles
