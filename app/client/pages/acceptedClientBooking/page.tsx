@@ -43,6 +43,7 @@ const AcceptedClientBooking = () => {
   const [showPrompt, setShowPrompt] = useState(false); // Confirmation prompt state
   const [status, setStatus] = useState(null); // State to track client status
   const [role, setRole] = useState(null); // State to track client role
+  const [loading, setLoading] = useState(true); // State for loading
 
   useEffect(() => {
     const fetchUserStatus = async () => {
@@ -53,54 +54,31 @@ const AcceptedClientBooking = () => {
         // Set the status and role from user preferences
         if (user.prefs?.status) {
           setStatus(user.prefs.status);
+        } else {
+          console.warn("No status found in user preferences");
         }
+
         if (user.prefs?.role) {
           setRole(user.prefs.role);
+        } else {
+          console.warn("No role found in user preferences");
         }
       } catch (error) {
         console.error("Error fetching user preferences: ", error);
+      } finally {
+        setLoading(false); // End loading after fetching
       }
     };
 
     fetchUserStatus();
   }, []);
 
-  // Handle month selection
-  const handleMonthChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedMonth(Number(event.target.value));
-    setSelectedDay(null); // Reset selected day when changing month
-  };
+  if (loading) {
+    return <div className="text-center p-4">Loading...</div>; // Show loading while fetching
+  }
 
-  const handleBookAppointment = () => {
-    if (selectedDay && selectedTime) {
-      setShowPrompt(true); // Show confirmation prompt
-    }
-  };
-
-  const confirmBooking = () => {
-    setAppointmentBooked(true); // Show success message
-    setShowPrompt(false); // Close the prompt
-  };
-
-  const cancelBooking = () => {
-    setShowPrompt(false); // Close the prompt without booking
-  };
-
-  const daysInSelectedMonth = months[selectedMonth]?.days || 31;
-
-  // Calculate first day of the month
-  const getFirstDayOfMonth = (monthIndex: number, year: number) => {
-    return new Date(year, monthIndex, 1).getDay();
-  };
-
-  const firstDayOfMonth = getFirstDayOfMonth(selectedMonth, new Date().getFullYear());
-
-  const handleProceedToPayment = () => {
-    alert("Proceeding to payment..."); // Placeholder for payment logic
-  };
-
-  // Conditionally render the UI only if status is 'Accepted Client' and role is 'Client'
-  if (status !== "Accepted Client" || role !== "Client") {
+  // Conditionally render the UI only if status is 'Accepted Client' or 'Referred Client' and role is 'Client'
+  if ((status !== "Accepted Client" && status !== "Referred Client") || role !== "Client") {
     return <div className="text-center p-4">You are not authorized to view this content.</div>;
   }
 
@@ -115,6 +93,14 @@ const AcceptedClientBooking = () => {
                   <span className="text-green-600 animate-bounce">✔️</span>
                   <span className="ml-2 text-lg font-bold">Evaluation Completed!</span>
                 </div>
+
+                {/* Check if status is 'Referred Client' and display additional message */}
+                {status === "Referred Client" && (
+                  <div className="text-red-600 text-xl font-semibold mb-4">
+                    You have been referred. View attachment below.
+                  </div>
+                )}
+
                 <div className="text-xl font-semibold">
                   <Link href="/client/pages/newappointment">
                     <button className="bg-blue-500 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded">
