@@ -7,7 +7,7 @@ import Link from "next/link"; // Import Link for navigation
 import '../../../globals.css';
 import 'typeface-roboto';
 import 'typeface-lora';
-import { account } from "@/appwrite"; // Import Appwrite account service for fetching user data
+import { account, databases } from "@/appwrite"; // Import Appwrite account service for fetching user data
 
 const therapists = [
   {
@@ -25,6 +25,7 @@ const therapists = [
 const NewClientDashboard = () => {
   const [status, setStatus] = useState<string | null>(null); // State to track user status
   const [userName, setUserName] = useState<string | null>(null); // State to track user name
+  const [users, setUsers] = useState([]);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -37,6 +38,10 @@ const NewClientDashboard = () => {
         if (user.prefs?.status) {
           setStatus(user.prefs.status);
         }
+
+        
+        const response = await databases.listDocuments("Butterfly-Database", "Client");
+        setUsers(response.documents);
       } catch (error) {
         console.error("Error fetching user data: ", error);
       }
@@ -75,8 +80,8 @@ const NewClientDashboard = () => {
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
       {/* Header Section */}
-      <div className="bg-white shadow-lg rounded-xl p-8 mb-10 border border-blue-200">
-        <h2 className="text-4xl font-bold text-blue-500 mb-4 font-roboto">
+      <div className="bg-white rounded-b-lg shadow-md p-5 top-0 left-60 w-full">
+        <h2 className="text-4xl font-bold text-blue-500 font-roboto">
           Welcome, {userName ? userName : "Client"}!
         </h2>
         <p className="text-gray-600 text-lg font-lora">
@@ -92,7 +97,7 @@ const NewClientDashboard = () => {
               <div className="text-left mb-8">
                 <div className="text-xl font-semibold">
                   {/* Conditionally render pre-assessment button based on user status */}
-                  {status === "To Be Evaluated" ? (
+                  {status === "To Be Evaluated" || users.status === "evaluate" ? (
                     <>
                       <button
                         className="bg-gray-300 text-gray-600 font-bold py-2 px-4 rounded cursor-not-allowed"

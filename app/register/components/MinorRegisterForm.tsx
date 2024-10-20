@@ -8,7 +8,7 @@ import PhoneInput from 'react-phone-input-2';
 import { RegisterFormProps } from '../hook/RegisterFormProps';
 import useRegisterForm from '@/register/hook/RegisterComponents';
 import 'react-phone-input-2/lib/style.css';
-import { createSubmitHandler } from '@/register/hook/handleSubmitAdult';
+import { createSubmitHandler } from '@/register/hook/handleSubmitMinor';
 import { useFetchCountries } from '@/register/hook/fetch/useFetchCountries';
 import { useFetchRegions } from '@/register/hook/fetch/useFetchRegions';
 import { useFetchProvinces } from '@/register/hook/fetch/useFetchProvinces';
@@ -16,7 +16,7 @@ import { useFetchCities } from '@/register/hook/fetch/useFetchCitiesAndMunicipal
 import { useFetchBarangays } from '@/register/hook/fetch/useFetchBarangays';
 import { useRouter } from 'next/navigation';
 
-const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading }) => {
+const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error}) => {
     const router = useRouter();
 
     const {
@@ -49,6 +49,8 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
         provinces, setProvinces,
         cities, setCities,
         barangays, setBarangays,
+        buttonClicked, setButtonClicked,
+        loading, setLoading
     } = useRegisterForm();
 
     // Handle form submission
@@ -81,7 +83,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
             router.push(`/register/verify/email/?user=${encodeURIComponent(userId)}`);
         },
         setValidationError,
-    });
+    }, setLoading, setButtonClicked); // Pass setLoading and setButtonClicked here
 
     // Use custom hooks to fetch data
     useFetchCountries(setCountries);
@@ -107,8 +109,8 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
         setAge(calculatedAge);
 
         // Validate age
-        if (calculatedAge < 18) {
-            setValidationError('You must be at least 18 years old to register.');
+        if (calculatedAge > 18) {
+            setValidationError('You must be at 18 years old and below to register.');
         } else {
             setValidationError(null);
         }
@@ -367,12 +369,12 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
 
                     {/* Emergency Contact Name */}
                     <div>
-                        <label htmlFor="emergencyContactName" className="block text-[#38b6ff] mb-1">Guardian Contact Name</label>
+                        <label htmlFor="emergencyContactName" className="block text-[#38b6ff] mb-1">Emergency Contact Name</label>
                         <input
                             id="emergencyContactName"
                             type="text"
                             required
-                            placeholder="Guardian Contact Name"
+                            placeholder="Emergency Contact Name"
                             value={emergencyContactName}
                             onChange={(e) => setEmergencyContactName(e.target.value)}
                             className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
@@ -381,18 +383,17 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
 
                     {/* Emergency Contact Number */}
                     <div>
-                        <label htmlFor="emergencyContactNumber" className="block text-[#38b6ff] mb-1">Guardian Contact Number</label>
+                        <label htmlFor="emergencyContactNumber" className="block text-[#38b6ff] mb-1">Emergency Contact Number</label>
                         <PhoneInput
                             country={'ph'}
                             value={emergencyContactNumber}
                             onChange={(phone) => {
-                                let formattedPhone = phone.replace(/[^\d]/g, '');
-                                if (formattedPhone.length <= 10) {
-                                    if (!formattedPhone.startsWith('+')) {
-                                        formattedPhone = `+${formattedPhone}`;
-                                    }
-                                    setContactNumber(formattedPhone);
+                                let formattedPhone = phone;
+                                if (!phone.startsWith('+')) {
+                                    formattedPhone = `+${phone}`;
                                 }
+                                formattedPhone = formattedPhone.replace(/[^\d+]/g, '');
+                                setEmergencyContactNumber(formattedPhone);
                             }}
                             inputClass="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500 mt-1"
                             containerClass="phone-input-container"
@@ -507,7 +508,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
                 <button
                     type="submit"
                     disabled={loading || !agreeToTerms}
-                    className={`bg-gradient-to-r from-[#38b6ff] to-[#4982ae] text-white font-bold py-2 px-4 rounded-xl transition-all duration-300 ease-in-out shadow-lg transform hover:scale-105 hover:shadow-xl ${!agreeToTerms ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`bg-gradient-to-r from-[#38b6ff] to-[#4982ae] text-white font-bold py-2 px-4 rounded-xl transition-all duration-300 ease-in-out shadow-lg transform hover:scale-105 hover:shadow-xl ${!agreeToTerms ? 'opacity-50 cursor-not-allowed' : ''} ${buttonClicked ? 'bg-green-500' : ''}`}
                 >
                     {loading ? 'Registering...' : 'Register'}
                 </button>

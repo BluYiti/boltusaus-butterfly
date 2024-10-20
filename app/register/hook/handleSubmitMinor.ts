@@ -56,7 +56,17 @@ const validateFile = (file: File | null) => {
     return null;
 };
 
-const handleSubmit = async (e: React.FormEvent<HTMLFormElement>, formData: FormData) => {
+const handleSubmit = async (
+    e: React.FormEvent<HTMLFormElement>, 
+    formData: FormData, 
+    setLoading: (loading: boolean) => void, 
+    setButtonClicked: (clicked: boolean) => void
+) => {
+    e.preventDefault();
+    formData.setValidationError(null);
+
+    setLoading(true); // Set loading to true when submit starts
+    setButtonClicked(true); // Show the button as clicked
     e.preventDefault();
     formData.setValidationError(null);
 
@@ -181,7 +191,11 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>, formData: FormD
 };
 
 
-// Wrapper function to use in the component
-export const createSubmitHandler = (formData: FormData) => {
-    return (e: React.FormEvent<HTMLFormElement>) => handleSubmit(e, formData);
+// Updated wrapper function to pass setLoading and setButtonClicked
+export const createSubmitHandler = (
+    formData: FormData, 
+    setLoading: (loading: boolean) => void, 
+    setButtonClicked: (clicked: boolean) => void
+) => {
+    return (e: React.FormEvent<HTMLFormElement>) => handleSubmit(e, formData, setLoading, setButtonClicked);
 };

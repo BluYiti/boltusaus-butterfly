@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Question from '@/preassessment/components/Question';
 import NavigationButtons from '@/preassessment/components/NavigationButtons';
 import { useAssessment } from '@/preassessment/hooks/useAssessment';
