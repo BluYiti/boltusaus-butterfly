@@ -4,13 +4,16 @@ import Layout from "@/components/Sidebar/Layout";
 import items from "@/psychotherapist/data/Links";
 import { useEffect, useState } from "react";
 import { client, databases } from "@/appwrite"; // Adjust the path accordingly
-import TakeNotesModal from '@/psychotherapist/components/TakeNotesModal'; // Import TakeNotesModal
+import TakeNotesModal from '@/psychotherapist/components/TakeNotesModal'; // Import your TakeNotesModal
+import CallModal from '@/psychotherapist/components/CallModal'; // Import the CallModal
 
 const Appointments = () => {
   const [clientData, setClientData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isTakeNotesModalOpen, setTakeNotesModalOpen] = useState(false); // State for the modal
+  const [isTakeNotesModalOpen, setIsTakeNotesModalOpen] = useState(false);
+  const [isCallModalOpen, setIsCallModalOpen] = useState(false);
+  const [selectedClient, setSelectedClient] = useState(null);
 
   // Fetch data from Appwrite
   useEffect(() => {
@@ -19,7 +22,7 @@ const Appointments = () => {
         const response = await databases.listDocuments('Butterfly-Database', 'Bookings');
         const formattedData = response.documents.map((doc: any) => ({
           id: doc.$id,
-          clientName: `${doc.client.firstname} ${doc.client.lastname}`, // Adjusted to access the first and last name
+          clientName: `${doc.client.firstname} ${doc.client.lastname}`,
           date: doc.date,
           time: doc.slots,
           status: doc.status,
@@ -36,6 +39,16 @@ const Appointments = () => {
 
     fetchData();
   }, []);
+
+  const handleTakeNotesOpen = (clientName) => {
+    setSelectedClient(clientName);
+    setIsTakeNotesModalOpen(true);
+  };
+
+  const handleCallOpen = (clientName) => {
+    setSelectedClient(clientName);
+    setIsCallModalOpen(true);
+  };
 
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
@@ -66,12 +79,21 @@ const Appointments = () => {
                           <p className="text-gray-600">Time: <span className="font-semibold">{booking.time}</span></p>
                           <p className="text-gray-600">Mode: <span className="font-semibold">{booking.mode}</span></p>
                         </div>
-                        <button 
-                          className="bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-600 transition-colors duration-200"
-                          onClick={() => booking.mode === 'f2f' && setTakeNotesModalOpen(true)} // Open modal for f2f mode
-                        >
-                          {booking.mode === 'f2f' ? 'Take notes' : 'Call'}
-                        </button>
+                        {booking.mode === 'f2f' ? (
+                          <button 
+                            className="bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-600 transition-colors duration-200"
+                            onClick={() => handleTakeNotesOpen(booking.clientName)}
+                          >
+                            Take notes
+                          </button>
+                        ) : (
+                          <button 
+                            className="bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-600 transition-colors duration-200"
+                            onClick={() => handleCallOpen(booking.clientName)}
+                          >
+                            Call
+                          </button>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -92,7 +114,7 @@ const Appointments = () => {
                         <p className="text-gray-600">Time: <span className="font-semibold">{booking.time}</span></p>
                         <p className="text-gray-600">Mode: <span className="font-semibold">{booking.mode}</span></p>
                       </div>
-                    ))}  
+                    ))} 
                   </div>
                 ) : (
                   <p>No upcoming bookings found.</p>
@@ -118,7 +140,7 @@ const Appointments = () => {
                           Reschedule
                         </button>
                       </div>
-                    ))}
+                    ))} 
                   </div>
                 ) : (
                   <p>No missed bookings found.</p>
@@ -129,8 +151,17 @@ const Appointments = () => {
         </div>
       </div>
 
-      {/* TakeNotesModal */}
-      <TakeNotesModal isOpen={isTakeNotesModalOpen} onClose={() => setTakeNotesModalOpen(false)} />
+      {/* Modals */}
+      <TakeNotesModal 
+        isOpen={isTakeNotesModalOpen} 
+        onClose={() => setIsTakeNotesModalOpen(false)} 
+        clientName={selectedClient}
+      />
+      <CallModal 
+        isOpen={isCallModalOpen} 
+        onClose={() => setIsCallModalOpen(false)} 
+        clientName={selectedClient}
+      />
     </Layout>
   );
 };
