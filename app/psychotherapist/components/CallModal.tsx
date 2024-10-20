@@ -57,11 +57,16 @@ const CallModal = ({ isOpen, onClose, clientName }) => {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50">
-      <div className="bg-white rounded-lg p-8 shadow-lg w-full max-w-3xl"> {/* Increased max width */}
-        <h2 className="text-2xl font-semibold mb-4 text-center text-gray-800">Video Call with {clientName}</h2>
-        <div className="flex items-center justify-center h-80 mb-4"> {/* Increased height */}
-          <video ref={videoRef} className="rounded-lg w-full h-full object-cover border-4 border-gray-300" autoPlay></video>
-        </div>
+  <div className="bg-white rounded-lg p-8 shadow-lg w-full max-w-6xl"> {/* Increased max width to 6xl */}
+    <h2 className="text-2xl font-semibold mb-4 text-center text-gray-800">Video Call with {clientName}</h2>
+    <div className="flex items-center justify-center mb-4 h-[70vh]"> {/* Set height to 80% of viewport height */}
+      <video 
+        ref={videoRef} 
+        className="rounded-lg w-full h-full object-cover border-4 border-gray-300" 
+        autoPlay
+        playsInline // Ensures video plays inline on mobile devices
+      ></video>
+    </div>
         <div className="flex justify-center space-x-4">
           <button
             onClick={endCall}
