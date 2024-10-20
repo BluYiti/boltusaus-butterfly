@@ -113,12 +113,14 @@ const ContactList: FC<{ onContactClick: (id: number) => void; selectedContact: n
 };
 
 // Chat Box Component
+  // Chat Box Component
 const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSendMessage: (text: string) => void }> = ({
   selectedContact,
   messages,
   onSendMessage,
 }) => {
   const [messageInput, setMessageInput] = useState('');
+  const messagesEndRef = useRef<HTMLDivElement>(null); // Ref for scrolling
 
   const handleSendMessage = () => {
     if (messageInput.trim()) {
@@ -126,6 +128,14 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSend
       setMessageInput('');
     }
   };
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom(); // Scroll when messages change
+  }, [messages]);
 
   if (!selectedContact) {
     return (
@@ -157,6 +167,7 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSend
             </div>
           </div>
         ))}
+        <div ref={messagesEndRef} /> {/* Empty div to act as scroll target */}
       </div>
 
       <div className="flex items-center mt-4 border-t pt-4">
@@ -164,9 +175,16 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSend
           type="text"
           value={messageInput}
           onChange={e => setMessageInput(e.target.value)}
+          onKeyDown={e => {
+            if (e.key === 'Enter') {
+              handleSendMessage();
+              setMessageInput(''); // Clear input after sending
+            }
+          }}
           placeholder="Type a message..."
           className="flex-grow p-2 border border-gray-300 rounded-full"
         />
+
         <button
           onClick={handleSendMessage}
           className="ml-2 bg-blue-400 text-white px-4 py-2 rounded-full hover:bg-blue-500"
@@ -177,6 +195,7 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSend
     </div>
   );
 };
+
 
 // Main Chat Page Component
 const ChatPage: FC = () => {
