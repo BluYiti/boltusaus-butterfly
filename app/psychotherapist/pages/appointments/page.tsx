@@ -1,13 +1,12 @@
-// Appointments.tsx
-'use client';
-
+'use client'
 import Layout from "@/components/Sidebar/Layout";
 import items from "@/psychotherapist/data/Links";
 import { useEffect, useState } from "react";
-import { client, databases } from "@/appwrite"; // Adjust the path accordingly
-import TakeNotesModal from '@/psychotherapist/components/TakeNotesModal'; // Import your TakeNotesModal
-import CallModal from '@/psychotherapist/components/CallModal'; // Import the CallModal
-import CountdownModal from '@/psychotherapist/components/CountdownModal'; // Import the CountdownModal
+import { client, databases } from "@/appwrite"; 
+import TakeNotesModal from '@/psychotherapist/components/TakeNotesModal'; 
+import CallModal from '@/psychotherapist/components/CallModal'; 
+import CountdownModal from '@/psychotherapist/components/CountdownModal';
+import RescheduleModal from '@/psychotherapist/components/RescheduleModal'; // Import the new modal
 
 const Appointments = () => {
   const [clientData, setClientData] = useState<any[]>([]);
@@ -16,7 +15,9 @@ const Appointments = () => {
   const [isTakeNotesModalOpen, setIsTakeNotesModalOpen] = useState(false);
   const [isCallModalOpen, setIsCallModalOpen] = useState(false);
   const [isCountdownModalOpen, setIsCountdownModalOpen] = useState(false);
+  const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false); // State for the reschedule modal
   const [selectedClient, setSelectedClient] = useState(null);
+  const [selectedBooking, setSelectedBooking] = useState(null); // State to track the booking being rescheduled
 
   // Fetch data from Appwrite
   useEffect(() => {
@@ -50,12 +51,26 @@ const Appointments = () => {
 
   const handleCallOpen = (clientName) => {
     setSelectedClient(clientName);
-    setIsCountdownModalOpen(true); // Open countdown modal instead of call modal
+    setIsCountdownModalOpen(true);
   };
 
   const handleCountdownComplete = () => {
     setIsCountdownModalOpen(false);
-    setIsCallModalOpen(true); // Open call modal after countdown completes
+    setIsCallModalOpen(true);
+  };
+
+  // New function to open reschedule modal
+  const handleRescheduleOpen = (booking) => {
+    setSelectedBooking(booking);
+    setIsRescheduleModalOpen(true);
+  };
+
+  // Function to handle the confirmation of rescheduling
+  const handleConfirmReschedule = () => {
+    // Logic to reschedule the booking goes here
+    console.log('Rescheduling:', selectedBooking); // For now, just log it
+    setIsRescheduleModalOpen(false);
+    // Optionally, refresh the data or update the state
   };
 
   return (
@@ -145,6 +160,7 @@ const Appointments = () => {
                         </div>
                         <button 
                           className="bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-600 transition-colors duration-200"
+                          onClick={() => handleRescheduleOpen(booking)} // Open the reschedule modal
                         >
                           Reschedule
                         </button>
@@ -176,6 +192,11 @@ const Appointments = () => {
         onClose={() => setIsCountdownModalOpen(false)} 
         onComplete={handleCountdownComplete} 
         seconds={5} // Set your countdown duration here
+      />
+      <RescheduleModal // Include the reschedule confirmation modal
+        isOpen={isRescheduleModalOpen} 
+        onClose={() => setIsRescheduleModalOpen(false)} 
+        onConfirm={handleConfirmReschedule}
       />
     </Layout>
   );

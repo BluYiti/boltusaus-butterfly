@@ -1,9 +1,19 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-const ReviewPreAssModal: React.FC<ReviewPreAssModalProps> = ({ isOpen, onClose }) => {
+interface ReviewPreAssModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  username?: string; // Made this optional
+}
+
+const ReviewPreAssModal: React.FC<ReviewPreAssModalProps> = ({
+  isOpen,
+  onClose,
+  username = 'Default Username' // Default value if username is not provided
+}) => {
   const [score, setScore] = useState<number | null>(null);
-  const clientId = "bella_swan"; // Example client ID
+  const clientId = username.toLowerCase().replace(/\s+/g, '_'); // Example client ID based on username
 
   if (!isOpen) return null;
 
@@ -29,7 +39,7 @@ const ReviewPreAssModal: React.FC<ReviewPreAssModalProps> = ({ isOpen, onClose }
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50">
       <div className="bg-white rounded-lg w-96 p-6">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold">Bella Swan</h2>
+          <h2 className="text-lg font-semibold">{username}</h2>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
             X
           </button>
