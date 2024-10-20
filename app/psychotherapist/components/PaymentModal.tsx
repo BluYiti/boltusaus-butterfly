@@ -14,7 +14,6 @@ const PaymentModal = ({ isOpen, onClose, client }) => {
         <p><strong>Account Name:</strong> {client.name}</p>
         <p><strong>Amount:</strong> PHP 1,000.00</p>
         <p><strong>Status:</strong> {client.status}</p>
-        <p><strong>Description:</strong> Counseling Fee</p>
         <p><strong>Transaction Date and Time:</strong> 10/02/24 9:30 am</p>
 
         {/* Buttons */}

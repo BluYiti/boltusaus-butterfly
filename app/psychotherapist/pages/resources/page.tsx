@@ -1,6 +1,6 @@
 "use client";
 import Layout from "@/components/Sidebar/Layout";
-import items from "@/client/data/Links";
+import items from "@/psychotherapist/data/Links";
 import React, { useRef } from 'react';
 
 const ResourcesPage: React.FC = () => {

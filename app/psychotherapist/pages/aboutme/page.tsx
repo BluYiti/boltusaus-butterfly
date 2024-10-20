@@ -1,22 +1,66 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Layout from "@/components/Sidebar/Layout";
 import items from "@/psychotherapist/data/Links";
+import { Client, Databases } from 'appwrite'; // Import Appwrite SDK
 
 const AboutMe = () => {
   // State variables to store user inputs
-  const [description, setDescription] = useState("As a psychologist, my mission is to nurture mental well-being, offering compassionate support and guiding individuals towards resilience and personal growth.");
-  const [professionalBackground, setProfessionalBackground] = useState("Bachelor of Arts in Psychology");
-  const [specialties, setSpecialties] = useState(["Health and Lifestyle", "Mindfulness"]);
+  const [description, setDescription] = useState("");
+  const [professionalBackground, setProfessionalBackground] = useState("");
+  const [specialties, setSpecialties] = useState([]);
+  const [contactNumber, setContactNumber] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [position, setPosition] = useState("");
 
   const [isEditing, setIsEditing] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+
+  // Initialize Appwrite client and database
+  const client = new Client();
+  const databases = new Databases(client);
+
+  // Function to fetch data from Appwrite database
+  const fetchData = async () => {
+    try {
+      const response = await databases.getDocument(
+        'Butterfly-Database', // Your database ID
+        'Psychotherapist', // Your collection ID
+        '[DOCUMENT_ID]' // The document ID to fetch (you need to replace this with the actual document ID or fetch it based on user authentication)
+      );
+
+      // Update state with fetched data
+      setDescription(response.description || '');
+      setContactNumber(response.phonenum || '');
+      setFirstName(response.firstName || '');
+      setLastName(response.lastName || '');
+      setProfessionalBackground(response.background || '');
+      setSpecialties(response.specialties || []);
+      setPosition(response.position || '');
+    } catch (error) {
+      console.error("Failed to fetch data", error);
+    }
+  };
+
+  // Fetch data when the component mounts
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   // Function to handle form submission (this could be integrated with a backend API)
   const handleSave = () => {
     // Here you can add logic to save the data to the backend
     setIsEditing(false);
     alert('Profile information saved successfully!');
+  };
+
+  // Function to handle file selection
+  const handleFileChange = (e) => {
+    setSelectedFile(e.target.files[0]);
+    setIsModalOpen(false); // Close modal after file selection
   };
 
   return (
@@ -35,7 +79,12 @@ const AboutMe = () => {
               {/* Profile Picture */}
               <div className="flex flex-col items-center mb-6">
                 <div className="w-24 h-24 rounded-full bg-blue-500 mb-4"></div>
-                <button className="bg-gray-200 text-gray-700 text-sm px-4 py-2 rounded">Choose profile</button>
+                <button
+                  className="bg-gray-200 text-gray-700 text-sm px-4 py-2 rounded"
+                  onClick={() => setIsModalOpen(true)} // Open modal on click
+                >
+                  Choose profile
+                </button>
               </div>
 
               {/* Description */}
@@ -57,8 +106,20 @@ const AboutMe = () => {
               {/* About me name */}
               <div className="mb-6">
                 <h3 className="text-xl font-bold">About me</h3>
-                <p className="text-gray-700">[Name]</p>
-                <span className="bg-green-200 text-green-800 text-sm px-3 py-1 rounded-full inline-block mt-2">Senior Psychotherapist</span>
+                <p className="text-gray-700">{firstName} {lastName}</p>
+                <span className="bg-green-200 text-green-800 text-sm px-3 py-1 rounded-full inline-block mt-2">{position}</span>
+              </div>
+
+              {/* Contact Number */}
+              <div className="mb-6">
+                <h4 className="text-lg font-semibold">Contact Number</h4> 
+                <input
+                  type="text"
+                  className="border border-gray-300 rounded-md p-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={contactNumber}
+                  onChange={(e) => setContactNumber(e.target.value)}
+                  disabled={!isEditing}
+                />
               </div>
 
               {/* Professional Background */}
@@ -84,6 +145,8 @@ const AboutMe = () => {
                   disabled={!isEditing}
                 />
               </div>
+
+              
             </div>
           </div>
 
@@ -107,6 +170,34 @@ const AboutMe = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal for File Selection */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded shadow-md">
+            <h2 className="text-xl font-semibold mb-4">Choose a profile picture</h2>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+            />
+            <div className="mt-4 flex justify-end">
+              <button
+                className="bg-red-500 text-white px-4 py-2 rounded mr-2"
+                onClick={() => setIsModalOpen(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="bg-blue-500 text-white px-4 py-2 rounded"
+                onClick={() => document.querySelector('input[type="file"]').click()}
+              >
+                Choose File
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </Layout>
   );
 };
