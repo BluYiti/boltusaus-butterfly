@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { databases, storage } from "@/appwrite"; // Make sure to initialize the Appwrite storage service
 import { useRouter } from "next/navigation";
-import { Models } from 'appwrite';
+import { Models, Query } from 'appwrite';
 
 interface ReferredClientProfileModalProps {
   clientId: string;
@@ -49,7 +49,7 @@ const ReferredClientProfileModal: React.FC<ReferredClientProfileModalProps> = ({
       }
     };
 
-    fetchClientProfile();
+    fetchClientProfile();  
   }, [clientId, isOpen]);
 
   const handleReferClient = async () => {
@@ -69,14 +69,14 @@ const ReferredClientProfileModal: React.FC<ReferredClientProfileModalProps> = ({
       console.log('File uploaded:', uploadedFile);
   
       // Step 2: Create a new document in the database with the uploaded file's ID
-      const newDocument = await databases.createDocument(
+      const updatedDocument = await databases.updateDocument(
         'Butterfly-Database', // Your Appwrite database ID
-        'Certificate',        // Collection ID set to 'Certificate'
-        'unique()',           // Generate a unique ID for the document
-        { certificate: uploadedFile.$id } // Store the file ID in the 'certificate' field
+        'Client',        // Collection ID set to 'Certificate'
+        clientId,           // Generate a unique ID for the document
+        {  certificate: uploadedFile.$id, status: 'attached' }
       );
   
-      console.log('New document created with certificate:', newDocument);
+      console.log('Document updated with status "attached":', updatedDocument);
   
       alert('PDF uploaded and client referred successfully!');
       setIsConfirmModalOpen(false);
@@ -178,9 +178,12 @@ const ReferredClientProfileModal: React.FC<ReferredClientProfileModalProps> = ({
                 </button>
                 <button
                   onClick={() => setIsConfirmModalOpen(true)}
-                  className="bg-green-500 text-white px-6 py-2 rounded-full shadow-md hover:shadow-lg hover:bg-green-600 transition-all"
+                  className={`text-white px-6 py-2 rounded-full shadow-md transition-all ${
+                    clientData.status === 'attached' ? 'bg-blue-500 hover:bg-blue-600' : 'bg-green-500 hover:bg-green-600'
+                  }`}
+                  disabled={clientData.status === 'attached'} // Disable the button if status is 'attached'
                 >
-                  Upload Certificate
+                  {clientData.status === 'attached' ? 'Certificate already uploaded' : 'Upload Certificate'}
                 </button>
               </div>
             </>
