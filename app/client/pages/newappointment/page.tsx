@@ -233,35 +233,34 @@ const AppointmentBooking = () => {
 
 {/* Time Selection */}
 <h3 className="text-lg font-bold text-blue-900">Select Time {!selectedTime && <span className="text-red-500">*</span>}</h3>
-                  <div className="grid grid-cols-4 gap-4 mt-4">
-                    {["9:00 AM", "10:00 AM", "11:00 AM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM"].map((time) => (
-                      <button
-                        key={time}
-                        className={`py-2 px-4 rounded-lg ${
-                          selectedTime === time ? "bg-blue-500 text-white" : "bg-gray-300 text-black hover:bg-blue-500"
-                        }`}
-                        onClick={() => setSelectedTime(time)}
-                      >
-                        {time}
-                      </button>
-                    ))}
-                  </div>
+<div className="grid grid-cols-4 gap-4 mt-4 mb-8">  {/* Added mb-8 for bottom margin */}
+  {["9:00 AM", "10:00 AM", "11:00 AM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM"].map((time) => (
+    <button
+      key={time}
+      className={`py-2 px-4 rounded-lg ${
+        selectedTime === time ? "bg-blue-500 text-white" : "bg-gray-300 text-black hover:bg-blue-500"
+      }`}
+      onClick={() => setSelectedTime(time)}
+    >
+      {time}
+    </button>
+  ))}
+</div>
 
-                  {/* Therapy Mode Selection */}
-                  <div className="mb-4">
-                    <label className="block mb-2 text-lg font-medium text-gray-700">
-                      Select Therapy Mode {!therapyMode && <span className="text-red-500">*</span>}
-                    </label>
-                    <select
-                      value={therapyMode}
-                      onChange={(e) => setTherapyMode(e.target.value)}
-                      className="border w-32 border-gray-300 rounded-lg p-2"
-                    >
-                      <option value="Online">Online</option>
-                      <option value="In-Person">In-Person</option>
-                    </select>
-                  </div>
-
+{/* Therapy Mode Selection */}
+<div className="mb-4">
+  <label className="block mb-2 text-lg font-medium text-gray-700">
+    Select Therapy Mode {!therapyMode && <span className="text-red-500">*</span>}
+  </label>
+  <select
+    value={therapyMode}
+    onChange={(e) => setTherapyMode(e.target.value)}
+    className="border w-32 border-gray-300 rounded-lg p-2"
+  >
+    <option value="Online">Online</option>
+    <option value="In-Person">In-Person</option>
+  </select>
+</div>
 
                   {/* Selected Info */}
                   <div className="mt-6">
@@ -269,12 +268,12 @@ const AppointmentBooking = () => {
                       Selected: {selectedMonth} {selectedDay}, {currentYear} | {selectedTime} | Mode: {therapyMode}
                     </p>
                     <button
-                      className={`mt-4 py-2 px-4 rounded-lg ${isFormComplete ? "bg-blue-400 text-white hover:bg-blue-500" : "bg-gray-300 text-gray-700 cursor-not-allowed"}`}
-                      onClick={handleBookAppointment}
-                      disabled={!isFormComplete}
-                    >
-                      Book
-                    </button>
+  className={`mt-4 py-2 px-4 rounded-lg ${isFormComplete ? "bg-blue-400 text-white hover:bg-blue-500" : "bg-gray-300 text-gray-700 cursor-not-allowed"}`}
+  onClick={handleBookAppointment}
+  disabled={!isFormComplete} // Button is disabled unless the form is complete
+>
+  Book
+</button>
                   </div>
                 </div>
 
