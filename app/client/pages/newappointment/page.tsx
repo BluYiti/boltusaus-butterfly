@@ -24,16 +24,22 @@ const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Frida
 
 const therapists = [
   {
-    name: "Mrs. Angelica Peralta",
-    specialty: "Psychotherapy and Counseling",
+    name: "Ms. Angelica Peralta",
+    specialty: "Senior Psychotherapist",
     imgSrc: "https://via.placeholder.com/60",
-    bio: "A licensed professional who provides talk therapy to individuals or groups to help them manage mental health conditions, emotional issues, and psychological distress. "
+    bio: "A licensed professional who provides talk therapy to individuals or groups to help them manage mental health conditions, emotional issues, and psychological distress."
   },
   {
-    name: "Psychotherapist 2",
-    specialty: "Psychotherapy and Counseling",
+    name: "Ms. Sophia Bandin",
+    specialty: "Junior Psychotherapist",
     imgSrc: "https://via.placeholder.com/60",
-    bio: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+    bio: "A compassionate junior psychotherapist dedicated to helping individuals through their therapeutic journey."
+  },
+  {
+    name: "Ms. Alexandra Marie",
+    specialty: "Junior Psychotherapist",
+    imgSrc: "https://via.placeholder.com/60",
+    bio: "An enthusiastic junior psychotherapist who aims to provide support and guidance for mental well-being."
   },
 ];
 
@@ -215,7 +221,7 @@ const AppointmentBooking = () => {
                   {/* Time Selection */}
                   <h3 className="text-lg font-bold text-blue-900">Select Time {!selectedTime && <span className="text-red-500">*</span>}</h3>
                   <div className="grid grid-cols-4 gap-4 mt-4">
-                    {["10:00", "11:00", "12:00", "1:00", "2:00", "3:00", "4:00", "5:00"].map((time) => (
+                    {["9:00","10:00", "11:00","1:00", "2:00", "3:00", "4:00"].map((time) => (
                       <button
                         key={time}
                         className={`py-2 px-4 rounded-lg ${
@@ -227,6 +233,26 @@ const AppointmentBooking = () => {
                       </button>
                     ))}
                   </div>
+
+                    {/* Select Mode of Therapy */}
+                <div className="mt-6">
+                  <h4 className="text-lg font-semibold text-gray-700">
+                    Mode of Therapy {!selectedMode && <span className="text-red-500">*</span>}
+                  </h4>
+                  <select
+                    value={selectedMode}
+                    onChange={handleModeChange}
+                    className="border border-gray-300 rounded-lg p-2"
+                  >
+                    <option value="">Select mode</option>
+                    {modesOfTherapy.map((mode) => (
+                      <option key={mode} value={mode}>
+                        {mode}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
 
               {/* Selected Info */}
               <div className="mt-6">

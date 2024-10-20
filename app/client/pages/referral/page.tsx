@@ -1,82 +1,19 @@
 "use client"; // Mark this file as a Client Component
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Layout from "@/components/Sidebar/Layout"; // Adjust the path if necessary
 import items from "@/client/data/Links";
-import Confetti from "react-confetti"; // Import the Confetti component
-import Link from "next/link"; // Import Link for navigation
-
-const months = [
-  { name: "January", days: 31 },
-  { name: "February", days: 29 }, // Leap year, so February has 29 days in 2024
-  { name: "March", days: 31 },
-  { name: "April", days: 30 },
-  { name: "May", days: 31 },
-  { name: "June", days: 30 },
-  { name: "July", days: 31 },
-  { name: "August", days: 31 },
-  { name: "September", days: 30 },
-  { name: "October", days: 31 },
-  { name: "November", days: 30 },
-  { name: "December", days: 31 },
-];
-
-const therapists = [
-  {
-    name: "Ma'am Angelica Peralta",
-    specialty: "Senior Psychotherapist",
-    imgSrc: "https://via.placeholder.com/60", // Replace with actual image URLs
-  },
-  {
-    name: "Ma'am Junior Psychotherapist",
-    specialty: "Junior Psychotherapist",
-    imgSrc: "https://via.placeholder.com/60", // Replace with actual image URLs
-  },
-];
+import Link from "next/link";
 
 const AppointmentBooking = () => {
-  const [selectedMonth, setSelectedMonth] = useState(9); // October as default
-  const [selectedDay, setSelectedDay] = useState(null);
-  const [selectedTime, setSelectedTime] = useState("");
-  const [selectedTherapist] = useState(therapists[0]); // Default therapist
-  const [appointmentBooked, setAppointmentBooked] = useState(false); // Success message state
-  const [showPrompt, setShowPrompt] = useState(false); // Confirmation prompt state
+  const [modalOpen, setModalOpen] = useState(true); // State to control the modal
+ 
+  useEffect(() => {
+    setModalOpen(true); // Automatically open the modal when the page loads
+  }, []);
 
-  const currentYear = new Date().getFullYear(); // Get the current year
-  const currentMonth = new Date().getMonth();
-  const currentDay = new Date().getDate();
-
-  const handleMonthChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedMonth(Number(event.target.value));
-    setSelectedDay(null); // Reset selected day when changing month
-  };
-
-  const handleBookAppointment = () => {
-    if (selectedDay && selectedTime) {
-      setShowPrompt(true); // Show confirmation prompt
-    }
-  };
-
-  const confirmBooking = () => {
-    setAppointmentBooked(true); // Show success message
-    setShowPrompt(false); // Close the prompt
-  };
-
-  const cancelBooking = () => {
-    setShowPrompt(false); // Close the prompt without booking
-  };
-
-  const daysInSelectedMonth = months[selectedMonth]?.days || 31;
-
-  // Calculate first day of the month
-  const getFirstDayOfMonth = (monthIndex: number, year: number) => {
-    return new Date(year, monthIndex, 1).getDay();
-  };
-
-  const firstDayOfMonth = getFirstDayOfMonth(selectedMonth, currentYear);
-
-  const handleProceedToPayment = () => {
-    alert("Proceeding to payment..."); // Placeholder for payment logic
+  const closeModal = () => {
+    setModalOpen(false);
   };
 
   return (
@@ -85,13 +22,34 @@ const AppointmentBooking = () => {
         <div className="flex-grow flex flex-col justify-between bg-blue-100">
           <div className="bg-white shadow-lg py-4 px-6 flex justify-between items-center">
             <div className="text-black flex flex-col flex-grow p-6 space-y-6 mx-auto w-3/4">
+              
+              {/* Modal */}
+              {modalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                  <div className="bg-white rounded-lg shadow-lg p-6 w-1/3 relative">
+                    <div className="text-center">
+                      <div className="text-4xl mb-4">🌞</div>
+                      <h2 className="text-xl font-semibold mb-4">
+                        You have been referred by the Psychotherapist to a different clinic.
+                      </h2>
+                      <p className="text-gray-600 mb-4">
+                        Please view and download the attached referral certificate below.
+                      </p>
+                      <button className="bg-blue-500 text-white px-4 py-2 rounded-lg">
+                        View Attached Certificate
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Rest of your component content */}
               <div className="text-left mb-8">
                 <div className="text-green-600 text-4xl mb-4 flex items-center">
                   <span className="text-green-600 animate-bounce">✔️</span>
                   <span className="ml-2 text-lg font-bold">Evaluation Completed!</span>
                 </div>
-                <div className="text-xl font-semibold">
-</div>
+                <div className="text-xl font-semibold"></div>
               </div>
 
               {/* Flex container to display both sections side by side */}
@@ -101,22 +59,6 @@ const AppointmentBooking = () => {
                   <h3 className="text-3xl font-bold text-blue-500 text-left mb-6">
                     Meet our caring psychotherapists, here to guide your healing!
                   </h3>
-                  <div className="flex justify-left space-x-6">
-                    {therapists.map((therapist, index) => (
-                      <div
-                        key={index}
-                        className="relative bg-blue-100 border border-blue-500 shadow-lg p-6 rounded-lg w-60 text-center overflow-hidden transform transition-shadow duration-500 hover:shadow-2xl"
-                      >
-                        <img
-                          src={therapist.imgSrc}
-                          alt={therapist.name}
-                          className="rounded-full mx-auto w-24 h-24 mb-4 transition-transform duration-300 transform hover:scale-110"
-                        />
-                        <h4 className="text-lg font-bold text-blue-500">{therapist.name}</h4>
-                        <p className="text-sm text-gray-600">{therapist.specialty}</p>
-                      </div>
-                    ))}
-                  </div>
                 </div>
 
                 {/* A Daily Reminder to Yourself section */}
