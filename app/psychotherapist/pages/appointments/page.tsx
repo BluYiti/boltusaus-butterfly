@@ -150,7 +150,7 @@ const Appointments = () => {
                 <h3 className="font-semibold text-lg border-b-2 border-gray-300 pb-2">Missed bookings</h3>
                 {clientData.length > 0 ? (
                   <div className="grid grid-cols-1 gap-6 mt-4">
-                    {clientData.filter(bookings => bookings.status === "rescheduled").map((booking, bookingIndex) => (
+                    {clientData.filter(bookings => bookings.status === "missed").map((booking, bookingIndex) => (
                       <div key={bookingIndex} className="bg-red-50 rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-200 border-l-4 border-red-500 flex justify-between items-center">
                         <div>
                           <h4 className="font-semibold text-red-700">{booking.clientName}</h4>

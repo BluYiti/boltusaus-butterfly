@@ -1,13 +1,13 @@
 // RescheduleConfirmationModal.tsx
 import React from 'react';
 
-interface RescheduleConfirmationModalProps {
+interface RescheduleModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
 }
 
-const RescheduleConfirmationModal: React.FC<RescheduleConfirmationModalProps> = ({ isOpen, onClose, onConfirm }) => {
+const RescheduleModal: React.FC<RescheduleModalProps> = ({ isOpen, onClose, onConfirm }) => {
   if (!isOpen) return null;
 
   return (
@@ -28,4 +28,4 @@ const RescheduleConfirmationModal: React.FC<RescheduleConfirmationModalProps> = 
   );
 };
 
-export default RescheduleConfirmationModal;
+export default RescheduleModal;
