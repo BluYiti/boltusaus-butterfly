@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { FaMicrophone, FaMicrophoneSlash, FaVideo, FaVideoSlash, FaPhoneSlash } from 'react-icons/fa';
 
 const CallModal = ({ isOpen, onClose, clientName }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -21,7 +22,6 @@ const CallModal = ({ isOpen, onClose, clientName }) => {
       startVideoCall();
 
       return () => {
-        // Cleanup the video stream on component unmount
         if (videoRef.current && videoRef.current.srcObject) {
           (videoRef.current.srcObject as MediaStream).getTracks().forEach((track) => track.stop());
         }
@@ -56,30 +56,33 @@ const CallModal = ({ isOpen, onClose, clientName }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div className="bg-white rounded-lg p-6 shadow-md w-full max-w-4xl">
-        <h2 className="text-xl font-bold mb-4">Video Call with {clientName}</h2>
-        <div className="flex items-center justify-center h-96">
-          <video ref={videoRef} className="rounded-lg w-full h-full object-cover" autoPlay></video>
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50">
+      <div className="bg-white rounded-lg p-8 shadow-lg w-full max-w-3xl"> {/* Increased max width */}
+        <h2 className="text-2xl font-semibold mb-4 text-center text-gray-800">Video Call with {clientName}</h2>
+        <div className="flex items-center justify-center h-80 mb-4"> {/* Increased height */}
+          <video ref={videoRef} className="rounded-lg w-full h-full object-cover border-4 border-gray-300" autoPlay></video>
         </div>
-        <div className="mt-4 flex justify-center space-x-4">
+        <div className="flex justify-center space-x-4">
           <button
             onClick={endCall}
-            className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full"
+            className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-full transition duration-200"
+            title="End Call"
           >
-            End Call
+            <FaPhoneSlash />
           </button>
           <button
             onClick={toggleMic}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"
+            className={`text-white font-bold py-2 px-4 rounded-full transition duration-200 ${micEnabled ? 'bg-blue-500 hover:bg-blue-600' : 'bg-gray-400 hover:bg-gray-500'}`}
+            title={micEnabled ? "Mute" : "Unmute"}
           >
-            <i className={`fas ${micEnabled ? 'fa-microphone' : 'fa-microphone-slash'}`}></i>
+            {micEnabled ? <FaMicrophone /> : <FaMicrophoneSlash />}
           </button>
           <button
             onClick={toggleVideo}
-            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-full"
+            className={`text-white font-bold py-2 px-4 rounded-full transition duration-200 ${videoEnabled ? 'bg-green-500 hover:bg-green-600' : 'bg-gray-400 hover:bg-gray-500'}`}
+            title={videoEnabled ? "Turn off video" : "Turn on video"}
           >
-            <i className={`fas ${videoEnabled ? 'fa-video' : 'fa-video-slash'}`}></i>
+            {videoEnabled ? <FaVideo /> : <FaVideoSlash />}
           </button>
         </div>
       </div>

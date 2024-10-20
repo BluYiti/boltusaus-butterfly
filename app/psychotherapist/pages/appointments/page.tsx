@@ -1,3 +1,4 @@
+// Appointments.tsx
 'use client';
 
 import Layout from "@/components/Sidebar/Layout";
@@ -6,6 +7,7 @@ import { useEffect, useState } from "react";
 import { client, databases } from "@/appwrite"; // Adjust the path accordingly
 import TakeNotesModal from '@/psychotherapist/components/TakeNotesModal'; // Import your TakeNotesModal
 import CallModal from '@/psychotherapist/components/CallModal'; // Import the CallModal
+import CountdownModal from '@/psychotherapist/components/CountdownModal'; // Import the CountdownModal
 
 const Appointments = () => {
   const [clientData, setClientData] = useState<any[]>([]);
@@ -13,6 +15,7 @@ const Appointments = () => {
   const [error, setError] = useState(null);
   const [isTakeNotesModalOpen, setIsTakeNotesModalOpen] = useState(false);
   const [isCallModalOpen, setIsCallModalOpen] = useState(false);
+  const [isCountdownModalOpen, setIsCountdownModalOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState(null);
 
   // Fetch data from Appwrite
@@ -47,7 +50,12 @@ const Appointments = () => {
 
   const handleCallOpen = (clientName) => {
     setSelectedClient(clientName);
-    setIsCallModalOpen(true);
+    setIsCountdownModalOpen(true); // Open countdown modal instead of call modal
+  };
+
+  const handleCountdownComplete = () => {
+    setIsCountdownModalOpen(false);
+    setIsCallModalOpen(true); // Open call modal after countdown completes
   };
 
   return (
@@ -96,6 +104,7 @@ const Appointments = () => {
                         )}
                       </div>
                     ))}
+
                   </div>
                 ) : (
                   <p>No missed bookings found.</p>
@@ -161,6 +170,12 @@ const Appointments = () => {
         isOpen={isCallModalOpen} 
         onClose={() => setIsCallModalOpen(false)} 
         clientName={selectedClient}
+      />
+      <CountdownModal 
+        isOpen={isCountdownModalOpen} 
+        onClose={() => setIsCountdownModalOpen(false)} 
+        onComplete={handleCountdownComplete} 
+        seconds={5} // Set your countdown duration here
       />
     </Layout>
   );
