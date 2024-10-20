@@ -1,9 +1,10 @@
 'use client'
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Layout from "@/components/Sidebar/Layout"; // Adjust the path if necessary
 import items from "@/client/data/Links";
 import Link from "next/link"; // Import Link for navigation
+import { account } from "@/appwrite"; // Ensure Appwrite is configured correctly
 
 const months = [
   { name: "January", days: 31 },
@@ -33,18 +34,38 @@ const therapists = [
   },
 ];
 
-const AppointmentBooking = () => {
+const AcceptedClientBooking = () => {
   const [selectedMonth, setSelectedMonth] = useState(9); // October as default
   const [selectedDay, setSelectedDay] = useState(null);
   const [selectedTime, setSelectedTime] = useState("");
   const [selectedTherapist] = useState(therapists[0]); // Default therapist
   const [appointmentBooked, setAppointmentBooked] = useState(false); // Success message state
   const [showPrompt, setShowPrompt] = useState(false); // Confirmation prompt state
+  const [status, setStatus] = useState(null); // State to track client status
+  const [role, setRole] = useState(null); // State to track client role
 
-  const currentYear = new Date().getFullYear(); // Get the current year
-  const currentMonth = new Date().getMonth();
-  const currentDay = new Date().getDate();
+  useEffect(() => {
+    const fetchUserStatus = async () => {
+      try {
+        const user = await account.get();
+        console.log("User Preferences: ", user.prefs); // Debugging step
 
+        // Set the status and role from user preferences
+        if (user.prefs?.status) {
+          setStatus(user.prefs.status);
+        }
+        if (user.prefs?.role) {
+          setRole(user.prefs.role);
+        }
+      } catch (error) {
+        console.error("Error fetching user preferences: ", error);
+      }
+    };
+
+    fetchUserStatus();
+  }, []);
+
+  // Handle month selection
   const handleMonthChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedMonth(Number(event.target.value));
     setSelectedDay(null); // Reset selected day when changing month
@@ -72,11 +93,16 @@ const AppointmentBooking = () => {
     return new Date(year, monthIndex, 1).getDay();
   };
 
-  const firstDayOfMonth = getFirstDayOfMonth(selectedMonth, currentYear);
+  const firstDayOfMonth = getFirstDayOfMonth(selectedMonth, new Date().getFullYear());
 
   const handleProceedToPayment = () => {
     alert("Proceeding to payment..."); // Placeholder for payment logic
   };
+
+  // Conditionally render the UI only if status is 'Accepted Client' and role is 'Client'
+  if (status !== "Accepted Client" || role !== "Client") {
+    return <div className="text-center p-4">You are not authorized to view this content.</div>;
+  }
 
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
@@ -90,12 +116,12 @@ const AppointmentBooking = () => {
                   <span className="ml-2 text-lg font-bold">Evaluation Completed!</span>
                 </div>
                 <div className="text-xl font-semibold">
-  <Link href="/client/pages/newappointment">
-    <button className="bg-blue-500 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded">
-      Book your appointment
-    </button>
-  </Link>
-</div>
+                  <Link href="/client/pages/newappointment">
+                    <button className="bg-blue-500 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded">
+                      Book your appointment
+                    </button>
+                  </Link>
+                </div>
               </div>
 
               {/* Flex container to display both sections side by side */}
@@ -176,4 +202,4 @@ const AppointmentBooking = () => {
   );
 };
 
-export default AppointmentBooking;
+export default AcceptedClientBooking;

@@ -31,6 +31,13 @@ export const useAssessment = (questions: Question[] = []) => {
         const user = await account.get();
         setUserName(user.name);
         setUserID(user.$id);
+
+      // Optionally, store the role and status in the user preferences
+      await account.updatePrefs({
+        role: 'New Client',
+        status: 'To Be Evaluated',
+      });
+      
       } catch (error) {
         console.error('Error fetching user data:', error);
       }
@@ -106,7 +113,7 @@ export const useAssessment = (questions: Question[] = []) => {
   const closeModal = () => {
     if (modalType === 'success') {
       setModalOpen(false);
-      router.push('/auth/login');
+      router.push('../../client/pages/newClientDashboard');
     } else {
       setModalOpen(false);
     }

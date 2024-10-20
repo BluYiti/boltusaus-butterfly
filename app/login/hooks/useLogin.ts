@@ -1,26 +1,26 @@
 'use client';
 
 import { useState } from 'react';
-import { account, databases } from '@/appwrite'; // Make sure to import databases
+import { account, databases } from '@/appwrite'; // Keep both account and databases imports
 import { useRouter } from 'next/navigation';
 
 export const useLogin = () => {
     const [error, setError] = useState<string | null>(null);
     const router = useRouter();
 
-    // Fetch user role from the accounts collection
-    const fetchUserRole = async (userId: string) => {
+    // Fetch user role from the database
+    const fetchUserRoleFromDatabase = async (UserId: string) => {
         try {
-            const response = await databases.getDocument('Butterfly-Database', 'Accounts', userId);
+            const response = await databases.getDocument('Butterfly-Database', 'Accounts', UserId);
             return response.role; // Adjust this based on your data structure
         } catch (err) {
-            console.error('Failed to fetch user role:', err);
+            console.error('Failed to fetch user role from database:', err);
             return null;
         }
     };
 
     // Redirect based on user role
-    const handleUserRoleRedirect = (role: string, user: any) => {
+    const handleUserRoleRedirect = (role: string) => {
         switch (role) {
             case 'admin':
                 router.push('/admin');
@@ -66,15 +66,24 @@ export const useLogin = () => {
                 }
             }
 
-            // Fetch user role from the accounts collection
-            const role = await fetchUserRole(user.$id);
-            if (!role) {
-                setError('No role assigned to the user. Contact support.');
-                return;
+            // Step 1: Check for the role from user preferences (prefs.role)
+            const prefsRole = user.prefs?.role;
+
+            // If the user's prefs.role is "New Client", redirect them immediately
+            if (prefsRole === 'New Client') {
+                router.push('/client/pages/newClientDashboard'); // Redirect to NewClientDashboard for new clients
+                return; // Stop further execution
             }
 
-            // If login was successful, handle redirection based on user role
-            handleUserRoleRedirect(role, user);
+            // Step 2: If not "New Client", fetch the role from the database
+            const dbRole = await fetchUserRoleFromDatabase(user.$id);
+
+            if (dbRole) {
+                // Redirect based on the role from the database
+                handleUserRoleRedirect(dbRole);
+            } else {
+                setError('No role assigned to the user. Contact support.');
+            }
         } catch (err: any) {
             console.error('Error during login:', err);
             setError(`Login failed: ${err.message}`);

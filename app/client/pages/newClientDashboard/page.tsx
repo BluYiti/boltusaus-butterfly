@@ -1,26 +1,13 @@
 "use client"; // Mark this file as a Client Component
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Layout from "@/components/Sidebar/Layout"; // Adjust the path if necessary
 import items from "@/client/data/Links";
 import Link from "next/link"; // Import Link for navigation
+import '../../../globals.css';
 import 'typeface-roboto';
 import 'typeface-lora';
-
-const months = [
-  { name: "January", days: 31 },
-  { name: "February", days: 29 }, // Leap year, so February has 29 days in 2024
-  { name: "March", days: 31 },
-  { name: "April", days: 30 },
-  { name: "May", days: 31 },
-  { name: "June", days: 30 },
-  { name: "July", days: 31 },
-  { name: "August", days: 31 },
-  { name: "September", days: 30 },
-  { name: "October", days: 31 },
-  { name: "November", days: 30 },
-  { name: "December", days: 31 },
-];
+import { account } from "@/appwrite"; // Import Appwrite account service for fetching user data
 
 const therapists = [
   {
@@ -35,56 +22,63 @@ const therapists = [
   },
 ];
 
-const AppointmentBooking = () => {
-  const [selectedMonth, setSelectedMonth] = useState(9); // October as default
-  const [selectedDay, setSelectedDay] = useState(null);
-  const [selectedTime, setSelectedTime] = useState("");
-  const [selectedTherapist] = useState(therapists[0]); // Default therapist
-  const [appointmentBooked, setAppointmentBooked] = useState(false); // Success message state
-  const [showPrompt, setShowPrompt] = useState(false); // Confirmation prompt state
+const NewClientDashboard = () => {
+  const [status, setStatus] = useState<string | null>(null); // State to track user status
+  const [userName, setUserName] = useState<string | null>(null); // State to track user name
 
-  const currentYear = new Date().getFullYear(); // Get the current year
-  const currentMonth = new Date().getMonth();
-  const currentDay = new Date().getDate();
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const user = await account.get();
+        console.log("User Data: ", user); // Debugging step
 
-  const handleMonthChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedMonth(Number(event.target.value));
-    setSelectedDay(null); // Reset selected day when changing month
-  };
+        // Set the user's name and status from user data
+        setUserName(user.name); // Assuming Appwrite returns 'name' field for the user
+        if (user.prefs?.status) {
+          setStatus(user.prefs.status);
+        }
+      } catch (error) {
+        console.error("Error fetching user data: ", error);
+      }
+    };
 
-  const handleBookAppointment = () => {
-    if (selectedDay && selectedTime) {
-      setShowPrompt(true); // Show confirmation prompt
-    }
-  };
+    fetchUserData();
+  }, []);
 
-  const confirmBooking = () => {
-    setAppointmentBooked(true); // Show success message
-    setShowPrompt(false); // Close the prompt
-  };
-
-  const cancelBooking = () => {
-    setShowPrompt(false); // Close the prompt without booking
-  };
-
-  const daysInSelectedMonth = months[selectedMonth]?.days || 31;
-
-  // Calculate first day of the month
-  const getFirstDayOfMonth = (monthIndex: number, year: number) => {
-    return new Date(year, monthIndex, 1).getDay();
-  };
-
-  const firstDayOfMonth = getFirstDayOfMonth(selectedMonth, currentYear);
-
-  const handleProceedToPayment = () => {
-    alert("Proceeding to payment..."); // Placeholder for payment logic
-  };
+  // Conditionally render UI based on user status
+  if (status === "Referred Client") {
+    return (
+<Layout sidebarTitle="Butterfly" sidebarItems={items}>
+        {/* Centered Referred Client Content */}
+        <div className="flex justify-center items-center h-screen">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full md:w-1/2">
+            <div className="text-center">
+              <div className="text-4xl mb-4">🌞</div>
+              <h2 className="text-xl font-semibold mb-4">
+                You have been referred by the Psychotherapist to a different clinic.
+              </h2>
+              <p className="text-gray-600 mb-4">
+                Please view and download the attached referral certificate below.
+              </p>
+              <a href="/path/to/referral/certificate" download>
+                <button className="bg-blue-500 text-white px-4 py-2 rounded-lg">
+                  Download Referral Certificate
+                </button>
+              </a>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
       {/* Header Section */}
       <div className="bg-white shadow-lg rounded-xl p-8 mb-10 border border-blue-200">
-        <h2 className="text-4xl font-bold text-blue-500 mb-4 font-roboto">Welcome, Client!</h2>
+        <h2 className="text-4xl font-bold text-blue-500 mb-4 font-roboto">
+          Welcome, {userName ? userName : "Client"}!
+        </h2>
         <p className="text-gray-600 text-lg font-lora">
           Book your therapy sessions with ease and embark your path to well-being.
         </p>
@@ -97,11 +91,30 @@ const AppointmentBooking = () => {
             <div className="text-black flex flex-col flex-grow p-6 space-y-6 mx-auto w-3/4">
               <div className="text-left mb-8">
                 <div className="text-xl font-semibold">
-                  <Link href="/client/pages/answerforms">
-                    <button className="bg-blue-500 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded">
-                      Start Pre-assessment test
-                    </button>
-                  </Link>
+                  {/* Conditionally render pre-assessment button based on user status */}
+                  {status === "To Be Evaluated" ? (
+                    <>
+                      <button
+                        className="bg-gray-300 text-gray-600 font-bold py-2 px-4 rounded cursor-not-allowed"
+                        disabled
+                      >
+                        Start Pre-assessment test
+                      </button>
+                      <div className="speech-bubble mt-4">
+                        <p className="text-black font-semibold">
+                          Pre-assessment Already Completed! <br />
+                          Please wait for the confirmation, it might take 1-2 days! <br />
+                          Thank You!
+                        </p>
+                      </div>
+                    </>
+                  ) : (
+                    <Link href="../../../preassessment"> 
+                      <button className="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-700">
+                        Start Pre-assessment test
+                      </button>
+                    </Link>
+                  )}
                 </div>
               </div>
 
@@ -183,4 +196,4 @@ const AppointmentBooking = () => {
   );
 };
 
-export default AppointmentBooking;
+export default NewClientDashboard;

@@ -15,6 +15,7 @@ const therapists = [
 
 const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
+<<<<<<< HEAD
 const availableSlots = [
   [
     {
@@ -142,6 +143,9 @@ const availableSlots = [
 
 
 const AppointmentBooking = () => {
+=======
+const AcceptedClientBooking = () => {
+>>>>>>> origin/kumarrr
   const [selectedMonth, setSelectedMonth] = useState("October");
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [selectedTime, setSelectedTime] = useState("");
@@ -373,4 +377,4 @@ const AppointmentBooking = () => {
   );
 };
 
-export default AppointmentBooking;
+export default AcceptedClientBooking;
