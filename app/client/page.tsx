@@ -19,6 +19,7 @@ const Dashboard: React.FC = () => {
   const currentYear = today.getFullYear();
   const [userName, setUserName] = useState("Client");
   const [role, setRole] = useState('');
+  
   useEffect(() => {
     const fetchUserData = async () => {
       try {

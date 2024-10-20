@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { account, databases, ID } from '@/appwrite';
 import { Query } from 'appwrite';
+import SuccessModal from './SuccessfulAddAccount';
 
 interface AddAccountModalProps {
   isOpen: boolean;
@@ -21,6 +22,7 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, sele
   const [adminPassword, setAdminPassword] = useState('');
   const [adminError, setAdminError] = useState<string | null>(null);
   const [isAdminValidating, setIsAdminValidating] = useState(false);
+  const [isModalOpen, setModalOpen] = useState(false);
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -42,21 +44,26 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, sele
       const response = await databases.listDocuments('Butterfly-Database', 'Accounts', [
         Query.equal('email', adminEmail)
       ]);
-  
+
       // Check if the email exists
       if (response.documents.length === 0) {
         throw new Error('Admin email not found');
       }
-  
+
       // Log out any existing session
       await account.deleteSession('current');
-  
+      console.log('Logged out admin');
+
       // Call handleSubmit to proceed with account creation or any other logic
       await handleSubmit();
-  
+
       // Log the admin back in using their credentials (assuming you have adminEmail and password available)
-      const loginResponse = await account.createSession(adminEmail, adminPassword);
-  
+      const loginResponse = await account.createEmailPasswordSession(adminEmail, adminPassword);
+      console.log('Logged in admin');
+
+      {isModalOpen && (
+        <SuccessModal selectedTab={selectedTab} onClose={() => setModalOpen(false)} />
+      )}
       if (!loginResponse) {
         throw new Error('Failed to log in the admin');
       }
@@ -92,13 +99,16 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, sele
       const accountId = userResponse.$id;
       console.log('Account created successfully');
 
+      // Log in the user immediately after creating the account
+      await account.createEmailPasswordSession(email, password);
+      console.log('User logged in successfully.');
+
       // Create the user in the "Accounts" collection
       await databases.createDocument('Butterfly-Database', 'Accounts', accountId, {
         username: name,
         email: email,
         role: selectedTab.toLowerCase(),
       });
-
       console.log('Accounts Collection document added');
 
       // Create the user in the selected tab collection
@@ -111,6 +121,9 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, sele
 
       console.log(selectedTab, ' Collection document added');
 
+      // Log out the user
+      await account.deleteSession('current'); // 'current' refers to the active session
+      console.log('User logged out successfully.');
     } catch (err: any) {
       setError(err.message || 'Failed to create account');
     } finally {
