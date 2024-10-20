@@ -30,13 +30,13 @@ const therapists = [
     bio: "A licensed professional who provides talk therapy to individuals or groups to help them manage mental health conditions, emotional issues, and psychological distress."
   },
   {
-    name: "Ms. Sophia Bandin",
+    name: "Ms. Jennica Viloria",
     specialty: "Junior Psychotherapist",
     imgSrc: "https://via.placeholder.com/60",
     bio: "A compassionate junior psychotherapist dedicated to helping individuals through their therapeutic journey."
   },
   {
-    name: "Ms. Alexandra Marie",
+    name: "Ms. April Geronimo",
     specialty: "Junior Psychotherapist",
     imgSrc: "https://via.placeholder.com/60",
     bio: "An enthusiastic junior psychotherapist who aims to provide support and guidance for mental well-being."
@@ -50,18 +50,23 @@ const AppointmentBooking = () => {
   const [selectedTherapist, setSelectedTherapist] = useState(null);
   const [appointmentBooked, setAppointmentBooked] = useState(false); // State for success message
   const [showPrompt, setShowPrompt] = useState(false); // Confirmation prompt state
+  const [therapyMode, setTherapyMode] = useState("Online"); // State for therapy mode selection
 
-  const handleMonthChange = (event: { target: { value: React.SetStateAction<string> } }) => {
+  const currentDate = new Date();
+  const twoWeeksLater = new Date(currentDate);
+  twoWeeksLater.setDate(currentDate.getDate() + 14);
+  
+  const handleMonthChange = (event) => {
     setSelectedMonth(event.target.value);
     setSelectedDay("1"); // Reset selected day when changing month
   };
 
-  const handleTherapistSelect = (therapist: any) => {
+  const handleTherapistSelect = (therapist) => {
     setSelectedTherapist(therapist);
   };
 
   const handleBookAppointment = () => {
-    if (selectedTherapist && selectedDay && selectedTime) {
+    if (selectedTherapist && selectedDay && selectedTime && therapyMode) {
       setShowPrompt(true); // Show confirmation prompt when booking
     }
   };
@@ -89,7 +94,7 @@ const AppointmentBooking = () => {
     ...Array.from({ length: daysInSelectedMonth }, (_, i) => i + 1), // Add days in month
   ];
 
-  const isFormComplete = selectedTherapist && selectedDay && selectedTime;
+  const isFormComplete = selectedTherapist && selectedDay && selectedTime && therapyMode;
 
   const [width, setWidth] = useState(window.innerWidth);
   const [height, setHeight] = useState(window.innerHeight);
@@ -171,8 +176,8 @@ const AppointmentBooking = () => {
                   </div>
                 )}
 
-                {/* Select Month and Date */}
-                <h2 className="text-3xl font-bold text-left text-blue-900 mt-8">Counseling and Therapy Sessions</h2>
+    {/* Select Month and Date */}
+    <h2 className="text-3xl font-bold text-left text-blue-900 mt-8">Counseling and Therapy Sessions</h2>
                 <div className="bg-white p-6 rounded shadow-lg border border-gray-200 w-full">
                   <div className="mb-4">
                     <label className="block mb-2 text-lg font-medium text-gray-700">
@@ -181,7 +186,7 @@ const AppointmentBooking = () => {
                     <select
                       value={selectedMonth}
                       onChange={handleMonthChange}
-                      className="border w-32 border-gray-300 rounded-lg p-2" // Reduced width
+                      className="border w-32 border-gray-300 rounded-lg p-2"
                     >
                       {months.map((month) => (
                         <option key={month.name} value={month.name}>
@@ -194,34 +199,42 @@ const AppointmentBooking = () => {
                   {/* Display Weekday Headers Above the Dates */}
                   <div className="grid grid-cols-7 gap-4 text-center font-bold text-gray-600">
                     {weekdays.map((day) => (
-                      <div key={day}>{day.slice(0, 3)}</div> // Show the first 3 letters of the day
+                      <div key={day}>{day.slice(0, 3)}</div>
                     ))}
                   </div>
 
                   {/* Calendar with Dates */}
                   <div className="grid grid-cols-7 gap-4 mb-4 p-4 rounded shadow-md bg-gray-100">
-                    {/* Empty divs to shift the 1st day to the correct weekday */}
                     {Array.from({ length: firstDayOfMonth }).map((_, index) => (
                       <div key={index}></div>
                     ))}
-                    {/* Display days of the selected month */}
-                    {Array.from({ length: daysInSelectedMonth }, (_, i) => i + 1).map((day) => (
-                      <button
-                        key={day}
-                        className={`py-2 px-4 rounded-lg ${
-                          selectedDay === day.toString() ? "bg-blue-500 text-white" : "bg-gray-300 text-black hover:bg-blue-500"
-                        }`}
-                        onClick={() => setSelectedDay(day.toString())}
-                      >
-                        {day}
-                      </button>
-                    ))}
+                    {Array.from({ length: daysInSelectedMonth }, (_, i) => i + 1).map((day) => {
+                      const date = new Date(2024, months.findIndex((month) => month.name === selectedMonth), day);
+                      const isPastDate = date < currentDate;
+                      const isSunday = date.getDay() === 0; // Sunday
+                      const isTooFarAhead = date > twoWeeksLater;
+
+                      return (
+                        <button
+                          key={day}
+                          className={`py-2 px-4 rounded-lg ${isPastDate || isSunday || isTooFarAhead ? "bg-gray-200 text-gray-400 cursor-not-allowed" : selectedDay === day.toString() ? "bg-blue-500 text-white" : "bg-gray-300 text-black hover:bg-blue-500"}`}
+                          onClick={() => {
+                            if (!isPastDate && !isSunday && !isTooFarAhead) {
+                              setSelectedDay(day.toString());
+                            }
+                          }}
+                          disabled={isPastDate || isSunday || isTooFarAhead}
+                        >
+                          {day}
+                        </button>
+                      );
+                    })}
                   </div>
 
-                  {/* Time Selection */}
-                  <h3 className="text-lg font-bold text-blue-900">Select Time {!selectedTime && <span className="text-red-500">*</span>}</h3>
+{/* Time Selection */}
+<h3 className="text-lg font-bold text-blue-900">Select Time {!selectedTime && <span className="text-red-500">*</span>}</h3>
                   <div className="grid grid-cols-4 gap-4 mt-4">
-                    {["9:00","10:00", "11:00","1:00", "2:00", "3:00", "4:00"].map((time) => (
+                    {["9:00 AM", "10:00 AM", "11:00 AM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM"].map((time) => (
                       <button
                         key={time}
                         className={`py-2 px-4 rounded-lg ${
@@ -234,96 +247,92 @@ const AppointmentBooking = () => {
                     ))}
                   </div>
 
-                    {/* Select Mode of Therapy */}
-                <div className="mt-6">
-                  <h4 className="text-lg font-semibold text-gray-700">
-                    Mode of Therapy {!selectedMode && <span className="text-red-500">*</span>}
-                  </h4>
-                  <select
-                    value={selectedMode}
-                    onChange={handleModeChange}
-                    className="border border-gray-300 rounded-lg p-2"
-                  >
-                    <option value="">Select mode</option>
-                    {modesOfTherapy.map((mode) => (
-                      <option key={mode} value={mode}>
-                        {mode}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                  {/* Therapy Mode Selection */}
+                  <div className="mb-4">
+                    <label className="block mb-2 text-lg font-medium text-gray-700">
+                      Select Therapy Mode {!therapyMode && <span className="text-red-500">*</span>}
+                    </label>
+                    <select
+                      value={therapyMode}
+                      onChange={(e) => setTherapyMode(e.target.value)}
+                      className="border w-32 border-gray-300 rounded-lg p-2"
+                    >
+                      <option value="Online">Online</option>
+                      <option value="In-Person">In-Person</option>
+                    </select>
+                  </div>
 
 
-              {/* Selected Info */}
-              <div className="mt-6">
-                  <p className="text-gray-500">
-                    Selected: {selectedMonth} {selectedDay}, {currentYear} | {selectedTime}
-                  </p>
-                  <button
-                    className={`mt-4 py-2 px-4 rounded-lg ${isFormComplete ? "bg-blue-400 text-white hover:bg-blue-500" : "bg-gray-300 text-gray-700 cursor-not-allowed"}`}
-                    onClick={handleBookAppointment}
-                    disabled={!isFormComplete}
-                  >
-                    Book
-                  </button>
-                </div>
-              </div>
-
-    {/* Confirmation Prompt */}
-    {showPrompt && (
-                <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
-                  <div className="bg-white p-8 rounded-xl shadow-xl max-w-md w-full text-center relative border border-gray-300">
-                    <h3 className="text-2xl font-bold text-blue-900 mb-4">
-                      Are you sure you want to proceed?
-                    </h3>
-                    <div className="mt-6 flex justify-around">
-                      <button
-                        className="bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-400"
-                        onClick={cancelBooking}
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        className="bg-blue-400 text-white py-2 px-4 rounded-lg hover:bg-blue-500"
-                        onClick={confirmBooking}
-                      >
-                        Confirm
-                      </button>
-                    </div>
+                  {/* Selected Info */}
+                  <div className="mt-6">
+                    <p className="text-gray-500">
+                      Selected: {selectedMonth} {selectedDay}, {currentYear} | {selectedTime} | Mode: {therapyMode}
+                    </p>
+                    <button
+                      className={`mt-4 py-2 px-4 rounded-lg ${isFormComplete ? "bg-blue-400 text-white hover:bg-blue-500" : "bg-gray-300 text-gray-700 cursor-not-allowed"}`}
+                      onClick={handleBookAppointment}
+                      disabled={!isFormComplete}
+                    >
+                      Book
+                    </button>
                   </div>
                 </div>
-              )}
 
-              {/* Success Message and Confetti */}
-              {appointmentBooked && (
-                <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
-                  <Confetti width={width} height={height} /> {/* Render Confetti */}
-                  <div className="bg-white p-8 rounded-lg shadow-xl max-w-md w-full text-center relative border border-gray-300">
-                       {/* Add the small 'X' button to close the success message */}
-                  <button
-                      className="absolute top-2 right-2 bg-gray-300 rounded-full w-6 h-6 flex items-center justify-center text-black hover:bg-gray-400"
-                      onClick={() => setAppointmentBooked(false)} // Close the pop-up
-                       >
-                       &times; {/* 'X' symbol */}
-                  </button>
-                  <h3 className="text-2xl font-bold text-green-600">
+                {/* Confirmation Prompt */}
+                {showPrompt && (
+                  <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
+                    <div className="bg-white p-8 rounded-xl shadow-xl max-w-md w-full text-center relative border border-gray-300">
+                      <h3 className="text-2xl font-bold text-blue-900 mb-4">
+                        Are you sure you want to proceed?
+                      </h3>
+                      <div className="mt-6 flex justify-around">
+                        <button
+                          className="bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-400"
+                          onClick={cancelBooking}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          className="bg-blue-400 text-white py-2 px-4 rounded-lg hover:bg-blue-500"
+                          onClick={confirmBooking}
+                        >
+                          Confirm
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Success Message and Confetti */}
+                {appointmentBooked && (
+                  <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
+                    <Confetti width={width} height={height} /> {/* Render Confetti */}
+                    <div className="bg-white p-8 rounded-lg shadow-xl max-w-md w-full text-center relative border border-gray-300">
+                      <button
+                        className="absolute top-2 right-2 bg-gray-300 rounded-full w-6 h-6 flex items-center justify-center text-black hover:bg-gray-400"
+                        onClick={() => setAppointmentBooked(false)} // Close the pop-up
+                      >
+                        &times; {/* 'X' symbol */}
+                      </button>
+                      <h3 className="text-2xl font-bold text-green-600">
                         Your Appointment was Booked Successfully!
                       </h3>
                       <p className="mt-2">
                         Service: Counseling and Therapy<br />
                         Date & Time: {selectedMonth} {selectedDay}, 2024 | {selectedTime}<br />
+                        Mode: {therapyMode}<br />
                         Psychotherapist: {selectedTherapist ? selectedTherapist.name : "No therapist selected"}
                       </p>
                       <p className="text-lg text-gray-700">You can proceed to payment to complete the booking.</p>
                       <button
-                         className="mt-6 bg-blue-400 text-white py-2 px-6 rounded-full hover:bg-blue-500"
-                          onClick={handleProceedToPayment}
-                          >
-                          Proceed to Payment
-                          </button>
-                   </div>
-                </div>
-               )}
+                        className="mt-6 bg-blue-400 text-white py-2 px-6 rounded-full hover:bg-blue-500"
+                        onClick={handleProceedToPayment}
+                      >
+                        Proceed to Payment
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
