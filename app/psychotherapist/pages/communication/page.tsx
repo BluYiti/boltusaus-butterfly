@@ -173,7 +173,7 @@ const Communication: FC = () => {
 
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
-      <div className="flex h-screen bg-gray-100">
+      <div className="flex h-screen bg-blue-50">
         <ContactList onContactClick={setSelectedContactId} selectedContact={selectedContactId} />
         <ChatBox selectedContact={selectedContact} messages={messages} />
       </div>

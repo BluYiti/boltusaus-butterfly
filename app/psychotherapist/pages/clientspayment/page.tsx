@@ -105,7 +105,7 @@ const ClientsPayment = () => {
   if (loading) {
     return (
       <Layout sidebarTitle="Butterfly" sidebarItems={items}>
-        <div className="bg-gray-100 min-h-screen overflow-auto flex justify-center items-center">
+        <div className="bg-blue-50 min-h-screen overflow-auto flex justify-center items-center">
           <p>Loading...</p>
         </div>
       </Layout>
