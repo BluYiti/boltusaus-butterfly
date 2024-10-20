@@ -4,7 +4,8 @@ import Layout from "@/components/Sidebar/Layout";
 import items from "@/psychotherapist/data/Links";
 import { databases } from "@/appwrite";
 import ClientProfileModal from "@/psychotherapist/components/ClientProfileModal";
-import ReferredClientProfileModal from "@/psychotherapist/components/ReferredClientProfileModal"; // Import your new modal
+import ReferredClientProfileModal from "@/psychotherapist/components/ReferredClientProfileModal";
+import ReviewPreAssModal from "@/psychotherapist/components/ReviewPreAssModal"; // Import your new modal
 
 interface ClientType {
   id: string;
@@ -38,6 +39,7 @@ const Clients = () => {
   // Modal state
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isReferredProfileModalOpen, setIsReferredProfileModalOpen] = useState(false);
+  const [isPreAssessmentModalOpen, setIsPreAssessmentModalOpen] = useState(false); // New modal state
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -186,7 +188,8 @@ const Clients = () => {
             {activeTab === "To Be Evaluated" && (
               <button
                 onClick={() => {
-                  // Handle viewing pre-assessment logic here
+                  setSelectedClientId(client.id);
+                  setIsPreAssessmentModalOpen(true); // Open the new pre-assessment modal
                 }}
                 className="px-4 py-2 text-sm font-semibold text-white bg-blue-400 rounded-full hover:bg-blue-600 transition"
               >
@@ -284,6 +287,14 @@ const Clients = () => {
         isOpen={isReferredProfileModalOpen}
         onClose={() => {
           setIsReferredProfileModalOpen(false);
+          setSelectedClientId(null);
+        }}
+      />
+      <ReviewPreAssModal
+        clientId={selectedClientId}
+        isOpen={isPreAssessmentModalOpen} // Use the new modal's state
+        onClose={() => {
+          setIsPreAssessmentModalOpen(false); // Close modal
           setSelectedClientId(null);
         }}
       />
