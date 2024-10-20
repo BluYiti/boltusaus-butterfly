@@ -48,6 +48,8 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
         barangays, setBarangays,
     } = useRegisterForm();
 
+    const [modalContentType, setModalContentType] = React.useState<'terms' | 'privacy'>('terms');
+
     // Inside your component
     const handleSubmit = createSubmitHandler({
         firstName,
@@ -376,51 +378,74 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
                         />
                     </div>
 
-                    {/* Re-enter Password */}
-                    <div className="relative">
-                        <label htmlFor="rePassword" className="block text-[#38b6ff] mb-1">Re-enter Password</label>
+                    {/* Confirm Password */}
+                    <div className="mb-4">
+                        <label htmlFor="rePassword" className="block text-[#38b6ff] mb-2">Confirm Password</label>
                         <input
                             id="rePassword"
                             type="password"
                             required
-                            placeholder="********"
+                            placeholder="Confirm Password"
                             value={rePassword}
                             onChange={(e) => setRePassword(e.target.value)}
                             className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
                         />
                     </div>
-                </div>
 
-                <div className="flex items-start mt-4 space-x-2">
-                    <input
-                        type="checkbox"
-                        id="terms"
-                        checked={agreeToTerms}
-                        onChange={(e) => setAgreeToTerms(e.target.checked)}
-                        className="mt-1"
-                    />
-                    <label htmlFor="terms" className="text-gray-500 text-xs">
-                        I agree to the
-                        <button type="button" onClick={() => setIsModalOpen(true)} className="text-blue-500 hover:underline ml-1">Terms and Conditions</button>
-                        &nbsp;and the
-                        <button type="button" onClick={() => setIsModalOpen(true)} className="text-blue-500 hover:underline ml-1">Privacy Policy</button>.
-                    </label>
-                </div>
+                    {/* Agree to Terms and Conditions */}
+                    <div className="mb-4">
+                        <input
+                            id="terms"
+                            type="checkbox"
+                            checked={agreeToTerms}
+                            onChange={(e) => setAgreeToTerms(e.target.checked)}
+                            className="mr-2"
+                        />
+                        <label htmlFor="terms" className="text-gray-500 text-xs">
+                            I agree to the
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setIsModalOpen(true);
+                                    setModalContentType('terms');
+                                }}
+                                className="text-blue-500 hover:underline ml-1"
+                            >
+                                Terms and Conditions
+                            </button>
+                            &nbsp;and the
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setIsModalOpen(true);
+                                    setModalContentType('privacy');
+                                }}
+                                className="text-blue-500 hover:underline ml-1"
+                            >
+                                Privacy Policy
+                            </button>.
+                        </label>
+                    </div>
 
-                <button
+                    {/* Submit Button */}
+                    <div className="mt-8">
+                    <button
                     type="submit"
                     disabled={loading || !agreeToTerms}
                     className={`bg-gradient-to-r from-[#38b6ff] to-[#4982ae] text-white font-bold py-2 px-4 rounded-xl transition-all duration-300 ease-in-out shadow-lg transform hover:scale-105 hover:shadow-xl ${!agreeToTerms ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                     {loading ? 'Registering...' : 'Register'}
                 </button>
+                    </div>
+                </div>
             </form>
 
-            <TermsAndPrivacy 
+            {/* Terms and Privacy Modal */}
+            <TermsAndPrivacy
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                contentType={'terms'}
-                termsContent={termsContent}
+                contentType={modalContentType}  
+                termsContent={termsContent} 
                 privacyContent={privacyContent}
             />
         </div>

@@ -432,9 +432,9 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
             <TermsAndPrivacy
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                contentType={modalContentType}  // Pass the content type here
-                termsContent={termsContent} // Pass updated terms content
-                privacyContent={privacyContent} // Pass updated privacy content
+                contentType={modalContentType}  
+                termsContent={termsContent} 
+                privacyContent={privacyContent} 
             />
         </div>
     );
