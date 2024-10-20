@@ -158,7 +158,7 @@ const handleSubmit = async (
             type: 'adult',
             emergencyContactName: formData.emergencyContactName,
             emergencyContact: formData.emergencyContactNumber,
-            state: null,
+            state: 'new',
             status: null,
             sex: formData.sex,
             idFile: fileId

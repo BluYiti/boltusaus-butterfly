@@ -5,6 +5,8 @@ import Layout from '@/components/Sidebar/Layout';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { Client, Databases } from 'appwrite';
 import items from './data/Links';
+import useAuthCheck from '@/auth/page';
+import LoadingScreen from '@/components/LoadingScreen';
 
 // Define types for the availability response
 interface Availability {

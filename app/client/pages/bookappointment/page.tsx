@@ -15,6 +15,132 @@ const therapists = [
 
 const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
+const availableSlots = [
+  [
+    {
+        "date": "2024-10-18",
+        "timeSlots": [
+            { "time": "9:00 am", "available": true },
+            { "time": "10:00 am", "available": false },
+            { "time": "11:00 am", "available": true },
+            { "time": "1:00 pm", "available": true },
+            { "time": "2:00 pm", "available": false },
+            { "time": "3:00 pm", "available": true },
+            { "time": "4:00 pm", "available": false }
+        ]
+    },
+    {
+        "date": "2024-10-19",
+        "timeSlots": [
+            { "time": "9:00 am", "available": true },
+            { "time": "10:00 am", "available": false },
+            { "time": "11:00 am", "available": true },
+            { "time": "1:00 pm", "available": true },
+            { "time": "2:00 pm", "available": false },
+            { "time": "3:00 pm", "available": true },
+            { "time": "4:00 pm", "available": false }
+        ]
+    },
+    {
+        "date": "2024-10-21",
+        "timeSlots": [
+            { "time": "9:00 am", "available": true },
+            { "time": "10:00 am", "available": false },
+            { "time": "11:00 am", "available": true },
+            { "time": "1:00 pm", "available": true },
+            { "time": "2:00 pm", "available": false },
+            { "time": "3:00 pm", "available": true },
+            { "time": "4:00 pm", "available": false }
+        ]
+    },
+    {
+        "date": "2024-10-22",
+        "timeSlots": [
+            { "time": "9:00 am", "available": true },
+            { "time": "10:00 am", "available": false },
+            { "time": "11:00 am", "available": true },
+            { "time": "1:00 pm", "available": true },
+            { "time": "2:00 pm", "available": false },
+            { "time": "3:00 pm", "available": true },
+            { "time": "4:00 pm", "available": false }
+        ]
+    },
+    {
+        "date": "2024-10-23",
+        "timeSlots": [
+            { "time": "9:00 am", "available": true },
+            { "time": "10:00 am", "available": false },
+            { "time": "11:00 am", "available": true },
+            { "time": "1:00 pm", "available": true },
+            { "time": "2:00 pm", "available": false },
+            { "time": "3:00 pm", "available": true },
+            { "time": "4:00 pm", "available": false }
+        ]
+    },
+    {
+        "date": "2024-10-24",
+        "timeSlots": [
+            { "time": "9:00 am", "available": true },
+            { "time": "10:00 am", "available": false },
+            { "time": "11:00 am", "available": true },
+            { "time": "1:00 pm", "available": true },
+            { "time": "2:00 pm", "available": false },
+            { "time": "3:00 pm", "available": true },
+            { "time": "4:00 pm", "available": false }
+        ]
+    },
+    {
+        "date": "2024-10-25",
+        "timeSlots": [
+            { "time": "9:00 am", "available": true },
+            { "time": "10:00 am", "available": false },
+            { "time": "11:00 am", "available": true },
+            { "time": "1:00 pm", "available": true },
+            { "time": "2:00 pm", "available": false },
+            { "time": "3:00 pm", "available": true },
+            { "time": "4:00 pm", "available": false }
+        ]
+    },
+    {
+        "date": "2024-10-26",
+        "timeSlots": [
+            { "time": "9:00 am", "available": true },
+            { "time": "10:00 am", "available": false },
+            { "time": "11:00 am", "available": true },
+            { "time": "1:00 pm", "available": true },
+            { "time": "2:00 pm", "available": false },
+            { "time": "3:00 pm", "available": true },
+            { "time": "4:00 pm", "available": false }
+        ]
+    },
+    {
+        "date": "2024-10-28",
+        "timeSlots": [
+            { "time": "9:00 am", "available": true },
+            { "time": "10:00 am", "available": false },
+            { "time": "11:00 am", "available": true },
+            { "time": "1:00 pm", "available": true },
+            { "time": "2:00 pm", "available": false },
+            { "time": "3:00 pm", "available": true },
+            { "time": "4:00 pm", "available": false }
+        ]
+    },
+    {
+        "date": "2024-10-29",
+        "timeSlots": [
+            { "time": "9:00 am", "available": true },
+            { "time": "10:00 am", "available": false },
+            { "time": "11:00 am", "available": true },
+            { "time": "1:00 pm", "available": true },
+            { "time": "2:00 pm", "available": false },
+            { "time": "3:00 pm", "available": true },
+            { "time": "4:00 pm", "available": false }
+        ]
+    }
+  ]
+];
+
+
 const AppointmentBooking = () => {
   const [selectedMonth, setSelectedMonth] = useState("October");
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
@@ -24,6 +150,7 @@ const AppointmentBooking = () => {
   const [showPrompt, setShowPrompt] = useState(false); // State to control the confirmation prompt
   const [width, setWidth] = useState(window.innerWidth);
   const [height, setHeight] = useState(window.innerHeight);
+  const [availableTimeSlots, setAvailableTimeSlots] = useState([]);
 
   const today = new Date();
   const currentYear = today.getFullYear();

@@ -386,12 +386,13 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
                             country={'ph'}
                             value={emergencyContactNumber}
                             onChange={(phone) => {
-                                let formattedPhone = phone;
-                                if (!phone.startsWith('+')) {
-                                    formattedPhone = `+${phone}`;
+                                let formattedPhone = phone.replace(/[^\d]/g, '');
+                                if (formattedPhone.length <= 10) {
+                                    if (!formattedPhone.startsWith('+')) {
+                                        formattedPhone = `+${formattedPhone}`;
+                                    }
+                                    setContactNumber(formattedPhone);
                                 }
-                                formattedPhone = formattedPhone.replace(/[^\d+]/g, '');
-                                setEmergencyContactNumber(formattedPhone);
                             }}
                             inputClass="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500 mt-1"
                             containerClass="phone-input-container"
