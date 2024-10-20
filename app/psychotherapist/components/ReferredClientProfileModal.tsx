@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { databases } from "@/appwrite";
+import { databases, storage } from "@/appwrite"; // Make sure to initialize the Appwrite storage service
 import { useRouter } from "next/navigation";
-import { Models } from 'appwrite';
+import { Models, Query } from 'appwrite';
 
 interface ReferredClientProfileModalProps {
   clientId: string;
@@ -18,6 +18,7 @@ const ReferredClientProfileModal: React.FC<ReferredClientProfileModalProps> = ({
   const [selectedReportDetails, setSelectedReportDetails] = useState<string | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'sessions' | 'goals'>('sessions');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null); // New state to hold the selected file
 
   const fetchClientData = async (id: string) => {
     try {
@@ -48,28 +49,36 @@ const ReferredClientProfileModal: React.FC<ReferredClientProfileModalProps> = ({
       }
     };
 
-    fetchClientProfile();
+    fetchClientProfile();  
   }, [clientId, isOpen]);
 
   const handleReferClient = async () => {
     try {
-      if (!clientData) {
-        console.error('No client data available');
+      if (!selectedFile) {
+        alert('Please upload a PDF file.');
         return;
       }
-
-      const updatedDocument = await databases.updateDocument(
-        'Butterfly-Database',
-        'Client',
-        clientId,
-        { state: 'referred' }
+  
+      // Step 1: Upload PDF to Appwrite storage
+      const uploadedFile = await storage.createFile(
+        'Images', // Replace with your storage bucket ID
+        'unique()', // Generate a unique ID for the file
+        selectedFile
       );
-
-      console.log('Document updated:', updatedDocument);
-      const refreshedClientData = await fetchClientData(clientId);
-      setClientData(refreshedClientData);
-
-      alert('Client referred successfully!');
+  
+      console.log('File uploaded:', uploadedFile);
+  
+      // Step 2: Create a new document in the database with the uploaded file's ID
+      const updatedDocument = await databases.updateDocument(
+        'Butterfly-Database', // Your Appwrite database ID
+        'Client',        // Collection ID set to 'Certificate'
+        clientId,           // Generate a unique ID for the document
+        {  certificate: uploadedFile.$id, status: 'attached' }
+      );
+  
+      console.log('Document updated with status "attached":', updatedDocument);
+  
+      alert('PDF uploaded and client referred successfully!');
       setIsConfirmModalOpen(false);
     } catch (err: unknown) {
       console.error("Error referring client:", err);
@@ -79,6 +88,12 @@ const ReferredClientProfileModal: React.FC<ReferredClientProfileModalProps> = ({
         alert(`Error referring client: Unknown error occurred`);
       }
     }
+  };
+  
+  // Handler for file selection
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setSelectedFile(file);
   };
 
   const handleViewDetails = (details: string) => {
@@ -163,9 +178,12 @@ const ReferredClientProfileModal: React.FC<ReferredClientProfileModalProps> = ({
                 </button>
                 <button
                   onClick={() => setIsConfirmModalOpen(true)}
-                  className="bg-green-500 text-white px-6 py-2 rounded-full shadow-md hover:shadow-lg hover:bg-green-600 transition-all"
+                  className={`text-white px-6 py-2 rounded-full shadow-md transition-all ${
+                    clientData.status === 'attached' ? 'bg-blue-500 hover:bg-blue-600' : 'bg-green-500 hover:bg-green-600'
+                  }`}
+                  disabled={clientData.status === 'attached'} // Disable the button if status is 'attached'
                 >
-                  Refer
+                  {clientData.status === 'attached' ? 'Certificate already uploaded' : 'Upload Certificate'}
                 </button>
               </div>
             </>
@@ -173,8 +191,33 @@ const ReferredClientProfileModal: React.FC<ReferredClientProfileModalProps> = ({
         )}
       </div>
 
-      {/* Reports Modal */}
-      {isReportsModalOpen && (
+      {/* Confirm Refer Modal */}
+      {isConfirmModalOpen && (
+        <div className="fixed inset-0 bg-blue-600 bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white rounded-lg p-8 w-full max-w-md shadow-lg relative">
+            <button
+              onClick={() => setIsConfirmModalOpen(false)}
+              className="text-blue-400 hover:text-blue-600 absolute top-4 right-4"
+              aria-label="Close modal"
+            >
+              &#10005;
+            </button>
+            <h2 className="text-xl text-gray-800 font-bold mb-6">Upload Certificate PDF</h2>
+            <input type="file" accept="application/pdf" onChange={handleFileChange} />
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={handleReferClient}
+                className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-all"
+              >
+                Upload and Refer Client
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+    {/* Reports Modal */}
+    {isReportsModalOpen && (
         <div className="fixed inset-0 bg-blue-600 bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white rounded-lg p-8 w-full max-w-4xl shadow-lg relative">
             <button
@@ -189,21 +232,21 @@ const ReferredClientProfileModal: React.FC<ReferredClientProfileModalProps> = ({
             </button>
             <h2 className="text-2xl text-blue-400 font-bold mb-6">Reports</h2>
 
-          {/* Tabs */}
-          <div className="flex space-x-4 mb-4">
-            <div
-              onClick={() => setActiveTab('sessions')}
-              className={`cursor-pointer px-4 py-2 rounded-lg ${activeTab === 'sessions' ? 'bg-blue-400 text-white' : 'bg-gray-200 text-gray-800'}`}
-            >
-              Sessions
+            {/* Tabs */}
+            <div className="flex space-x-4 mb-4">
+              <div
+                onClick={() => setActiveTab('sessions')}
+                className={`cursor-pointer px-4 py-2 rounded-lg ${activeTab === 'sessions' ? 'bg-blue-400 text-white' : 'bg-gray-200 text-gray-800'}`}
+              >
+                Sessions
+              </div>
+              <div
+                onClick={() => setActiveTab('goals')}
+                className={`cursor-pointer px-4 py-2 rounded-lg ${activeTab === 'goals' ? 'bg-blue-400 text-white' : 'bg-gray-200 text-gray-800'}`}
+              >
+                Goals
+              </div>
             </div>
-            <div
-              onClick={() => setActiveTab('goals')}
-              className={`cursor-pointer px-4 py-2 rounded-lg ${activeTab === 'goals' ? 'bg-blue-400 text-white' : 'bg-gray-200 text-gray-800'}`}
-            >
-              Goals
-            </div>
-          </div>
 
             {/* Tab Content with Transitions */}
             <div className={`transition-opacity duration-300 ${activeTab === 'sessions' ? 'opacity-100' : 'opacity-0'}`}>
@@ -230,7 +273,7 @@ const ReferredClientProfileModal: React.FC<ReferredClientProfileModalProps> = ({
                             <td className="px-4 py-2 border-blue-400 border-[1px]">
                               <button
                                 onClick={() => handleViewDetails(report.details)}
-                                className="text-blue-500"
+                                className="text-blue-500 hover:text-blue-700"
                               >
                                 View Details
                               </button>
@@ -244,7 +287,7 @@ const ReferredClientProfileModal: React.FC<ReferredClientProfileModalProps> = ({
               )}
             </div>
 
-              {/* Tab Content with Transitions */}
+                 {/* Tab Content with Transitions */}
                  <div className={`transition-opacity duration-300 ${activeTab === 'goals' ? 'opacity-100' : 'opacity-0'}`}>
               {activeTab === 'goals' && (
                 <div className="max-h-[400px] overflow-y-auto">
@@ -258,7 +301,7 @@ const ReferredClientProfileModal: React.FC<ReferredClientProfileModalProps> = ({
                         </tr>
                       </thead>
                       <tbody>
-                        {Array.from({ length: 20 }, (_, index) => ({
+                        {Array.from({ length: 30 }, (_, index) => ({
                           sessionId: `00${index + 1}A`,
                           dateTime: new Date(Date.now() - index * 86400000).toLocaleString(),
                           details: `Detailed report for goal ${index + 1}`,
@@ -282,6 +325,7 @@ const ReferredClientProfileModal: React.FC<ReferredClientProfileModalProps> = ({
                 </div>
               )}
             </div>
+
             <div className="mt-4">
               <button
                 onClick={() => setIsReportsModalOpen(false)}
@@ -294,41 +338,10 @@ const ReferredClientProfileModal: React.FC<ReferredClientProfileModalProps> = ({
         </div>
       )}
 
-      {/* Confirm Referral Modal */}
-      {isConfirmModalOpen && (
-        <div className="fixed inset-0 bg-blue-600 bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white rounded-lg p-8 w-full max-w-md shadow-lg relative">
-            <button
-              onClick={() => setIsConfirmModalOpen(false)}
-              className="text-blue-400 hover:text-blue-600 absolute top-4 right-4"
-              aria-label="Close modal"
-            >
-              &#10005;
-            </button>
-            <h2 className="text-2xl text-blue-400 font-bold mb-4">Confirm Referral</h2>
-            <p>Are you sure you want to refer this client?</p>
-            <div className="mt-6 flex justify-end space-x-4">
-              <button
-                onClick={handleReferClient}
-                className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-all"
-              >
-                Yes, Refer
-              </button>
-              <button
-                onClick={() => setIsConfirmModalOpen(false)}
-                className="bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400 transition-all"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Details Modal */}
       {isDetailsModalOpen && (
         <div className="fixed inset-0 bg-blue-600 bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white rounded-lg p-8 w-full max-w-md shadow-lg relative">
+          <div className="bg-white rounded-lg p-8 w-full max-w-4xl shadow-lg relative">
             <button
               onClick={() => setIsDetailsModalOpen(false)}
               className="text-blue-400 hover:text-blue-600 absolute top-4 right-4"
@@ -336,12 +349,12 @@ const ReferredClientProfileModal: React.FC<ReferredClientProfileModalProps> = ({
             >
               &#10005;
             </button>
-            <h2 className="text-2xl text-blue-400 font-bold mb-4">Report Details</h2>
+            <h2 className="text-xl font-bold mb-4">Report Details</h2>
             <p>{selectedReportDetails}</p>
-            <div className="mt-6 flex justify-end">
+            <div className="mt-4">
               <button
                 onClick={() => setIsDetailsModalOpen(false)}
-                className="bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400 transition-all"
+                className="bg-gray-300 text-gray-800 px-4 py-2 rounded-full hover:bg-gray-400 transition-all"
               >
                 Close
               </button>

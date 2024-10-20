@@ -57,18 +57,19 @@ const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpe
         console.error('No client data available');
         return;
       }
-
+  
+      // Update both state and status in the document
       const updatedDocument = await databases.updateDocument(
         'Butterfly-Database',
         'Client',
         clientId,
-        { state: 'referred' }
+        { state: 'referred', status: 'pending' } // Updating state and status
       );
-
+  
       console.log('Document updated:', updatedDocument);
       const refreshedClientData = await fetchClientData(clientId);
       setClientData(refreshedClientData);
-
+  
       alert('Client referred successfully!');
       setIsConfirmModalOpen(false);
     } catch (err: unknown) {
@@ -80,6 +81,7 @@ const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpe
       }
     }
   };
+  
 
   const handleViewDetails = (details: string) => {
     setSelectedReportDetails(details);
