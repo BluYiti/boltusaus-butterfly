@@ -1,10 +1,11 @@
 'use client';
-import { FC, useState } from 'react';
-import { FaSearch, FaTimes } from 'react-icons/fa'; // Added FaTimes for the clear (X) button
+import { FC, useState, useRef, useEffect } from 'react';
+import { FaSearch, FaTimes } from 'react-icons/fa';
 import Layout from '@/components/Sidebar/Layout';
 import items from '@/client/data/Links';
+import CallNotification from '@/components/CallNotification';
 
-// Interface for Contact
+// Interface Definitions
 interface Contact {
   id: number;
   name: string;
@@ -14,7 +15,6 @@ interface Contact {
   isSession: boolean;
 }
 
-// Interface for Message
 interface Message {
   id: number;
   text: string;
@@ -22,7 +22,13 @@ interface Message {
   time: string;
 }
 
-// Static data for contacts
+// Call State
+interface Call {
+  isActive: boolean;
+  caller: Contact | null;
+}
+
+// Static Data
 const contacts: Contact[] = [
   {
     id: 1,
@@ -34,36 +40,32 @@ const contacts: Contact[] = [
   },
 ];
 
-// Static messages based on contacts (simulate fetching different messages for each contact)
 const chatMessages: { [key: number]: Message[] } = {
   1: [],
 };
 
-// Contact List component with search, clear functionality, and no contacts message
+// Contact List Component
 const ContactList: FC<{ onContactClick: (id: number) => void; selectedContact: number | null }> = ({
   onContactClick,
   selectedContact,
 }) => {
-  const [searchTerm, setSearchTerm] = useState(''); // State for the search term
+  const [searchTerm, setSearchTerm] = useState('');
 
-  const handleClearSearch = () => {
-    setSearchTerm(''); // Clears the search input
-  };
+  const handleClearSearch = () => setSearchTerm('');
 
-  const filteredContacts = contacts.filter((contact) =>
+  const filteredContacts = contacts.filter(contact =>
     contact.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
     <div className="w-1/4 bg-gray-200 p-4 border-r border-gray-200">
       <h1 className="text-xl font-bold text-gray-800">Chats</h1>
-      {/* Search Bar */}
       <div className="relative flex items-center bg-gray-100 p-2 rounded-full mb-4">
         <FaSearch className="text-gray-400 ml-2" />
         <input
           type="text"
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={e => setSearchTerm(e.target.value)}
           placeholder="Search"
           className="flex-grow bg-transparent p-2 outline-none text-sm"
         />
@@ -74,14 +76,13 @@ const ContactList: FC<{ onContactClick: (id: number) => void; selectedContact: n
         )}
       </div>
 
-      {/* No Contacts Found Message */}
       {filteredContacts.length === 0 ? (
         <div className="text-center text-gray-500">
           <p>No contacts found</p>
         </div>
       ) : (
         <div className="space-y-2">
-          {filteredContacts.map((contact) => (
+          {filteredContacts.map(contact => (
             <div
               key={contact.id}
               className={`flex items-center p-3 rounded-lg cursor-pointer transition ${
@@ -111,18 +112,18 @@ const ContactList: FC<{ onContactClick: (id: number) => void; selectedContact: n
   );
 };
 
-// Chat Box component (unchanged)
+// Chat Box Component
 const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSendMessage: (text: string) => void }> = ({
   selectedContact,
   messages,
   onSendMessage,
 }) => {
-  const [messageInput, setMessageInput] = useState(''); // Message input state
+  const [messageInput, setMessageInput] = useState('');
 
   const handleSendMessage = () => {
     if (messageInput.trim()) {
       onSendMessage(messageInput);
-      setMessageInput(''); // Clear the input after sending
+      setMessageInput('');
     }
   };
 
@@ -136,7 +137,6 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSend
 
   return (
     <div className="w-3/4 p-6 flex flex-col justify-between">
-      {/* Chat Header */}
       <div className="flex items-center mb-4 justify-between">
         <div className="flex items-center">
           <img
@@ -148,18 +148,10 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSend
         </div>
       </div>
 
-      {/* Messages */}
       <div className="flex-grow overflow-y-auto space-y-4">
-        {messages.map((message) => (
-          <div
-            key={message.id}
-            className={`flex ${
-              message.sender === 'client' ? 'justify-end' : 'justify-start'
-            }`}
-          >
-            <div className={`max-w-xs p-4 rounded-lg shadow ${
-              message.sender === 'client' ? 'bg-blue-100' : 'bg-gray-100'
-            }`}>
+        {messages.map(message => (
+          <div key={message.id} className={`flex ${message.sender === 'client' ? 'justify-end' : 'justify-start'}`}>
+            <div className={`max-w-xs p-4 rounded-lg shadow ${message.sender === 'client' ? 'bg-blue-100' : 'bg-gray-100'}`}>
               <p>{message.text}</p>
               <span className="block text-xs text-gray-400">{message.time}</span>
             </div>
@@ -167,12 +159,11 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSend
         ))}
       </div>
 
-      {/* Message Input */}
       <div className="flex items-center mt-4 border-t pt-4">
         <input
           type="text"
           value={messageInput}
-          onChange={(e) => setMessageInput(e.target.value)}
+          onChange={e => setMessageInput(e.target.value)}
           placeholder="Type a message..."
           className="flex-grow p-2 border border-gray-300 rounded-full"
         />
@@ -187,18 +178,17 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSend
   );
 };
 
-// Main Chat Page component (unchanged)
+// Main Chat Page Component
 const ChatPage: FC = () => {
   const [selectedContactId, setSelectedContactId] = useState<number | null>(null);
-  const [messagesByContact, setMessagesByContact] = useState(chatMessages); // State to manage messages
-  const [userName, setUserName] = useState('Client'); // Define userName, can be dynamic
+  const [messagesByContact, setMessagesByContact] = useState(chatMessages);
+  const [call, setCall] = useState<Call>({ isActive: false, caller: null });
+  const [isVideoCallActive, setIsVideoCallActive] = useState(false);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
 
-  const selectedContact = contacts.find((contact) => contact.id === selectedContactId) || null;
-
-  // Fetch messages based on selected contact
+  const selectedContact = contacts.find(contact => contact.id === selectedContactId) || null;
   const messages = selectedContact ? messagesByContact[selectedContactId] || [] : [];
 
-  // Function to handle sending a new message
   const handleSendMessage = (text: string) => {
     if (selectedContactId === null) return;
 
@@ -209,29 +199,63 @@ const ChatPage: FC = () => {
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
 
-    setMessagesByContact((prevMessages) => ({
+    setMessagesByContact(prevMessages => ({
       ...prevMessages,
       [selectedContactId]: [...(prevMessages[selectedContactId] || []), newMessage],
     }));
   };
 
+  const handleIncomingCall = (caller: Contact) => {
+    setCall({ isActive: true, caller });
+  };
+
+  const handleAcceptCall = () => {
+    setCall({ isActive: false, caller: null }); // Hide call notification
+    setIsVideoCallActive(true); // Start video call
+  };
+
+  useEffect(() => {
+    if (isVideoCallActive && videoRef.current) {
+      const startVideoCall = async () => {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+          videoRef.current.srcObject = stream;
+        } catch (err) {
+          console.error('Error accessing media devices.', err);
+        }
+      };
+      startVideoCall();
+      return () => {
+        if (videoRef.current && videoRef.current.srcObject) {
+          (videoRef.current.srcObject as MediaStream).getTracks().forEach(track => track.stop());
+        }
+      };
+    }
+  }, [isVideoCallActive]);
+
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
       <div className="text-black min-h-screen flex">
-        {/* Main Content */}
-        <div className="flex-grow flex flex-col justify-between">
-          {/* Top Section with User Info and Header */}
-          <div className="bg-white shadow-lg py-4 px-6 flex justify-between items-center">
-            <div className="flex items-center space-x-3">
+        {!isVideoCallActive ? (
+          <div className="flex-grow flex flex-col justify-between">
+            <div className="flex h-screen">
+              <ContactList onContactClick={setSelectedContactId} selectedContact={selectedContactId} />
+              <ChatBox selectedContact={selectedContact} messages={messages} onSendMessage={handleSendMessage} />
             </div>
           </div>
-
-          {/* Chat Layout */}
-          <div className="flex h-screen">
-            <ContactList onContactClick={setSelectedContactId} selectedContact={selectedContactId} />
-            <ChatBox selectedContact={selectedContact} messages={messages} onSendMessage={handleSendMessage} />
+        ) : (
+          <div className="relative w-full h-screen border-8 border-gray-500"> {/* Full-size video call area */}
+            <video ref={videoRef} className="rounded-lg w-full h-full object-cover" autoPlay></video>
           </div>
-        </div>
+        )}
+
+        {/* Call Notification */}
+        {call.isActive && (
+          <CallNotification
+            caller={call.caller}
+            onAccept={handleAcceptCall}
+          />
+        )}
       </div>
     </Layout>
   );
