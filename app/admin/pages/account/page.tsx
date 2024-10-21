@@ -1,4 +1,4 @@
-'use client';
+'use client'
 
 import { SetStateAction, useEffect, useMemo, useState } from "react";
 import items from "@/admin/data/Links";
@@ -58,6 +58,7 @@ const Account = () => {
   const totalEntries = filteredUsers.length;
 
   const paginate = (pageNumber: SetStateAction<number>) => setCurrentPage(pageNumber);
+
   const { loading } = useAuthCheck(['admin']);
 
   if (loading) return <LoadingScreen />;
@@ -87,7 +88,11 @@ const Account = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
             className="flex-1 w-full px-4 py-2 border rounded"
           />
-          <button className="bg-green-500 text-white px-4 py-2 rounded hover:bg-blue-600" onClick={openModal}>
+          <button 
+            className={`px-4 py-2 rounded hover:bg-blue-600 ${selectedTab === "Client" ? "bg-gray-400 cursor-not-allowed" : "bg-green-500 text-white"}`}
+            onClick={openModal}
+            disabled={selectedTab === "Client"}
+          >
             Add Account
           </button>
         </div>
@@ -145,7 +150,11 @@ const Account = () => {
         </div>
       </div>
 
-      {isModalOpen && <AddAccountModal closeModal={closeModal} />}
+      <AddAccountModal 
+        isOpen={isModalOpen} 
+        onClose={closeModal} 
+        selectedTab={selectedTab} 
+      />
     </Layout>
   );
 };
