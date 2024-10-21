@@ -54,13 +54,13 @@ export default function PreAssessmentPage() {
 
           <div className="flex justify-between gap-4 mt-6">
             <button
-              className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-500"
+              className="flex-1 bg-blue-400 text-white py-2 px-4 rounded-md hover:bg-blue-800"
               onClick={handleBack}
             >
               Back
             </button>
             <button
-              className="flex-1 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-500"
+              className="flex-1 bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-700"
               onClick={handleFormSubmit} // Opens the confirmation modal
             >
               Submit

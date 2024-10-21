@@ -45,7 +45,7 @@ const SubmissionModal: React.FC<SubmissionModalProps> = ({
               Thank you for completing the Pre-Assessment! You will receive the results and recommendations in your email within a few hours. Please check your inbox for further instructions.
             </p>
             <button
-              className="bg-blue-600 text-white py-2 px-4 rounded-full hover:bg-blue-500"
+              className="bg-green-500 text-white py-2 px-4 rounded-full hover:bg-green-700"
               onClick={onClose}
             >
               DONE
@@ -70,10 +70,10 @@ const SubmissionModal: React.FC<SubmissionModalProps> = ({
                   </button>
                   <button
                     onClick={onConfirm}
-                    className="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-500"
+                    className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-700"
                   >
                     Submit
-                  </button>
+                  </button> 
                 </>
               )}
 
