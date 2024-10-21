@@ -50,33 +50,6 @@ const NewClientDashboard = () => {
     fetchUserData();
   }, []);
 
-  // Conditionally render UI based on user status
-  if (status === "Referred Client") {
-    return (
-<Layout sidebarTitle="Butterfly" sidebarItems={items}>
-        {/* Centered Referred Client Content */}
-        <div className="flex justify-center items-center h-screen">
-          <div className="bg-white rounded-lg shadow-lg p-6 w-full md:w-1/2">
-            <div className="text-center">
-              <div className="text-4xl mb-4">🌞</div>
-              <h2 className="text-xl font-semibold mb-4">
-                You have been referred by the Psychotherapist to a different clinic.
-              </h2>
-              <p className="text-gray-600 mb-4">
-                Please view and download the attached referral certificate below.
-              </p>
-              <a href="/path/to/referral/certificate" download>
-                <button className="bg-blue-500 text-white px-4 py-2 rounded-lg">
-                  Download Referral Certificate
-                </button>
-              </a>
-            </div>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
-
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
       {/* Header Section */}
