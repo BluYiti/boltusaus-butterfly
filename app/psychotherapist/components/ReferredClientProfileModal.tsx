@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { databases, storage } from "@/appwrite"; // Make sure to initialize the Appwrite storage service
-import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Models, Query } from 'appwrite';
 
 interface ReferredClientProfileModalProps {
@@ -108,7 +108,7 @@ const ReferredClientProfileModal: React.FC<ReferredClientProfileModalProps> = ({
       <div
         role="dialog"
         aria-modal="true"
-        className="bg-white rounded-lg p-8 w-full max-w-4xl shadow-lg relative"
+        className="bg-white rounded-xl p-8 max-w-4xl shadow-lg relative"
       >
         <button
           onClick={onClose}
@@ -119,7 +119,9 @@ const ReferredClientProfileModal: React.FC<ReferredClientProfileModalProps> = ({
         </button>
 
         {loading ? (
-          <p>Loading...</p>
+          <div className="bg-white rounded-full p-6">
+            <Image src={'/gifs/load.gif'} alt={'loading'} width={250} height={250} className='rounded-full'></Image>
+          </div>
         ) : error ? (
           <p className="text-red-500">{error}</p>
         ) : (

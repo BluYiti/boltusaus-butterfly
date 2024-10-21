@@ -129,7 +129,7 @@ const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpe
                   </h2>
                 </div>
                 <div className="flex-grow">
-                  <h3 className="text-xl font-bold mb-2 text-gray-900">Client’s Profile</h3>
+                  <h3 className="text-xl font-bold mb-2 text-gray-900">Client's Profile</h3>
                   <div className="grid grid-cols-2 gap-6 text-gray-700">
                     <div>
                       <p><strong>Home Address:</strong> {clientData.address}</p>

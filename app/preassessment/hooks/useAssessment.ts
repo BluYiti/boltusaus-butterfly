@@ -92,11 +92,13 @@ export const useAssessment = (questions: Question[] = []) => {
   };
 
   const confirmSubmit = async () => {
-    // Create the pre-assessment document
     try {
-      const serializedAnswers = JSON.stringify(answers);
+      // Transform the answers array to include question, answer string, and answer integer
+      const transformedAnswers = answers.map((answer) => 
+        `Question: ${answer.question}, Answer Int: ${answer.answerInt}, Answer: ${answer.answerStr || answer.answerInt}`
+      );
   
-      // Store the answers in the Pre-Assessment collection
+      // Store the transformed answers as an array of strings
       await databases.createDocument(
         DATABASE_ID,
         COLLECTION_ID_PREASSESSMENT,
@@ -104,35 +106,35 @@ export const useAssessment = (questions: Question[] = []) => {
         {
           userID: clientID,
           userName,
-          answers: serializedAnswers,
+          answers: transformedAnswers, // Pass the transformed array
           date: new Date().toISOString(),
         }
       );
-
+  
       try {
         // Update the state attribute of the client document to "evaluate"
         await databases.updateDocument(
           DATABASE_ID,
           COLLECTION_ID_CLIENT,
-          clientID, // Document ID (same as userID)
-          { state: 'evaluate' } // Updating the state field to "evaluate"
+          clientID,
+          { state: 'evaluate' }
         ); 
-
-        try{
+  
+        try {
           await account.updatePrefs({
             role: 'New Client',
             status: 'To Be Evaluated',
           });
-
+  
           setModalMessage('Your answers have been submitted successfully');
           setModalType('success');
           setModalOpen(true);
-        } catch (error){
+        } catch (error) {
           setModalMessage(`Error updating client prefs: ${error instanceof Error ? error.message : 'Unknown error'}`);
           setModalType('error');
           setModalOpen(true);
         }
-      }catch (error){
+      } catch (error) {
         setModalMessage(`Error updating client state: ${error instanceof Error ? error.message : 'Unknown error'}`);
         setModalType('error');
         setModalOpen(true);
