@@ -120,20 +120,9 @@ export const useAssessment = (questions: Question[] = []) => {
           { state: 'evaluate' }
         ); 
   
-        try {
-          await account.updatePrefs({
-            role: 'New Client',
-            status: 'To Be Evaluated',
-          });
-  
-          setModalMessage('Your answers have been submitted successfully');
-          setModalType('success');
-          setModalOpen(true);
-        } catch (error) {
-          setModalMessage(`Error updating client prefs: ${error instanceof Error ? error.message : 'Unknown error'}`);
-          setModalType('error');
-          setModalOpen(true);
-        }
+        setModalMessage('Your answers have been submitted successfully');
+        setModalType('success');
+        setModalOpen(true);
       } catch (error) {
         setModalMessage(`Error updating client state: ${error instanceof Error ? error.message : 'Unknown error'}`);
         setModalType('error');
@@ -149,7 +138,7 @@ export const useAssessment = (questions: Question[] = []) => {
   const closeModal = () => {
     if (modalType === 'success') {
       setModalOpen(false);
-      router.push('../../client/pages/newClientDashboard');
+      router.push('../../client');
     } else {
       setModalOpen(false);
     }

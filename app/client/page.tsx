@@ -93,33 +93,52 @@ const NewClientDashboard = () => {
 
       <div className="flex justify-between items-start space-x-4 px-8 ">
         {/* Left side - Pre-assessment and Psychotherapists Section */}
-        <div className="flex-1 bg-white p-6 rounded-lg shadow-lg mb-6 mt-8 h-[26rem] w-[56%]">
+        <div className="flex-1 bg-white p-6 rounded-lg shadow-lg mb-6 mt-8 h-[27rem] w-[56%]">
+          {/* Conditionally render based on client state */}
           {state === "new" && (
-              <div className="text-xl font-semibold mb-6">
-                  {state === "new" ? (
-                      <Link href="/preassessment">
-                          <button className="bg-[#2563EB] text-white font-bold py-2 px-4 rounded hover:bg-blue-300   hover:scale-105">
-                              Start Pre-assessment test
-                          </button>
-                      </Link>
-                  ) : (
-                      <>
-                          <button
-                              className="bg-gray-300 text-gray-600 font-bold py-2 px-4 rounded cursor-not-allowed"
-                              disabled
-                          >
-                              Start Pre-assessment test
-                          </button>
-                          <div className="speech-bubble mt-4">
-                              <p className="text-black font-semibold">
-                                  Pre-assessment Already Completed! <br />
-                                  Please wait for the confirmation, it might take 1-2 days! <br />
-                                  Thank You!
-                              </p>
-                          </div>
-                      </>
-                  )}
+            <Link href="/preassessment">
+              <button className="bg-[#2563EB] text-white py-2 px-4 mb-4 rounded text-xl font-semibold hover:bg-blue-300 hover:scale-105">
+                Start Pre-assessment test
+              </button>
+            </Link>
+          )}
+
+          {state === "evaluate" && status === "pending" && (
+            <>
+              <div className="relative group flex"> {/* Wrapper for hover effect */}
+                <button
+                  className="bg-gray-300 text-gray-600 font-bold mb-4 py-2 px-4 rounded cursor-not-allowed"
+                  disabled
+                >
+                  Pre-assessment Done!
+                </button>
+                <p className="ml-2 bg-[#2563EB] text-white mb-4 py-2 px-4 rounded">
+                    Please wait for the confirmation via SMS, it might take 1-2 days! Thank You!
+                  </p>
               </div>
+            </>
+          )}
+
+          {state === "current" && (
+            <div className="mb-4 text-green-600 text-4xl flex items-center">
+              <Link href="/client/pages/newappointment">
+                <button className="text-xl font-semibold bg-blue-500 hover:bg-gray-500 text-white py-2 px-4 rounded">
+                  Book your appointment
+                </button>
+              </Link>
+              <span className="ml-3 text-green-600 animate-bounce">✅</span>
+              <span className="text-lg font-bold">Evaluation Completed!</span>
+            </div>
+          )}
+
+          {state === "referred" && status === "attached" && (
+            <div className="mb-4 text-green-600 text-4xl flex items-center">
+              <button className="ml-4 text-xl font-semibold bg-blue-500 hover:bg-gray-500 text-white py-2 px-4 rounded">
+                Click me to download Certificate.
+              </button>
+              <span className="text-green-600 animate-bounce">✅</span>
+              <span className="ml-2 text-lg font-bold">You have been referred</span>
+            </div>
           )}
 
           {/* Psychotherapists Section */}
@@ -133,7 +152,7 @@ const NewClientDashboard = () => {
                 className="flex transition-transform duration-500 ease-in-out"
                 style={{
                   transform: `translateX(-${(currentIndex / psychotherapists.length) * 100}%)`,
-                  width: `${(psychotherapists.length / visibleSlides) * 100}%`
+                  width: `${(psychotherapists.length / visibleSlides) * 100}%`,
                 }}
               >
                 {psychotherapists.map((psychotherapist, index) => (
@@ -184,9 +203,9 @@ const NewClientDashboard = () => {
         </div>
 
         {/* Right side - A Daily Reminder Section */}
-        <div className="flex-1 bg-white p-6 rounded-lg shadow-lg mt-8 h-[26rem]">
+        <div className="flex-1 bg-white p-6 rounded-lg shadow-lg mt-8 h-[27rem]">
           <h2 className="font-bold sm:text-2xl 2xl:text-4xl text-blue-950 mb-6">A Daily Reminder to Yourself</h2>
-          <div className="sm:space-y-4 3xl:space-y-7 max-h-[300px] text-black">
+          <div className="sm:space-y-5 3xl:space-y-8 max-h-[300px] text-black">
               <div className="bg-blue-50 border-blue-300 p-2 rounded-lg shadow-lg transition-transform transform hover:scale-105 hover:shadow-2xl duration-300">
                   <h2 className="font-semibold text-lg mb-2">😊 This Too Shall Pass</h2>
                   <p className="text-gray-800">Feelings are temporary. Hold on, better days are coming.</p>

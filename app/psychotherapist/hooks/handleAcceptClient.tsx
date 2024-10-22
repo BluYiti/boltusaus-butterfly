@@ -1,5 +1,4 @@
 import { databases, Query } from '@/appwrite';
-import { useRouter } from 'next/navigation';
 
 interface AcceptClientProps {
   clientId: string;
@@ -9,8 +8,6 @@ interface AcceptClientProps {
 }
 
 const AcceptClient: React.FC<AcceptClientProps> = ({ clientId, score, showModal, setShowModal }) => {
-  const router = useRouter();
-
   const confirmAccept = async () => {
     try {
       console.log("Starting the client acceptance process...");
@@ -47,7 +44,8 @@ const AcceptClient: React.FC<AcceptClientProps> = ({ clientId, score, showModal,
   
       // Navigate to accepted client booking page
       console.log("Navigating to the accepted client booking page.");
-      router.push('/psychotherapist/pages/clients');
+      setShowModal(false);
+      window.location.reload();
     } catch (error) {
       console.error(`Error during client acceptance process: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
@@ -55,7 +53,6 @@ const AcceptClient: React.FC<AcceptClientProps> = ({ clientId, score, showModal,
       console.log("Client acceptance process finished.");
     }
   };
-  
 
   const cancelAccept = () => {
     setShowModal(false);

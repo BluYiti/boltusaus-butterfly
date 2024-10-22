@@ -69,6 +69,15 @@ const ReviewPreAssModal: React.FC<ReviewPreAssModalProps> = ({ clientId, isOpen,
       try {
         setLoading(true);
         const data = await fetchPreAssessment(clientId);
+        
+          // Check the number of documents
+          if (data.length > 1) {
+            setError("Multiple pre-assessment documents found.");
+            // You can use a popup function here, e.g.:
+            alert("Many pre-assessments found. Please check the records.");
+            return; // Exit early
+          }
+        
         const allAnswers = data.flatMap((doc) => doc.answers || []);
         const parsedAnswers = allAnswers.map((answerString) => {
           const questionMatch = answerString.match(/Question: (.*?), Answer Int:/);

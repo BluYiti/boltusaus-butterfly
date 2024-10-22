@@ -1,5 +1,4 @@
 import { databases, Query } from '@/appwrite';
-import { useRouter } from 'next/navigation';
 
 interface ReferClientProps {
   clientId: string;
@@ -9,8 +8,6 @@ interface ReferClientProps {
 }
 
 const ReferClient: React.FC<ReferClientProps> = ({ clientId, score, showModal, setShowModal }) => {
-  const router = useRouter();
-
   const confirmRefer = async () => {
     try {
       console.log("Starting the client acceptance process...");
@@ -50,7 +47,7 @@ const ReferClient: React.FC<ReferClientProps> = ({ clientId, score, showModal, s
   
       // Navigate to accepted client booking page
       console.log("Navigating to the accepted client booking page.");
-      router.push('/psychotherapist/pages/clients');
+      window.location.reload();
     } catch (error) {
       console.error(`Error during client acceptance process: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {

@@ -5,7 +5,7 @@ import { CiWallet } from "react-icons/ci";
 
 const items: { href: string; label: string; icon: IconType }[] = [
   { href: "/client", label: "Home", icon: () => <FiHome /> },
-  { href: "/client/pages/acceptedClientBooking", label: "Book Appointment", icon: () => <FiClock /> },
+  { href: "/client/pages/bookappointment", label: "Book Appointment", icon: () => <FiClock /> },
   { href: "/client/pages/profile", label: "Profile", icon: () => <FiUser /> },
   { href: "/client/pages/cmessage", label: "Communication", icon: () => <CiChat1 /> },
   { href: "/client/pages/payment", label: "Payments", icon: () => <CiWallet /> },

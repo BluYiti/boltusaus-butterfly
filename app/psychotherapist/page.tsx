@@ -15,6 +15,8 @@ interface Availability {
 }
 
 const Dashboard: React.FC = () => {
+  const { loading: authLoading } = useAuthCheck(['psychotherapist']); // Call the useAuthCheck hook
+  const [dataLoading, setDataLoading] = useState(true); // State to track if data is still loading
   const [date, setDate] = useState(new Date());
   const [availability, setAvailability] = useState<Availability[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -91,6 +93,10 @@ const Dashboard: React.FC = () => {
   };
 
   const currentMonthWeeks = getCurrentMonthWeeks(date);
+
+  if (authLoading || dataLoading) {
+    return <LoadingScreen />; // Show the loading screen while the auth check or data loading is in progress
+  }
 
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
