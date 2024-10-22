@@ -1,26 +1,49 @@
 'use client';
 
 import { useState } from 'react';
-import { account, databases } from '@/appwrite'; // Keep both account and databases imports
+import { account, databases, Query } from '@/appwrite'; // Make sure to import databases
 import { useRouter } from 'next/navigation';
 
 export const useLogin = () => {
     const [error, setError] = useState<string | null>(null);
+    const [loading, setLoading] = useState<boolean>(false);
     const router = useRouter();
 
-    // Fetch user role from the database
-    const fetchUserRoleFromDatabase = async (UserId: string) => {
+    // Fetch user role from the accounts collection
+    const fetchUserRole = async (userId: string) => {
         try {
-            const response = await databases.getDocument('Butterfly-Database', 'Accounts', UserId);
+            const response = await databases.getDocument('Butterfly-Database', 'Accounts', userId);
             return response.role; // Adjust this based on your data structure
         } catch (err) {
-            console.error('Failed to fetch user role from database:', err);
+            console.error('Failed to fetch user role:', err);
             return null;
         }
     };
 
-    // Redirect based on user role
-    const handleUserRoleRedirect = (role: string) => {
+    // Fetch user state
+    const fetchUserState = async (userId: string) => {
+        try {
+            const response = await databases.listDocuments('Butterfly-Database', 'Client', [Query.equal('userid', userId),]);
+            return response.documents[0]?.state || null; // Assuming response.documents contains an array
+        } catch (error) {
+            console.error('Error fetching user state:', error);
+            return null;
+        }
+    };
+
+    // Fetch user status
+    const fetchUserStatus = async (userId: string) => {
+        try {
+            const response = await databases.listDocuments('Butterfly-Database', 'Client', [Query.equal('userid', userId),]);
+            return response.documents[0]?.status || null; // Assuming response.documents contains an array
+        } catch (error) {
+            console.error('Error fetching user state:', error);
+            return null;
+        }
+    };
+
+    // Redirect based on user role and state
+    const handleUserRoleRedirect = (role: string, state: string, status: string) => {
         switch (role) {
             case 'admin':
                 router.push('/admin');
@@ -32,63 +55,72 @@ export const useLogin = () => {
                 router.push('/associate');
                 break;
             case 'client':
-                router.push('/client');
+                if (state === 'new' || state === 'evaluate') {
+                    router.push('/client/pages/newClientDashboard');
+                }else if(state ==='referred' && status === 'pending'){
+                    router.push('/client/pages/newClientDashboard');
+                }else {
+                    router.push('/client/pages/acceptedClientBooking');
+                }
                 break;
             default:
                 setError('Unknown role. Please contact support.');
         }
     };
 
+    // Login function
     const login = async (email: string, password: string) => {
         setError(null); // Reset error before trying to log in
+        setLoading(true); // Start loading
 
         try {
-            // Check if there is already an active session
             let user = null;
+
             try {
-                user = await account.get();  // Check if a session exists
+                // Check if there is already an active session
+                user = await account.get();
                 console.log('User is already logged in:', user.$id);
             } catch (err) {
                 console.log('No active session, proceeding to login...');
             }
 
-            // If no user session exists, attempt to log in
+            // If no session, attempt to log in
             if (!user) {
                 try {
-                    // Attempt to create a new session with email and password
                     await account.createEmailPasswordSession(email, password);
-                    user = await account.get();  // Fetch the user after successful login
+                    user = await account.get(); // Fetch the user after successful login
                     console.log('Logged in user:', user.$id);
                 } catch (err: any) {
                     console.error('Login failed:', err);
                     setError('Invalid email or password. Please try again.');
-                    return;  // Stop further execution if login fails
+                    return;
                 }
             }
 
-            // Step 1: Check for the role from user preferences (prefs.role)
-            const prefsRole = user.prefs?.role;
+            // Fetch user role and state
+            const role = await fetchUserRole(user.$id);
+            const state = await fetchUserState(user.$id);
+            const status = await fetchUserStatus(user.$id);
 
-            // If the user's prefs.role is "New Client", redirect them immediately
-            if (prefsRole === 'New Client') {
-                router.push('/client/pages/newClientDashboard'); // Redirect to NewClientDashboard for new clients
-                return; // Stop further execution
-            }
-
-            // Step 2: If not "New Client", fetch the role from the database
-            const dbRole = await fetchUserRoleFromDatabase(user.$id);
-
-            if (dbRole) {
-                // Redirect based on the role from the database
-                handleUserRoleRedirect(dbRole);
-            } else {
+            if (!role) {
                 setError('No role assigned to the user. Contact support.');
+                return;
             }
+
+            if (!state) {
+                setError('No state assigned to the client. Contact support.');
+                return;
+            }
+
+            // Handle redirection based on role and state
+            handleUserRoleRedirect(role, state, status);
         } catch (err: any) {
             console.error('Error during login:', err);
             setError(`Login failed: ${err.message}`);
+        } finally {
+            setLoading(false); // Stop loading after all operations are complete
         }
     };
 
-    return { login, error };
+    return { login, error, loading };
 };

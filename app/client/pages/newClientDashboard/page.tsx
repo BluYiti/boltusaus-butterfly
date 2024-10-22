@@ -1,4 +1,4 @@
-"use client"; // Mark this file as a Client Component
+'use client'
 
 import React, { useState, useEffect } from "react";
 import Layout from "@/components/Sidebar/Layout"; // Adjust the path if necessary
@@ -7,7 +7,10 @@ import Link from "next/link"; // Import Link for navigation
 import '../../../globals.css';
 import 'typeface-roboto';
 import 'typeface-lora';
-import { account, databases } from "@/appwrite"; // Import Appwrite account service for fetching user data
+import { useRouter } from "next/navigation";
+import { account, databases, Query } from "@/appwrite"; // Import Appwrite account service for fetching user data
+import useAuthCheck from "@/auth/page"; // Correct import path for useAuthCheck
+import LoadingScreen from "@/components/LoadingScreen"; // Import LoadingScreen component
 
 const therapists = [
   {
@@ -23,22 +26,20 @@ const therapists = [
 ];
 
 const NewClientDashboard = () => {
+  const [state, setState] = useState<string | null>(null); // State to track user state
   const [status, setStatus] = useState<string | null>(null); // State to track user status
   const [userName, setUserName] = useState<string | null>(null); // State to track user name
   const [users, setUsers] = useState([]);
+  
+  const router = useRouter();
+  const { loading } = useAuthCheck(['client']); // Call the useAuthCheck hook
+  // Redirect if the state is 'current' or if state is 'referred' and status is 'attached'
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const user = await account.get();
-        console.log("User Data: ", user); // Debugging step
-
-        // Set the user's name and status from user data
+        const user = await account.get(); // Get user information
         setUserName(user.name); // Assuming Appwrite returns 'name' field for the user
-        if (user.prefs?.status) {
-          setStatus(user.prefs.status);
-        }
-
         
         const response = await databases.listDocuments("Butterfly-Database", "Client");
         setUsers(response.documents);
@@ -47,8 +48,35 @@ const NewClientDashboard = () => {
       }
     };
 
+    const fetchUserState = async () => {
+      try {
+        const user = await account.get(); // Get user information
+        const response = await databases.listDocuments(
+          'Butterfly-Database', 
+          'Client', 
+          [Query.equal('userid', user.$id)] // Fetch documents where userid matches the logged-in user
+        );
+        
+        // Assuming the user's state is in response.documents[0] (adjust if needed)
+        const userState = response.documents[0]?.state;
+        const userStatus = response.documents[0]?.status;
+        setState(userState);
+        setStatus(userStatus);
+      } catch (error) {
+        console.error('Error fetching user state:', error);
+      }
+    };
+
     fetchUserData();
-  }, []);
+    fetchUserState();
+  }, [router]); // Dependency array includes router for redirection
+
+  if (loading) {
+    if (state === 'current' || (state === 'referred' && status === 'attached')) {
+      router.push('/client/pages/acceptedClientBooking');
+    }
+    return <LoadingScreen />; // Show the loading screen while the auth check is in progress
+  }
 
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
@@ -58,7 +86,7 @@ const NewClientDashboard = () => {
           Welcome, {userName ? userName : "Client"}!
         </h2>
         <p className="text-gray-600 text-lg font-lora">
-          Book your therapy sessions with ease and embark your path to well-being.
+          Book your therapy sessions with ease and embark on your path to well-being.
         </p>
       </div>
 
@@ -70,7 +98,7 @@ const NewClientDashboard = () => {
               <div className="text-left mb-8">
                 <div className="text-xl font-semibold">
                   {/* Conditionally render pre-assessment button based on user status */}
-                  {status === "To Be Evaluated" || users.status === "evaluate" ? (
+                  {status !== "evaluate" ? (
                     <>
                       <button
                         className="bg-gray-300 text-gray-600 font-bold py-2 px-4 rounded cursor-not-allowed"
@@ -87,7 +115,7 @@ const NewClientDashboard = () => {
                       </div>
                     </>
                   ) : (
-                    <Link href="../../../preassessment"> 
+                    <Link href="../../../preassessment">
                       <button className="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-700">
                         Start Pre-assessment test
                       </button>
@@ -149,23 +177,14 @@ const NewClientDashboard = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
                   <div className="bg-white p-4 rounded-lg shadow transition-all duration-300 hover:shadow-xl">
                     <div className="font-semibold text-blue-500 font-roboto">Take time to Meditate</div>
-                    <p className="text-sm font-lora">20-30 minutes/day 🧘‍♀️</p>
+                    <p className="text-gray-700 font-lora">Find a peaceful space to meditate and breathe deeply.</p>
                   </div>
                   <div className="bg-white p-4 rounded-lg shadow transition-all duration-300 hover:shadow-xl">
-                    <div className="font-semibold text-blue-500 font-roboto">Have Time with your pets</div>
-                    <p className="text-sm font-lora">Be sure to have some playtime with your beloved pets 🐶</p>
-                  </div>
-                  <div className="bg-white p-4 rounded-lg shadow transition-all duration-300 hover:shadow-xl">
-                    <div className="font-semibold text-blue-500 font-roboto">Workout and Exercise</div>
-                    <p className="text-sm font-lora">30-35 minutes/day 💪</p>
-                  </div>
-                  <div className="bg-white p-4 rounded-lg shadow transition-all duration-300 hover:shadow-xl">
-                    <div className="font-semibold text-blue-500 font-roboto">Paint something colorful</div>
-                    <p className="text-sm font-lora">Showcase your talent, be unique and creative! 🎨</p>
+                    <div className="font-semibold text-blue-500 font-roboto">Engage in physical activity</div>
+                    <p className="text-gray-700 font-lora">Go for a walk, stretch, or do some light exercise.</p>
                   </div>
                 </div>
               </div>
-
             </div>
           </div>
         </div>

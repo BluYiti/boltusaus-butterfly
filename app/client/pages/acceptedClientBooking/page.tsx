@@ -4,7 +4,9 @@ import React, { useEffect, useState } from "react";
 import Layout from "@/components/Sidebar/Layout"; // Adjust the path if necessary
 import items from "@/client/data/Links";
 import Link from "next/link"; // Import Link for navigation
-import { account } from "@/appwrite"; // Ensure Appwrite is configured correctly
+import { account, databases, Query } from "@/appwrite"; // Ensure Appwrite is configured correctly
+import useAuthCheck from "@/auth/page";
+import LoadingScreen from "@/components/LoadingScreen";
 
 const months = [
   { name: "January", days: 31 },
@@ -35,58 +37,58 @@ const therapists = [
 ];
 
 const AcceptedClientBooking = () => {
+  {/* USER AUTHENTICATION PART */}
+  const { loading } = useAuthCheck(['client']); // Call the useAuthCheck hook
+
   const [selectedMonth, setSelectedMonth] = useState(9); // October as default
   const [selectedDay, setSelectedDay] = useState(null);
   const [selectedTime, setSelectedTime] = useState("");
   const [selectedTherapist] = useState(therapists[0]); // Default therapist
   const [appointmentBooked, setAppointmentBooked] = useState(false); // Success message state
   const [showPrompt, setShowPrompt] = useState(false); // Confirmation prompt state
+  const [users, setUsers] = useState([]);
   const [status, setStatus] = useState(null); // State to track client status
   const [role, setRole] = useState(null); // State to track client role
-  const [loading, setLoading] = useState(true); // State for loading
 
   useEffect(() => {
-    const fetchUserStatus = async () => {
+    // Fetch user state
+    const fetchUserState = async () => {
       try {
-        const user = await account.get();
-        console.log("User Preferences: ", user.prefs); // Debugging step
+        const user = await account.get(); // Get user information
+        const response = await databases.listDocuments(
+          'Butterfly-Database', 
+          'Client', 
+          [Query.equal('userid', user.$id)] // Fetch documents where userid matches the logged-in user
+        );
+        
+        // Assuming the user's state is in response.documents[0] (adjust if needed)
+        const userState = response.documents[0]?.state;
+        setStatus(userState);
 
-        // Set the status and role from user preferences
-        if (user.prefs?.status) {
-          setStatus(user.prefs.status);
-        } else {
-          console.warn("No status found in user preferences");
-        }
-
-        if (user.prefs?.role) {
-          setRole(user.prefs.role);
-        } else {
-          console.warn("No role found in user preferences");
+        // Redirect if the state is 'new or evaluate'
+        if (userState === 'new' || userState === 'evaluate') {
+          router.push('/client/pages/newClientDashboard');
         }
       } catch (error) {
-        console.error("Error fetching user preferences: ", error);
-      } finally {
-        setLoading(false); // End loading after fetching
+        console.error('Error fetching user state:', error);
       }
     };
 
-    fetchUserStatus();
+    fetchUserState();
   }, []);
 
   if (loading) {
-    return <div className="text-center p-4">Loading...</div>; // Show loading while fetching
-  }
-
-  // Conditionally render the UI only if status is 'Accepted Client' or 'Referred Client' and role is 'Client'
-  if ((status !== "Accepted Client" && status !== "Referred Client") || role !== "Client") {
-    return <div className="text-center p-4">You are not authorized to view this content.</div>;
+    return <LoadingScreen />; // Show the loading screen while the auth check is in progress
   }
 
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
-      <div className="text-black min-h-screen flex bg-gradient-to-b from-blue-100 to-blue-600">
+      <div className="bg-white rounded-b-lg shadow-md p-5 top-0 left-60 w-full z-10 sticky">
+        <h2 className="text-2xl font-bold">Clients</h2>
+      </div>
+      <div className="text-black flex bg-gradient-to-b from-blue-100 to-blue-600">
         <div className="flex-grow flex flex-col justify-between bg-blue-100">
-          <div className="bg-white shadow-lg py-4 px-6 flex justify-between items-center">
+          <div className="bg-blue-50 shadow-lg py-4 px-6 flex justify-between items-center">
             <div className="text-black flex flex-col flex-grow p-6 space-y-6 mx-auto w-3/4">
               <div className="text-left mb-8">
                 <div className="text-green-600 text-4xl mb-4 flex items-center">
@@ -95,7 +97,7 @@ const AcceptedClientBooking = () => {
                 </div>
 
                 {/* Check if status is 'Referred Client' and display additional message */}
-                {status === "Referred Client" && (
+                {status === "referred" && (
                   <div className="text-red-600 text-xl font-semibold mb-4">
                     You have been referred. View attachment below.
                   </div>
