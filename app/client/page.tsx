@@ -11,64 +11,74 @@ import useAuthCheck from "@/auth/page"; // Correct import path for useAuthCheck
 import LoadingScreen from "@/components/LoadingScreen"; // Import LoadingScreen component
 
 const NewClientDashboard = () => {
-  const { loading } = useAuthCheck(['client']); // Call the useAuthCheck hook
+  const { loading: authLoading } = useAuthCheck(['client']); // Call the useAuthCheck hook
+  const [dataLoading, setDataLoading] = useState(true); // State to track if data is still loading
   const [users, setUsers] = useState([]);
   const [psychotherapists, setPsychotherapists] = useState([]);
   const [state, setState] = useState<string | null>(null); // State to track user state
   const [status, setStatus] = useState<string | null>(null); // State to track user status
   const [userName, setUserName] = useState<string | null>(null); // State to track user name
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
-      const fetchUserData = async () => {
-        try {
-          const user = await account.get(); // Get user information
-          setUserName(user.name); // Assuming Appwrite returns 'name' field for the user
-          
-          const response = await databases.listDocuments("Butterfly-Database", "Client");
-          setUsers(response.documents);
-        } catch (error) {
-          console.error("Error fetching user data: ", error);
-        }
-      };
-  
-      const fetchUserState = async () => {
-        try {
-          const user = await account.get(); // Get user information
-          const response = await databases.listDocuments(
-            'Butterfly-Database', 
-            'Client', 
-            [Query.equal('userid', user.$id)] // Fetch documents where userid matches the logged-in user
-          );
-          
-          // Assuming the user's state is in response.documents[0] (adjust if needed)
-          const userState = response.documents[0]?.state;
-          const userStatus = response.documents[0]?.status;
-          setState(userState);
-          setStatus(userStatus);
-        } catch (error) {
-          console.error('Error fetching user state:', error);
-        }
-      };
+    const fetchData = async () => {
+      try {
+        const user = await account.get(); // Get user information
+        setUserName(user.name); // Assuming Appwrite returns 'name' field for the user
 
-      const fetchPsychotherapists = async () => {
-        try {
-          const user = await account.get(); // Get user information
-          const response = await databases.listDocuments('Butterfly-Database', 'Psychotherapist');
-          
-          setPsychotherapists(response.documents);
-        } catch (error) {
-          console.error('Error fetching user state:', error);
-        }
+        // Fetch users
+        const userResponse = await databases.listDocuments("Butterfly-Database", "Client");
+        setUsers(userResponse.documents);
+
+        // Fetch user state
+        const stateResponse = await databases.listDocuments(
+          'Butterfly-Database',
+          'Client',
+          [Query.equal('userid', user.$id)] // Fetch documents where userid matches the logged-in user
+        );
+        const userState = stateResponse.documents[0]?.state;
+        const userStatus = stateResponse.documents[0]?.status;
+        setState(userState);
+        setStatus(userStatus);
+
+        // Fetch psychotherapists
+        const therapistResponse = await databases.listDocuments('Butterfly-Database', 'Psychotherapist');
+        setPsychotherapists(therapistResponse.documents);
+
+      } catch (error) {
+        console.error("Error fetching data: ", error);
+      } finally {
+        setDataLoading(false); // Set dataLoading to false when all data is fetched
       }
-  
-      fetchUserData();
-      fetchUserState();
-      fetchPsychotherapists();
-    }, []); // Dependency array includes router for redirection
+    };
 
-  if (loading) {
-    return <LoadingScreen />; // Show the loading screen while the auth check is in progress
+    fetchData();
+  }, []); // Empty dependency array to run once on component mount
+
+  const visibleSlides = 2;
+
+  // Function to go to the next slide
+  const handleNext = () => {
+    setCurrentIndex((prevIndex) => {
+      const nextIndex = prevIndex + visibleSlides;
+      return nextIndex >= psychotherapists.length ? 0 : nextIndex;
+    });
+  };
+
+  // Function to go to the previous slide
+  const handlePrevious = () => {
+    setCurrentIndex((prevIndex) => {
+      const prevIndexAdjusted = prevIndex - visibleSlides;
+      return prevIndexAdjusted < 0
+        ? psychotherapists.length - (psychotherapists.length % visibleSlides || visibleSlides)
+        : prevIndexAdjusted;
+    });
+  };
+
+  if (authLoading || dataLoading) {
+    return <LoadingScreen />; // Show the loading screen while the auth check or data loading is in progress
   }
+
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
       {/* Header Section */}
@@ -80,10 +90,10 @@ const NewClientDashboard = () => {
           Book your therapy sessions with ease and embark on your path to well-being.
           </p>
       </div>
-        
-      <div className="flex justify-between items-start space-x-8 px-8">
+
+      <div className="flex justify-between items-start space-x-4 px-8 ">
         {/* Left side - Pre-assessment and Psychotherapists Section */}
-        <div className="flex-1 bg-white p-6 rounded-lg shadow-lg mb-8 mt-8 h-96">
+        <div className="flex-1 bg-white p-6 rounded-lg shadow-lg mb-6 mt-8 h-[26rem] w-[56%]">
           {state === "new" && (
               <div className="text-xl font-semibold mb-6">
                   {state === "new" ? (
@@ -114,44 +124,70 @@ const NewClientDashboard = () => {
 
           {/* Psychotherapists Section */}
           <div>
-              <h3 className="text-3xl font-bold text-blue-500 text-left mb-6 font-lora">
-                  Meet our caring psychotherapists, here to guide your healing!
-              </h3>
-              <div className="overflow-x-auto z-10">
-                  <div className="flex gap-6 mt-10">
-                      {psychotherapists.map((psychotherapist, index) => (
-                          <div
-                              key={index}
-                              className="flex items-center bg-white border border-blue-300 p-4 rounded-3xl transition-transform duration-500 ease-in-out transform   min-w-[300px]"
-                          >
-                              <img
-                                  src={psychotherapist.imgSrc}
-                                  alt={psychotherapist.name}
-                                  className="rounded-full w-24 h-24 mr-4"
-                              />
-                              <div className="flex flex-col">
-                                  <h4 className="text-lg font-bold text-blue-500 font-roboto">
-                                      {psychotherapist.firstName} {psychotherapist.lastName}
-                                  </h4>
-                                  <p className="text-sm text-gray-600 font-lora">{psychotherapist.specialties}</p>
-                                  <h3 className="text-gray-600 font-lora">
-                                      {psychotherapist.position ? 
-                                          psychotherapist.position.charAt(0).toUpperCase() + psychotherapist.position.slice(1) : 
-                                          'Position not specified'}
-                                  </h3>
-                              </div>
-                          </div>
-                      ))}
+            <h3 className="text-2xl font-bold text-blue-500 text-left mb-2 font-lora">
+              Meet our caring psychotherapists, here to guide your healing!
+            </h3>
+            <div className="relative overflow-hidden">
+              {/* Container for carousel */}
+              <div
+                className="flex transition-transform duration-500 ease-in-out"
+                style={{
+                  transform: `translateX(-${(currentIndex / psychotherapists.length) * 100}%)`,
+                  width: `${(psychotherapists.length / visibleSlides) * 100}%`
+                }}
+              >
+                {psychotherapists.map((psychotherapist, index) => (
+                  <div
+                    key={index}
+                    className="flex-shrink-0 flex items-center justify-center p-4 w-[33%]"
+                  >
+                    <div className="flex flex-col items-center bg-white border border-blue-300 p-4 rounded-3xl transform transition-transform duration-500 ease-in-out hover:scale-105 min-w-[300px]">
+                      <img
+                        src={psychotherapist.imgSrc}
+                        alt={psychotherapist.name}
+                        className="rounded-full w-24 h-24 mb-4"
+                      />
+                      <div className="flex flex-col items-center text-center">
+                        <h4 className="text-lg font-bold text-blue-500 font-roboto">
+                          {psychotherapist.firstName} {psychotherapist.lastName}
+                        </h4>
+                        <p className="text-sm text-gray-600 font-lora">
+                          {psychotherapist.specialties}
+                        </p>
+                        <h3 className="text-gray-600 font-lora">
+                          {psychotherapist.position
+                            ? psychotherapist.position.charAt(0).toUpperCase() +
+                              psychotherapist.position.slice(1)
+                            : 'Position not specified'}
+                        </h3>
+                      </div>
+                    </div>
                   </div>
+                ))}
               </div>
+
+              {/* Navigation Buttons */}
+              <button
+                className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-[#2563EB] text-white p-2 rounded-full"
+                onClick={handlePrevious}
+              >
+                &nbsp;&lt;&nbsp;
+              </button>
+              <button
+                className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-[#2563EB] text-white p-2 rounded-full"
+                onClick={handleNext}
+              >
+                &nbsp;&gt;&nbsp;
+              </button>
+            </div>
           </div>
         </div>
 
         {/* Right side - A Daily Reminder Section */}
-        <div className="flex-1 bg-white p-6 rounded-lg shadow-lg mt-8 h-96">
-          <h2 className="font-bold text-4xl text-blue-950 mb-6">A Daily Reminder to Yourself</h2>
-          <div className="space-y-6 max-h-[300px] text-black">
-              <div className="bg-blue-50   border-blue-300 p-2 rounded-lg shadow-lg transition-transform transform hover:scale-105 hover:shadow-2xl duration-300">
+        <div className="flex-1 bg-white p-6 rounded-lg shadow-lg mt-8 h-[26rem]">
+          <h2 className="font-bold sm:text-2xl 2xl:text-4xl text-blue-950 mb-6">A Daily Reminder to Yourself</h2>
+          <div className="sm:space-y-4 3xl:space-y-7 max-h-[300px] text-black">
+              <div className="bg-blue-50 border-blue-300 p-2 rounded-lg shadow-lg transition-transform transform hover:scale-105 hover:shadow-2xl duration-300">
                   <h2 className="font-semibold text-lg mb-2">😊 This Too Shall Pass</h2>
                   <p className="text-gray-800">Feelings are temporary. Hold on, better days are coming.</p>
               </div>
@@ -169,30 +205,30 @@ const NewClientDashboard = () => {
 
       {/* What to do section */}
       <div className="flex justify-between items-start space-x-8 px-8 w-full">
-        <div className="bg-white rounded-lg shadow-lg p-6 w-full">
+        <div className="bg-white rounded-lg shadow-lg p-6 w-full mb-8">
           <h2 className="text-lg font-semibold text-blue-500">What to do during your freetime?</h2>
           <div className="grid grid-cols-4 gap-4 mt-4">
-            <div className="bg-blue-50 p-4 rounded-lg shadow transition-all duration-300 hover:shadow-xl">
-              <div className="font-semibold text-blue-500">Take time to Meditate</div>
-              <p className="text-sm">20-30 minutes/day 🧘‍♀️</p>
+            <div className="bg-blue-50 p-4 rounded-lg shadow transition-all duration-300 hover:shadow-xl hover:scale-105">
+              <div className="font-semibold text-blue-500">Read a Book</div>
+              <p className="text-sm text-gray-600">Lose yourself in a world of knowledge or stories.</p>
             </div>
-            <div className="bg-blue-50 p-4 rounded-lg shadow transition-all duration-300 hover:shadow-xl">
-              <div className="font-semibold text-blue-500">Have Time with your pets</div>
-              <p className="text-sm">Be sure to have some playtime with your beloved pets 🐶</p>
+            <div className="bg-blue-50 p-4 rounded-lg shadow transition-all duration-300 hover:shadow-xl hover:scale-105">
+              <div className="font-semibold text-blue-500">Do Yoga</div>
+              <p className="text-sm text-gray-600">Stretch, breathe, and relax.</p>
             </div>
-            <div className="bg-blue-50 p-4 rounded-lg shadow transition-all duration-300 hover:shadow-xl">
-              <div className="font-semibold text-blue-500">Workout and Exercise</div>
-              <p className="text-sm">30-35 minutes/day 💪</p>
+            <div className="bg-blue-50 p-4 rounded-lg shadow transition-all duration-300 hover:shadow-xl hover:scale-105">
+              <div className="font-semibold text-blue-500">Take a Walk</div>
+              <p className="text-sm text-gray-600">Enjoy some fresh air and a change of scenery.</p>
             </div>
-            <div className="bg-blue-50 p-4 rounded-lg shadow transition-all duration-300 hover:shadow-xl">
-              <div className="font-semibold text-blue-500">Paint something colorful</div>
-              <p className="text-sm">Showcase your talent, be unique and creative! 🎨</p>
+            <div className="bg-blue-50 p-4 rounded-lg shadow transition-all duration-300 hover:shadow-xl hover:scale-105">
+              <div className="font-semibold text-blue-500">Listen to Music</div>
+              <p className="text-sm text-gray-600">Let music uplift or soothe your soul.</p>
             </div>
           </div>
         </div>
       </div>
     </Layout>
-  )
-}
+  );
+};
 
 export default NewClientDashboard;

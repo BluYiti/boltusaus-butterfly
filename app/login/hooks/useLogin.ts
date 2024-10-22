@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { account, databases, Query } from '@/appwrite'; // Make sure to import databases
+import { account, databases} from '@/appwrite'; // Make sure to import databases
 import { useRouter } from 'next/navigation';
 
 export const useLogin = () => {
@@ -20,30 +20,8 @@ export const useLogin = () => {
         }
     };
 
-    // Fetch user state
-    const fetchUserState = async (userId: string) => {
-        try {
-            const response = await databases.listDocuments('Butterfly-Database', 'Client', [Query.equal('userid', userId),]);
-            return response.documents[0]?.state || null; // Assuming response.documents contains an array
-        } catch (error) {
-            console.error('Error fetching user state:', error);
-            return null;
-        }
-    };
-
-    // Fetch user status
-    const fetchUserStatus = async (userId: string) => {
-        try {
-            const response = await databases.listDocuments('Butterfly-Database', 'Client', [Query.equal('userid', userId),]);
-            return response.documents[0]?.status || null; // Assuming response.documents contains an array
-        } catch (error) {
-            console.error('Error fetching user state:', error);
-            return null;
-        }
-    };
-
     // Redirect based on user role and state
-    const handleUserRoleRedirect = (role: string, state: string, status: string) => {
+    const handleUserRoleRedirect = (role: string) => {
         switch (role) {
             case 'admin':
                 router.push('/admin');
@@ -55,13 +33,7 @@ export const useLogin = () => {
                 router.push('/associate');
                 break;
             case 'client':
-                if (state === 'new' || state === 'evaluate') {
-                    router.push('/client/pages/newClientDashboard');
-                }else if(state ==='referred' && status === 'pending'){
-                    router.push('/client/pages/newClientDashboard');
-                }else {
-                    router.push('/client/pages/acceptedClientBooking');
-                }
+                router.push('/client');
                 break;
             default:
                 setError('Unknown role. Please contact support.');
@@ -99,8 +71,6 @@ export const useLogin = () => {
 
             // Fetch user role and state
             const role = await fetchUserRole(user.$id);
-            const state = await fetchUserState(user.$id);
-            const status = await fetchUserStatus(user.$id);
 
             if (!role) {
                 setError('No role assigned to the user. Contact support.');
@@ -108,7 +78,7 @@ export const useLogin = () => {
             }
 
             // Handle redirection based on role and state
-            handleUserRoleRedirect(role, state, status);
+            handleUserRoleRedirect(role);
         } catch (err: any) {
             console.error('Error during login:', err);
             setError(`Login failed: ${err.message}`);

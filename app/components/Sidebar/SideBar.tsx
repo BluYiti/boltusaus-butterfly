@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useState } from "react";
 import { FiMenu, FiChevronLeft } from "react-icons/fi";
 import { IconType } from "react-icons"; // Import IconType from react-icons
@@ -15,8 +13,6 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ title, items, isMinimized, setIsMinimized }) => {
-  const [isLoading, setIsLoading] = useState(true);
-
   useEffect(() => {
     const savedState = localStorage.getItem('sidebarMinimized');
     if (savedState) {

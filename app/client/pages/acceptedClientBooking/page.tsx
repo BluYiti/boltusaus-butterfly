@@ -26,8 +26,6 @@ const AcceptedClientBooking = () => {
   {/* USER AUTHENTICATION PART */}
   //const { loading } = useAuthCheck(['client']); // Call the useAuthCheck hook
 
-  const router = useRouter();
-
   const [selectedMonth, setSelectedMonth] = useState(9); // October as default
   const [selectedDay, setSelectedDay] = useState(null);
   const [selectedTime, setSelectedTime] = useState("");
@@ -53,10 +51,6 @@ const AcceptedClientBooking = () => {
         const userState = response.documents[0]?.state;
         setStatus(userState);
 
-        // Redirect if the state is 'new or evaluate'
-        if (userState === 'new' || userState === 'evaluate') {
-          router.push('/client/pages/newClientDashboard');
-        }
       } catch (error) {
         console.error('Error fetching user state:', error);
       }
