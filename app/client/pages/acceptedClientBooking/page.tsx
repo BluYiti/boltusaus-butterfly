@@ -1,4 +1,4 @@
-'use client'
+  'use client'
 
 import React, { useEffect, useState } from "react";
 import Layout from "@/components/Sidebar/Layout"; // Adjust the path if necessary
@@ -7,21 +7,7 @@ import Link from "next/link"; // Import Link for navigation
 import { account, databases, Query } from "@/appwrite"; // Ensure Appwrite is configured correctly
 import useAuthCheck from "@/auth/page";
 import LoadingScreen from "@/components/LoadingScreen";
-
-const months = [
-  { name: "January", days: 31 },
-  { name: "February", days: 29 }, // Leap year, so February has 29 days in 2024
-  { name: "March", days: 31 },
-  { name: "April", days: 30 },
-  { name: "May", days: 31 },
-  { name: "June", days: 30 },
-  { name: "July", days: 31 },
-  { name: "August", days: 31 },
-  { name: "September", days: 30 },
-  { name: "October", days: 31 },
-  { name: "November", days: 30 },
-  { name: "December", days: 31 },
-];
+import { useRouter } from "next/router";
 
 const therapists = [
   {
@@ -38,7 +24,9 @@ const therapists = [
 
 const AcceptedClientBooking = () => {
   {/* USER AUTHENTICATION PART */}
-  const { loading } = useAuthCheck(['client']); // Call the useAuthCheck hook
+  //const { loading } = useAuthCheck(['client']); // Call the useAuthCheck hook
+
+  const router = useRouter();
 
   const [selectedMonth, setSelectedMonth] = useState(9); // October as default
   const [selectedDay, setSelectedDay] = useState(null);
@@ -76,10 +64,6 @@ const AcceptedClientBooking = () => {
 
     fetchUserState();
   }, []);
-
-  if (loading) {
-    return <LoadingScreen />; // Show the loading screen while the auth check is in progress
-  }
 
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
@@ -158,7 +142,7 @@ const AcceptedClientBooking = () => {
                   </div>
                 </div>
               </div>
-
+                    
               {/* What to do section */}
               <div className="bg-blue-100 rounded-lg shadow-lg p-6 mt-8">
                 <h2 className="text-lg font-semibold text-blue-500">What to do during your freetime?</h2>

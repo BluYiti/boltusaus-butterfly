@@ -98,7 +98,13 @@ const NewClientDashboard = () => {
               <div className="text-left mb-8">
                 <div className="text-xl font-semibold">
                   {/* Conditionally render pre-assessment button based on user status */}
-                  {status !== "evaluate" ? (
+                  {state === "new" ? (
+                    <Link href="/preassessment">
+                      <button className="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-700">
+                        Start Pre-assessment test
+                      </button>
+                    </Link>
+                  ) : (
                     <>
                       <button
                         className="bg-gray-300 text-gray-600 font-bold py-2 px-4 rounded cursor-not-allowed"
@@ -113,13 +119,7 @@ const NewClientDashboard = () => {
                           Thank You!
                         </p>
                       </div>
-                    </>
-                  ) : (
-                    <Link href="../../../preassessment">
-                      <button className="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-700">
-                        Start Pre-assessment test
-                      </button>
-                    </Link>
+                      </>
                   )}
                 </div>
               </div>

@@ -107,11 +107,6 @@ export const useLogin = () => {
                 return;
             }
 
-            if (!state) {
-                setError('No state assigned to the client. Contact support.');
-                return;
-            }
-
             // Handle redirection based on role and state
             handleUserRoleRedirect(role, state, status);
         } catch (err: any) {
