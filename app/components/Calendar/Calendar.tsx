@@ -1,15 +1,18 @@
-"use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 
 interface CalendarProps {
     currentMonth: string;
     nextMonth: string;
     currentDate: number;
     currentYear: number;
-    selectedMonth: string;
-    selectedDay: number; // Changed to number
+    selectedDay: number | null; // Changed to number | null
     setSelectedDay: (day: number | null) => void; // Changed to number | null
-    setSelectedMonth: (month: string) => void; // Added setSelectedMonth
+    selectedMonth: string;
+    setSelectedMonth: (month: string) => void;
+    selectedTime: string | null;
+    setSelectedTime: (time: string | null) => void;
+    isTherapistSelected: boolean; // New prop to check therapist selection
+    handleBookAppointment: () => void;
 }
 
 const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -20,10 +23,14 @@ const Calendar: React.FC<CalendarProps> = ({
     currentYear,
     selectedDay,
     setSelectedDay,
+    selectedMonth,
+    setSelectedMonth,
+    selectedTime,
+    setSelectedTime,
+    isTherapistSelected,
+    handleBookAppointment,
 }) => {
     const [isNextMonthAvailable, setIsNextMonthAvailable] = useState(true);
-    const [selectedMonth, setSelectedMonth] = useState("October");
-    const [selectedTime, setSelectedTime] = useState<string | null>(null);
     const [isFormComplete, setIsFormComplete] = useState(false);
 
     const today = new Date();
@@ -74,11 +81,6 @@ const Calendar: React.FC<CalendarProps> = ({
         setSelectedDay(null); // Reset the selected day when changing month
     };
 
-    const handleBookAppointment = () => {
-        // Handle booking logic here
-        console.log(`Booking appointment on ${selectedMonth} ${selectedDay}, ${currentYear} at ${selectedTime}`);
-    };
-
     return (
         <div>
             <div className="mb-4">
@@ -90,7 +92,7 @@ const Calendar: React.FC<CalendarProps> = ({
                     value={selectedMonth}
                     onChange={handleMonthChange}
                     className="mb-4 p-2 rounded border border-gray-300"
-                    disabled={!isNextMonthAvailable}
+                    disabled={!isNextMonthAvailable || !isTherapistSelected} // Disable if no therapist is selected
                 >
                     <option value={currentMonth}>{currentMonth}</option>
                     <option value={nextMonth}>{nextMonth}</option>
@@ -122,12 +124,12 @@ const Calendar: React.FC<CalendarProps> = ({
                             key={day}
                             className={`py-2 px-1 rounded-lg ${selectedDay === day
                                 ? "bg-blue-300 rounded-3xl text-white"
-                                : isPastDate
+                                : isPastDate || !isTherapistSelected
                                     ? "bg-gray-400 text-gray-700 rounded-3xl cursor-not-allowed"
                                     : "rounded-3xl bg-[#49c987] text-white font-poppins hover:bg-green-300 hover:text-black hover:scale-110"
                                 }`}
-                            onClick={() => !isPastDate && setSelectedDay(day)}
-                            disabled={isPastDate}
+                            onClick={() => !isPastDate && isTherapistSelected && setSelectedDay(day)}
+                            disabled={isPastDate || !isTherapistSelected} // Disable if no therapist is selected
                         >
                             {day}
                         </button>

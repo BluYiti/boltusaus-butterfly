@@ -28,6 +28,21 @@ export const fetchUserState = async (userId: string): Promise<string | null> => 
     }
 };
 
+// Fetch profile image URL
+export const fetchProfileImageUrl = async (profilepicId: string): Promise<string | null> => {
+    try {
+        if (profilepicId) {
+        // Retrieve the file URL using Appwrite's getFileView
+        const url = storage.getFileView('Images', profilepicId);
+        return url; // Return the image URL
+        }
+        return null;
+    } catch (error) {
+        console.error("Error fetching profile image URL:", error);
+        return null;
+    }
+};
+
 // Fetch Certificate
 export const downloadCertificate = async (imageId: string, name: string) => {
     try {
