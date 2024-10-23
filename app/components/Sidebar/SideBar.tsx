@@ -1,4 +1,3 @@
-// components/Sidebar.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -10,7 +9,7 @@ import LogoutButton from '@/auth/logout/component/logoutButton';
 
 interface SidebarProps {
   title: string;
-  items: Array<{ href: string; label: string; icon: IconType; }>;
+  items: Array<{ href: string; label: string; icon: IconType; isDisabled?: boolean }>; // Accept isDisabled
   isMinimized: boolean;
   setIsMinimized: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -56,6 +55,7 @@ const Sidebar: React.FC<SidebarProps> = ({ title, items, isMinimized, setIsMinim
             icon={item.icon}
             label={item.label}
             isMinimized={isMinimized}
+            isDisabled={item.isDisabled} // Pass isDisabled
           />
         ))}
       </nav>

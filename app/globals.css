@@ -116,6 +116,12 @@ html {
   font-weight: normal;
   font-style: normal;
 }
+@font-face {
+  font-family: 'Poppins';
+  src: url('/fonts/Poppins.otf') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
 
 /* ========================================== TAILWIND STYLES */
 @layer base {
@@ -493,3 +499,32 @@ html {
 .PhoneInputInput::placeholder {
   color: #e8e9e9;
 }
+
+.speech-bubble {
+  background-color: #72c2f8;
+  border-radius: 20px;
+  padding: 15px;
+  border: 2px solid #cccccc;
+  position: relative;
+  max-width: 600px;
+  margin-top: 10px;
+}
+
+.speech-bubble::before {
+  content: '';
+  position: absolute;
+  top: -20px; /* Positioning the tail at the top */
+  left: 20px; /* You can adjust this to align with the button */
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-bottom: 20px solid #f0f0f0;
+  border-top: 0;
+}
+
+.speech-bubble p {
+  margin: 0;
+}
+
+

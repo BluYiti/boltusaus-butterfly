@@ -11,7 +11,7 @@ export const useLogout = () => {
     const logout = async () => {
         try {
             await account.deleteSession('current');
-            router.push('/auth/login');
+            router.push('/login');
         } catch (err: any) {
             console.error('Error during logout:', err);
             // Check if err.message exists; otherwise, provide a fallback

@@ -1,7 +1,6 @@
 "use client";
 import React from 'react';
-import { FaUserCircle, FaBars, FaHeart } from 'react-icons/fa';
-import { FaBell, FaUser } from "react-icons/fa";
+import { FaUser } from "react-icons/fa";
 import Layout from "@/components/Sidebar/Layout";
 import items from "@/client/data/Links";
 const userName = "John"; // Placeholder for dynamic user data

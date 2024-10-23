@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Client, Databases } from 'appwrite';
-import items from '@/associate/data/links';
+import items from '@/associate/data/Links';
 import Layout from '@/components/Sidebar/Layout';
 import { CSSTransition, SwitchTransition } from 'react-transition-group'; // For slide transitions
 
@@ -85,6 +85,8 @@ const PaymentsHistory: React.FC = () => {
       <div className="flex-grow p-8">
         <h2 className="text-4xl font-bold text-gray-800 mb-8">Payment History</h2>
 
+        
+
         {/* Tabs with underline effect */}
         <div className="flex space-x-6 mb-8 relative">
           {['All', 'Current Clients', 'Referred Clients'].map(tab => (
@@ -111,7 +113,7 @@ const PaymentsHistory: React.FC = () => {
           <SwitchTransition mode="out-in">
             <CSSTransition
               key={activeTab}
-              addEndListener={(node, done) => node.addEventListener("transitionend", done, false)}
+              addEndListener={(node: { addEventListener: (arg0: string, arg1: any, arg2: boolean) => any; }, done: any) => node.addEventListener("transitionend", done, false)}
               classNames="fade-slide"
             >
               <div>

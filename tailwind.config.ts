@@ -15,10 +15,15 @@ const config: Config = {
       center: true,
       padding: "2rem",
       screens: {
-        "2xl": "1400px",
+        "2xl": "1400px", // Existing 2xl breakpoint
+        "3xl": "1920px", // New 3xl breakpoint for 1920px
       },
     },
     extend: {
+      screens: {
+        '2xl': '1536px', // Already in Tailwind by default
+        '3xl': '1920px', // Custom breakpoint for 1920px
+      },
       colors: {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
@@ -95,6 +100,7 @@ const config: Config = {
         sans: ['Roboto', 'sans-serif'],
         paintbrush: ['PaintBrush'],
         montserrat: ['Montserrat'],
+        poppins: ['Poppins'],
       },
       backgroundImage: {
         appointments: "url('/assets/images/appointments-bg.png')",

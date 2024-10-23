@@ -1,87 +1,188 @@
-import React from 'react';
+"use client";
+import Layout from "@/components/Sidebar/Layout";
+import items from "@/psychotherapist/data/Links";
+import React, { useRef } from 'react';
 
-interface ResourceCardProps {
-  category: string;
-  resources: {
-    title: string;
-    duration: string;
-    description: string;
-    imageSrc: string;
-    isUploaded?: boolean;
-  }[];
-}
+const ResourcesPage: React.FC = () => {
+  // Sample resources data
+  const resources = [
+    {
+      id: 1,
+      category: "Wellness",
+      title: "Yoga",
+      duration: "10 mins",
+      description: "Find balance, strength, and serenity on the mat.",
+      image: "/path/to/yoga.jpg", // Update with actual path
+    },
+    {
+      id: 2,
+      category: "Wellness",
+      title: "Journaling",
+      duration: "10 mins",
+      description: "Journal your journey.",
+      image: "/path/to/journaling.jpg", // Update with actual path
+    },
+    {
+      id: 3,
+      category: "Wellness",
+      title: "Workout",
+      duration: "10 mins",
+      description: "Stay fit and healthy.",
+      image: "/path/to/workout.jpg", // Update with actual path
+    },
+    {
+      id: 4,
+      category: "Worklife",
+      title: "Reading",
+      duration: "5 mins",
+      description: "Mental health at work: How to improve it?",
+      image: "/path/to/reading.jpg", // Update with actual path
+    },
+    {
+      id: 5,
+      category: "Worklife",
+      title: "Drawing",
+      duration: "3 mins",
+      description: "Express yourself with art.",
+      image: "/path/to/drawing.jpg", // Update with actual path
+    },
+    {
+      id: 6,
+      category: "Wellness",
+      title: "Take time off",
+      duration: "5 mins",
+      description: "It is okay to rest.",
+      image: "/path/to/rest.jpg", // Update with actual path
+    },
+    {
+      id: 7,
+      category: "Psychology",
+      title: "Contemplate",
+      duration: "3 mins",
+      description: "It is okay to rest.",
+      image: "/path/to/contemplate.jpg", // Update with actual path
+    }
+  ];
 
-const ResourceCard: React.FC<ResourceCardProps> = ({ category, resources }) => {
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const handleUploadClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
   return (
-    <div className="mb-8">
-      <h2 className="text-lg font-bold mb-4">{category}</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {resources.map((resource, index) => (
-          <div key={index} className="relative bg-gray-100 rounded-lg shadow-md p-4">
-            {/* Image */}
-            <div className="relative">
-              {resource.isUploaded ? (
-                <div className="bg-gray-200 flex items-center justify-center h-32 rounded-lg">
-                  <button className="bg-gray-500 text-white rounded-full p-3">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 12h16m-7 7l-7-7 7-7" />
+    <Layout sidebarTitle="Butterfly" sidebarItems={items}>
+      <div className="text-black min-h-screen flex bg-gray-50">
+        {/* Main Content */}
+        <div className="flex-grow flex flex-col bg-white px-10 py-8 overflow-y-auto">
+          {/* Top Section with Title */}
+          <div className="bg-white shadow-lg py-4 px-6 flex justify-between items-center rounded-md mb-6">
+            <h1 className="text-xl font-bold text-gray-800">Resources</h1>
+          </div>
+
+          {/* Resource Categories */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {resources.map((resource) => (
+              <div
+                key={resource.id}
+                className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-200"
+              >
+                <div className="relative">
+                  <img
+                    src={resource.image}
+                    alt={resource.title}
+                    className="w-full h-40 object-cover"
+                  />
+                  <div className="absolute top-0 right-0 p-2">
+                    <button onClick={handleUploadClick} className="text-gray-500 hover:text-gray-700">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        className="w-8 h-8"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M12 4v16m8-8H4"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+                <div className="p-4">
+                  <h2 className="text-lg font-semibold text-gray-800">
+                    {resource.title}
+                  </h2>
+                  <p className="text-sm text-gray-500">{resource.duration}</p>
+                  <p className="mt-2 text-gray-600">{resource.description}</p>
+                </div>
+                <div className="flex justify-between items-center p-4 border-t">
+                  <p className="text-sm text-gray-500">{resource.category}</p>
+                  <button className="text-red-500 hover:text-red-700">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      className="w-6 h-6"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M6 18L18 6M6 6l12 12"
+                      />
                     </svg>
                   </button>
                 </div>
-              ) : (
-                <img src={resource.imageSrc} alt={resource.title} className="w-full h-32 rounded-lg object-cover" />
-              )}
-              {/* Like Icon */}
-              <div className="absolute top-2 right-2">
-                <button className="bg-white p-1 rounded-full shadow-md">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                  </svg>
-                </button>
               </div>
-            </div>
-            {/* Resource Information */}
-            <div className="mt-4">
-              <h3 className="text-md font-semibold">{resource.title}</h3>
-              <p className="text-sm text-gray-600">{resource.duration}</p>
-              <p className="text-sm text-gray-500">{resource.description}</p>
-            </div>
-            {/* Trash Icon */}
-            <div className="absolute bottom-2 right-2">
-              <button className="bg-gray-500 text-white p-2 rounded-full shadow-md">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+            ))}
+
+            {/* Upload Resource Card */}
+            <div className="bg-gray-200 rounded-lg shadow-lg flex flex-col justify-center items-center h-64">
+              <button className="text-gray-500 hover:text-gray-700">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  className="w-12 h-12"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M12 4v16m8-8H4"
+                  />
                 </svg>
               </button>
+              <p className="mt-4 text-gray-500">Upload Resource</p>
             </div>
+
+            {/* Hidden File Input */}
+            <input
+              type="file"
+              ref={fileInputRef}
+              className="hidden"
+              accept="image/*,.pdf,.doc,.docx"
+              onChange={(e) => {
+                const files = e.target.files;
+                if (files && files.length > 0) {
+                  // Handle the file upload (you can implement your logic here)
+                  console.log(files[0]); // Example: Log the first selected file
+                }
+              }}
+            />
           </div>
-        ))}
+        </div>
       </div>
-    </div>
+    </Layout>
   );
 };
 
-const ResourceList: React.FC = () => {
-  const wellnessResources = [
-    { title: 'Yoga', duration: '10 mins', description: 'Find balance, strength, and serenity on the mat.', imageSrc: '/images/yoga.jpg' },
-    { title: 'Journaling', duration: '10 mins', description: 'Journal your journey.', imageSrc: '/images/journaling.jpg' },
-    { title: 'Workout', duration: '10 mins', description: 'Stay fit and healthy.', imageSrc: '/images/workout.jpg' },
-    { title: 'Upload resource', duration: '', description: '', imageSrc: '', isUploaded: true },
-  ];
-
-  const worklifeResources = [
-    { title: 'Reading', duration: '5 mins', description: 'Mental Health at work: How to improve it?', imageSrc: '/images/reading.jpg' },
-    { title: 'Drawing', duration: '3 mins', description: 'Express yourself with art.', imageSrc: '/images/drawing.jpg' },
-    { title: 'Take time off', duration: '5 mins', description: 'It is okay to rest.', imageSrc: '/images/takeoff.jpg' },
-    { title: 'Upload resource', duration: '', description: '', imageSrc: '', isUploaded: true },
-  ];
-
-  return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <ResourceCard category="Wellness" resources={wellnessResources} />
-      <ResourceCard category="Worklife" resources={worklifeResources} />
-    </div>
-  );
-};
-
-export default ResourceList;
+export default ResourcesPage;

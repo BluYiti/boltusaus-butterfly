@@ -4,8 +4,10 @@
 import Layout from "@/components/Sidebar/Layout";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from 'recharts';
 import { useEffect, useState } from "react";
-import { client, databases } from "@/appwrite"; // Adjust the import based on your appwrite.ts location
+import { databases } from "@/appwrite"; // Adjust the import based on your appwrite.ts location
 import items from "@/admin/data/Links";
+import useAuthCheck from "@/auth/page";
+import LoadingScreen from "@/components/LoadingScreen";
 
 const userEngagementData = [
   { month: 'Jan', activeUsers: 1200, sessions: 2400 },
@@ -32,7 +34,7 @@ const Analytics = () => {
     const fetchTotalUsers = async () => {
       try {
         // Fetch total users from the database (replace 'YOUR_DATABASE_ID' and 'YOUR_COLLECTION_ID' with actual values)
-        const response = await databases.listDocuments('YOUR_DATABASE_ID', 'YOUR_COLLECTION_ID');
+        const response = await databases.listDocuments('Butterfly-Database', 'Account');
         setTotalUsers(response.total); // Set total users count based on the response
       } catch (error) {
         console.error('Error fetching total users:', error);
@@ -55,13 +57,22 @@ const Analytics = () => {
     fetchTotalUsers();
     fetchOnlineUsers();
   }, []);
+
+  const { loading } = useAuthCheck(['admin']); // Allowed roles
+
+  if (loading) {
+    return <LoadingScreen />;
+  }
+
   return (
-    <Layout sidebarTitle="Admin" sidebarItems={items}>
+    <Layout sidebarTitle="Butterfly" sidebarItems={items}>
+      <div className="bg-white rounded-b-lg shadow-md p-5 top-0 left-60 w-full"> {/* Fixed position with full width */}
+        <h2 className="text-2xl font-bold">Hello Admin!</h2>
+      </div>
       {/* User Engagement Section */}
-      <section className="mb-8">
-        <h2 className="text-2xl font-bold mb-6 text-black">User Engagement</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          
+      <section className="bg-gray-100">
+        <h2 className="text-2xl font-bold text-black px-10 pt-5">Analytics</h2>
+        <div className="px-10 pt-5 grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Active Users & Sessions Card */}
           <div className="p-5 bg-white shadow-lg rounded-lg transition-transform transform hover:scale-105">
             <h3 className="text-xl font-semibold mb-3">Active Users & Sessions</h3>
@@ -102,12 +113,6 @@ const Analytics = () => {
               </BarChart>
             </ResponsiveContainer>
           </div>
-
-        </div>
-
-        {/* Total Users and Online Users Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-          
           {/* Total Users Card */}
           <div className="bg-white shadow-lg rounded-lg p-4 h-32 flex flex-col justify-center items-center transition-transform transform hover:scale-105">
             <h2 className="text-lg font-semibold text-gray-800">Total Users</h2>
@@ -123,13 +128,12 @@ const Analytics = () => {
               {onlineUsers !== null ? onlineUsers : 'Loading...'}
             </p>
           </div>
-
         </div>
       </section>
 
       {/* Revenue Data Section */}
-      <section className="mb-8">
-        <h2 className="text-xl font-semibold mb-4">Revenue Data</h2>
+      <section className="mb-8 px-10 bg-gray-100">
+        <h2 className="text-2xl font-bold text-black pt-10 pb-5">Revenue Data</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="p-4 bg-white shadow-md rounded-lg">
             <h3 className="text-lg font-medium">Total Revenue</h3>
