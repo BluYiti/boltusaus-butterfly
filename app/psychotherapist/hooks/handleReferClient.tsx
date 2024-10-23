@@ -66,17 +66,17 @@ const ReferClient: React.FC<ReferClientProps> = ({ clientId, score, showModal, s
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded shadow-md">
-            <h2 className="text-lg font-bold mb-4">Are you sure you want to refer this client?</h2>
-            <div className="flex justify-end space-x-4">
+            <h2 className="text-lg font-bold mb-2">Are you sure you want to refer this client?</h2>
+            <div className="flex justify-end mt-4">
               <button
                 onClick={cancelRefer}
-                className="px-4 py-2 bg-gray-300 rounded"
+                className="w-1/2 px-4 py-2 bg-red-500 text-white rounded"
               >
                 Cancel
               </button>
               <button
                 onClick={confirmRefer}
-                className="px-4 py-2 bg-green-500 text-white rounded"
+                className="w-1/2 px-4 py-2 bg-green-500 text-white rounded ml-2" // Added margin-left for spacing
               >
                 Confirm
               </button>

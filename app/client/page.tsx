@@ -9,6 +9,7 @@ import 'typeface-lora';
 import { account, databases, Query } from "@/appwrite"; // Import Appwrite account service for fetching user data
 import useAuthCheck from "@/auth/page"; // Correct import path for useAuthCheck
 import LoadingScreen from "@/components/LoadingScreen"; // Import LoadingScreen component
+import { downloadCertificate } from "@/hooks/userService";
 
 const NewClientDashboard = () => {
   const { loading: authLoading } = useAuthCheck(['client']); // Call the useAuthCheck hook
@@ -17,6 +18,7 @@ const NewClientDashboard = () => {
   const [psychotherapists, setPsychotherapists] = useState([]);
   const [state, setState] = useState<string | null>(null); // State to track user state
   const [status, setStatus] = useState<string | null>(null); // State to track user status
+  const [cert, setCert] = useState<string | null>(null); // State to track user status
   const [userName, setUserName] = useState<string | null>(null); // State to track user name
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -38,8 +40,10 @@ const NewClientDashboard = () => {
         );
         const userState = stateResponse.documents[0]?.state;
         const userStatus = stateResponse.documents[0]?.status;
+        const userCert = stateResponse.documents[0]?.certificate;
         setState(userState);
         setStatus(userStatus);
+        setCert(userCert);
 
         // Fetch psychotherapists
         const therapistResponse = await databases.listDocuments('Butterfly-Database', 'Psychotherapist');
@@ -54,6 +58,11 @@ const NewClientDashboard = () => {
 
     fetchData();
   }, []); // Empty dependency array to run once on component mount
+
+  const handleDownload = () => {
+    const documentId = cert; // Assuming userCert is defined in the same scope
+    downloadCertificate(documentId, userName);
+  };
 
   const visibleSlides = 2;
 
@@ -103,7 +112,19 @@ const NewClientDashboard = () => {
             </Link>
           )}
 
-          {state === "evaluate" && status === "pending" && (
+          {state === "current" && (
+            <div className="mb-4 text-green-600 text-4xl flex items-center">
+              <Link href="/client/pages/bookappointment">
+                <button className="text-xl font-semibold bg-blue-500 hover:bg-gray-500 text-white py-2 px-4 rounded">
+                  Book your appointment
+                </button>
+              </Link>
+              <span className="ml-3 text-green-600 animate-bounce">✅</span>
+              <span className="text-lg font-bold">Evaluation Completed!</span>
+            </div>
+          )}
+
+          {state === "referred" && status === "pending" && (
             <>
               <div className="relative group flex"> {/* Wrapper for hover effect */}
                 <button
@@ -119,21 +140,12 @@ const NewClientDashboard = () => {
             </>
           )}
 
-          {state === "current" && (
-            <div className="mb-4 text-green-600 text-4xl flex items-center">
-              <Link href="/client/pages/newappointment">
-                <button className="text-xl font-semibold bg-blue-500 hover:bg-gray-500 text-white py-2 px-4 rounded">
-                  Book your appointment
-                </button>
-              </Link>
-              <span className="ml-3 text-green-600 animate-bounce">✅</span>
-              <span className="text-lg font-bold">Evaluation Completed!</span>
-            </div>
-          )}
-
           {state === "referred" && status === "attached" && (
             <div className="mb-4 text-green-600 text-4xl flex items-center">
-              <button className="ml-4 text-xl font-semibold bg-blue-500 hover:bg-gray-500 text-white py-2 px-4 rounded">
+              <button
+                className="text-xl font-semibold bg-blue-500 hover:bg-gray-500 text-white py-2 px-4 rounded"
+                onClick={handleDownload}
+              >
                 Click me to download Certificate.
               </button>
               <span className="text-green-600 animate-bounce">✅</span>
