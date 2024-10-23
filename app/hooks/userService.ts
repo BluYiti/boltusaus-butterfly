@@ -45,4 +45,4 @@ export const downloadCertificate = async (imageId: string, name: string) => {
     } catch (error) {
       console.error('Error downloading certificate:', error);
     }
-  };
+};
