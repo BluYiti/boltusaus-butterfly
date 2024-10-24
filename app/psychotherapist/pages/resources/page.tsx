@@ -1,184 +1,340 @@
 "use client";
+import { Client, Databases, Storage } from 'appwrite';
 import Layout from "@/components/Sidebar/Layout";
 import items from "@/psychotherapist/data/Links";
-import React, { useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 const ResourcesPage: React.FC = () => {
-  // Sample resources data
-  const resources = [
-    {
-      id: 1,
-      category: "Wellness",
-      title: "Yoga",
-      duration: "10 mins",
-      description: "Find balance, strength, and serenity on the mat.",
-      image: "/path/to/yoga.jpg", // Update with actual path
-    },
-    {
-      id: 2,
-      category: "Wellness",
-      title: "Journaling",
-      duration: "10 mins",
-      description: "Journal your journey.",
-      image: "/path/to/journaling.jpg", // Update with actual path
-    },
-    {
-      id: 3,
-      category: "Wellness",
-      title: "Workout",
-      duration: "10 mins",
-      description: "Stay fit and healthy.",
-      image: "/path/to/workout.jpg", // Update with actual path
-    },
-    {
-      id: 4,
-      category: "Worklife",
-      title: "Reading",
-      duration: "5 mins",
-      description: "Mental health at work: How to improve it?",
-      image: "/path/to/reading.jpg", // Update with actual path
-    },
-    {
-      id: 5,
-      category: "Worklife",
-      title: "Drawing",
-      duration: "3 mins",
-      description: "Express yourself with art.",
-      image: "/path/to/drawing.jpg", // Update with actual path
-    },
-    {
-      id: 6,
-      category: "Wellness",
-      title: "Take time off",
-      duration: "5 mins",
-      description: "It is okay to rest.",
-      image: "/path/to/rest.jpg", // Update with actual path
-    },
-    {
-      id: 7,
-      category: "Psychology",
-      title: "Contemplate",
-      duration: "3 mins",
-      description: "It is okay to rest.",
-      image: "/path/to/contemplate.jpg", // Update with actual path
+  const [resources, setResources] = useState<any[]>([]);
+  const [newCategory, setNewCategory] = useState('');
+  const [newTitle, setNewTitle] = useState('');
+  const [newDuration, setNewDuration] = useState('');
+  const [newDescription, setNewDescription] = useState('');
+  const [newResourceId, setNewResourceId] = useState<string | null>(null); 
+  const [fileUrl, setFileUrl] = useState(''); 
+  const [imageUrl, setImageUrl] = useState(''); 
+  const [modalFileUrl, setModalFileUrl] = useState(''); 
+  const [modalImageUrl, setModalImageUrl] = useState(''); 
+  const [modalCategory, setModalCategory] = useState('');
+  const [modalTitle, setModalTitle] = useState('');
+  const [modalDuration, setModalDuration] = useState('');
+  const [modalDescription, setModalDescription] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [selectedResourceId, setSelectedResourceId] = useState<string | null>(null); 
+  const fileInputRef = useRef<HTMLInputElement | null>(null); 
+  const imageInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Initialize Appwrite Client
+  const client = new Client();
+  client
+    .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT as string)
+    .setProject(process.env.NEXT_PUBLIC_PROJECT_ID as string);
+
+  const databases = new Databases(client);
+  const storage = new Storage(client);
+
+  const DATABASE_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || 'Butterfly-Database';
+  const COLLECTION_ID = 'Resources'; 
+  const BUCKET_ID = 'Resources'; 
+
+  // Fetch resources from Appwrite database
+  const fetchResources = async () => {
+    try {
+      const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID);
+      setResources(response.documents);
+    } catch (error) {
+      console.error('Error fetching resources:', error);
     }
-  ];
+  };
 
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  useEffect(() => {
+    fetchResources();
+  }, []);
 
-  const handleUploadClick = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
+  // Upload function for both image and file
+  const uploadFile = async (file: File): Promise<string | null> => {
+    try {
+      const uploadedFile = await storage.createFile(BUCKET_ID, 'unique()', file);
+      const fileUrl = storage.getFileView(BUCKET_ID, uploadedFile.$id); // Get the file view URL
+      return fileUrl;
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      return null;
+    }
+  };
+
+  // Handle image change when creating a new resource
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      const imageUrl = await uploadFile(files[0]); // Upload image and get URL
+      setImageUrl(imageUrl || ''); // Set the uploaded image URL
+    }
+  };
+
+  // Handle file change when creating a new resource
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      const fileUrl = await uploadFile(files[0]); // Upload file and get URL
+      setFileUrl(fileUrl || ''); // Set the uploaded file URL
+    }
+  };
+
+  // Handle image change in the modal for updating
+  const handleModalImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      const imageUrl = URL.createObjectURL(files[0]); // Preview image in the modal
+      setModalImageUrl(imageUrl); // Set the preview image URL in the modal
+    }
+  };
+
+  // Handle file change in the modal for updating
+  const handleModalFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      const fileUrl = files[0].name; // Just show the file name in the modal
+      setModalFileUrl(fileUrl); // Set the preview file name in the modal
+    }
+  };
+
+  // Apply changes from the modal (update file, image, and attributes)
+  const handleUpdateResource = async () => {
+    if (!selectedResourceId) return;
+
+    try {
+      const existingResource = resources.find(resource => resource.$id === selectedResourceId);
+      if (!existingResource) return;
+
+      // Prepare payload for updating
+      const updatePayload: any = {
+        category: modalCategory || existingResource.category,
+        title: modalTitle || existingResource.title,
+        duration: modalDuration || existingResource.duration,
+        description: modalDescription || existingResource.description,
+      };
+
+      // If there's a new image in the modal
+      if (modalImageUrl && imageInputRef.current?.files?.length) {
+        const uploadedImageUrl = await uploadFile(imageInputRef.current.files[0]);
+        if (uploadedImageUrl) {
+          updatePayload.image = uploadedImageUrl;
+        }
+      }
+
+      // If there's a new file in the modal
+      if (modalFileUrl && fileInputRef.current?.files?.length) {
+        const uploadedFileUrl = await uploadFile(fileInputRef.current.files[0]);
+        if (uploadedFileUrl) {
+          updatePayload.file = uploadedFileUrl;
+        }
+      }
+
+      // Update the resource in the database with the new file, image, and attributes
+      await databases.updateDocument(DATABASE_ID, COLLECTION_ID, selectedResourceId, updatePayload);
+
+      // Clear modal inputs and state
+      setModalFileUrl('');
+      setModalImageUrl('');
+      setModalCategory('');
+      setModalTitle('');
+      setModalDuration('');
+      setModalDescription('');
+      setIsModalOpen(false); // Close the modal after updating
+      fetchResources(); // Refresh the resource list to show updates
+    } catch (error) {
+      console.error('Error updating resource:', error);
+    }
+  };
+
+  // Create a new resource with required attributes
+  const handleCreateResource = async () => {
+    if (!newCategory.trim() || !newTitle.trim() || !newDuration.trim() || !newDescription.trim()) {
+      setError('All fields must be filled.');
+      return;
+    }
+
+    try {
+      const response = await databases.createDocument(
+        DATABASE_ID, 
+        COLLECTION_ID, 
+        'unique()', 
+        {
+          id: Date.now(), 
+          category: newCategory, 
+          title: newTitle, 
+          duration: newDuration, 
+          description: newDescription, 
+          image: imageUrl, // Image URL as string
+          file: fileUrl,   // File URL as string
+          createdAt: new Date().toISOString(), 
+        }
+      );
+      
+      setNewResourceId(response.$id);
+      setNewCategory(''); 
+      setNewTitle('');
+      setNewDuration('');
+      setNewDescription('');
+      setFileUrl(''); 
+      setImageUrl(''); 
+      setError(null);
+      fetchResources(); 
+      setIsCreateModalOpen(false); 
+    } catch (error) {
+      console.error('Error creating resource:', error);
+      setError('Failed to create resource.');
+    }
+  };
+
+  const openModal = (resourceId: string) => {
+    const resource = resources.find(res => res.$id === resourceId);
+    if (resource) {
+      setModalCategory(resource.category);
+      setModalTitle(resource.title);
+      setModalDuration(resource.duration);
+      setModalDescription(resource.description);
+    }
+    setSelectedResourceId(resourceId);
+    setIsModalOpen(true);
+  };
+
+  const handleDeleteResource = async (resourceId: string) => {
+    try {
+      await databases.deleteDocument(DATABASE_ID, COLLECTION_ID, resourceId);
+      fetchResources();
+    } catch (error) {
+      console.error('Error deleting resource:', error);
     }
   };
 
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
       <div className="text-black min-h-screen flex bg-gray-50">
-        {/* Main Content */}
         <div className="flex-grow flex flex-col bg-white px-10 py-8 overflow-y-auto">
-          {/* Top Section with Title */}
           <div className="bg-white shadow-lg py-4 px-6 flex justify-between items-center rounded-md mb-6">
             <h1 className="text-xl font-bold text-gray-800">Resources</h1>
+            <button onClick={() => setIsCreateModalOpen(true)} className="bg-blue-500 text-white px-4 py-2 rounded-full shadow hover:bg-blue-600">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+              </svg>
+            </button>
           </div>
 
-          {/* Resource Categories */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {resources.map((resource) => (
-              <div
-                key={resource.id}
-                className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-200"
-              >
-                <div className="relative">
-                  <img
-                    src={resource.image}
-                    alt={resource.title}
-                    className="w-full h-40 object-cover"
-                  />
-                  <div className="absolute top-0 right-0 p-2">
-                    <button onClick={handleUploadClick} className="text-gray-500 hover:text-gray-700">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        className="w-8 h-8"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M12 4v16m8-8H4"
-                        />
+          {/* List of Resources */}
+          {resources.length === 0 ? (
+            <p>No resources available.</p>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {resources.map((resource) => (
+                <div key={resource.$id} className="bg-white rounded-lg shadow-lg relative p-4 cursor-pointer" onClick={() => window.open(resource.file, "_blank")}>
+                  {resource.image ? (
+                    <img src={resource.image} alt={resource.title} className="w-full h-40 object-cover rounded-t-lg" />
+                  ) : (
+                    <div className="w-full h-40 bg-gray-200 rounded-t-lg flex items-center justify-center">
+                      <p className="text-gray-500">No image</p>
+                    </div>
+                  )}
+
+                  <div className="p-4">
+                    <h3 className="text-lg font-semibold text-gray-800">{resource.title}</h3>
+                    <p className="text-sm text-gray-500">{resource.duration}</p>
+                    <p className="text-gray-600 mt-2">{resource.description}</p>
+                    <div className="border-t mt-4 pt-2">
+                      <p className="text-sm text-gray-500">{resource.category}</p>
+                    </div>
+                  </div>
+
+                  <div className="absolute top-2 right-2">
+                    <button onClick={(e) => { e.stopPropagation(); openModal(resource.$id); }} className="bg-white p-2 rounded-full shadow hover:bg-gray-200">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                      </svg>
+                    </button>
+                  </div>
+
+                  <div className="absolute bottom-2 right-2">
+                    <button onClick={(e) => { e.stopPropagation(); handleDeleteResource(resource.$id); }} className="text-red-500 hover:text-red-700">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                       </svg>
                     </button>
                   </div>
                 </div>
-                <div className="p-4">
-                  <h2 className="text-lg font-semibold text-gray-800">
-                    {resource.title}
-                  </h2>
-                  <p className="text-sm text-gray-500">{resource.duration}</p>
-                  <p className="mt-2 text-gray-600">{resource.description}</p>
-                </div>
-                <div className="flex justify-between items-center p-4 border-t">
-                  <p className="text-sm text-gray-500">{resource.category}</p>
-                  <button className="text-red-500 hover:text-red-700">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      className="w-6 h-6"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </button>
+              ))}
+            </div>
+          )}
+
+          {/* Modal for Updating Resource */}
+          {isModalOpen && (
+            <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
+              <div className="bg-white rounded-lg p-8 w-full max-w-md">
+                <h3 className="text-lg font-semibold mb-4">Update Resource</h3>
+
+                <label className="block text-gray-700">Category:</label>
+                <input type="text" value={modalCategory} onChange={(e) => setModalCategory(e.target.value)} className="border border-gray-300 rounded px-4 py-2 mb-4 w-full" />
+
+                <label className="block text-gray-700">Title:</label>
+                <input type="text" value={modalTitle} onChange={(e) => setModalTitle(e.target.value)} className="border border-gray-300 rounded px-4 py-2 mb-4 w-full" />
+
+                <label className="block text-gray-700">Duration:</label>
+                <input type="text" value={modalDuration} onChange={(e) => setModalDuration(e.target.value)} className="border border-gray-300 rounded px-4 py-2 mb-4 w-full" />
+
+                <label className="block text-gray-700">Description:</label>
+                <textarea value={modalDescription} onChange={(e) => setModalDescription(e.target.value)} className="border border-gray-300 rounded px-4 py-2 mb-4 w-full" />
+
+                <label className="block text-gray-700">Update Cover Image:</label>
+                <input type="file" className="mb-4" ref={imageInputRef} onChange={handleModalImageChange} />
+                {modalImageUrl && <img src={modalImageUrl} alt="Preview Image" className="w-full h-40 object-cover rounded mb-4" />}
+
+                <label className="block text-gray-700">Update File:</label>
+                <input type="file" className="mb-4" ref={fileInputRef} onChange={handleModalFileChange} />
+                {modalFileUrl && <p>File uploaded successfully.</p>}
+
+                <div className="flex justify-end">
+                  <button onClick={() => setIsModalOpen(false)} className="bg-gray-300 text-gray-700 px-4 py-2 rounded mr-4">Cancel</button>
+                  <button onClick={handleUpdateResource} className="bg-blue-500 text-white px-4 py-2 rounded">Update</button>
                 </div>
               </div>
-            ))}
-
-            {/* Upload Resource Card */}
-            <div className="bg-gray-200 rounded-lg shadow-lg flex flex-col justify-center items-center h-64">
-              <button className="text-gray-500 hover:text-gray-700">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  className="w-12 h-12"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M12 4v16m8-8H4"
-                  />
-                </svg>
-              </button>
-              <p className="mt-4 text-gray-500">Upload Resource</p>
             </div>
+          )}
 
-            {/* Hidden File Input */}
-            <input
-              type="file"
-              ref={fileInputRef}
-              className="hidden"
-              accept="image/*,.pdf,.doc,.docx"
-              onChange={(e) => {
-                const files = e.target.files;
-                if (files && files.length > 0) {
-                  // Handle the file upload (you can implement your logic here)
-                  console.log(files[0]); // Example: Log the first selected file
-                }
-              }}
-            />
-          </div>
+          {/* Modal for Creating a Resource */}
+          {isCreateModalOpen && (
+            <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
+              <div className="bg-white rounded-lg p-8 w-full max-w-md">
+                <h3 className="text-lg font-semibold mb-4">Add a Resource Card</h3>
+
+                <label className="block text-gray-700">Category:</label>
+                <input type="text" value={newCategory} onChange={(e) => setNewCategory(e.target.value)} placeholder="Enter or add new category" className="border border-gray-300 rounded px-4 py-2 mb-4 w-full" />
+
+                <label className="block text-gray-700">Title:</label>
+                <input type="text" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} placeholder="Enter or add new title" className="border border-gray-300 rounded px-4 py-2 mb-4 w-full" />
+
+                <label className="block text-gray-700">Duration:</label>
+                <input type="text" value={newDuration} onChange={(e) => setNewDuration(e.target.value)} placeholder="Enter duration (e.g., 5 mins)" className="border border-gray-300 rounded px-4 py-2 mb-4 w-full" />
+
+                <label className="block text-gray-700">Description:</label>
+                <textarea value={newDescription} onChange={(e) => setNewDescription(e.target.value)} placeholder="Enter description" className="border border-gray-300 rounded px-4 py-2 mb-4 w-full" />
+
+                <label className="block text-gray-700">Upload Cover Image:</label>
+                <input type="file" ref={imageInputRef} className="mb-4" onChange={handleImageChange} />
+                {imageUrl && <img src={imageUrl} alt="Preview Image" className="w-full h-40 object-cover rounded mb-4" />}
+
+                <label className="block text-gray-700">Upload File:</label>
+                <input type="file" ref={fileInputRef} className="mb-4" onChange={handleFileChange} />
+                {fileUrl && <p>File uploaded successfully.</p>}
+
+                <div className="flex justify-end">
+                  <button onClick={() => setIsCreateModalOpen(false)} className="bg-gray-300 text-gray-700 px-4 py-2 rounded mr-4">Cancel</button>
+                  <button onClick={handleCreateResource} className="bg-blue-500 text-white px-4 py-2 rounded">Create Resource</button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </Layout>
