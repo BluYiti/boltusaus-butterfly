@@ -57,51 +57,40 @@ const ResourcesPage: React.FC = () => {
   const uploadFile = async (file: File): Promise<string | null> => {
     try {
       const uploadedFile = await storage.createFile(BUCKET_ID, 'unique()', file);
-      const fileUrl = storage.getFileView(BUCKET_ID, uploadedFile.$id); // Get the file view URL
-      return fileUrl;
+      return uploadedFile.$id; // Return the file ID instead of the URL
     } catch (error) {
       console.error('Error uploading file:', error);
       return null;
     }
   };
 
-  // Handle image change when creating a new resource
-  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const [selectedFile, setSelectedFile] = useState<File | null>(null); // Store the selected file
+  const [selectedImage, setSelectedImage] = useState<File | null>(null); // Store the selected image
+  
+  // Handle image change when selecting
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
-      const imageUrl = await uploadFile(files[0]); // Upload image and get URL
-      setImageUrl(imageUrl || ''); // Set the uploaded image URL
+      setSelectedImage(files[0]); // Store the selected image file in state
+      const previewImageUrl = URL.createObjectURL(files[0]); // Generate preview URL for the image
+      setImageUrl(previewImageUrl); // Show image preview
+    }
+  };
+  
+  // Handle file change when selecting
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      setSelectedFile(files[0]); // Store the selected file in state
+      setFileUrl(files[0].name); // Just display the file name or preview URL
     }
   };
 
-  // Handle file change when creating a new resource
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      const fileUrl = await uploadFile(files[0]); // Upload file and get URL
-      setFileUrl(fileUrl || ''); // Set the uploaded file URL
-    }
+  // Dynamically generate file or image URL based on the stored ID
+  const getFileUrl = (fileId: string) => {
+    return storage.getFileView(BUCKET_ID, fileId); // Generate URL using file ID
   };
-
-  // Handle image change in the modal for updating
-  const handleModalImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      const imageUrl = URL.createObjectURL(files[0]); // Preview image in the modal
-      setModalImageUrl(imageUrl); // Set the preview image URL in the modal
-    }
-  };
-
-  // Handle file change in the modal for updating
-  const handleModalFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      const fileUrl = files[0].name; // Just show the file name in the modal
-      setModalFileUrl(fileUrl); // Set the preview file name in the modal
-    }
-  };
-
-  // Apply changes from the modal (update file, image, and attributes)
+  
   const handleUpdateResource = async () => {
     if (!selectedResourceId) return;
 
@@ -109,7 +98,7 @@ const ResourcesPage: React.FC = () => {
       const existingResource = resources.find(resource => resource.$id === selectedResourceId);
       if (!existingResource) return;
 
-      // Prepare payload for updating
+      // Prepare the update payload
       const updatePayload: any = {
         category: modalCategory || existingResource.category,
         title: modalTitle || existingResource.title,
@@ -117,32 +106,31 @@ const ResourcesPage: React.FC = () => {
         description: modalDescription || existingResource.description,
       };
 
-      // If there's a new image in the modal
+      // Check if a new image has been selected
       if (modalImageUrl && imageInputRef.current?.files?.length) {
-        const uploadedImageUrl = await uploadFile(imageInputRef.current.files[0]);
-        if (uploadedImageUrl) {
-          updatePayload.image = uploadedImageUrl;
+        if (existingResource.image) {
+          await storage.deleteFile(BUCKET_ID, existingResource.image); // Delete existing image using its ID
         }
+
+        // Upload the new image and store its ID
+        const uploadedImageId = await uploadFile(imageInputRef.current.files[0]);
+        updatePayload.image = uploadedImageId; // Store new image ID
       }
 
-      // If there's a new file in the modal
+      // Check if a new file has been selected
       if (modalFileUrl && fileInputRef.current?.files?.length) {
-        const uploadedFileUrl = await uploadFile(fileInputRef.current.files[0]);
-        if (uploadedFileUrl) {
-          updatePayload.file = uploadedFileUrl;
+        if (existingResource.file) {
+          await storage.deleteFile(BUCKET_ID, existingResource.file); // Delete existing file using its ID
         }
+
+        // Upload the new file and store its ID
+        const uploadedFileId = await uploadFile(fileInputRef.current.files[0]);
+        updatePayload.file = uploadedFileId; // Store new file ID
       }
 
-      // Update the resource in the database with the new file, image, and attributes
+      // Update the resource document in the database
       await databases.updateDocument(DATABASE_ID, COLLECTION_ID, selectedResourceId, updatePayload);
 
-      // Clear modal inputs and state
-      setModalFileUrl('');
-      setModalImageUrl('');
-      setModalCategory('');
-      setModalTitle('');
-      setModalDuration('');
-      setModalDescription('');
       setIsModalOpen(false); // Close the modal after updating
       fetchResources(); // Refresh the resource list to show updates
     } catch (error) {
@@ -150,7 +138,6 @@ const ResourcesPage: React.FC = () => {
     }
   };
 
-  // Create a new resource with required attributes
   const handleCreateResource = async () => {
     if (!newCategory.trim() || !newTitle.trim() || !newDuration.trim() || !newDescription.trim()) {
       setError('All fields must be filled.');
@@ -158,6 +145,20 @@ const ResourcesPage: React.FC = () => {
     }
 
     try {
+      let uploadedImageId = null;
+      let uploadedFileId = null;
+
+      // Upload the image only if the user selected an image
+      if (selectedImage) {
+        uploadedImageId = await uploadFile(selectedImage); // Store the image ID in 'image'
+      }
+
+      // Upload the file only if the user selected a file
+      if (selectedFile) {
+        uploadedFileId = await uploadFile(selectedFile); // Store the file ID in 'file'
+      }
+
+      // Create the resource in the database with the IDs (not URLs)
       const response = await databases.createDocument(
         DATABASE_ID, 
         COLLECTION_ID, 
@@ -168,22 +169,24 @@ const ResourcesPage: React.FC = () => {
           title: newTitle, 
           duration: newDuration, 
           description: newDescription, 
-          image: imageUrl, // Image URL as string
-          file: fileUrl,   // File URL as string
+          image: uploadedImageId,  // Store image ID
+          file: uploadedFileId,    // Store file ID
           createdAt: new Date().toISOString(), 
         }
       );
-      
+
       setNewResourceId(response.$id);
       setNewCategory(''); 
       setNewTitle('');
       setNewDuration('');
       setNewDescription('');
+      setSelectedFile(null); 
+      setSelectedImage(null); 
       setFileUrl(''); 
       setImageUrl(''); 
       setError(null);
-      fetchResources(); 
-      setIsCreateModalOpen(false); 
+      fetchResources(); // Fetch updated resources
+      setIsCreateModalOpen(false); // Close modal after creation
     } catch (error) {
       console.error('Error creating resource:', error);
       setError('Failed to create resource.');
@@ -204,12 +207,47 @@ const ResourcesPage: React.FC = () => {
 
   const handleDeleteResource = async (resourceId: string) => {
     try {
+      const resource = resources.find(res => res.$id === resourceId);
+      if (!resource) return;
+
+      const fileId = resource.file; // Stored file ID
+      const imageId = resource.image; // Stored image ID
+
+      if (fileId) {
+        await storage.deleteFile(BUCKET_ID, fileId);
+      }
+
+      if (imageId) {
+        await storage.deleteFile(BUCKET_ID, imageId);
+      }
+
       await databases.deleteDocument(DATABASE_ID, COLLECTION_ID, resourceId);
       fetchResources();
     } catch (error) {
-      console.error('Error deleting resource:', error);
+      console.error('Error deleting resource and file:', error);
     }
   };
+
+  // Handle file change in the modal for updating
+const handleModalFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const files = e.target.files;
+  if (files && files.length > 0) {
+    const fileUrl = files[0].name; // Just capture the file name for the modal display
+    setModalFileUrl(fileUrl); // Set the preview file name in the modal
+    fileInputRef.current = e.target; // Set the reference to the selected file for uploading
+  }
+};
+
+// Handle image change in the modal for updating
+const handleModalImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const files = e.target.files;
+  if (files && files.length > 0) {
+    const imageUrl = URL.createObjectURL(files[0]); // Generate a preview URL for the selected image
+    setModalImageUrl(imageUrl); // Update the state to show the preview
+    imageInputRef.current = e.target; // Set the reference to the selected file for uploading
+  }
+};
+
 
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
@@ -230,9 +268,9 @@ const ResourcesPage: React.FC = () => {
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {resources.map((resource) => (
-                <div key={resource.$id} className="bg-white rounded-lg shadow-lg relative p-4 cursor-pointer" onClick={() => window.open(resource.file, "_blank")}>
+                <div key={resource.$id} className="bg-white rounded-lg shadow-lg relative p-4 cursor-pointer" onClick={() => window.open(getFileUrl(resource.file), "_blank")}>
                   {resource.image ? (
-                    <img src={resource.image} alt={resource.title} className="w-full h-40 object-cover rounded-t-lg" />
+                    <img src={getFileUrl(resource.image)} alt={resource.title} className="w-full h-40 object-cover rounded-t-lg" />
                   ) : (
                     <div className="w-full h-40 bg-gray-200 rounded-t-lg flex items-center justify-center">
                       <p className="text-gray-500">No image</p>
