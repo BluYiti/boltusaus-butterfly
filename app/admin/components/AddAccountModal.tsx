@@ -1,9 +1,7 @@
-'use client'
-
-import { useState } from "react";
-import { ID, Query } from "appwrite";
-import { databases, account } from "@/appwrite"; // Ensure you're using the correct imports
-import { FiX } from "react-icons/fi";
+import { useState } from 'react';
+import { account, databases, ID } from '@/appwrite';
+import { Query } from 'appwrite';
+import SuccessModal from './SuccessfulAddAccount';
 
 interface AddAccountModalProps {
   isOpen: boolean;
@@ -12,108 +10,122 @@ interface AddAccountModalProps {
 }
 
 const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, selectedTab }) => {
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('+63');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
+  const [adminEmail, setAdminEmail] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
+  const [adminError, setAdminError] = useState<string | null>(null);
+  const [isAdminValidating, setIsAdminValidating] = useState(false);
+  const [isModalOpen, setModalOpen] = useState(false);
 
-  // Validation error states
-  const [errors, setErrors] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    password: "",
-  });
-
-  const validateInputs = () => {
-    const newErrors: any = {};
-    // Validate first name
-    if (!firstName.trim()) newErrors.firstName = "First name is required.";
-    else if (firstName.length < 2) newErrors.firstName = "First name must be at least 2 characters.";
-
-    // Validate last name
-    if (!lastName.trim()) newErrors.lastName = "Last name is required.";
-    else if (lastName.length < 2) newErrors.lastName = "Last name must be at least 2 characters.";
-
-    // Validate email
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!email.trim()) newErrors.email = "Email is required.";
-    else if (!emailPattern.test(email)) newErrors.email = "Invalid email format.";
-
-    // Validate phone (Philippine numbers only, assuming 10 digits)
-    const phonePattern = /^[0-9]{10}$/;
-    if (!phone.trim()) newErrors.phone = "Phone number is required.";
-    else if (!phonePattern.test(phone)) newErrors.phone = "Phone number must be 10 digits.";
-
-    // Validate password
-    if (!password) newErrors.password = "Password is required.";
-    else if (password.length < 8) newErrors.password = "Password must be at least 8 characters.";
-
-    setErrors(newErrors);
-
-    // If there are no errors, return true; otherwise, return false
-    return Object.keys(newErrors).length === 0;
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const validatePhoneNumber = (phone: string) => {
+    const phoneRegex = /^\+63\d{10}$/;
+    return phoneRegex.test(phone);
+  };
+
+  const handleAdminValidation = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateInputs()) return; // Stop if validation fails
+    setAdminError(null);
+    setIsAdminValidating(true);
+  
+    try {
+      // Query the Accounts collection for the provided email
+      const response = await databases.listDocuments('Butterfly-Database', 'Accounts', [
+        Query.equal('email', adminEmail)
+      ]);
+
+      // Check if the email exists
+      if (response.documents.length === 0) {
+        throw new Error('Admin email not found');
+      }
+
+      // Log out any existing session
+      await account.deleteSession('current');
+      console.log('Logged out admin');
+
+      // Call handleSubmit to proceed with account creation or any other logic
+      await handleSubmit();
+
+      // Log the admin back in using their credentials (assuming you have adminEmail and password available)
+      const loginResponse = await account.createEmailPasswordSession(adminEmail, adminPassword);
+      console.log('Logged in admin');
+
+      {isModalOpen && (
+        <SuccessModal selectedTab={selectedTab} onClose={() => setModalOpen(false)} />
+      )}
+      if (!loginResponse) {
+        throw new Error('Failed to log in the admin');
+      }
+
+      setIsAdminModalOpen(false);
+      onClose();
+    } catch (err: any) {
+      setAdminError(err.message || 'Invalid admin credentials');
+    } finally {
+      setIsAdminValidating(false);
+    }
+  };  
+
+  const handleSubmit = async () => {
+    setError(null);
+    // Check if the email and phone number are valid
+    if (!validateEmail(email)) {
+      setError('Invalid email format.');
+      return;
+    }
+
+    if (!validatePhoneNumber(phoneNumber)) {
+      setError('Phone number must start with +63 and be exactly 10 digits after +63.');
+      return;
+    }
 
     setLoading(true);
-  
     try {
       const name = `${firstName} ${lastName}`;
 
-      console.log("User Data:", { email, password, name });
-  
-      // Check if email already exists in the "Accounts" collection
-      const existingUser = await databases.listDocuments('Butterfly-Database', 'Accounts', [
-        Query.equal('email', email)
-      ]);
-  
-      if (existingUser.documents.length > 0) {
-        throw new Error('A user with this email already exists');
-      }
-  
-      // Proceed to create the Appwrite account
-      try {
-        const userResponse = await account.create(ID.unique(), email, password, name);
-        const accountId = userResponse.$id;
-  
-        // Create the user in the "Accounts" collection
-        await databases.createDocument('Butterfly-Database', 'Accounts', accountId, {
-          username: name,
-          email: email,
-          role: selectedTab.toLowerCase(),
-        });
-  
-        console.log('Accounts Collection document added');
-  
-        // Create the user in the selected tab collection
-        await databases.createDocument('Butterfly-Database', selectedTab, ID.unique(), {
-          userId: accountId,
-          firstName: firstName,
-          lastName: lastName,
-          phonenum: phone
-        });
-  
-        console.log(selectedTab, ' Collection document added');
+      // Create the account in appwrite
+      const userResponse = await account.create(ID.unique(), email, password, name);
+      const accountId = userResponse.$id;
+      console.log('Account created successfully');
 
-        onClose(); // Close the modal
-      } catch (error: any) {
-        // Handle the conflict error when email/phone already exists in Appwrite's account system
-        if (error.code === 409) {
-          alert('An account with this email or phone number already exists.');
-        } else {
-          throw error;
-        }
-      }
-    } catch (error: any) {
-      console.error("Error creating account:", error);
-      alert(error.message || "An error occurred while creating the account.");
+      // Log in the user immediately after creating the account
+      await account.createEmailPasswordSession(email, password);
+      console.log('User logged in successfully.');
+
+      // Create the user in the "Accounts" collection
+      await databases.createDocument('Butterfly-Database', 'Accounts', accountId, {
+        username: name,
+        email: email,
+        role: selectedTab.toLowerCase(),
+      });
+      console.log('Accounts Collection document added');
+
+      // Create the user in the selected tab collection
+      await databases.createDocument('Butterfly-Database', selectedTab, ID.unique(), {
+        userId: accountId,
+        firstName: firstName,
+        lastName: lastName,
+        phonenum: phoneNumber
+      });
+
+      console.log(selectedTab, ' Collection document added');
+
+      // Log out the user
+      await account.deleteSession('current'); // 'current' refers to the active session
+      console.log('User logged out successfully.');
+    } catch (err: any) {
+      setError(err.message || 'Failed to create account');
     } finally {
       setLoading(false);
     }
@@ -122,103 +134,166 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, sele
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div className="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold">Add New {selectedTab} Account</h2>
-          <button onClick={onClose}>
-            <FiX size={24} />
-          </button>
-        </div>
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label htmlFor="firstName" className="block text-[#38b6ff] mb-1">First Name</label>
-            <input
-                id="firstName"
+    <>
+      {/* Main Add Account Modal */}
+      <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
+          <h2 className="text-xl font-semibold mb-4">Add Account</h2>
+
+          {error && <p className="text-red-500">{error}</p>}
+
+          <form onSubmit={(e) => { e.preventDefault(); setIsAdminModalOpen(true); }} className="space-y-4">
+            <div>
+              <label htmlFor="firstName" className="block text-sm font-medium">
+                First Name
+              </label>
+              <input
                 type="text"
-                required
-                placeholder="First Name"
+                id="firstName"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
-                className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
-            />
-            {errors.firstName && <p className="text-red-500 text-sm">{errors.firstName}</p>}
-          </div>
-          <div className="mb-4">
-              <label htmlFor="lastName" className="block text-[#38b6ff] mb-1">Last Name</label>
-              <input
-                  id="lastName"
-                  type="text"
-                  required
-                  placeholder="Last Name"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
-              />
-            {errors.lastName && <p className="text-red-500 text-sm">{errors.lastName}</p>}
-          </div>
-          <div className="mb-4">
-            <label htmlFor="email" className="block text-[#38b6ff] mb-1">Email</label>
-            <input
-                id="email"
-                type="email"
                 required
-                placeholder="Example@gmail.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
                 className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
-            />
-            {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
-          </div>
-          <div className="mb-4">
-            <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-              Phone
-            </label>
-            <div className="flex">
-              <input
-                type="text"
-                value="+63"
-                className="mt-1 p-2 w-16 border rounded-l bg-gray-200 text-gray-700"
-                readOnly
-              />
-              <input
-                type="tel"
-                id="phone"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className={`mt-1 p-2 w-full border rounded-r ${errors.phone ? 'border-red-500' : ''}`}
-                required
-                placeholder="Enter phone number"
               />
             </div>
-            {errors.phone && <p className="text-red-500 text-sm">{errors.phone}</p>}
-          </div>
-          <div className="mb-4">
-            <label htmlFor="email" className="block text-[#38b6ff] mb-1">
-              Password
-            </label>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
-              required
-            />
-            {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
-          </div>
-          <div className="flex justify-end">
-            <button
-              type="submit"
-              disabled={loading}
-              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-            >
-              {loading ? "Adding..." : "Add Account"}
-            </button>
-          </div>
-        </form>
+
+            <div>
+              <label htmlFor="lastName" className="block text-sm font-medium">
+                Last Name
+              </label>
+              <input
+                type="text"
+                id="lastName"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                required
+                className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium">
+                Email
+              </label>
+              <input
+                type="email"
+                id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="phoneNumber" className="block text-sm font-medium">
+                Phone Number
+              </label>
+              <input
+                type="tel"
+                id="phoneNumber"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                required
+                maxLength={13}
+                className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
+                placeholder="+63"
+              />
+              <small className="text-xs text-gray-500">Format: +63 followed by 10 digits</small>
+            </div>
+
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium">
+                Password
+              </label>
+              <input
+                type="password"
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
+              />
+            </div>
+
+            <div className="flex justify-end space-x-2">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-blue-300"
+              >
+                {loading ? 'Adding...' : 'Next'}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
-    </div>
+
+      {/* Admin Credentials Modal */}
+      {isAdminModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
+            <h2 className="text-xl font-semibold mb-4">Admin Authentication</h2>
+
+            {adminError && <p className="text-red-500">{adminError}</p>}
+
+            <form onSubmit={handleAdminValidation} className="space-y-4">
+              <div>
+                <label htmlFor="adminEmail" className="block text-sm font-medium">
+                  Admin Email
+                </label>
+                <input
+                  type="email"
+                  id="adminEmail"
+                  value={adminEmail}
+                  onChange={(e) => setAdminEmail(e.target.value)}
+                  required
+                  className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="adminPassword" className="block text-sm font-medium">
+                  Admin Password
+                </label>
+                <input
+                  type="password"
+                  id="adminPassword"
+                  value={adminPassword}
+                  onChange={(e) => setAdminPassword(e.target.value)}
+                  required
+                  className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-2">
+                <button
+                  type="button"
+                  onClick={() => setIsAdminModalOpen(false)}
+                  className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isAdminValidating}
+                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-blue-300"
+                >
+                  {isAdminValidating ? 'Validating...' : 'Submit'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 
