@@ -139,7 +139,7 @@ const SettingsPage = () => {
           <h3 className="text-xl font-semibold text-gray-700 cursor-pointer flex justify-between items-center"
             onClick={() => toggleSection("privacy")}>
             Privacy and Security
-            <button className="text-sm text-blue-400 underline" onClick={handlePrivacyClick}>Manage</button>
+            <button className="text-sm text-blue-400 underline">Manage</button>
           </h3>
           {activeSection === "privacy" && (
             <div className="mt-4 text-gray-600">
