@@ -94,7 +94,10 @@ const ClientsPayment = () => {
                 <p className="text-sm text-gray-500">{client.email}</p>
               </div>
             </div>
-            <button className="px-4 py-2 text-sm font-semibold text-white bg-blue-400 rounded-full hover:bg-green-600 transition">
+            <button
+              className="px-4 py-2 text-sm font-semibold text-white bg-blue-400 rounded-full hover:bg-blue-600 transition"
+              onClick={() => openModal(client)}
+            >
               View Payment
             </button>
           </div>
