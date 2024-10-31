@@ -1,6 +1,4 @@
 const privacyContent = `
-# Privacy Policy
-
 PRIVACY POLICY
 I am to participate in telebehavioral health with A.M.Peralta Psychological Services as part of my consultation/counseling and psychotherapy. I understand that telebehavioral health is the practice of delivering mental health care services via technology between a licensed mental health care practitioner and a client such as myself. Furthermore, I understand the guidelines indicated below with respect to telebehavioral health.
 

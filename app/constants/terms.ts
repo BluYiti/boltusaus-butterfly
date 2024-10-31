@@ -4,8 +4,7 @@ We are A.M Peralta Psychological Services ("Company," "we," "us,"
 "our"), a company registered in the Philippines at Unit 303 Sam-son's Building, Lower Mabini St., Baguio City, Benguet 2600.
 We operate the website http://www.amperalta.com (the "Site"), as well as any other related products and services that refer or link to these legal terms (the "Legal Terms") (collectively, the "Services").
 Butterfly is a psychological wellness web application of A.M. Peralta Psychological Services that offers the features: enhanced appointment system with an automated interactive SMS service, refined remote psychotherapy counseling, and a comprehensive client monitoring and management. These integrated services will allow clients and psychotherapists to book appointments and communicate remotely at any time. Butterfly aims to deliver more efficient, effective, and reliable mental healthcare digital service.
-
-You can contact us by phone at 09266696242, email at amperaltapsychservices@gmail.com, or by mail to Unit 303 Sam-son's Building, Lower Mabini St., Baguio City, Benguet 2600, Philippines.
+You can contact us by phone at 09266696242, email at amperaltapsychservices@yahoo.com, or by mail to Unit 303 Sam-son's Building, Lower Mabini St., Baguio City, Benguet 2600, Philippines.
 These Legal Terms constitute a legally binding agreement made between you, whether personally or on behalf of an entity ("you"), and A.M Peralta Psychological Services, concerning your access to and use of the Services. You agree that by accessing the Services, you have read, understood, and agreed to be bound by all of these Legal Terms. IF YOU DO NOT AGREE WITH ALL OF THESE LEGAL TERMS, THEN YOU ARE EXPRESSLY PROHIBITED FROM USING THE SERVICES AND YOU MUST DISCONTINUE USE IMMEDIATELY.
 We will provide you with prior notice of any scheduled changes to the Services you are using. Changes to Legal Terms will become effective seven (7) days after the notice is given, except if the changes apply to new functionality, security updates, and bug fixes, in which case the changes will be effective immediately. By continuing to use the Services after the effective date of any changes, you agree to be bound by the modified terms. If you disagree with such changes, you may terminate Services as per the section "TERM AND TERMINATION."
 All users who are minors in the jurisdiction in which they reside (generally under the age of 18) must have the permission of, and be directly supervised by, their parent or guardian to use the Services. If you are a minor, you must have your parent or guardian read and agree to these Legal Terms prior to you using the Services.
@@ -41,8 +40,9 @@ The information provided when using the Services is not intended for distributio
 
 2. INTELLECTUAL PROPERTY RIGHTS
 Our intellectual property
-We are the owner or the licensee of all intellectual property rights in our Services, including all source code, databases, functionality, software, website designs, audio, video, text, photographs, and graphics in the Services (collectively, the "Content"), as well as the trademarks, service marks, and logos contained therein (the "Marks").
-Our Content and Marks are protected by copyright and trademark laws (and various other intellectual property rights and unfair competition laws) and treaties in the United States and around the world.
+We are the owner or the licensee of all intellectual property rights in our Services, including all source code, databases, functionality, software, website designs, audio, video,and photographs in the Services (collectively, the "Content"), as well as the trademarks, service marks, and logos contained therein (the "Marks").
+Some Images, graphics, and elements used are from CANVA.
+Our Content and Marks are protected by copyright and trademark laws (and various other intellectual property rights and unfair competition laws) and treaties in the Philippines and around the world.
 The Content and Marks are provided in or through the Services "AS IS" for your personal, non-commercial use or internal business purpose only.
 
 Your use of our Services
@@ -52,7 +52,7 @@ Subject to your compliance with these Legal Terms, including the
 • download or print a copy of any portion of the Content to which you have properly gained access.
 solely for your personal, non-commercial use or internal business purpose.
 Except as set out in this section or elsewhere in our Legal Terms, no part of the Services and no Content or Marks may be copied, reproduced, aggregated, republished, uploaded, posted, publicly displayed, encoded, translated, transmitted, distributed, sold, licensed, or otherwise exploited for any commercial purpose whatsoever, without our express prior written permission.
-If you wish to make any use of the Services, Content, or Marks other than as set out in this section or elsewhere in our Legal Terms, please address your request to: amperaltapsychservices@gmail.com. If we ever grant you the permission to post, reproduce, or publicly display any part of our Services or Content, you must identify us as the owners or licensors of the Services, Content, or Marks and ensure that any copyright or proprietary notice appears or is visible on posting, reproducing, or displaying our Content.
+If you wish to make any use of the Services, Content, or Marks other than as set out in this section or elsewhere in our Legal Terms, please address your request to: amperaltapsychservices@yahoo.com. If we ever grant you the permission to post, reproduce, or publicly display any part of our Services or Content, you must identify us as the owners or licensors of the Services, Content, or Marks and ensure that any copyright or proprietary notice appears or is visible on posting, reproducing, or displaying our Content.
 We reserve all rights not expressly granted to you in and to the Services, Content, and Marks.
 Any breach of these Intellectual Property Rights will constitute a material breach of our Legal Terms and your right to use our Services will terminate immediately.
 
@@ -60,7 +60,7 @@ Your submissions and contributions
 Please review this section and the "PROHIBITED ACTIVITIES" section carefully prior to using our Services to understand the (a) rights you give us and (b) obligations you have when you post or upload any content through the Services.
 Submissions: By directly sending us any question, comment, suggestion, idea, feedback, or other information about the Services ("Submissions"), you agree to assign to us all intellectual property rights in such Submission.
 You agree that we shall own this Submission and be entitled to its unrestricted use and dissemination for any lawful purpose, commercial or otherwise, without acknowledgment or compensation to you.
-Contributions: The Services may invite you to chat, contribute to, or participate in blogs, message boards, online forums, and other functionality during which you may create, submit, post, display, transmit, publish, distribute, or broadcast content and materials to us or through the Services, including but not limited to text, writings, video, audio, photographs, music, graphics, comments, reviews, rating suggestions, personal information, or other material ("Contributions"). Any Submission that is publicly posted shall also be treated as a Contribution.
+Contributions: The Services may invite you to chat, contribute to, message Psychotherapists, and other functionality during which you may create, submit, post, display, transmit, publish, distribute to us or through the Services, including but not limited to text, writings, video, audio, photographs, music, graphics, comments, reviews, rating suggestions, personal information, or other material ("Contributions"). Any Submission that is publicly posted shall also be treated as a Contribution.
 You understand that Contributions may be viewable by other users of the Services.
 When you post Contributions, you grant us a license (including use of your name, trademarks, and logos): By posting any Contributions, you grant us an unrestricted, unlimited, irrevocable, perpetual, non-exclusive, transferable, royalty-free, fully-paid, worldwide right, and license to: use, copy, reproduce, distribute, sell, resell, publish, broadcast, retitle, store, publicly perform, publicly display, reformat, translate, excerpt (in whole or in part), and exploit your Contributions (including, without limitation, your image, name, and voice) for any purpose, commercial, advertising, or otherwise, to prepare derivative works of, or incorporate into other works, your Contributions, and to sublicense the licenses granted in this section.
 Our use and distribution may occur in any media formats and through any media channels.
@@ -78,8 +78,8 @@ Copyright infringement
 We respect the intellectual property rights of others. If you believe that any material available on or through the Services infringes upon any copyright you own or control, please immediately refer to the "COPYRIGHT INFRINGEMENTS" section below.
 
 3. USER REPRESENTATIONS
-By using the Services, you represent and warrant that: (1) all registration information you submit will be true, accurate, current, and complete; (2) you will maintain the accuracy of such information and promptly update such registration information as necessary; (3) you have the legal capacity and you agree to comply with these Legal Terms; (4) you are not a minor in the jurisdiction in which you reside, or if a minor, you have received parental permission to use the Services; (5) you will not access the Services through automated or non-human means, whether through a bot, script or otherwise; (6) you will not use the Services for any illegal or unauthorized purpose; and (7) your use of the Services will not violate any applicable law or regulation.
-If you provide any information that is untrue, inaccurate, not current, or incomplete, we have the right to suspend or terminate your account and refuse any and all current or future use of the Services (or any portion thereof).
+By using the Services, you represent and warrant that: (1) all registration information you submit will be true, accurate, current, and complete; (2) you will maintain the accuracy of such information and promptly update such registration information as necessary; (3) you have the legal capacity and you agree to comply with these Legal Terms; (4) you are not a minor in the jurisdiction in which you reside, or if a minor, you have received parental permission to use the Services; (5) you will not access the Services through automated or non-human means, whether through a bot, script or otherwise; (6) you will not use the Services for any illegal or unauthorized purpose; (7) your use of the Services will not violate any applicable law or regulation; (8) Camera & Audio should be turned on when having a session with the Psychotherapist; (9) refunds will be done by messaging the psychotherapist; (10) missed sessions will be rescheduled; (11) chosen psychotherapist is permanent; (12) psychotherapists can approve face to face psychotherapy or online psychotherapy; and (13) psychotherapists can view client’s data excluding account information
+If you provide any information that is untrue, inaccurate, not current, or incomplete, we have the right to suspend or terminate your account and refuse any and all current or future use of the Services (or any portion thereof). 
 
 4. USER REGISTRATION
 You may be required to register to use the Services. You agree to keep your password confidential and will be responsible for all use of your account and password. We reserve the right to remove, reclaim, or change a username you select if we determine, in our sole discretion, that such username is inappropriate, obscene, or otherwise objectionable.
@@ -175,9 +175,7 @@ Exceptions to Informal Negotiations and Arbitration
 The Parties agree that the following Disputes are not subject to the above provisions concerning informal negotiations binding arbitration: (a) any Disputes seeking to enforce or protect, or concerning the validity of, any of the intellectual property rights of a Party; (b) any Dispute related to, or arising from, allegations of theft, piracy, invasion of privacy, or unauthorized use; and (c) any claim for injunctive relief. If this provision is found to be illegal or unenforceable, then neither Party will elect to arbitrate any Dispute falling within that portion of this provision found to be illegal or unenforceable and such Dispute shall be decided by a court of competent jurisdiction within the courts listed for jurisdiction above, and the Parties agree to submit to the personal jurisdiction of that court.
 
 15. CORRECTIONS
-There may be information on the Services that contains typographical errors, inaccuracies, or omissions, including descriptions, pricing, availability, and various other information. We reserve the right to correct
-any errors, Inaccuracies, or omissions ana Io chance or updale ine
-information on the Services at any time, without prior notice.
+There may be information on the Services that contains typographical errors, inaccuracies, or omissions, including descriptions, pricing, availability, and various other information. We reserve the right to correct any errors, Inaccuracies, or omissions ana Io chance or update information on the Services at any time, without prior notice.
 
 16. DISCLAIMER
 THE SERVICES ARE PROVIDED ON AN AS-IS AND AS-AVAILABLE BASIS. YOU AGREE THAT YOUR USE OF THE SERVICES WILL BE AT YOUR SOLE RISK. TO THE FULLEST EXTENT PERMITTED BY LAW, WE DISCLAIM ALL WARRANTIES, EXPRESS OR IMPLIED, IN CONNECTION WITH THE SERVICES AND YOUR USE THEREOF, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. WE MAKE NO WARRANTIES OR REPRESENTATIONS ABOUT THE ACCURACY OR COMPLETENESS OF THE SERVICES' CONTENT OR THE CONTENT OF ANY WEBSITES OR MOBILE APPLICATIONS LINKED TO THE SERVICES AND WE WILL ASSUME NO LIABILITY OR RESPONSIBILITY FOR ANY (1) ERRORS, MISTAKES, OR INACCURACIES OF CONTENT AND MATERIALS, (2)
@@ -203,7 +201,7 @@ If at any time you wish to stop receiving SMS messages from us, simply reply to 
 Message and Data Rates
 Please be aware that message and data rates may apply to any SMS messages sent or received. The rates are determined by your carrier and the specifics of your mobile plan.
 Support
-If you have any questions or need assistance regarding our SMS communications, please email us at amperaltapsychservices@gmail.com or call at 09266696242.
+If you have any questions or need assistance regarding our SMS communications, please email us at amperaltapsychservices@yahoo.com or call at 09266696242.
 
 22. MISCELLANEOUS
 These Legal Terms and any policies or operating rules posted by us on the Services or in respect to the Services constitute the entire agreement and understanding between you and us. Our failure to exercise or enforce any right or provision of these Legal Terms shall not operate as a waiver of such right or provision. These Legal Terms operate to the fullest extent permissible by law. We may assign any or all of our rights and obligations to others at any time. We shall not be responsible or liable for any loss, damage, delay, or failure to act caused by any cause beyond our reasonable control. If any provision or part of a provision of these Legal Terms is determined to be unlawful, void, or unenforceable, that provision or part of the provision is deemed severable from these Legal Terms and does not affect the validity and enforceability of any remaining provisions.
@@ -216,9 +214,7 @@ Unit 303 Sam-son's Building, Lower Mabini St.
 Baguio City, Benguet 2600
 Philippines
 Phone: 09266696242
-amperaltapsychservices@gmail.com
-
-
+amperaltapsychservices@yahoo.com
 
 `;
 
