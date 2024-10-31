@@ -78,7 +78,7 @@ const ReferredClientProfileModal: React.FC<ReferredClientProfileModalProps> = ({
   
       console.log('Document updated with status "attached":', updatedDocument);
   
-      alert('PDF uploaded and client referred successfully!');
+      window.location.reload();
       setIsConfirmModalOpen(false);
     } catch (err: unknown) {
       console.error("Error referring client:", err);
@@ -108,7 +108,7 @@ const ReferredClientProfileModal: React.FC<ReferredClientProfileModalProps> = ({
       <div
         role="dialog"
         aria-modal="true"
-        className="bg-white rounded-xl p-8 max-w-4xl shadow-lg relative"
+        className="bg-white p-8 max-w-4xl shadow-lg relative"
       >
         <button
           onClick={onClose}
@@ -118,16 +118,22 @@ const ReferredClientProfileModal: React.FC<ReferredClientProfileModalProps> = ({
           &#10005;
         </button>
 
-        {loading ? (
-          <div className="bg-white rounded-full p-6">
-            <Image src={'/gifs/load.gif'} alt={'loading'} width={250} height={250} className='rounded-full'></Image>
-          </div>
-        ) : error ? (
-          <p className="text-red-500">{error}</p>
-        ) : (
+          {loading ? (
+            <div className="bg-white rounded-full p-6 flex justify-center items-center">
+              <Image 
+                src={'/gifs/load.gif'} 
+                alt={'loading'} 
+                width={250} 
+                height={250} 
+                className='rounded-full'
+              />
+            </div>
+          ) : error ? (
+            <p className="text-red-500">{error}</p>
+          ) : (
           clientData && (
             <>
-              <div className="flex space-x-12 items-center">
+              <div className=" flex space-x-12 items-center">
                 <div className="flex-shrink-0 text-center">
                   <img
                     src={clientData.profilePictureUrl || '/default-profile.jpg'}

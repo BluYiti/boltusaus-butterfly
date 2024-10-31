@@ -15,6 +15,8 @@ interface Availability {
 }
 
 const Dashboard: React.FC = () => {
+  const { loading: authLoading } = useAuthCheck(['psychotherapist']); // Call the useAuthCheck hook
+  const [dataLoading, setDataLoading] = useState(true); // State to track if data is still loading
   const [date, setDate] = useState(new Date());
   const [availability, setAvailability] = useState<Availability[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -34,8 +36,8 @@ const Dashboard: React.FC = () => {
       setLoading(true);
       try {
         const response = await databases.listDocuments(
-          '[your_database_id]',  // Replace with your database ID
-          '[your_collection_id]', // Replace with your availability collection ID
+          'Butterfly-Database',  // Replace with your database ID
+          'Availability', // Replace with your availability collection ID
         );
         const fetchedAvailability = response.documents.map((doc: any) => ({
           date: doc.date,
@@ -91,6 +93,10 @@ const Dashboard: React.FC = () => {
   };
 
   const currentMonthWeeks = getCurrentMonthWeeks(date);
+
+  if (authLoading) {
+    return <LoadingScreen />; // Show the loading screen while the auth check or data loading is in progress
+  }
 
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
