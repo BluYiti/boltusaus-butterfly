@@ -6,6 +6,7 @@ const useRegisterForm = () => {
     const [firstName, setFirstName] = useState<string>('');
     const [lastName, setLastName] = useState<string>('');
     const [birthday, setBirthday] = useState<string>('');
+    const [sex, setSex] = useState<string>('');
     const [country, setCountry] = useState<string>('');
     const [region, setRegion] = useState<string>('');
     const [province, setProvince] = useState<string>('');
@@ -18,7 +19,15 @@ const useRegisterForm = () => {
     const [idFile, setIdFile] = useState<File | null>(null);
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
+    const [passwordCriteria, setPasswordCriteria] = useState({
+        length: false,
+        number: false,
+        specialChar: false,
+        uppercase: false,
+        lowercase: false,
+    });
     const [rePassword, setRePassword] = useState<string>('');
+    const [isPasswordValid, setIsPasswordValid] = useState(false);
     const [agreeToTerms, setAgreeToTerms] = useState<boolean>(false);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [validationError, setValidationError] = useState<string | null>(null);
@@ -30,11 +39,14 @@ const useRegisterForm = () => {
     const [provinces, setProvinces] = useState<Province[]>([]);
     const [cities, setCities] = useState<City[]>([]);
     const [barangays, setBarangays] = useState<Barangay[]>([]);
+    const [buttonClicked, setButtonClicked] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     return {
         firstName, setFirstName,
         lastName, setLastName,
         birthday, setBirthday,
+        sex, setSex,
         country, setCountry,
         region, setRegion,
         province, setProvince,
@@ -47,7 +59,9 @@ const useRegisterForm = () => {
         idFile, setIdFile,
         email, setEmail,
         password, setPassword,
+        passwordCriteria, setPasswordCriteria,
         rePassword, setRePassword,
+        isPasswordValid, setIsPasswordValid,
         agreeToTerms, setAgreeToTerms,
         isModalOpen, setIsModalOpen,
         validationError, setValidationError,
@@ -59,6 +73,8 @@ const useRegisterForm = () => {
         provinces, setProvinces,
         cities, setCities,
         barangays, setBarangays,
+        buttonClicked, setButtonClicked,
+        loading, setLoading
     };
 };
 

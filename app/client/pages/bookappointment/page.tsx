@@ -1,53 +1,94 @@
-'use client'
+"use client"; // Add this at the top of the file
 
 import React, { useState, useEffect } from "react";
-import Layout from "@/components/Sidebar/Layout"; // Adjust the path if necessary
-import Confetti from "react-confetti"; // Import the Confetti component
+import Layout from "@/components/Sidebar/Layout";
 import items from "@/client/data/Links";
-
-
-const months = [
-  { name: "January", days: 31 },
-  { name: "February", days: 29 }, // Leap year, so February has 29 days in 2024
-  { name: "March", days: 31 },
-  { name: "April", days: 30 },
-  { name: "May", days: 31 },
-  { name: "June", days: 30 },
-  { name: "July", days: 31 },
-  { name: "August", days: 31 },
-  { name: "September", days: 30 },
-  { name: "October", days: 31 },
-  { name: "November", days: 30 },
-  { name: "December", days: 31 },
-];
-
-const therapists = [
-  {
-    name: "Mrs. Angelica Peralta",
-    specialty: "Psychotherapy and Counseling",
-    imgSrc: "https://via.placeholder.com/60",
-  },
-];
-
-const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+import Confetti from "react-confetti"; // Import Confetti for the success effect
+import { databases } from "@/appwrite";
+import useAuthCheck from "@/auth/page";
+import LoadingScreen from "@/components/LoadingScreen";
+import Calendar from "@/components/Calendar/Calendar"; // Import the Calendar component
+import { fetchProfileImageUrl } from "@/hooks/userService";
+import ChoosePaymentModal from "./choosepayment";
 
 const AppointmentBooking = () => {
-  const [selectedMonth, setSelectedMonth] = useState("October");
-  const [selectedDay, setSelectedDay] = useState<number | null>(null);
-  const [selectedTime, setSelectedTime] = useState("");
-  const [selectedTherapist] = useState(therapists[0]); // Default selection for the therapist
-  const [appointmentBooked, setAppointmentBooked] = useState(false); // State for success message
-  const [showPrompt, setShowPrompt] = useState(false); // State to control the confirmation prompt
-  const [width, setWidth] = useState(window.innerWidth);
-  const [height, setHeight] = useState(window.innerHeight);
+  const { loading: authLoading } = useAuthCheck(['client']);
+  const [loading, setLoading] = useState(true);
+  const [appointmentData, setAppointmentData] = useState({
+    selectedMonth: "October",
+    selectedDay: null,
+    selectedTime: null,
+    selectedTherapist: null,
+    appointmentBooked: false,
+  });
+  const [psychotherapists, setPsychotherapists] = useState([]);
+  const [profileImageUrls, setProfileImageUrls] = useState({});
+  const [showPrompt, setShowPrompt] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [windowDimensions, setWindowDimensions] = useState({ width: 0, height: 0 });
 
-  const currentYear = new Date().getFullYear(); // Get the current year dynamically
+  const handleOpenModal = () => setIsModalOpen(true);
+  const handleCloseModal = () => setIsModalOpen(false);
 
-  // Handle window resizing
+  const handlePaymentSelection = (selectedMethod: string) => {
+    setPaymentMethod(selectedMethod);
+    console.log(`Selected payment method: ${selectedMethod}`);
+  };
+
+  const today = new Date();
+  const currentYear = today.getFullYear();
+
+  const handleBookAppointment = () => {
+    const { selectedTherapist, selectedDay, selectedTime } = appointmentData;
+    if (selectedTherapist && selectedDay && selectedTime) {
+      setShowPrompt(true);
+    }
+  };
+
+  const confirmBooking = () => {
+    setAppointmentData((prev) => ({ ...prev, appointmentBooked: true }));
+    setShowPrompt(false);
+  };
+
+  const cancelBooking = () => {
+    setShowPrompt(false);
+  };
+
+  const handleProceedToPayment = () => {
+    setAppointmentData((prev) => ({ ...prev, appointmentBooked: false }));
+    setIsModalOpen(true);
+    console.log("Proceeding to payment...");
+  };
+
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const therapistResponse = await databases.listDocuments('Butterfly-Database', 'Psychotherapist');
+        const therapists = therapistResponse.documents;
+        setPsychotherapists(therapists);
+
+        // Fetch profile images for each psychotherapist
+        const profileImages = {};
+        for (const therapist of therapists) {
+          if (therapist.profilepic) {
+            const url = await fetchProfileImageUrl(therapist.profilepic);
+            if (url) {
+              profileImages[therapist.$id] = url;
+            }
+          }
+        }
+        setProfileImageUrls(profileImages);
+      } catch (error) {
+        console.error("Error fetching data: ", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+
     const handleResize = () => {
-      setWidth(window.innerWidth);
-      setHeight(window.innerHeight);
+      setWindowDimensions({ width: window.innerWidth, height: window.innerHeight });
     };
 
     window.addEventListener("resize", handleResize);
@@ -56,188 +97,126 @@ const AppointmentBooking = () => {
     };
   }, []);
 
-  const handleMonthChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedMonth(event.target.value);
-    setSelectedDay(null); // Reset selected day when changing month
-  };
+  const isFormComplete = appointmentData.selectedDay !== null && appointmentData.selectedTime && appointmentData.selectedTherapist;
 
-  const handleBookAppointment = () => {
-    if (selectedDay && selectedTime) {
-      setShowPrompt(true); // Show confirmation prompt when booking is attempted
-    }
-  };
-
-  const confirmBooking = () => {
-    setAppointmentBooked(true); // Show success message when confirmed
-    setShowPrompt(false); // Close the prompt
-  };
-
-  const cancelBooking = () => {
-    setShowPrompt(false); // Close the prompt without booking
-  };
-
-  const daysInSelectedMonth = months.find((month) => month.name === selectedMonth)?.days || 31;
-
-  // Get the weekday of the 1st day of the selected month
-  const firstDayOfMonth = new Date(`${selectedMonth} 1, ${currentYear}`).getDay();
-
-  const isFormComplete = selectedDay !== null && selectedTime;
-
-  const handleProceedToPayment = () => {
-    alert("Proceeding to payment..."); // Placeholder for payment logic
-  };
+  if (authLoading || loading) {
+    return <LoadingScreen />;
+  }
 
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
-      <div className="bg-blue-100 text-black min-h-screen flex">
-        <div className="flex-grow flex flex-col justify-between p-6">
-          <div className="bg-white shadow-lg rounded-lg p-6 flex flex-col">
-            <h3 className="text-3xl font-bold text-blue-900">Your Psychotherapist</h3>
-            <div className="flex space-x-6 mt-4 items-center">
-              <img
-                src={selectedTherapist.imgSrc}
-                alt={selectedTherapist.name}
-                className="rounded-full w-16 h-16 border-2 border-blue-300"
-              />
-              <div>
-                <h3 className="text-lg font-bold">{selectedTherapist.name}</h3>
-                <p className="text-sm text-gray-500">Specialty: {selectedTherapist.specialty}</p>
-              </div>
-            </div>
+      <div className="text-black min-h-screen flex">
+        <div className="flex-grow flex flex-col justify-between bg-gray-100 w-3/4">
+          <div className="bg-blue-100 shadow-lg py-4 px-6 flex justify-between items-center">
+            <div className="text-black w-full flex flex-col bg-gray-100">
+              <div className="flex flex-col p-6 space-y-6">
+                <h3 className="text-3xl font-bold text-blue-900">
+                  Choose Psychotherapist <span className="text-red-500">{!appointmentData.selectedTherapist && "*"}</span>
+                </h3>
 
-            <h2 className="text-3xl font-bold text-left text-blue-900 mt-8">Counseling and Therapy Sessions</h2>
-            <div className="bg-gray-50 p-4 rounded-lg shadow border border-gray-200 mt-4">
-              <div className="mb-4">
-                <label className="block mb-2 text-lg font-medium text-gray-700">
-                  Select Month and Date {!selectedDay && <span className="text-red-500">*</span>}
-                </label>
-                <select
-                  value={selectedMonth}
-                  onChange={handleMonthChange}
-                  className="border w-1/2 border-gray-300 rounded-lg p-2"
-                >
-                  {months.map((month) => (
-                    <option key={month.name} value={month.name}>
-                      {month.name}
-                    </option>
+                <div className="flex space-x-6 mt-4">
+                  {psychotherapists.map((therapist) => (
+                    <div key={therapist.$id} className="flex items-center space-x-4">
+                      <img
+                        src={profileImageUrls[therapist.$id] || "/images/default-profile.png"}  // fallback to a default image
+                        alt={`${therapist.firstName} ${therapist.lastName}`}
+                        className="rounded-full w-16 h-16"
+                      />
+                      <div>
+                        <h3 className="text-lg font-bold">{therapist.firstName} {therapist.lastName}</h3>
+                        <p className="text-sm text-gray-500">Specialty: {therapist.specialties}</p>
+                        <button
+                          className={`mt-2 py-1 px-3 rounded ${appointmentData.selectedTherapist?.$id === therapist.$id ? 'bg-[#2563EB] text-white' : 'bg-gray-300 text-blue-500 hover:bg-gray-400'}`}
+                          onClick={() => setAppointmentData((prev) => ({ ...prev, selectedTherapist: therapist }))}
+                        >
+                          {appointmentData.selectedTherapist?.$id === therapist.$id ? "Selected" : "Select"}
+                        </button>
+                      </div>
+                    </div>
                   ))}
-                </select>
-              </div>
+                </div>
 
-              {/* Display Weekday Headers Above the Dates */}
-              <div className="grid grid-cols-7 gap-2 text-center font-bold text-gray-600 mb-2">
-                {weekdays.map((day) => (
-                  <div key={day}>{day}</div>
-                ))}
-              </div>
-
-              {/* Calendar with Dates */}
-              <div className="grid grid-cols-7 gap-2 mb-4 p-4 rounded shadow-md bg-gray-200">
-                {/* Empty divs to shift the 1st day to the correct weekday */}
-                {Array.from({ length: firstDayOfMonth }).map((_, index) => (
-                  <div key={index}></div>
-                ))}
-                {/* Display days of the selected month */}
-                {Array.from({ length: daysInSelectedMonth }, (_, i) => i + 1).map((day) => (
-                  <button
-                    key={day}
-                    className={`py-2 px-1 rounded-lg ${selectedDay === day ? "bg-blue-300 text-white" : "bg-gray-300 text-black hover:bg-blue-500"}`}
-                    onClick={() => setSelectedDay(day)}
-                  >
-                    {day}
-                  </button>
-                ))}
-              </div>
-
-              {/* Time Selection */}
-              <h3 className="text-lg font-bold mb-4">
-                Time {!selectedTime && <span className="text-red-500">*</span>}
-              </h3>
-              <div className="grid grid-cols-4 gap-2 mb-4">
-                {["9:00", "10:00", "11:00", "12:00", "1:00", "2:00", "3:00", "4:00"].map((time) => (
-                  <button
-                    key={time}
-                    className={`py-2 rounded-lg ${selectedTime === time ? "bg-blue-300 text-white" : "bg-gray-300 text-black hover:bg-blue-500"}`}
-                    onClick={() => setSelectedTime(time)}
-                  >
-                    {time}
-                  </button>
-                ))}
-              </div>
-
-              {/* Selected Info */}
-              <div className="mt-4">
-                <p className="text-gray-500">
-                  Selected: {selectedMonth} {selectedDay}, {currentYear} | {selectedTime}
-                </p>
-                <button
-                  className={`mt-4 py-2 px-4 rounded-lg ${isFormComplete ? "bg-blue-400 text-white hover:bg-blue-500" : "bg-gray-300 text-gray-700 cursor-not-allowed"}`}
-                  onClick={handleBookAppointment}
-                  disabled={!isFormComplete}
-                >
-                  Book
-                </button>
+                <h2 className="text-3xl font-bold text-left text-blue-900 mt-8">Counseling and Therapy Sessions</h2>
+                <div className="bg-gray-50 p-4 rounded-lg shadow border border-gray-200 mt-4">
+                  <Calendar
+                      currentMonth="October"
+                      nextMonth="November"
+                      currentDate={today.getDate()}
+                      currentYear={currentYear}
+                      selectedDay={appointmentData.selectedDay}
+                      setSelectedDay={(day) => setAppointmentData((prev) => ({ ...prev, selectedDay: day }))}
+                      selectedMonth={appointmentData.selectedMonth}
+                      setSelectedMonth={(month) => setAppointmentData((prev) => ({ ...prev, selectedMonth: month, selectedDay: null }))}
+                      selectedTime={appointmentData.selectedTime}
+                      setSelectedTime={(time) => setAppointmentData((prev) => ({ ...prev, selectedTime: time }))}
+                      isTherapistSelected={!!appointmentData.selectedTherapist} // Pass the selection state
+                      handleBookAppointment={handleBookAppointment}
+                  />
+                </div>
               </div>
             </div>
           </div>
-
-          {/* Confirmation Prompt */}
-          {showPrompt && (
-            <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
-              <div className="bg-white p-8 rounded-xl shadow-xl max-w-md w-full text-center relative border border-gray-300">
-                <h3 className="text-2xl font-bold text-blue-900 mb-4">
-                  Are you sure you want to proceed?
-                </h3>
-                <div className="mt-6 flex justify-around">
-                  <button
-                    className="bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-400"
-                    onClick={cancelBooking}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    className="bg-blue-400 text-white py-2 px-4 rounded-lg hover:bg-blue-500"
-                    onClick={confirmBooking}
-                  >
-                    Confirm
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Success Message and Confetti */}
-          {appointmentBooked && (
-                <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
-                  <Confetti width={width} height={height} /> {/* Render Confetti */}
-                  <div className="bg-white p-8 rounded-lg shadow-xl max-w-md w-full text-center relative border border-gray-300">
-                       {/* Add the small 'X' button to close the success message */}
-                  <button
-                      className="absolute top-2 right-2 bg-gray-300 rounded-full w-6 h-6 flex items-center justify-center text-black hover:bg-gray-400"
-                      onClick={() => setAppointmentBooked(false)} // Close the pop-up
-                       >
-                       &times; {/* 'X' symbol */}
-                  </button>
-                  <h3 className="text-2xl font-bold text-green-600">
-                        Your Appointment was Booked Successfully!
-                      </h3>
-                      <p className="mt-2">
-                        Service: Counseling and Therapy<br />
-                        Date & Time: {selectedMonth} {selectedDay}, 2024 | {selectedTime}<br />
-                        Psychotherapist: {selectedTherapist ? selectedTherapist.name : "No therapist selected"}
-                      </p>
-                      <p className="text-lg text-gray-700">You can proceed to payment to complete the booking.</p>
-                      <button
-                         className="mt-6 bg-blue-400 text-white py-2 px-6 rounded-full hover:bg-blue-500"
-                          onClick={handleProceedToPayment}
-                          >
-                          Proceed to Payment
-                          </button>
-                   </div>
-                </div>
-               )}
         </div>
       </div>
+
+      {/* Confirmation Prompt */}
+      {showPrompt && (
+        <div className="fixed inset-0 flex justify-center items-center bg-gray-800 bg-opacity-50 z-50">
+          <div className="bg-white p-8 rounded-xl shadow-xl max-w-md w-full text-center relative border border-gray-300">
+            <h3 className="text-2xl font-bold text-blue-900 mb-4">Are you sure you want to proceed?</h3>
+            <div className="mt-6 flex justify-around">
+              <button
+                className="bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-400"
+                onClick={cancelBooking}
+              >
+                Cancel
+              </button>
+              <button
+                className="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-blue-500"
+                onClick={confirmBooking}
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Success Message and Confetti */}
+      {appointmentData.appointmentBooked && (
+        <div className="fixed inset-0 flex justify-center items-center bg-gray-800 bg-opacity-50 z-50">
+          <Confetti width={windowDimensions.width} height={windowDimensions.height} />
+          <div className="bg-white p-8 rounded-lg shadow-xl max-w-md w-full text-center relative border border-gray-300">
+            <button
+              className="absolute top-2 right-2 bg-gray-300 rounded-full w-6 h-6 flex items-center justify-center text-black hover:bg-gray-400"
+              onClick={() => setAppointmentData((prev) => ({ ...prev, appointmentBooked: false }))}
+            >
+              &times;
+            </button>
+            <h3 className="text-2xl font-bold text-green-600">You Are Almost Done With Booking your Appointment!</h3>
+            <p className="mt-2">
+              Service: Counseling and Therapy<br />
+              Date & Time: {appointmentData.selectedMonth} {appointmentData.selectedDay}, {currentYear} | {appointmentData.selectedTime}<br />
+              Psychotherapist: {appointmentData.selectedTherapist ? `${appointmentData.selectedTherapist.firstName} ${appointmentData.selectedTherapist.lastName}` : "No therapist selected"}
+            </p>
+            <p className="text-lg text-gray-700">You can proceed to payment to complete the booking.</p>
+            <button
+              className="mt-4 bg-green-400 text-white py-2 px-4 rounded-lg hover:bg-green-950"
+              onClick={handleProceedToPayment}
+              disabled={!isFormComplete}
+            >
+              Proceed to Payment
+            </button>
+          </div>
+        </div>
+      )}
+
+
+      {/* Modal */}
+      <ChoosePaymentModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+      />
     </Layout>
   );
 };

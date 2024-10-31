@@ -12,17 +12,18 @@ import { createSubmitHandler } from '@/register/hook/handleSubmitAdult';
 import { useFetchCountries } from '@/register/hook/fetch/useFetchCountries';
 import { useFetchRegions } from '@/register/hook/fetch/useFetchRegions';
 import { useFetchProvinces } from '@/register/hook/fetch/useFetchProvinces';
-import { useFetchCities } from '@/register/hook/fetch/useFetchCities';
+import { useFetchCities } from '@/register/hook/fetch/useFetchCitiesAndMunicipalities';
 import { useFetchBarangays } from '@/register/hook/fetch/useFetchBarangays';
 import { useRouter } from 'next/navigation';
 
-const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading }) => {
+const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error}) => {
     const router = useRouter();
 
     const {
         firstName, setFirstName,
         lastName, setLastName,
         birthday, setBirthday,
+        sex, setSex,
         country, setCountry,
         region, setRegion,
         province, setProvince,
@@ -35,6 +36,8 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
         idFile, setIdFile,
         email, setEmail,
         password, setPassword,
+        passwordCriteria, setPasswordCriteria,
+        isPasswordValid, setIsPasswordValid,
         rePassword, setRePassword,
         agreeToTerms, setAgreeToTerms,
         isModalOpen, setIsModalOpen,
@@ -46,6 +49,8 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
         provinces, setProvinces,
         cities, setCities,
         barangays, setBarangays,
+        buttonClicked, setButtonClicked,
+        loading, setLoading
     } = useRegisterForm();
 
     // Handle form submission
@@ -53,6 +58,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
         firstName,
         lastName,
         birthday,
+        sex,
         password,
         rePassword,
         agreeToTerms,
@@ -77,7 +83,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
             router.push(`/register/verify/email/?user=${encodeURIComponent(userId)}`);
         },
         setValidationError,
-    });
+    }, setLoading, setButtonClicked); // Pass setLoading and setButtonClicked here
 
     // Use custom hooks to fetch data
     useFetchCountries(setCountries);
@@ -108,6 +114,30 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
         } else {
             setValidationError(null);
         }
+    };
+
+    const validatePassword = (password: string) => {
+        const length = password.length >= 8;
+        const number = /\d/.test(password);
+        const specialChar = /[@$!%*?&]/.test(password);
+        const uppercase = /[A-Z]/.test(password);
+        const lowercase = /[a-z]/.test(password);
+
+        setPasswordCriteria({
+            length,
+            number,
+            specialChar,
+            uppercase,
+            lowercase,
+        });
+
+        setIsPasswordValid(length && number && specialChar && uppercase && lowercase);
+    };
+
+    const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newPassword = e.target.value;
+        setPassword(newPassword);
+        validatePassword(newPassword);
     };
 
     return (
@@ -168,6 +198,23 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
                                 className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
                             />
                         </div>
+                    </div>
+
+                    {/* Sex Dropdown */}
+                    <div className="mb-4">
+                        <label className="block text-[#38b6ff] mb-2">Sex</label>
+                        <select
+                            className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
+                            value={sex}
+                            onChange={(e) => setSex(e.target.value)}
+                        >
+                            <option value="">Select Sex</option>
+                            {["Male", "Female"].map((gender) => (
+                                <option key={gender} value={gender}>
+                                    {gender}
+                                </option>
+                            ))}
+                        </select>
                     </div>
 
                     {/* Address */}
@@ -302,12 +349,13 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
                             country={'ph'}
                             value={contactNumber}
                             onChange={(phone) => {
-                                let formattedPhone = phone;
-                                if (!phone.startsWith('+')) {
-                                    formattedPhone = `+${phone}`;
+                                let formattedPhone = phone.replace(/[^\d]/g, '');
+                                if (formattedPhone.length <= 10) {
+                                    if (!formattedPhone.startsWith('+')) {
+                                        formattedPhone = `+${formattedPhone}`;
+                                    }
+                                    setContactNumber(formattedPhone);
                                 }
-                                formattedPhone = formattedPhone.replace(/[^\d+]/g, '');
-                                setContactNumber(formattedPhone);
                             }}
                             inputClass="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500 mt-1"
                             containerClass="phone-input-container"
@@ -400,12 +448,31 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
                         <input
                             id="password"
                             type="password"
-                            required
-                            placeholder="********"
                             value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
+                            onChange={handlePasswordChange}
+                            placeholder="********"
+                            className={`border rounded-xl pl-3 pr-10 py-2 w-full text-gray-500 ${
+                                isPasswordValid ? 'border-green-500' : 'border-red-500'
+                            }`}
                         />
+
+                        <div className="mt-2">
+                            <p className={`text-sm ${passwordCriteria.length ? 'text-green-500' : 'text-red-500'}`}>
+                                - At least 8 characters
+                            </p>
+                            <p className={`text-sm ${passwordCriteria.number ? 'text-green-500' : 'text-red-500'}`}>
+                                - At least 1 number
+                            </p>
+                            <p className={`text-sm ${passwordCriteria.specialChar ? 'text-green-500' : 'text-red-500'}`}>
+                                - At least 1 special character (@, $, !, %, *, ?, &)
+                            </p>
+                            <p className={`text-sm ${passwordCriteria.uppercase ? 'text-green-500' : 'text-red-500'}`}>
+                                - At least 1 uppercase letter
+                            </p>
+                            <p className={`text-sm ${passwordCriteria.lowercase ? 'text-green-500' : 'text-red-500'}`}>
+                                - At least 1 lowercase letter
+                            </p>
+                        </div>
                     </div>
 
                     {/* Re-enter Password */}
@@ -442,7 +509,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error, loading 
                 <button
                     type="submit"
                     disabled={loading || !agreeToTerms}
-                    className={`bg-gradient-to-r from-[#38b6ff] to-[#4982ae] text-white font-bold py-2 px-4 rounded-xl transition-all duration-300 ease-in-out shadow-lg transform hover:scale-105 hover:shadow-xl ${!agreeToTerms ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`bg-gradient-to-r from-[#38b6ff] to-[#4982ae] text-white font-bold py-2 px-4 rounded-xl transition-all duration-300 ease-in-out shadow-lg transform hover:scale-105 hover:shadow-xl ${!agreeToTerms ? 'opacity-50 cursor-not-allowed' : ''} ${buttonClicked ? 'bg-green-500' : ''}`}
                 >
                     {loading ? 'Registering...' : 'Register'}
                 </button>

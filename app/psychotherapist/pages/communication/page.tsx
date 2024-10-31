@@ -51,9 +51,9 @@ const chatMessages = {
 // Contact List component
 const ContactList: FC<{ onContactClick: (id: number) => void; selectedContact: number | null }> = ({ onContactClick, selectedContact }) => {
   return (
-    <div className="w-1/4 bg-white p-4 border-r border-gray-200">
+    <div className="w-1/4 bg-gray-100   p-4 border-r border-gray-200">
       {/* Search Bar */}
-      <div className="flex items-center bg-gray-100 p-2 rounded-full mb-4">
+      <div className="flex items-center bg-white p-2 rounded-full mb-4">
         <FaSearch className="text-gray-400 ml-2" />
         <input
           type="text"
@@ -132,7 +132,7 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[] }> = ({
             }`}
           >
             <div className={`max-w-xs p-4 rounded-lg shadow ${
-              message.sender === 'client' ? 'bg-blue-100' : 'bg-gray-100'
+              message.sender === 'client' ? 'bg-blue-100' : 'bg-white'
             }`}>
               <p>{message.text}</p>
               <span className="block text-xs text-gray-400">{message.time}</span>
@@ -173,7 +173,7 @@ const Communication: FC = () => {
 
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
-      <div className="flex h-screen bg-gray-100">
+      <div className="flex h-screen bg-blue-50">
         <ContactList onContactClick={setSelectedContactId} selectedContact={selectedContactId} />
         <ChatBox selectedContact={selectedContact} messages={messages} />
       </div>
