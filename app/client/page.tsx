@@ -124,7 +124,7 @@ const NewClientDashboard = () => {
             </div>
           )}
 
-          {state === "referred" && status === "pending" && (
+          {(state === "referred" && status === "pending") || state === "evaluate" && (
             <>
               <div className="relative group flex"> {/* Wrapper for hover effect */}
                 <button

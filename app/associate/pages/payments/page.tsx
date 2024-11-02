@@ -1,4 +1,4 @@
-'use client';
+'use client'
 
 import React, { useState, useEffect } from 'react';
 import { Client, Databases } from 'appwrite';
@@ -113,7 +113,7 @@ const PaymentsHistory: React.FC = () => {
           <SwitchTransition mode="out-in">
             <CSSTransition
               key={activeTab}
-              addEndListener={(node: { addEventListener: (arg0: string, arg1: any, arg2: boolean) => any; }, done: any) => node.addEventListener("transitionend", done, false)}
+              timeout={300} // duration of your animation in ms
               classNames="fade-slide"
             >
               <div>

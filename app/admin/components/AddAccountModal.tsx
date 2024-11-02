@@ -70,8 +70,12 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, sele
 
       setIsAdminModalOpen(false);
       onClose();
-    } catch (err: any) {
-      setAdminError(err.message || 'Invalid admin credentials');
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setAdminError(err.message || 'Invalid admin credentials');
+      } else {
+        setAdminError('An unexpected error occurred');
+      }
     } finally {
       setIsAdminValidating(false);
     }

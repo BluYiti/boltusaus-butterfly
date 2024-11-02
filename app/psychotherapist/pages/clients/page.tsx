@@ -5,7 +5,7 @@ import items from "@/psychotherapist/data/Links";
 import { databases } from "@/appwrite";
 import ClientProfileModal from "@/psychotherapist/components/ClientProfileModal";
 import ReferredClientProfileModal from "@/psychotherapist/components/ReferredClientProfileModal";
-import ReviewPreAssModal from "@/psychotherapist/components/ReviewPreAssModal"; // Import your new modal
+import ReviewPreAssModal from "@/psychotherapist/components/EvaluateModal"; // Import your new modal
 
 interface ClientType {
   id: string;
