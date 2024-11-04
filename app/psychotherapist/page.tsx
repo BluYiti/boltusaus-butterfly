@@ -1,9 +1,9 @@
-'use client';
-
+'use client'
 import React, { useState, useEffect } from 'react';
 import Layout from '@/components/Sidebar/Layout';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
-import { Client, Databases } from 'appwrite';
+import { databases } from '@/appwrite';
+import { Query } from 'appwrite';
 import items from './data/Links';
 import useAuthCheck from '@/auth/page';
 import LoadingScreen from '@/components/LoadingScreen';
@@ -19,45 +19,29 @@ const Dashboard: React.FC = () => {
   const [dataLoading, setDataLoading] = useState(true); // State to track if data is still loading
   const [date, setDate] = useState(new Date());
   const [availability, setAvailability] = useState<Availability[]>([]);
+  const [evaluationData, setEvaluationData] = useState<any[]>([]); // New state for evaluation data
   const [error, setError] = useState<string | null>(null);
   const [slotsInfo, setSlotsInfo] = useState<number | null>(null);
   const [loading, setLoading] = useState<boolean>(true); // Loading state
   const [year, setYear] = useState(date.getFullYear());
 
-  // Set up Appwrite Client
-  const client = new Client();
-  const databases = new Databases(client);
-
-  client.setEndpoint('https://[YOUR-ENDPOINT]') // Replace with your Appwrite endpoint
-        .setProject('[YOUR-PROJECT-ID]'); // Replace with your project ID
-
   useEffect(() => {
-    const fetchAvailability = async () => {
-      setLoading(true);
+    const fetchData = async () => {
       try {
-        const response = await databases.listDocuments(
-          'Butterfly-Database',  // Replace with your database ID
-          'Availability', // Replace with your availability collection ID
+        const evaluationResponse = await databases.listDocuments(
+          'Butterfly-Database', // Replace with your database ID
+          'Client', // Replace with your Client collection ID
+          [Query.equal('state', 'evaluate')]
         );
-        const fetchedAvailability = response.documents.map((doc: any) => ({
-          date: doc.date,
-          slotsAvailable: doc.slotsAvailable,
-        }));
-        setAvailability(fetchedAvailability);
-      } catch (error) {
-        console.error('Error fetching availability from Appwrite:', error);
-        setError('Failed to fetch availability. Using mock data.');
-        setAvailability([
-          { date: '2024-10-04', slotsAvailable: 3 },
-          { date: '2024-10-05', slotsAvailable: 0 }, // Fully booked day
-          { date: '2024-10-06', slotsAvailable: 1 },
-        ]);
+        setEvaluationData(evaluationResponse.documents); // Save the fetched data
+      } catch (err) {
+        setError('Failed to fetch evaluation data.'); // Set an error message
+        console.error(err); // Log the error for debugging
       } finally {
-        setLoading(false);
+        setLoading(false); // Ensure loading state is updated
       }
     };
-
-    fetchAvailability();
+    fetchData();
   }, []);
 
   const formatDate = (date: Date) => {
@@ -79,7 +63,7 @@ const Dashboard: React.FC = () => {
     const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
     const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
     const weekStart = new Date(startOfMonth);
-    weekStart.setDate(startOfMonth.getDate() - startOfMonth.getDay()); // Adjust to the start of the week
+    weekStart.setDate(startOfMonth.getDate() - startOfMonth.getDay());
 
     const weeks = [];
     let dateIterator = weekStart;
@@ -95,23 +79,49 @@ const Dashboard: React.FC = () => {
   const currentMonthWeeks = getCurrentMonthWeeks(date);
 
   if (authLoading) {
-    return <LoadingScreen />; // Show the loading screen while the auth check or data loading is in progress
+    return <LoadingScreen />;
   }
+
+  // Function to handle view list button click
+  const handleViewListClick = () => {
+    console.log('View List clicked');
+    // Implement the logic to view the list of evaluations here
+    // For example, you could navigate to another page or open a modal
+  };
 
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
-      <div className="bg-blue-50 min-h-screen"> {/* Changed gray background to light blue */}
-        <div className="bg-white rounded-b-lg shadow-md p-5 top-0 left-60 w-full z-10"> {/* Fixed position with full width */}
+      <div className="bg-blue-50 min-h-screen">
+        <div className="bg-white rounded-b-lg shadow-md p-5 top-0 left-60 w-full z-10">
           <h2 className="text-2xl font-bold text-blue-400">Hello, Psychotherapist!</h2>
         </div>
 
-        {/* Main Dashboard Sections */}
-        <div className="pt-10"> {/* Add padding to prevent overlap with the fixed header */}
+        <div className="pt-10">
           <div className="grid grid-cols-3 gap-4 mx-10">
             {/* To Be Evaluated Section */}
             <div className="bg-white p-4 rounded-lg shadow-md transition hover:shadow-lg">
-              <h3 className="text-lg font-semibold mb-4 text-blue-500">To be Evaluated</h3>
-              <p>Placeholder for evaluation data fetched from Appwrite.</p>
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold mb-4 text-blue-500">To be Evaluated</h3>
+                <button
+                  onClick={handleViewListClick}
+                  className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 transition -mt-2"
+                >
+                  View List
+                </button>
+              </div>
+              {loading ? (
+                <p className="text-blue-600">Loading evaluation data...</p>
+              ) : error ? (
+                <p className="text-red-500">{error}</p>
+              ) : (
+                <ul>
+                  {evaluationData.map((doc) => (
+                    <li key={doc.$id}>
+                      <p>{doc.firstname} {doc.lastname}</p>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
 
             {/* Upcoming Sessions Section */}
@@ -200,16 +210,16 @@ const Dashboard: React.FC = () => {
               )}
             </div>
 
-            {/* Payments Status (Placeholder section) */}
+            {/* Payments Status Section */}
             <div className="bg-white p-4 rounded-lg shadow-md transition hover:shadow-lg">
-              <h3 className="text-lg font-semibold mb-4 text-blue-500">Payment Status</h3>
-              <p>Placeholder for payment status information</p>
+              <h3 className="text-lg font-semibold mb-4 text-green-500">Payments Status</h3>
+              <p>Placeholder for payments status data fetched from Appwrite.</p>
             </div>
           </div>
         </div>
       </div>
     </Layout>
-  );  
-};  
+  );
+};
 
 export default Dashboard;
