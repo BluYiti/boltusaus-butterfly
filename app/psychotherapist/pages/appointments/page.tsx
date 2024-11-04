@@ -131,7 +131,7 @@ const Appointments = () => {
                 <h3 className="font-semibold text-lg border-b-2 border-gray-300 pb-2">Upcoming bookings</h3>
                 {clientData.length > 0 ? (
                   <div className="grid grid-cols-1 gap-6 mt-4">
-                    {clientData.filter(bookings => bookings.status === "pending").map((booking, bookingIndex) => (
+                    {clientData.filter(bookings => bookings.status === "paid").map((booking, bookingIndex) => (
                       <div key={bookingIndex} className="bg-blue-50 rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-200 border-l-4 border-blue-500">
                         <h4 className="font-semibold text-blue-700">{booking.clientName}</h4>
                         <p className="text-gray-600">Date: <span className="font-semibold">{booking.date}</span></p>

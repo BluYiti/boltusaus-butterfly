@@ -7,6 +7,7 @@ import { Query } from 'appwrite';
 import items from './data/Links';
 import useAuthCheck from '@/auth/page';
 import LoadingScreen from '@/components/LoadingScreen';
+import { useRouter } from 'next/navigation';
 
 // Define types for the availability response
 interface Availability {
@@ -19,21 +20,107 @@ const Dashboard: React.FC = () => {
   const [dataLoading, setDataLoading] = useState(true); // State to track if data is still loading
   const [date, setDate] = useState(new Date());
   const [availability, setAvailability] = useState<Availability[]>([]);
-  const [evaluationData, setEvaluationData] = useState<any[]>([]); // New state for evaluation data
+  const [evaluationData, setEvaluationData] = useState<any[]>([]);
+  const [missedData, setMissedData] = useState<any[]>([]);
+  const [sessionData, setSessionData] = useState<any[]>([]); 
   const [error, setError] = useState<string | null>(null);
   const [slotsInfo, setSlotsInfo] = useState<number | null>(null);
   const [loading, setLoading] = useState<boolean>(true); // Loading state
   const [year, setYear] = useState(date.getFullYear());
+  const router = useRouter();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // Fetch evaluation data
         const evaluationResponse = await databases.listDocuments(
           'Butterfly-Database', // Replace with your database ID
           'Client', // Replace with your Client collection ID
           [Query.equal('state', 'evaluate')]
         );
         setEvaluationData(evaluationResponse.documents); // Save the fetched data
+    
+        // Fetch paid session data
+        const sessionResponse = await databases.listDocuments(
+          'Butterfly-Database', // Replace with your database ID
+          'Bookings', // Replace with your Bookings collection ID
+          [Query.equal('status', 'paid')]
+        );
+        setSessionData(sessionResponse.documents);
+    
+        // Log session response for debugging
+        console.log("Session Response:", sessionResponse.documents);
+    
+        // Extract client IDs from paid sessions
+        const clientIds = sessionResponse.documents.map(booking => booking.clientId).filter(id => id);
+        console.log("Client IDs from paid sessions:", clientIds);
+    
+        // Fetch client data based on the client IDs from paid sessions
+        const clientPromises = clientIds.map(clientId => {
+          if (!clientId) {
+            console.warn("Empty clientId found, skipping fetch."); // Warn about missing clientId
+            return Promise.resolve(null); // Return a resolved promise for missing IDs
+          }
+          return databases.getDocument('Butterfly-Database', 'Client', clientId); // Ensure 'Client' is correct
+        });
+    
+        // Resolve all promises and extract client names for paid sessions
+        const clientData = await Promise.all(clientPromises);
+    
+        // Filter out any null results
+        const validClientData = clientData.filter(client => client !== null);
+    
+        // Merge client names into the paid session data
+        const sessionsWithClientNames = sessionResponse.documents.map(booking => {
+          const client = validClientData.find(client => client.$id === booking.clientId);
+          return {
+            ...booking,
+            firstname: client?.firstname || 'Unknown', // Fallback in case client not found
+            lastname: client?.lastname || 'Unknown',
+          };
+        });
+    
+        setSessionData(sessionsWithClientNames); // Update session data with client names
+  
+        // Fetch missed bookings
+        const missedResponse = await databases.listDocuments(
+          'Butterfly-Database', // Replace with your database ID
+          'Bookings', // Replace with your Bookings collection ID
+          [Query.equal('status', 'missed')]
+        );
+        setMissedData(missedResponse.documents); // Save the missed booking data
+  
+        // Extract client IDs from missed sessions
+        const missedClientIds = missedResponse.documents.map(booking => booking.clientId).filter(id => id);
+        console.log("Client IDs from missed sessions:", missedClientIds);
+  
+        // Fetch client data based on the client IDs from missed sessions
+        const missedClientPromises = missedClientIds.map(clientId => {
+          if (!clientId) {
+            console.warn("Empty clientId found in missed bookings, skipping fetch."); // Warn about missing clientId
+            return Promise.resolve(null); // Return a resolved promise for missing IDs
+          }
+          return databases.getDocument('Butterfly-Database', 'Client', clientId); // Ensure 'Client' is correct
+        });
+    
+        // Resolve all promises and extract client names for missed sessions
+        const missedClientData = await Promise.all(missedClientPromises);
+    
+        // Filter out any null results
+        const validMissedClientData = missedClientData.filter(client => client !== null);
+    
+        // Merge client names into the missed session data
+        const missedSessionsWithClientNames = missedResponse.documents.map(booking => {
+          const client = validMissedClientData.find(client => client.$id === booking.clientId);
+          return {
+            ...booking,
+            firstname: client?.firstname || 'Unknown', // Fallback in case client not found
+            lastname: client?.lastname || 'Unknown',
+          };
+        });
+  
+        setMissedData(missedSessionsWithClientNames); // Update missed data with client names
+  
       } catch (err) {
         setError('Failed to fetch evaluation data.'); // Set an error message
         console.error(err); // Log the error for debugging
@@ -41,9 +128,18 @@ const Dashboard: React.FC = () => {
         setLoading(false); // Ensure loading state is updated
       }
     };
+  
     fetchData();
   }, []);
 
+  const handleViewListClick = () => {
+    router.push(`/psychotherapist/pages/clients?tab=To%20Be%20Evaluated`);
+  };
+
+  const handleViewUpcomingListClick = () => {
+    router.push(`/psychotherapist/pages/appointments`);
+  };
+  
   const formatDate = (date: Date) => {
     return date.toISOString().split('T')[0];
   };
@@ -82,13 +178,6 @@ const Dashboard: React.FC = () => {
     return <LoadingScreen />;
   }
 
-  // Function to handle view list button click
-  const handleViewListClick = () => {
-    console.log('View List clicked');
-    // Implement the logic to view the list of evaluations here
-    // For example, you could navigate to another page or open a modal
-  };
-
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
       <div className="bg-blue-50 min-h-screen">
@@ -126,14 +215,54 @@ const Dashboard: React.FC = () => {
 
             {/* Upcoming Sessions Section */}
             <div className="bg-white p-4 rounded-lg shadow-md transition hover:shadow-lg">
-              <h3 className="text-lg font-semibold mb-4 text-blue-500">Upcoming Sessions</h3>
-              <p>Placeholder for upcoming sessions data fetched from Appwrite.</p>
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold mb-4 text-blue-500">Upcoming Sessions</h3>
+                <button
+                  onClick={handleViewUpcomingListClick}
+                  className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 transition -mt-2"
+                >
+                  View List
+                </button>
+              </div>
+              {loading ? (
+                <p className="text-blue-600">Loading upcoming session data...</p>
+              ) : error ? (
+                <p className="text-red-500">{error}</p>
+              ) : (
+                <ul>
+                  {sessionData.map((doc) => (
+                    <li key={doc.$id}>
+                      <p>{doc.client.firstname} {doc.client.lastname}</p> {/* Access client names directly */}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
 
             {/* Missed Appointments Section */}
             <div className="bg-white p-4 rounded-lg shadow-md transition hover:shadow-lg">
-              <h3 className="text-lg font-semibold mb-4 text-red-600">Missed Appointments</h3>
-              <p>Placeholder for missed appointments data fetched from Appwrite.</p>
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold mb-4 text-blue-500">Missed Appointments</h3>
+                <button
+                  onClick={handleViewUpcomingListClick}
+                  className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 transition -mt-2"
+                >
+                  View List
+                </button>
+              </div>
+              {loading ? (
+                <p className="text-blue-600">Loading missed session data...</p>
+              ) : error ? (
+                <p className="text-red-500">{error}</p>
+              ) : (
+                <ul>
+                  {missedData.map((doc) => (
+                    <li key={doc.$id}>
+                      <p>{doc.client.firstname} {doc.client.lastname}</p> {/* Access client names directly */}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </div>
 
