@@ -8,18 +8,12 @@ import items from './data/Links';
 import useAuthCheck from '@/auth/page';
 import LoadingScreen from '@/components/LoadingScreen';
 import { useRouter } from 'next/navigation';
-
-// Define types for the availability response
-interface Availability {
-  date: string;
-  slotsAvailable: number;
-}
+import Calendar from '@/components/Calendar/Calendar';
 
 const Dashboard: React.FC = () => {
   const { loading: authLoading } = useAuthCheck(['psychotherapist']); // Call the useAuthCheck hook
   const [dataLoading, setDataLoading] = useState(true); // State to track if data is still loading
   const [date, setDate] = useState(new Date());
-  const [availability, setAvailability] = useState<Availability[]>([]);
   const [evaluationData, setEvaluationData] = useState<any[]>([]);
   const [missedData, setMissedData] = useState<any[]>([]);
   const [sessionData, setSessionData] = useState<any[]>([]); 
@@ -27,6 +21,22 @@ const Dashboard: React.FC = () => {
   const [slotsInfo, setSlotsInfo] = useState<number | null>(null);
   const [loading, setLoading] = useState<boolean>(true); // Loading state
   const [year, setYear] = useState(date.getFullYear());
+
+  const today = new Date();
+  const currentYear = today.getFullYear();
+  const selectedMonth = today.toLocaleString('default', { month: 'long' });
+  const nextMonth = new Date(today.setMonth(today.getMonth() + 1)).toLocaleString('default', { month: 'long' });
+  const [appointmentData, setAppointmentData] = useState({
+    selectedMonth,
+    selectedDay: null,
+    selectedTime: null,
+    selectedTherapist: null,
+    selectedMode: null,
+    appointmentBooked: false,
+    isFirstBooking: false, // Track if this is the first booking
+    allowTherapistChange: true, // Control therapist selection ability
+  });
+
   const router = useRouter();
 
   useEffect(() => {
@@ -144,17 +154,6 @@ const Dashboard: React.FC = () => {
     return date.toISOString().split('T')[0];
   };
 
-  const getAvailabilityForDate = (date: Date) => {
-    const formattedDate = formatDate(date);
-    const availabilityForDate = availability.find((item) => item.date === formattedDate);
-    return availabilityForDate ? availabilityForDate.slotsAvailable : null;
-  };
-
-  const handleDateClick = (value: Date) => {
-    const slotsAvailable = getAvailabilityForDate(value);
-    setSlotsInfo(slotsAvailable !== null ? slotsAvailable : null);
-  };
-
   const getCurrentMonthWeeks = (currentDate: Date) => {
     const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
     const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
@@ -181,11 +180,11 @@ const Dashboard: React.FC = () => {
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
       <div className="bg-blue-50 min-h-screen">
-        <div className="bg-white rounded-b-lg shadow-md p-5 top-0 left-60 w-full z-10">
+        <div className="bg-white width rounded-b-lg fixed p-5 top-0 w-full z-10">
           <h2 className="text-2xl font-bold text-blue-400">Hello, Psychotherapist!</h2>
         </div>
 
-        <div className="pt-10">
+        <div className="pt-24">
           <div className="grid grid-cols-3 gap-4 mx-10">
             {/* To Be Evaluated Section */}
             <div className="bg-white p-4 rounded-lg shadow-md transition hover:shadow-lg">
@@ -265,78 +264,23 @@ const Dashboard: React.FC = () => {
               )}
             </div>
           </div>
-
-          {/* Availability Calendar */}
+          
           <div className="grid grid-cols-3 gap-4 mt-8 mx-10">
-            <div className="col-span-2 bg-white p-4 rounded-lg shadow-md transition hover:shadow-lg">
-              <h3 className="text-lg font-semibold mb-4 text-blue-500">Availability Calendar</h3>
-
-              <div className="flex justify-between mb-4">
-                <button
-                  onClick={() => setDate(new Date(date.getFullYear(), date.getMonth() - 1, 1))}
-                  className="p-2 text-blue-500 hover:bg-blue-100 rounded transition"
-                  aria-label="Previous Month"
-                >
-                  <FaChevronLeft />
-                </button>
-                <h4 className="font-semibold">
-                  {date.toLocaleString('default', { month: 'long' })} {date.getFullYear()}
-                </h4>
-                <button
-                  onClick={() => setDate(new Date(date.getFullYear(), date.getMonth() + 1, 1))}
-                  className="p-2 text-blue-500 hover:bg-blue-100 rounded transition"
-                  aria-label="Next Month"
-                >
-                  <FaChevronRight />
-                </button>
-              </div>
-
-              {/* Calendar Days */}
-              <div className="grid grid-cols-7 gap-2 text-gray-500 font-semibold">
-                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, index) => (
-                  <div key={index} className="text-center font-semibold">{day}</div>
-                ))}
-              </div>
-
-              {/* Calendar Weeks */}
-              <div className="grid grid-cols-7 gap-2">
-                {currentMonthWeeks.map((weekDate, index) => {
-                  const isOutsideMonth = weekDate.getMonth() !== date.getMonth();
-                  const slotsAvailable = getAvailabilityForDate(weekDate);
-
-                  return (
-                    <button
-                      key={index}
-                      className={`p-2 text-center rounded transition
-                        ${isOutsideMonth ? 'text-gray-400' : ''}
-                        ${slotsAvailable === null ? 'bg-gray-200 cursor-not-allowed' : ''}
-                        ${slotsAvailable === 0 ? 'bg-red-200' : ''}
-                        ${slotsAvailable > 0 ? 'bg-blue-200 hover:bg-blue-300' : ''}
-                      `}
-                      disabled={slotsAvailable === null}
-                      onClick={() => {
-                        if (slotsAvailable !== null) {
-                          handleDateClick(weekDate);
-                        }
-                      }}
-                      aria-label={`Date ${weekDate.getDate()} ${slotsAvailable ? `(${slotsAvailable} slots available)` : 'No slots available'}`}
-                    >
-                      {weekDate.getDate()}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Slots Information */}
-              {loading ? (
-                <p className="mt-4 animate-pulse text-blue-600">Loading availability...</p>
-              ) : slotsInfo !== null && (
-                <p className="mt-4 text-blue-400">
-                  {slotsInfo === 0
-                    ? 'No slots available for the selected date.'
-                    : `${slotsInfo} slots available for the selected date.`}
-                </p>
-              )}
+            {/* Availability Calendar */}
+            <div className='col-span-2 bg-white p-4 rounded-lg shadow-md transition hover:shadow-lg'>
+              <Calendar
+                currentMonth={selectedMonth}
+                nextMonth={nextMonth}
+                currentDate={today.getDate()}
+                currentYear={currentYear}
+                selectedDay={appointmentData.selectedDay}
+                setSelectedDay={(day) => setAppointmentData((prev) => ({ ...prev, selectedDay: day }))}
+                selectedMonth={appointmentData.selectedMonth}
+                setSelectedMonth={(month) => setAppointmentData((prev) => ({ ...prev, selectedMonth: month, selectedDay: null }))}
+                selectedTime={appointmentData.selectedTime}
+                setSelectedTime={(time) => setAppointmentData((prev) => ({ ...prev, selectedTime: time }))}
+                isTherapistSelected={!!appointmentData.selectedTherapist}>
+              </Calendar>
             </div>
 
             {/* Payments Status Section */}

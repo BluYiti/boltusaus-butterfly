@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
 interface CalendarProps {
     currentMonth: string;
@@ -28,10 +29,12 @@ const Calendar: React.FC<CalendarProps> = ({
     setSelectedTime,
     isTherapistSelected,
 }) => {
+    const [date, setDate] = useState(new Date());
     const [isNextMonthAvailable, setIsNextMonthAvailable] = useState(true);
     const [isFormComplete, setIsFormComplete] = useState(false);
-
+    
     const today = new Date();
+    const isPreviousMonthAvailable = date > new Date(today.getFullYear(), today.getMonth(), 1);
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate());
 
@@ -81,20 +84,28 @@ const Calendar: React.FC<CalendarProps> = ({
 
     return (
         <div>
-            <div className="mb-4">
-                <label className="block mb-2 text-lg font-medium text-gray-700">
-                    Select Month and Date {!selectedDay && <span className="text-red-500">*</span>}
-                </label>
-                {/* Month Selection */}
-                <select
-                    value={selectedMonth}
-                    onChange={handleMonthChange}
-                    className="p-2 rounded border border-gray-300"
-                    disabled={!isNextMonthAvailable || !isTherapistSelected} // Disable if no therapist is selected
+            <div className="flex justify-between mb-4">
+                <button
+                    onClick={() => setDate(new Date(date.getFullYear(), date.getMonth() - 1, 1))}
+                    className="p-2 text-blue-500 hover:bg-blue-100 rounded transition"
+                    aria-label="Previous Month"
+                    disabled={!isPreviousMonthAvailable} // Disable if date is at the earliest month
                 >
-                    <option value={currentMonth}>{currentMonth}</option>
-                    <option value={nextMonth}>{nextMonth}</option>
-                </select>
+                    <FaChevronLeft />
+                </button>
+
+                <h4 className="font-semibold">
+                    {date.toLocaleString('default', { month: 'long' })} {date.getFullYear()}
+                </h4>
+
+                <button
+                    onClick={() => setDate(new Date(date.getFullYear(), date.getMonth() + 1, 1))}
+                    className="p-2 text-blue-500 hover:bg-blue-100 rounded transition"
+                    aria-label="Next Month"
+                    disabled={!isNextMonthAvailable || !isTherapistSelected} // Disable if no therapist or next month not available
+                >
+                    <FaChevronRight />
+                </button>
             </div>
 
             {/* Display Weekday Headers Above the Dates */}
