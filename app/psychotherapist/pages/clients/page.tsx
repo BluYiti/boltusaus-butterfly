@@ -72,6 +72,14 @@ const Clients = () => {
         });
 
         setClients(combinedClients);
+        
+        // Extract the query parameter from the URL
+        const url = new URL(window.location.href);
+        const tab = url.searchParams.get("tab");
+        
+        if (tab) {
+          setActiveTab(tab); // Set active tab based on the query parameter
+        }
       } catch (error) {
         console.error(error);
       } finally {
