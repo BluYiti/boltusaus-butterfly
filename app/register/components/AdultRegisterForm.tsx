@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import React from 'react';
 import termsContent from '@/constants/terms';
@@ -53,6 +53,8 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error}) => {
         loading, setLoading
     } = useRegisterForm();
 
+    const [modalContentType, setModalContentType] = React.useState<'terms' | 'privacy'>('terms');
+
     // Handle form submission
     const handleSubmit = createSubmitHandler({
         firstName,
@@ -74,12 +76,8 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error}) => {
         idFile,
         email,
         onRegister: (data) => {
-            // Now you have access to the userId
             console.log('Registration successful:', data);
-            const { userId } = data; // Extract the userId from data
-            console.log('User ID:', userId); // You can see the userId here
-            
-            // Now use the userId in the URL param for verification
+            const { userId } = data;
             router.push(`/register/verify/email/?user=${encodeURIComponent(userId)}`);
         },
         setValidationError,
@@ -91,7 +89,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error}) => {
     useFetchProvinces(selectedRegionCode, setProvinces);
     useFetchCities(province, provinces, setCities, setCity, setBarangays);
     useFetchBarangays(city, cities, setBarangays);
-    
+
     const calculateAge = (birthDateString: string): number => {
         const birthDate = new Date(birthDateString);
         const today = new Date();
@@ -108,7 +106,6 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error}) => {
         const calculatedAge = calculateAge(date);
         setAge(calculatedAge);
 
-        // Validate age
         if (calculatedAge < 18) {
             setValidationError('You must be at least 18 years old to register.');
         } else {
@@ -249,13 +246,13 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error}) => {
                                     onChange={(e) => {
                                         const selectedRegion = regions.find(r => r.name === e.target.value);
                                         setRegion(e.target.value);
-                                        setSelectedRegionCode(selectedRegion?.code ?? null); // Use nullish coalescing to handle undefined
-                                        setProvince(''); // Reset province when region changes
-                                        setCity(''); // Reset city when region changes
-                                        setBarangay(''); // Reset barangay when region changes
-                                        setProvinces([]); // Clear provinces
-                                        setCities([]); // Clear cities
-                                        setBarangays([]); // Clear barangays
+                                        setSelectedRegionCode(selectedRegion?.code ?? null);
+                                        setProvince(''); 
+                                        setCity('');
+                                        setBarangay('');
+                                        setProvinces([]); 
+                                        setCities([]); 
+                                        setBarangays([]); 
                                     }}
                                 >
                                     <option value="">Select Region</option>
@@ -277,15 +274,15 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error}) => {
                                     value={province}
                                     onChange={(e) => {
                                         setProvince(e.target.value);
-                                        setCity(''); // Reset city when province changes
-                                        setBarangays([]); // Clear barangays when province changes
+                                        setCity('');
+                                        setBarangays([]); 
                                     }}
                                 >
                                     <option value="">Select Province</option>
                                     {provinces
                                         .sort((a, b) => a.name.localeCompare(b.name))
                                         .map((province) => (
-                                            <option key={province.code} value={province.name}>
+                                            <option key={province.name} value={province.name}>
                                                 {province.name}
                                             </option>
                                         ))}
@@ -304,15 +301,15 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error}) => {
                                     {cities
                                         .sort((a, b) => a.name.localeCompare(b.name))
                                         .map((city) => (
-                                            <option key={city.code} value={city.name}>
+                                            <option key={city.name} value={city.name}>
                                                 {city.name}
                                             </option>
                                         ))}
                                 </select>
                             </div>
 
-                            {/* Barangay Dropdown */}
-                            <div>
+                             {/* Barangay Dropdown */}
+                             <div>
                                 <label className="block text-[#38b6ff] mb-2">Barangay</label>
                                 <select
                                     className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
@@ -333,18 +330,18 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error}) => {
                                 <label className="block text-[#38b6ff] mb-2">Street</label>
                                 <input
                                     type="text"
-                                    className="border border-[#38b6ff] rounded-xl pl-3 pr-3 py-2 w-full text-gray-500"
+                                    placeholder="Street Address"
+                                    className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
                                     value={street}
                                     onChange={(e) => setStreet(e.target.value)}
-                                    placeholder="Enter your street"
                                 />
                             </div>
                         </div>
                     </div>
 
-                    {/* Contact Number */}
-                    <div>
-                        <label htmlFor="contactNumber" className="block text-[#38b6ff] mb-1">Contact Number:</label>
+                    {/* Contact Information */}
+                    <div className="mb-4">
+                        <label htmlFor="contactNumber" className="block text-[#38b6ff] mb-2">Contact Number</label>
                         <PhoneInput
                             country={'ph'}
                             value={contactNumber}
@@ -368,74 +365,48 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error}) => {
                         />
                     </div>
 
-                    {/* Emergency Contact Name */}
-                    <div>
-                        <label htmlFor="emergencyContactName" className="block text-[#38b6ff] mb-1">Emergency Contact Name</label>
+                    {/* Emergency Contact */}
+                    <div className="mb-4">
+                        <label className="block text-[#38b6ff] mb-2">Emergency Contact</label>
                         <input
-                            id="emergencyContactName"
                             type="text"
-                            required
                             placeholder="Emergency Contact Name"
+                            className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
                             value={emergencyContactName}
                             onChange={(e) => setEmergencyContactName(e.target.value)}
+                        />
+                    </div>
+
+                    <div className="mb-4">
+                        <label className="block text-[#38b6ff] mb-2">Emergency Contact Number</label>
+                        <PhoneInput
+                            country={'ph'}
+                            value={emergencyContactNumber}
+                            onChange={(phone) => setEmergencyContactNumber(phone)}
+                            containerClass="w-full"
+                            inputClass="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
+                        />
+                    </div>
+
+                    {/* ID File */}
+                    <div className="mb-4">
+                        <label className="block text-[#38b6ff] mb-2">Upload ID</label>
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => setIdFile(e.target.files?.[0] ?? null)}
                             className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
                         />
                     </div>
 
-                    {/* Emergency Contact Number */}
-                    <div>
-                        <label htmlFor="emergencyContactNumber" className="block text-[#38b6ff] mb-1">Emergency Contact Number</label>
-                        <PhoneInput
-                            country={'ph'}
-                            value={emergencyContactNumber}
-                            onChange={(phone) => {
-                                let formattedPhone = phone;
-                                if (!phone.startsWith('+')) {
-                                    formattedPhone = `+${phone}`;
-                                }
-                                formattedPhone = formattedPhone.replace(/[^\d+]/g, '');
-                                setEmergencyContactNumber(formattedPhone);
-                            }}
-                            inputClass="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500 mt-1"
-                            containerClass="phone-input-container"
-                            buttonClass="phone-input-button"
-                            inputProps={{
-                                name: 'emergencyContactNumber',
-                                required: true,
-                                autoComplete: 'tel',
-                            }}
-                        />
-                    </div>
-
-                    {/* Upload ID */}
-                    <div>
-                        <label htmlFor="idFile" className="block text-[#38b6ff] mb-1">Upload ID</label>
-                        <input
-                            id="idFile"
-                            type="file"
-                            accept="image/png, image/jpeg, image/gif, image/webp"
-                            onChange={(e) => {
-                                const file = e.target.files ? e.target.files[0] : null;
-                                if (file && !file.type.startsWith('image/')) {
-                                    setValidationError('Please upload a valid image file (PNG, JPEG, GIF, WEBP).');
-                                    setIdFile(null); // Reset the file input
-                                } else {
-                                    setValidationError(null);
-                                    setIdFile(file);
-                                }
-                            }}
-                            className="border border-[#38b6ff] rounded-xl w-full text-gray-500"
-                        />
-                    </div>
-
                     {/* Email */}
-                    <div>
-                        <label htmlFor="email" className="block text-[#38b6ff] mb-1">Email</label>
+                    <div className="mb-4">
+                        <label htmlFor="email" className="block text-[#38b6ff] mb-2">Email</label>
                         <input
                             id="email"
                             type="email"
                             required
-                            placeholder="Example@gmail.com"
+                            placeholder="Email Address"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
@@ -443,8 +414,8 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error}) => {
                     </div>
 
                     {/* Password */}
-                    <div className="relative">
-                        <label htmlFor="password" className="block text-[#38b6ff] mb-1">Password</label>
+                    <div className="mb-4">
+                        <label htmlFor="password" className="block text-[#38b6ff] mb-2">Password</label>
                         <input
                             id="password"
                             type="password"
@@ -475,56 +446,78 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error}) => {
                         </div>
                     </div>
 
-                    {/* Re-enter Password */}
-                    <div className="relative">
-                        <label htmlFor="rePassword" className="block text-[#38b6ff] mb-1">Re-enter Password</label>
+                    {/* Confirm Password */}
+                    <div className="mb-4">
+                        <label htmlFor="rePassword" className="block text-[#38b6ff] mb-2">Confirm Password</label>
                         <input
                             id="rePassword"
                             type="password"
                             required
-                            placeholder="********"
+                            placeholder="Confirm Password"
                             value={rePassword}
                             onChange={(e) => setRePassword(e.target.value)}
                             className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
                         />
                     </div>
-                </div>
 
-                <div className="flex items-start mt-4 space-x-2">
-                    <input
-                        type="checkbox"
-                        id="terms"
-                        checked={agreeToTerms}
-                        onChange={(e) => setAgreeToTerms(e.target.checked)}
-                        className="mt-1"
-                    />
-                    <label htmlFor="terms" className="text-gray-500 text-xs">
-                        I agree to the
-                        <button type="button" onClick={() => setIsModalOpen(true)} className="text-blue-500 hover:underline ml-1">Terms and Conditions</button>
-                        &nbsp;and the
-                        <button type="button" onClick={() => setIsModalOpen(true)} className="text-blue-500 hover:underline ml-1">Privacy Policy</button>.
-                    </label>
-                </div>
+                    {/* Agree to Terms and Conditions */}
+                    <div className="mb-4">
+                        <input
+                            id="terms"
+                            type="checkbox"
+                            checked={agreeToTerms}
+                            onChange={(e) => setAgreeToTerms(e.target.checked)}
+                            className="mr-2"
+                        />
+                        <label htmlFor="terms" className="text-gray-500 text-xs">
+                            I agree to the
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setIsModalOpen(true);
+                                    setModalContentType('terms');
+                                }}
+                                className="text-blue-500 hover:underline ml-1"
+                            >
+                                Terms and Conditions
+                            </button>
+                            &nbsp;and the
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setIsModalOpen(true);
+                                    setModalContentType('privacy');
+                                }}
+                                className="text-blue-500 hover:underline ml-1"
+                            >
+                                Privacy Policy
+                            </button>.
+                        </label>
+                    </div>
 
-                <button
+                    {/* Submit Button */}
+                    <div className="mt-8">
+                    <button
                     type="submit"
                     disabled={loading || !agreeToTerms}
                     className={`bg-gradient-to-r from-[#38b6ff] to-[#4982ae] text-white font-bold py-2 px-4 rounded-xl transition-all duration-300 ease-in-out shadow-lg transform hover:scale-105 hover:shadow-xl ${!agreeToTerms ? 'opacity-50 cursor-not-allowed' : ''} ${buttonClicked ? 'bg-green-500' : ''}`}
                 >
                     {loading ? 'Registering...' : 'Register'}
                 </button>
+                    </div>
+                </div>
             </form>
 
+            {/* Terms and Privacy Modal */}
             <TermsAndPrivacy
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                contentType={'terms'}
-                termsContent={termsContent}
-                privacyContent={privacyContent}
+                contentType={modalContentType}  
+                termsContent={termsContent} 
+                privacyContent={privacyContent} 
             />
         </div>
     );
 };
 
 export default RegisterForm;
-

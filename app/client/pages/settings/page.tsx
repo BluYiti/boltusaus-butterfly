@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Layout from '@/components/Sidebar/Layout';
 import items from '@/client/data/Links';
+import Link from "next/link";
 
 const Modal = ({ isOpen, onClose, title, children }) => {
   if (!isOpen) return null;
@@ -106,7 +107,7 @@ const SettingsPage = () => {
 
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
-      <div className="flex-grow p-8 bg-gray-50">
+      <div className="min-h-screen flex-grow p-8 bg-gray-50">
         <div className="bg-white shadow-md rounded-lg p-6 mb-8 text-left">
           <h2 className="text-3xl font-bold text-blue-800">Settings</h2>
           <p className="text-gray-600 mt-2">Manage your account, privacy, and application settings.</p>
@@ -122,7 +123,7 @@ const SettingsPage = () => {
             <div className="mt-4 text-gray-600 space-y-4">
               <div className="flex justify-between items-center">
                 <p>Update your profile information:</p>
-                <button className="px-4 py-2 bg-blue-400 text-white rounded hover:bg-blue-500"
+                <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-400"
                   onClick={handleEditProfileClick}>Edit Profile</button>
               </div>
               <div className="flex justify-between items-center">
@@ -138,13 +139,13 @@ const SettingsPage = () => {
           <h3 className="text-xl font-semibold text-gray-700 cursor-pointer flex justify-between items-center"
             onClick={() => toggleSection("privacy")}>
             Privacy and Security
-            <button className="text-sm text-blue-400 underline" onClick={handlePrivacyClick}>Manage</button>
+            <button className="text-sm text-blue-400 underline">Manage</button>
           </h3>
           {activeSection === "privacy" && (
             <div className="mt-4 text-gray-600">
               <div className="flex justify-between items-center">
                 <p>Manage your data-sharing preferences:</p>
-                <button className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+                <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-400"
                   onClick={handlePrivacyClick}>Manage Privacy</button>
               </div>
             </div>
@@ -161,11 +162,9 @@ const SettingsPage = () => {
             <div className="mt-4 text-gray-600 space-y-4">
               <div className="flex justify-between items-center">
                 <p>Contact our support team:</p>
-                <button className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600">Contact Support</button>
-              </div>
-              <div className="flex justify-between items-center">
-                <p>Browse FAQs and guides:</p>
-                <button className="px-4 py-2 bg-blue-400 text-white rounded hover:bg-blue-500">View FAQs</button>
+                <Link href="/client/pages/contactsupport">
+                <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-300">Contact Support</button>
+                </Link>
               </div>
             </div>
           )}
@@ -287,9 +286,9 @@ const SettingsPage = () => {
         </Modal>
 
       <Modal isOpen={isPrivacyModalOpen} onClose={handleModalClose} title="Manage Privacy Settings">
-      <p className="mb-4"> {/* Add margin-bottom for spacing */}
-    When you visit a website, it may store or retrieve information in your browser, primarily through cookies, which enhance your browsing experience and are used to tailor the site to your preferences; however, you have the option to reject certain cookies, although doing so may affect your overall experience and the services available to you.
-  </p>
+        <p className="mb-4"> {/* Add margin-bottom for spacing */}
+          When you visit a website, it may store or retrieve information in your browser, primarily through cookies, which enhance your browsing experience and are used to tailor the site to your preferences; however, you have the option to reject certain cookies, although doing so may affect your overall experience and the services available to you.
+        </p>
         <div className="space-y-4">
           <ToggleSwitch
             label="Tracking Cookies"

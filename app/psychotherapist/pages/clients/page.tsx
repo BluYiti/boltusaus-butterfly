@@ -5,7 +5,7 @@ import items from "@/psychotherapist/data/Links";
 import { databases } from "@/appwrite";
 import ClientProfileModal from "@/psychotherapist/components/ClientProfileModal";
 import ReferredClientProfileModal from "@/psychotherapist/components/ReferredClientProfileModal";
-import ReviewPreAssModal from "@/psychotherapist/components/ReviewPreAssModal"; // Import your new modal
+import ReviewPreAssModal from "@/psychotherapist/components/EvaluateModal"; // Import your new modal
 
 interface ClientType {
   id: string;
@@ -72,6 +72,14 @@ const Clients = () => {
         });
 
         setClients(combinedClients);
+        
+        // Extract the query parameter from the URL
+        const url = new URL(window.location.href);
+        const tab = url.searchParams.get("tab");
+        
+        if (tab) {
+          setActiveTab(tab); // Set active tab based on the query parameter
+        }
       } catch (error) {
         console.error(error);
       } finally {
@@ -205,11 +213,11 @@ const Clients = () => {
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
       <div className="bg-blue-50 min-h-screen overflow-auto">
-        <div className="bg-white rounded-b-lg shadow-md p-5 top-0 left-60 w-full z-10 sticky">
-          <h2 className="text-2xl font-bold">Clients</h2>
+        <div className="bg-white width rounded-b-lg fixed p-5 top-0 w-full z-10">
+      <h2 className="text-2xl font-bold text-blue-400">Clients</h2>
         </div>
 
-        <div className="mt-6 px-5">
+        <div className="mt-24 px-5">
           <div className="flex items-center justify-between">
             <div className="flex space-x-8 border-b">
               {["Current", "To Be Evaluated", "For Referral"].map((tab) => (

@@ -55,7 +55,7 @@ const PaymentsPage: React.FC = () => {
                       onClick={() => viewReceipt('10/03/24')}
                       className="text-blue-500 hover:text-blue-700 font-semibold"
                     >
-                      View Receipt
+                      View Payment
                     </button>
                   </td>
                 </tr>
@@ -71,7 +71,7 @@ const PaymentsPage: React.FC = () => {
               <div className="bg-white rounded-lg shadow-lg p-6 relative w-96 z-50">
                 {/* Modal Header */}
                 <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-bold">Receipt for {selectedReceipt}</h2>
+                  <h2 className="text-xl font-bold">Payment Details for {selectedReceipt}</h2>
                   <button
                     onClick={closeModal}
                     className="text-gray-500 hover:text-gray-700"
@@ -87,16 +87,7 @@ const PaymentsPage: React.FC = () => {
                   <p className="text-sm text-gray-600">Mode of Payment: GCash</p>
                   <p className="text-sm text-gray-600">Status: Pending</p>
                 </div>
-                {/* Modal Footer */}
-                <div className="flex justify-end mt-6">
-                  <a
-                    href={`/path-to-receipts/receipt-${selectedReceipt}.pdf`} // Example receipt path
-                    download={`Receipt-${selectedReceipt}.pdf`}
-                    className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700"
-                  >
-                    Download Receipt
-                  </a>
-                </div>
+            
               </div>
             </div>
           )}
@@ -105,5 +96,5 @@ const PaymentsPage: React.FC = () => {
     </Layout>
   );
 };
-
+//test code
 export default PaymentsPage;
