@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Layout from '@/components/Sidebar/Layout';
 import items from '@/client/data/Links';
+import Link from "next/link";
 
 const Modal = ({ isOpen, onClose, title, children }) => {
   if (!isOpen) return null;
@@ -122,7 +123,7 @@ const SettingsPage = () => {
             <div className="mt-4 text-gray-600 space-y-4">
               <div className="flex justify-between items-center">
                 <p>Update your profile information:</p>
-                <button className="px-4 py-2 bg-blue-400 text-white rounded hover:bg-blue-500"
+                <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-400"
                   onClick={handleEditProfileClick}>Edit Profile</button>
               </div>
               <div className="flex justify-between items-center">
@@ -138,13 +139,13 @@ const SettingsPage = () => {
           <h3 className="text-xl font-semibold text-gray-700 cursor-pointer flex justify-between items-center"
             onClick={() => toggleSection("privacy")}>
             Privacy and Security
-            <button className="text-sm text-blue-400 underline" onClick={handlePrivacyClick}>Manage</button>
+            <button className="text-sm text-blue-400 underline">Manage</button>
           </h3>
           {activeSection === "privacy" && (
             <div className="mt-4 text-gray-600">
               <div className="flex justify-between items-center">
                 <p>Manage your data-sharing preferences:</p>
-                <button className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+                <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-400"
                   onClick={handlePrivacyClick}>Manage Privacy</button>
               </div>
             </div>
@@ -161,11 +162,9 @@ const SettingsPage = () => {
             <div className="mt-4 text-gray-600 space-y-4">
               <div className="flex justify-between items-center">
                 <p>Contact our support team:</p>
-                <button className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600">Contact Support</button>
-              </div>
-              <div className="flex justify-between items-center">
-                <p>Browse FAQs and guides:</p>
-                <button className="px-4 py-2 bg-blue-400 text-white rounded hover:bg-blue-500">View FAQs</button>
+                <Link href="/client/pages/contactsupport">
+                <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-300">Contact Support</button>
+                </Link>
               </div>
             </div>
           )}
