@@ -8,7 +8,7 @@ const HotlinePage = () => {
     return (
         <Layout sidebarTitle="Butterfly" sidebarItems={items}>
             <div 
-                className="flex-grow p-8 bg-gradient-to-br from-blue-50 to-blue-100 bg-cover bg-center"
+                className="min-h-screen p-8 bg-cover bg-center"
                 style={{ backgroundImage: "url('/images/contact.jpeg')" }} // Update the path to your image
             >
                 <div className="bg-white shadow-lg rounded-xl p-7 mb-8 border border-blue-200">

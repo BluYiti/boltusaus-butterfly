@@ -107,7 +107,7 @@ const SettingsPage = () => {
 
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
-      <div className="flex-grow p-8 bg-gray-50">
+      <div className="min-h-screen flex-grow p-8 bg-gray-50">
         <div className="bg-white shadow-md rounded-lg p-6 mb-8 text-left">
           <h2 className="text-3xl font-bold text-blue-800">Settings</h2>
           <p className="text-gray-600 mt-2">Manage your account, privacy, and application settings.</p>
@@ -286,9 +286,9 @@ const SettingsPage = () => {
         </Modal>
 
       <Modal isOpen={isPrivacyModalOpen} onClose={handleModalClose} title="Manage Privacy Settings">
-      <p className="mb-4"> {/* Add margin-bottom for spacing */}
-    When you visit a website, it may store or retrieve information in your browser, primarily through cookies, which enhance your browsing experience and are used to tailor the site to your preferences; however, you have the option to reject certain cookies, although doing so may affect your overall experience and the services available to you.
-  </p>
+        <p className="mb-4"> {/* Add margin-bottom for spacing */}
+          When you visit a website, it may store or retrieve information in your browser, primarily through cookies, which enhance your browsing experience and are used to tailor the site to your preferences; however, you have the option to reject certain cookies, although doing so may affect your overall experience and the services available to you.
+        </p>
         <div className="space-y-4">
           <ToggleSwitch
             label="Tracking Cookies"

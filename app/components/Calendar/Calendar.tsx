@@ -12,7 +12,6 @@ interface CalendarProps {
     selectedTime: string | null;
     setSelectedTime: (time: string | null) => void;
     isTherapistSelected: boolean; // New prop to check therapist selection
-    handleBookAppointment: () => void;
 }
 
 const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -28,7 +27,6 @@ const Calendar: React.FC<CalendarProps> = ({
     selectedTime,
     setSelectedTime,
     isTherapistSelected,
-    handleBookAppointment,
 }) => {
     const [isNextMonthAvailable, setIsNextMonthAvailable] = useState(true);
     const [isFormComplete, setIsFormComplete] = useState(false);
@@ -91,7 +89,7 @@ const Calendar: React.FC<CalendarProps> = ({
                 <select
                     value={selectedMonth}
                     onChange={handleMonthChange}
-                    className="mb-4 p-2 rounded border border-gray-300"
+                    className="p-2 rounded border border-gray-300"
                     disabled={!isNextMonthAvailable || !isTherapistSelected} // Disable if no therapist is selected
                 >
                     <option value={currentMonth}>{currentMonth}</option>
@@ -143,26 +141,12 @@ const Calendar: React.FC<CalendarProps> = ({
                 {["10:00", "11:00", "12:00", "1:00", "2:00", "3:00", "4:00", "5:00"].map((time) => (
                     <button
                         key={time}
-                        className={`py-2 px-4 rounded-lg ${selectedTime === time ? "bg-blue-500 text-white" : "bg-gray-300 text-black hover:bg-blue-500"}`}
+                        className={`py-2 px-4 rounded-lg ${selectedTime === time ? "bg-blue-300 text-white" : "bg-gray-300 text-black hover:bg-blue-500 hover:text-white hover:scale-110"}`}
                         onClick={() => setSelectedTime(time)}
                     >
                         {time}
                     </button>
                 ))}
-            </div>
-
-            {/* Selected Info */}
-            <div className="mt-6">
-                <p className="text-gray-500">
-                    Selected: {selectedMonth} {selectedDay}, {currentYear} | {selectedTime}
-                </p>
-                <button
-                    className={`mt-4 py-2 px-4 rounded-lg ${isFormComplete ? "bg-blue-400 text-white hover:bg-blue-500" : "bg-gray-300 text-gray-700 cursor-not-allowed"}`}
-                    onClick={handleBookAppointment}
-                    disabled={!isFormComplete}
-                >
-                    Book
-                </button>
             </div>
         </div>
     );
