@@ -130,7 +130,6 @@ const Dashboard: React.FC = () => {
         });
   
         setMissedData(missedSessionsWithClientNames); // Update missed data with client names
-  
       } catch (err) {
         setError('Failed to fetch evaluation data.'); // Set an error message
         console.error(err); // Log the error for debugging
@@ -148,6 +147,10 @@ const Dashboard: React.FC = () => {
 
   const handleViewUpcomingListClick = () => {
     router.push(`/psychotherapist/pages/appointments`);
+  };
+
+  const handleViewPaymentClick = () => {
+    router.push(`/psychotherapist/pages/clientspayment`);
   };
   
   const formatDate = (date: Date) => {
@@ -192,7 +195,7 @@ const Dashboard: React.FC = () => {
                 <h3 className="text-lg font-semibold mb-4 text-blue-500">To be Evaluated</h3>
                 <button
                   onClick={handleViewListClick}
-                  className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 transition -mt-2"
+                  className="bg-blue-400 rounded-full text-white px-2 py-1 hover:bg-blue-600 transition -mt-2"
                 >
                   View List
                 </button>
@@ -218,7 +221,7 @@ const Dashboard: React.FC = () => {
                 <h3 className="text-lg font-semibold mb-4 text-blue-500">Upcoming Sessions</h3>
                 <button
                   onClick={handleViewUpcomingListClick}
-                  className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 transition -mt-2"
+                  className="bg-blue-400 rounded-full text-white px-2 py-1 hover:bg-blue-600 transition -mt-2"
                 >
                   View List
                 </button>
@@ -244,7 +247,7 @@ const Dashboard: React.FC = () => {
                 <h3 className="text-lg font-semibold mb-4 text-blue-500">Missed Appointments</h3>
                 <button
                   onClick={handleViewUpcomingListClick}
-                  className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 transition -mt-2"
+                  className="bg-blue-400 rounded-full text-white px-2 py-1 hover:bg-blue-600 transition -mt-2"
                 >
                   View List
                 </button>
@@ -285,7 +288,15 @@ const Dashboard: React.FC = () => {
 
             {/* Payments Status Section */}
             <div className="bg-white p-4 rounded-lg shadow-md transition hover:shadow-lg">
-              <h3 className="text-lg font-semibold mb-4 text-green-500">Payments Status</h3>
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold mb-4 text-green-500">Payments Status</h3>
+                <button
+                    onClick={handleViewPaymentClick}
+                    className="bg-blue-400 rounded-full text-white px-2 py-1 hover:bg-blue-600 transition -mt-2"
+                  >
+                    View List
+                  </button>
+              </div>
               <p>Placeholder for payments status data fetched from Appwrite.</p>
             </div>
           </div>
