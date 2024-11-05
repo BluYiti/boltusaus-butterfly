@@ -35,11 +35,11 @@ const Calendar: React.FC<CalendarProps> = ({
 
     const today = new Date();
     const tomorrow = new Date(today);
-    tomorrow.setDate(today.getDate() + 1);
+    tomorrow.setDate(today.getDate());
     const isPreviousMonthAvailable = date > new Date(today.getFullYear(), today.getMonth(), 1);
 
     const bookingEndDate = new Date(today);
-    bookingEndDate.setDate(today.getDate() + 7);
+    bookingEndDate.setDate(today.getDate() + 8);
 
     // Check if today is on or after the 25th of the month
     const isMonthEndingSoon = today.getDate() >= 25;
@@ -98,7 +98,7 @@ const Calendar: React.FC<CalendarProps> = ({
                     <FaChevronLeft />
                 </button>
 
-                <h4 className="font-semibold">
+                <h4 className="font-semibold text-xl text-blue-400">
                     {date.toLocaleString('default', { month: 'long' })} {date.getFullYear()}
                 </h4>
 

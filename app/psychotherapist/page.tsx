@@ -2,13 +2,14 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '@/components/Sidebar/Layout';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
-import { databases } from '@/appwrite';
+import { account, databases } from '@/appwrite';
 import { Query } from 'appwrite';
 import items from './data/Links';
 import useAuthCheck from '@/auth/page';
 import LoadingScreen from '@/components/LoadingScreen';
 import { useRouter } from 'next/navigation';
 import Calendar from '@/components/Calendar/Calendar';
+import { fetchPsychoId } from '@/hooks/userService';
 
 const Dashboard: React.FC = () => {
   const { loading: authLoading } = useAuthCheck(['psychotherapist']); // Call the useAuthCheck hook
@@ -42,6 +43,15 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const user = await account.get();
+        const psychoId = await fetchPsychoId(user.$id)
+        
+        // Update the appointment data with the fetched psychoId
+        setAppointmentData(prevData => ({
+            ...prevData,
+            selectedTherapist: psychoId, // Set selectedTherapist to psychoId
+        }));
+
         // Fetch evaluation data
         const evaluationResponse = await databases.listDocuments(
           'Butterfly-Database', // Replace with your database ID
@@ -152,29 +162,6 @@ const Dashboard: React.FC = () => {
   const handleViewPaymentClick = () => {
     router.push(`/psychotherapist/pages/clientspayment`);
   };
-  
-  const formatDate = (date: Date) => {
-    return date.toISOString().split('T')[0];
-  };
-
-  const getCurrentMonthWeeks = (currentDate: Date) => {
-    const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-    const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
-    const weekStart = new Date(startOfMonth);
-    weekStart.setDate(startOfMonth.getDate() - startOfMonth.getDay());
-
-    const weeks = [];
-    let dateIterator = weekStart;
-
-    while (dateIterator <= endOfMonth || dateIterator.getDay() !== 0) {
-      weeks.push(new Date(dateIterator));
-      dateIterator.setDate(dateIterator.getDate() + 1);
-    }
-
-    return weeks;
-  };
-
-  const currentMonthWeeks = getCurrentMonthWeeks(date);
 
   if (authLoading) {
     return <LoadingScreen />;
@@ -182,15 +169,15 @@ const Dashboard: React.FC = () => {
 
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
-      <div className="bg-blue-50 min-h-screen">
+      <div className="bg-blue-50 min-h-screen mb-10">
         <div className="bg-white width rounded-b-lg fixed p-5 top-0 w-full z-10">
           <h2 className="text-2xl font-bold text-blue-400">Hello, Psychotherapist!</h2>
         </div>
 
-        <div className="pt-24">
+        <div className="pt-[6.5rem]">
           <div className="grid grid-cols-3 gap-4 mx-10">
             {/* To Be Evaluated Section */}
-            <div className="bg-white p-4 rounded-lg shadow-md transition hover:shadow-lg">
+            <div className="bg-white p-4 rounded-lg shadow-md transition hover:shadow-lg max-h-96 overflow-y-auto">
               <div className="flex justify-between items-center">
                 <h3 className="text-lg font-semibold mb-4 text-blue-500">To be Evaluated</h3>
                 <button
@@ -216,7 +203,7 @@ const Dashboard: React.FC = () => {
             </div>
 
             {/* Upcoming Sessions Section */}
-            <div className="bg-white p-4 rounded-lg shadow-md transition hover:shadow-lg">
+            <div className="bg-white p-4 rounded-lg shadow-md transition hover:shadow-lg max-h-96 overflow-y-auto">
               <div className="flex justify-between items-center">
                 <h3 className="text-lg font-semibold mb-4 text-blue-500">Upcoming Sessions</h3>
                 <button
@@ -234,7 +221,7 @@ const Dashboard: React.FC = () => {
                 <ul>
                   {sessionData.map((doc) => (
                     <li key={doc.$id}>
-                      <p>{doc.client.firstname} {doc.client.lastname}</p> {/* Access client names directly */}
+                      <p>{doc.client.firstname} {doc.client.lastname}</p>
                     </li>
                   ))}
                 </ul>
@@ -242,7 +229,7 @@ const Dashboard: React.FC = () => {
             </div>
 
             {/* Missed Appointments Section */}
-            <div className="bg-white p-4 rounded-lg shadow-md transition hover:shadow-lg">
+            <div className="bg-white p-4 rounded-lg shadow-md transition hover:shadow-lg max-h-96 overflow-y-auto">
               <div className="flex justify-between items-center">
                 <h3 className="text-lg font-semibold mb-4 text-blue-500">Missed Appointments</h3>
                 <button
@@ -260,45 +247,46 @@ const Dashboard: React.FC = () => {
                 <ul>
                   {missedData.map((doc) => (
                     <li key={doc.$id}>
-                      <p>{doc.client.firstname} {doc.client.lastname}</p> {/* Access client names directly */}
+                      <p>{doc.client.firstname} {doc.client.lastname}</p>
                     </li>
                   ))}
                 </ul>
               )}
             </div>
           </div>
-          
-          <div className="grid grid-cols-3 gap-4 mt-8 mx-10">
-            {/* Availability Calendar */}
-            <div className='col-span-2 bg-white p-4 rounded-lg shadow-md transition hover:shadow-lg'>
-              <Calendar
-                currentMonth={selectedMonth}
-                nextMonth={nextMonth}
-                currentDate={today.getDate()}
-                currentYear={currentYear}
-                selectedDay={appointmentData.selectedDay}
-                setSelectedDay={(day) => setAppointmentData((prev) => ({ ...prev, selectedDay: day }))}
-                selectedMonth={appointmentData.selectedMonth}
-                setSelectedMonth={(month) => setAppointmentData((prev) => ({ ...prev, selectedMonth: month, selectedDay: null }))}
-                selectedTime={appointmentData.selectedTime}
-                setSelectedTime={(time) => setAppointmentData((prev) => ({ ...prev, selectedTime: time }))}
-                isTherapistSelected={!!appointmentData.selectedTherapist}>
-              </Calendar>
-            </div>
+        </div>
 
-            {/* Payments Status Section */}
-            <div className="bg-white p-4 rounded-lg shadow-md transition hover:shadow-lg">
-              <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold mb-4 text-green-500">Payments Status</h3>
-                <button
-                    onClick={handleViewPaymentClick}
-                    className="bg-blue-400 rounded-full text-white px-2 py-1 hover:bg-blue-600 transition -mt-2"
-                  >
-                    View List
-                  </button>
-              </div>
-              <p>Placeholder for payments status data fetched from Appwrite.</p>
+          
+        <div className="grid grid-cols-3 gap-4 mt-8 mx-10">
+          {/* Availability Calendar */}
+          <div className='col-span-2 bg-white p-4 rounded-lg shadow-md transition hover:shadow-lg'>
+            <Calendar
+              currentMonth={selectedMonth}
+              nextMonth={nextMonth}
+              currentDate={today.getDate()}
+              currentYear={currentYear}
+              selectedDay={appointmentData.selectedDay}
+              setSelectedDay={(day) => setAppointmentData((prev) => ({ ...prev, selectedDay: day }))}
+              selectedMonth={appointmentData.selectedMonth}
+              setSelectedMonth={(month) => setAppointmentData((prev) => ({ ...prev, selectedMonth: month, selectedDay: null }))}
+              selectedTime={appointmentData.selectedTime}
+              setSelectedTime={(time) => setAppointmentData((prev) => ({ ...prev, selectedTime: time }))}
+              isTherapistSelected={true}>
+            </Calendar>
+          </div>
+
+          {/* Payments Status Section */}
+          <div className="bg-white p-4 rounded-lg shadow-md transition hover:shadow-lg">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-semibold mb-4 text-green-500">Payments Status</h3>
+              <button
+                  onClick={handleViewPaymentClick}
+                  className="bg-blue-400 rounded-full text-white px-2 py-1 hover:bg-blue-600 transition -mt-2"
+                >
+                  View List
+                </button>
             </div>
+            <p>Placeholder for payments status data fetched from Appwrite.</p>
           </div>
         </div>
       </div>
