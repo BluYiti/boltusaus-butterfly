@@ -76,11 +76,11 @@ const Appointments = () => {
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
       <div className="bg-blue-50 h-screen overflow-auto">
-        <div className="bg-white rounded-b-lg shadow-md p-5 top-0 left-60 w-full z-10">
-          <h2 className="text-2xl font-bold">Appointments</h2>
+        <div className="bg-white width rounded-b-lg fixed p-5 top-0 w-full z-10">
+          <h2 className="text-2xl font-bold text-blue-400">Appointments</h2>
         </div>
 
-        <div className="p-5">
+        <div className="p-5 mt-20">
           {loading ? (
             <div className="text-center mt-10">
               <p>Loading...</p>
@@ -90,7 +90,7 @@ const Appointments = () => {
           ) : (
             <div className="bg-white rounded-lg shadow-md p-6">
               {/* Currently Happening */}
-              <div className="mt-6">
+              <div>
                 <h3 className="font-semibold text-lg border-b-2 border-gray-300 pb-2">Currently Happening</h3>
                 {clientData.length > 0 ? (
                   <div className="grid grid-cols-1 gap-6 mt-4">

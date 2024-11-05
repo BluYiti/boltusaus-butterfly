@@ -213,11 +213,11 @@ const Clients = () => {
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
       <div className="bg-blue-50 min-h-screen overflow-auto">
-        <div className="bg-white rounded-b-lg shadow-md p-5 top-0 left-60 w-full z-10 sticky">
-          <h2 className="text-2xl font-bold">Clients</h2>
+        <div className="bg-white width rounded-b-lg fixed p-5 top-0 w-full z-10">
+      <h2 className="text-2xl font-bold text-blue-400">Clients</h2>
         </div>
 
-        <div className="mt-6 px-5">
+        <div className="mt-24 px-5">
           <div className="flex items-center justify-between">
             <div className="flex space-x-8 border-b">
               {["Current", "To Be Evaluated", "For Referral"].map((tab) => (
