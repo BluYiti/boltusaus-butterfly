@@ -72,9 +72,12 @@ const ReviewPreAssModal: React.FC<ReviewPreAssModalProps> = ({ clientId, isOpen,
         
           // Check the number of documents
           if (data.length > 1) {
-            setError("Multiple pre-assessment documents found.");
-            // You can use a popup function here, e.g.:
-            alert("Many pre-assessments found. Please check the records.");
+            setError("Multiple pre-assessment documents found");
+
+            setTimeout(() => {
+              window.location.reload();
+            }, 3000);
+
             return; // Exit early
           }
         

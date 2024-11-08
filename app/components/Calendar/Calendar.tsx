@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react';
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
 interface CalendarProps {
     currentMonth: string;
     nextMonth: string;
     currentDate: number;
     currentYear: number;
-    selectedDay: number | null; // Changed to number | null
-    setSelectedDay: (day: number | null) => void; // Changed to number | null
+    selectedDay: number | null;
+    setSelectedDay: (day: number | null) => void;
     selectedMonth: string;
     setSelectedMonth: (month: string) => void;
     selectedTime: string | null;
     setSelectedTime: (time: string | null) => void;
-    isTherapistSelected: boolean; // New prop to check therapist selection
-    handleBookAppointment: () => void;
+    isTherapistSelected: boolean;
 }
 
 const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -28,17 +28,21 @@ const Calendar: React.FC<CalendarProps> = ({
     selectedTime,
     setSelectedTime,
     isTherapistSelected,
-    handleBookAppointment,
 }) => {
-    const [isNextMonthAvailable, setIsNextMonthAvailable] = useState(true);
+    const [date, setDate] = useState(new Date());
+    const [isNextMonthAvailable, setIsNextMonthAvailable] = useState(false);
     const [isFormComplete, setIsFormComplete] = useState(false);
 
     const today = new Date();
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate());
+    const isPreviousMonthAvailable = date > new Date(today.getFullYear(), today.getMonth(), 1);
 
     const bookingEndDate = new Date(today);
     bookingEndDate.setDate(today.getDate() + 8);
+
+    // Check if today is on or after the 25th of the month
+    const isMonthEndingSoon = today.getDate() >= 25;
 
     const isDateInRange = (date: Date) => {
         return date >= tomorrow && date <= bookingEndDate && date.getDay() !== 0; // Exclude Sundays
@@ -58,6 +62,7 @@ const Calendar: React.FC<CalendarProps> = ({
 
     useEffect(() => {
         const checkNextMonthAvailability = () => {
+            if (!isMonthEndingSoon) return;
             for (let day = 1; day <= monthsToDisplay[1].days; day++) {
                 const date = new Date(currentYear, nextMonthIndex, day);
                 if (isDateInRange(date)) {
@@ -69,7 +74,7 @@ const Calendar: React.FC<CalendarProps> = ({
         };
 
         checkNextMonthAvailability();
-    }, [monthsToDisplay, nextMonthIndex, currentYear]);
+    }, [isMonthEndingSoon, monthsToDisplay, nextMonthIndex, currentYear]);
 
     useEffect(() => {
         setIsFormComplete(!!selectedDay && !!selectedTime);
@@ -77,47 +82,51 @@ const Calendar: React.FC<CalendarProps> = ({
 
     const handleMonthChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         const selectedMonth = event.target.value;
-        setSelectedMonth(selectedMonth); // Update the selectedMonth state
-        setSelectedDay(null); // Reset the selected day when changing month
+        setSelectedMonth(selectedMonth);
+        setSelectedDay(null);
     };
 
     return (
         <div>
-            <div className="mb-4">
-                <label className="block mb-2 text-lg font-medium text-gray-700">
-                    Select Month and Date {!selectedDay && <span className="text-red-500">*</span>}
-                </label>
-                {/* Month Selection */}
-                <select
-                    value={selectedMonth}
-                    onChange={handleMonthChange}
-                    className="mb-4 p-2 rounded border border-gray-300"
-                    disabled={!isNextMonthAvailable || !isTherapistSelected} // Disable if no therapist is selected
+            <div className="flex justify-between mb-4">
+                <button
+                    onClick={() => setDate(new Date(date.getFullYear(), date.getMonth() - 1, 1))}
+                    className="p-2 text-blue-500 hover:bg-blue-100 rounded transition"
+                    aria-label="Previous Month"
+                    disabled={!isPreviousMonthAvailable}
                 >
-                    <option value={currentMonth}>{currentMonth}</option>
-                    <option value={nextMonth}>{nextMonth}</option>
-                </select>
+                    <FaChevronLeft />
+                </button>
+
+                <h4 className="font-semibold text-xl text-blue-400">
+                    {date.toLocaleString('default', { month: 'long' })} {date.getFullYear()}
+                </h4>
+
+                <button
+                    onClick={() => setDate(new Date(date.getFullYear(), date.getMonth() + 1, 1))}
+                    className="p-2 text-blue-500 hover:bg-blue-100 rounded transition"
+                    aria-label="Next Month"
+                    disabled={!isNextMonthAvailable || !isTherapistSelected}
+                >
+                    <FaChevronRight />
+                </button>
             </div>
 
-            {/* Display Weekday Headers Above the Dates */}
             <div className="grid grid-cols-7 gap-2 text-center font-bold text-gray-600 mb-2">
                 {weekdays.map((day) => (
                     <div key={day}>{day}</div>
                 ))}
             </div>
 
-            {/* Calendar with Dates */}
             <div className="grid grid-cols-7 gap-2 mb-4 p-4 rounded shadow-md bg-gray-200">
-                {/* Empty divs to shift the 1st day to the correct weekday */}
                 {Array.from({ length: firstDayOfMonth }).map((_, index) => (
                     <div key={index}></div>
                 ))}
 
-                {/* Display days of the selected month */}
                 {Array.from({ length: selectedMonth === currentMonth ? monthsToDisplay[0].days : monthsToDisplay[1].days }, (_, i) => {
                     const day = i + 1;
                     const date = new Date(currentYear, selectedMonth === currentMonth ? currentMonthIndex : nextMonthIndex, day);
-                    const isPastDate = !isDateInRange(date); // Disable past dates and Sundays
+                    const isPastDate = !isDateInRange(date);
 
                     return (
                         <button
@@ -129,7 +138,7 @@ const Calendar: React.FC<CalendarProps> = ({
                                     : "rounded-3xl bg-[#49c987] text-white font-poppins hover:bg-green-300 hover:text-black hover:scale-110"
                                 }`}
                             onClick={() => !isPastDate && isTherapistSelected && setSelectedDay(day)}
-                            disabled={isPastDate || !isTherapistSelected} // Disable if no therapist is selected
+                            disabled={isPastDate || !isTherapistSelected}
                         >
                             {day}
                         </button>
@@ -137,32 +146,17 @@ const Calendar: React.FC<CalendarProps> = ({
                 })}
             </div>
 
-            {/* Time Selection */}
             <h3 className="text-lg font-bold text-blue-900">Select Time {!selectedTime && <span className="text-red-500">*</span>}</h3>
             <div className="grid grid-cols-4 gap-4 mt-4">
                 {["10:00", "11:00", "12:00", "1:00", "2:00", "3:00", "4:00", "5:00"].map((time) => (
                     <button
                         key={time}
-                        className={`py-2 px-4 rounded-lg ${selectedTime === time ? "bg-blue-500 text-white" : "bg-gray-300 text-black hover:bg-blue-500"}`}
+                        className={`py-2 px-4 rounded-lg ${selectedTime === time ? "bg-blue-300 text-white" : "bg-gray-300 text-black hover:bg-blue-500 hover:text-white hover:scale-110"}`}
                         onClick={() => setSelectedTime(time)}
                     >
                         {time}
                     </button>
                 ))}
-            </div>
-
-            {/* Selected Info */}
-            <div className="mt-6">
-                <p className="text-gray-500">
-                    Selected: {selectedMonth} {selectedDay}, {currentYear} | {selectedTime}
-                </p>
-                <button
-                    className={`mt-4 py-2 px-4 rounded-lg ${isFormComplete ? "bg-blue-400 text-white hover:bg-blue-500" : "bg-gray-300 text-gray-700 cursor-not-allowed"}`}
-                    onClick={handleBookAppointment}
-                    disabled={!isFormComplete}
-                >
-                    Book
-                </button>
             </div>
         </div>
     );

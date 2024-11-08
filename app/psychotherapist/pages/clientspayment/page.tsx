@@ -94,7 +94,10 @@ const ClientsPayment = () => {
                 <p className="text-sm text-gray-500">{client.email}</p>
               </div>
             </div>
-            <button className="px-4 py-2 text-sm font-semibold text-white bg-blue-400 rounded-full hover:bg-green-600 transition">
+            <button
+              className="px-4 py-2 text-sm font-semibold text-white bg-blue-400 rounded-full hover:bg-blue-600 transition"
+              onClick={() => openModal(client)}
+            >
               View Payment
             </button>
           </div>
@@ -115,11 +118,11 @@ const ClientsPayment = () => {
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
       <div className="bg-blue-50 min-h-screen overflow-auto">
-        <div className="bg-white rounded-b-lg shadow-md p-5 top-0 left-60 w-full z-10 sticky">
-          <h2 className="text-2xl font-bold">Client's Payment</h2>
+      <div className="bg-white width rounded-b-lg fixed p-5 top-0 w-full z-10">
+          <h2 className="text-2xl font-bold text-blue-400">Client's Payment</h2>
         </div>
 
-        <div className="mt-6 px-5">
+        <div className="mt-24 px-5">
           <div className="flex items-center justify-between">
             <div className="flex space-x-8 border-b">
               {["Pending", "Paid"].map((tab) => (

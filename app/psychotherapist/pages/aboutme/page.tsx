@@ -66,13 +66,12 @@ const AboutMe = () => {
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
       <div className="bg-blue-50 min-h-screen overflow-y-auto">
-        {/* Header Section */}
-        <div className="bg-white rounded-b-lg shadow-md p-5 top-0 left-60 w-full z-10">
-          <h2 className="text-2xl font-bold">About Me</h2>
+        <div className="bg-white width rounded-b-lg fixed p-5 top-0 w-full z-10">
+          <h2 className="text-2xl font-bold text-blue-400">About Me</h2>
         </div>
 
         {/* Profile Settings Section */}
-        <div className="p-6">
+        <div className="mt-28 mx-8">
           <div className="bg-white shadow-md rounded-lg p-6 flex flex-col md:flex-row gap-6">
             {/* Left Side: Profile Picture and Description */}
             <div className="w-full md:w-1/2">

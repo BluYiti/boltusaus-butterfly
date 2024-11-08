@@ -9,6 +9,7 @@ import 'typeface-lora';
 import { account, databases, Query } from "@/appwrite"; // Import Appwrite account service for fetching user data
 import useAuthCheck from "@/auth/page"; // Correct import path for useAuthCheck
 import LoadingScreen from "@/components/LoadingScreen"; // Import LoadingScreen component
+import { fetchProfileImageUrl } from "@/hooks/userService";
 import { downloadCertificate } from "@/hooks/userService";
 
 const NewClientDashboard = () => {
@@ -16,6 +17,7 @@ const NewClientDashboard = () => {
   const [dataLoading, setDataLoading] = useState(true); // State to track if data is still loading
   const [users, setUsers] = useState([]);
   const [psychotherapists, setPsychotherapists] = useState([]);
+  const [profileImageUrls, setProfileImageUrls] = useState({});
   const [state, setState] = useState<string | null>(null); // State to track user state
   const [status, setStatus] = useState<string | null>(null); // State to track user status
   const [cert, setCert] = useState<string | null>(null); // State to track user status
@@ -47,7 +49,20 @@ const NewClientDashboard = () => {
 
         // Fetch psychotherapists
         const therapistResponse = await databases.listDocuments('Butterfly-Database', 'Psychotherapist');
+        const therapists = therapistResponse.documents;
         setPsychotherapists(therapistResponse.documents);
+
+        // Fetch profile images for each psychotherapist
+        const profileImages = {};
+        for (const therapist of therapists) {
+          if (therapist.profilepic) {
+            const url = await fetchProfileImageUrl(therapist.profilepic);
+            if (url) {
+              profileImages[therapist.$id] = url;
+            }
+          }
+        }
+        setProfileImageUrls(profileImages);
 
       } catch (error) {
         console.error("Error fetching data: ", error);
@@ -124,7 +139,7 @@ const NewClientDashboard = () => {
             </div>
           )}
 
-          {state === "referred" && status === "pending" && (
+          {(state === "referred" && status === "pending") || state === "evaluate" && (
             <>
               <div className="relative group flex"> {/* Wrapper for hover effect */}
                 <button
@@ -174,8 +189,8 @@ const NewClientDashboard = () => {
                   >
                     <div className="flex flex-col items-center bg-white border border-blue-300 p-4 rounded-3xl transform transition-transform duration-500 ease-in-out hover:scale-105 min-w-[300px]">
                       <img
-                        src={psychotherapist.imgSrc}
-                        alt={psychotherapist.name}
+                        src={profileImageUrls[psychotherapist.$id] || "/images/default-profile.png"}  // fallback to a default image
+                        alt={`${psychotherapist.firstName} ${psychotherapist.lastName}`}
                         className="rounded-full w-24 h-24 mb-4"
                       />
                       <div className="flex flex-col items-center text-center">
