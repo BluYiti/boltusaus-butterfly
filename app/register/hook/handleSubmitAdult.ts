@@ -167,11 +167,6 @@ const handleSubmit = async (
         await databases.createDocument('Butterfly-Database', 'Client', 'unique()', clientData);
         console.log('Client Collection document added');
 
-        // Optionally, store the role and status in the user preferences
-        await account.updatePrefs({
-            role: 'New Client',
-        });   
-
         // Redirect or perform further actions after successful login and JWT creation
         formData.onRegister({ ...accountData, userId: accountId });
 

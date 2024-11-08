@@ -74,3 +74,29 @@ export const fetchPsychoId = async (userId: string): Promise<string | null> => {
         return null;
     }
 };
+
+// Fetch psychotherapist ID
+export const fetchClientId = async (userId: string): Promise<string | null> => {
+    try {
+        const response = await databases.listDocuments('Butterfly-Database', 'Client', [
+            Query.equal('userid', userId),
+        ]);
+        return response.documents[0]?.psychoId || null;
+    } catch (error) {
+        console.error('Error fetching client ID:', error);
+        return null;
+    }
+};
+
+// Fetch psychotherapist ID
+export const fetchClientPsycho = async (userId: string): Promise<string | null> => {
+    try {
+        const response = await databases.listDocuments('Butterfly-Database', 'Client', [
+            Query.equal('psychotherapist', userId),
+        ]);
+        return response.documents[0]?.psychoId || null;
+    } catch (error) {
+        console.error('Error fetching clients psychotherapist :', error);
+        return null;
+    }
+};

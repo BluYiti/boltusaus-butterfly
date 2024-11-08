@@ -10,9 +10,9 @@ import LoadingScreen from "@/components/LoadingScreen";
 import Calendar from "@/components/Calendar/Calendar"; // Import the Calendar component
 import { fetchProfileImageUrl } from "@/hooks/userService";
 import ChoosePaymentModal from "./choosepayment";
-import CashPayment from './cash';
-import CreditCardPayment from './creditcard';
-import GCashPayment from './gcash';
+import CashPayment from "./cash";
+import CreditCardPayment from "./creditcard";
+import GCashPayment from "./gcash";
 
 const AppointmentBooking = ({ client }) => { // Pass client data as a prop
   const today = new Date();
@@ -31,7 +31,6 @@ const AppointmentBooking = ({ client }) => { // Pass client data as a prop
     isFirstBooking: false, // Track if this is the first booking
     allowTherapistChange: true, // Control therapist selection ability
   });
-  const [therapyMode, setTherapyMode] = useState("Online"); // State for therapy mode selection
   const [psychotherapists, setPsychotherapists] = useState([]);
   const [profileImageUrls, setProfileImageUrls] = useState({});
   const [showPrompt, setShowPrompt] = useState(false);
@@ -42,12 +41,9 @@ const AppointmentBooking = ({ client }) => { // Pass client data as a prop
   const handleOpenModal = () => setIsModalOpen(true);
   const handleCloseModal = () => setIsModalOpen(false);
 
-  const [width, setWidth] = useState(window.innerWidth);
-  const [height, setHeight] = useState(window.innerHeight);
-
   const handleBookAppointment = () => {
-    const { selectedTherapist, selectedDay, selectedTime } = appointmentData;
-    if (selectedTherapist && selectedDay && selectedTime && therapyMode) {
+    const { selectedTherapist, selectedDay, selectedTime, selectedMode } = appointmentData;
+    if (selectedTherapist && selectedDay && selectedTime && selectedMode) {
       setShowPrompt(true);
       console.log("Showing prompt for booking confirmation.");
     }
@@ -69,17 +65,15 @@ const AppointmentBooking = ({ client }) => { // Pass client data as a prop
 
   const handleProceedToPayment = () => {
     setAppointmentData((prev) => ({ ...prev, appointmentBooked: false }));
-    setIsModalOpen(true);
+    setIsModalOpen(true); // This should trigger the modal to open
     console.log("Proceeding to payment...");
-  };
+  };  
 
   // Set the payment method and close the modal
   const handleProceedPayment = (method: string) => {
     setSelectedPaymentMethod(method);
     setIsModalOpen(false);
-  };
-
-  const renderPaymentComponent = () => {
+    console.log(`Proceeding to payment`, {method});
     switch (selectedPaymentMethod) {
       case 'credit card':
         return <CreditCardPayment isOpen={isModalOpen} onClose={handleCloseModal} />;
@@ -90,12 +84,10 @@ const AppointmentBooking = ({ client }) => { // Pass client data as a prop
       default:
         return null;
     }
-  };  
+  };
 
   useEffect(() => {
     const fetchData = async () => {
-      setWidth(window.innerWidth);
-      setHeight(window.innerHeight);
       try {
         const therapistResponse = await databases.listDocuments('Butterfly-Database', 'Psychotherapist');
         const therapists = therapistResponse.documents;
@@ -210,22 +202,23 @@ const AppointmentBooking = ({ client }) => { // Pass client data as a prop
                 {/* Therapy Mode Selection */}
                 <div className="mb-4">
                   <label className="block mb-2 text-lg font-medium text-gray-700">
-                    Select Therapy Mode {!therapyMode && <span className="text-red-500">*</span>}
+                    Select Therapy Mode {!appointmentData.selectedMode && <span className="text-red-500">*</span>}
                   </label>
                   <select
-                    value={therapyMode}
-                    onChange={(e) => setTherapyMode(e.target.value)}
+                    value={appointmentData.selectedMode || ""}
+                    onChange={(e) => setAppointmentData(prev => ({ ...prev, selectedMode: e.target.value }))}
                     className="border w-32 border-gray-300 rounded-lg p-2"
                   >
-                    <option value="Online">Online</option>
-                    <option value="In-Person">In-Person</option>
+                    <option value="" disabled>Select Mode</option>
+                    <option value="online">Online</option>
+                    <option value="f2f">In-Person</option>
                   </select>
                 </div>
 
                 {/* Selected Info */}
                 <div className="mt-6">
                     <p className="text-gray-500">
-                        Selected: {appointmentData.selectedMonth} {appointmentData.selectedDay}, {currentYear} | {appointmentData.selectedTime} | Mode: {therapyMode}
+                        Selected: {appointmentData.selectedMonth} {appointmentData.selectedDay}, {currentYear} | {appointmentData.selectedTime} | Mode: {appointmentData.selectedMode}
                     </p>
                     <button
                         className={`mt-4 py-2 px-4 rounded-lg ${isFormComplete ? "bg-blue-400 text-white hover:bg-blue-500" : "bg-gray-300 text-gray-700 cursor-not-allowed"}`}
@@ -277,14 +270,14 @@ const AppointmentBooking = ({ client }) => { // Pass client data as a prop
             </button>
             <h3 className="text-2xl font-bold text-green-600">You Are Almost Done With Booking your Appointment!</h3>
             <p className="mt-2">
-              Service: Counseling and Therapy<br />
-              Date & Time: {appointmentData.selectedMonth} {appointmentData.selectedDay}, {currentYear} | {appointmentData.selectedTime}<br/>
-              Mode: {therapyMode}<br/>
-              Psychotherapist: {appointmentData.selectedTherapist ? `${appointmentData.selectedTherapist.firstName} ${appointmentData.selectedTherapist.lastName}` : "No therapist selected"}
+              Service Counseling and Therapy<br />
+              <strong>Date & Time</strong>: {appointmentData.selectedMonth} {appointmentData.selectedDay}, {currentYear} | {appointmentData.selectedTime}<br/>
+              <strong>Mode</strong>: {appointmentData.selectedMode}<br/>
+              <strong>Psychotherapist</strong>: {appointmentData.selectedTherapist ? `${appointmentData.selectedTherapist.firstName} ${appointmentData.selectedTherapist.lastName}` : "No therapist selected"}
             </p>
             <p className="text-lg text-gray-700">You can proceed to payment to complete the booking.</p>
             <button
-              className="mt-4 py-2 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+              className="mt-4 py-2 px-4 bg-blue-400 text-white rounded-lg hover:bg-blue-500"
               onClick={handleProceedToPayment}
             >
               Proceed to Payment
@@ -292,17 +285,32 @@ const AppointmentBooking = ({ client }) => { // Pass client data as a prop
           </div>
         </div>
       )}
-
+      
       {/* Payment Modal */}
       {isModalOpen && (
-        <>
-          <ChoosePaymentModal
-            isOpen={isModalOpen}
-            onClose={handleCloseModal}
-            onProceed={handleProceedPayment}
-          />
-          {renderPaymentComponent()} {/* Separates rendering of selected payment component */}
-        </>
+        <ChoosePaymentModal
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          onProceed={handleProceedPayment}
+          appointmentData={appointmentData} // Pass booking details here
+        />
+      )}
+
+      {/* Render selected payment component based on `selectedPaymentMethod` */}
+      {selectedPaymentMethod === "credit card" && (
+        <React.Suspense fallback={<LoadingScreen />}>
+          <CreditCardPayment isOpen={true} onClose={() => setSelectedPaymentMethod(null)} appointmentData={appointmentData} />
+        </React.Suspense>
+      )}
+      {selectedPaymentMethod === "gcash" && (
+        <React.Suspense fallback={<LoadingScreen />}>
+          <GCashPayment isOpen={true} onClose={() => setSelectedPaymentMethod(null)} appointmentData={appointmentData} />
+        </React.Suspense>
+      )}
+      {selectedPaymentMethod === "cash" && (
+        <React.Suspense fallback={<LoadingScreen />}>
+          <CashPayment isOpen={true} onClose={() => setSelectedPaymentMethod(null)} appointmentData={appointmentData} />
+        </React.Suspense>
       )}
     </Layout>
   );
