@@ -68,9 +68,10 @@ export const fetchPsychoId = async (userId: string): Promise<string | null> => {
         const response = await databases.listDocuments('Butterfly-Database', 'Psychotherapist', [
             Query.equal('userId', userId),
         ]);
-        return response.documents[0]?.psychoId || null; // Assuming response.documents contains an array and psychoId is a field
+        return response.documents[0]?.$id || null; // Assuming response.documents contains an array and psychoId is a field
     } catch (error) {
         console.error('Error fetching psychotherapist ID:', error);
         return null;
     }
 };
+
