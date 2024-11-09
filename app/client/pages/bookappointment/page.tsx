@@ -29,7 +29,7 @@ const AppointmentBooking = ({ client }) => { // Pass client data as a prop
     selectedMode: null,
     appointmentBooked: false,
     createdAt: today,
-    allowTherapistChange: true, // Control therapist selection ability
+    allowTherapistChange: null, // Control therapist selection ability
   });
   const [psychotherapists, setPsychotherapists] = useState([]);
   const [profileImageUrls, setProfileImageUrls] = useState({});
@@ -89,11 +89,13 @@ const AppointmentBooking = ({ client }) => { // Pass client data as a prop
   useEffect(() => {
     const fetchData = async () => {
       try {
+        console.log("Currently logged-in user data:", client);
+        // Fetch list of therapists
         const therapistResponse = await databases.listDocuments('Butterfly-Database', 'Psychotherapist');
         const therapists = therapistResponse.documents;
         setPsychotherapists(therapists);
-    
-        // Fetch profile images for each psychotherapist
+  
+        // Fetch profile images for each therapist
         const profileImages = {};
         for (const therapist of therapists) {
           if (therapist.profilepic) {
@@ -104,38 +106,43 @@ const AppointmentBooking = ({ client }) => { // Pass client data as a prop
           }
         }
         setProfileImageUrls(profileImages);
-    
-        // Check if the client has an existing psychotherapist
+  
+        // Check if the client already has an assigned therapist
         if (client?.psychotherapist?.length > 0) {
           const selectedTherapist = therapists.find(therapist => therapist.$id === client.psychotherapist);
           if (selectedTherapist) {
-            setAppointmentData(prev => ({ ...prev, selectedTherapist }));
+            // Set the selected therapist and prevent changes to therapist selection
+            setAppointmentData(prev => ({
+              ...prev,
+              selectedTherapist: selectedTherapist,
+              allowTherapistChange: false, // Client already has a therapist, can't change
+            }));
           }
-        }
-    
-        // Track if it's the user's first booking
-        if (!client?.hasBookedBefore) {
-          setAppointmentData(prev => ({ ...prev, isFirstBooking: true }));
+        } else {
+          setAppointmentData(prev => ({
+            ...prev,
+            allowTherapistChange: true, // Client can select a therapist
+          }));
         }
       } catch (error) {
         console.error("Error fetching data: ", error);
       } finally {
-        setLoading(false);
+        setLoading(false); // End the loading state once data is fetched
       }
-    };    
-
+    };
+  
     fetchData();
-
+  
     const handleResize = () => {
       setWindowDimensions({ width: window.innerWidth, height: window.innerHeight });
     };
-
+  
     window.addEventListener("resize", handleResize);
     return () => {
       window.removeEventListener("resize", handleResize);
     };
-  }, [client]);
-
+  }, [client]); // Dependency on `client` ensures re-fetch if client changes
+  
   const isFormComplete = appointmentData.selectedDay !== null && appointmentData.selectedTime && appointmentData.selectedTherapist;
 
   if (authLoading || loading) {

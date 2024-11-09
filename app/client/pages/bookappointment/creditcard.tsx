@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Modal from '@/components/Modal';
 import { account, databases } from '@/appwrite';
-import { fetchClientId, fetchClientPsycho } from '@/hooks/userService';
+import { fetchClientId, fetchClientPsycho, updateClientPsychotherapist } from '@/hooks/userService';
 
 interface CreditCardPaymentProps {
   isOpen: boolean;
@@ -12,65 +12,7 @@ interface CreditCardPaymentProps {
 const CreditCardPayment: React.FC<CreditCardPaymentProps> = ({ isOpen, onClose, appointmentData }) => {
   const [referenceNumber, setReferenceNumber] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [psychotherapists, setPsychotherapists] = useState([]);
   const [error, setError] = useState<string>('');
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const user = await account.get();
-        const clientId = await fetchClientId(user.$id)
-        const psychoId = await fetchClientPsycho(user.$id)
-  
-        const BookingsData = {
-          client: clientId,
-          psychotherapist: psychoId,
-          slots: appointmentData.selectedTime,
-          status: "pending",
-          createdAt: appointmentData.createdAt,
-          mode: appointmentData.selectedMode,
-          month: appointmentData.selectedMonth,
-          day: appointmentData.selectedDay
-        };
-
-        const PaymentData = {
-          referenceNo: referenceNumber,
-          channel: "bpi",
-          amount: 1000,
-          status: "pending",
-          client: clientId,
-          psychotherapist: psychoId
-        }
-
-        addBookingData(BookingsData);
-        addPaymentData(PaymentData);
-      } catch (err) {
-        console.error(err); // Log the error for debugging
-      }
-    };
-  
-    fetchData();
-  }, []);
-
-  async function addBookingData(BookingsData: { client: string; psychotherapist: string; slots: any; status: any; createdAt: any; mode: any; month: any; day: any; }){
-    try {
-      await databases.createDocument('Butterfly-Database', 'Bookings', 'unique()', BookingsData);
-      console.log("Created Bookings Data");
-    } catch (error) {
-      console.error(error); // Log the error for debugging
-    }
-    console.log('Client Collection document added');
-  }
-
-  async function addPaymentData(PaymentData: { referenceNo: string; channel: string; amount: number; status: string; client: string; psychotherapist: string; }){
-    try {
-      await databases.createDocument('Butterfly-Database', 'Payment', 'unique()', PaymentData);
-      console.log("Created Payment Data");
-    } catch (error) {
-      console.error(error); // Log the error for debugging
-    }
-    console.log('Client Collection document added');
-  }
 
   const handleReferenceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let inputValue = e.target.value;
@@ -99,16 +41,73 @@ const CreditCardPayment: React.FC<CreditCardPaymentProps> = ({ isOpen, onClose, 
     setError('');
     setIsSubmitting(true);
 
-    // Simulate form submission (e.g., API call)
     try {
       console.log('Submitting reference number:', referenceNumber);
-      // Add actual submission logic here, like calling an API or saving to state
+
+      // Fetch user data
+      const user = await account.get();
+      const clientId = await fetchClientId(user.$id);
+      let psychoId = await fetchClientPsycho(user.$id);
+
+      // Check if psychoId is null or empty
+      if (!psychoId) {
+          // If psychoId is null or empty, use the selected psychotherapist's ID
+          psychoId = appointmentData.selectedTherapist.$id;
+          updateClientPsychotherapist(clientId, psychoId);
+      }
+
+      const BookingsData = {
+        client: clientId,
+        psychotherapist: psychoId,
+        slots: appointmentData.selectedTime,
+        status: "pending",
+        createdAt: appointmentData.createdAt,
+        mode: appointmentData.selectedMode,
+        month: appointmentData.selectedMonth,
+        day: appointmentData.selectedDay
+      };
+
+      const PaymentData = {
+        referenceNo: referenceNumber,
+        channel: "bpi",
+        amount: 1000,
+        status: "pending",
+        client: clientId,
+        psychotherapist: psychoId
+      };
+
+      // Add booking and payment data
+      await addBookingData(BookingsData);
+      await addPaymentData(PaymentData);
+
+      console.log("Booking and Payment data successfully created.");
+
+      // Close the modal or do something else
+      onClose();
     } catch (err) {
       console.error('Submission failed:', err);
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  async function addBookingData(BookingsData: { client: string; psychotherapist: string; slots: any; status: any; createdAt: any; mode: any; month: any; day: any; }) {
+    try {
+      await databases.createDocument('Butterfly-Database', 'Bookings', 'unique()', BookingsData);
+      console.log("Created Bookings Data");
+    } catch (error) {
+      console.error(error); // Log the error for debugging
+    }
+  }
+
+  async function addPaymentData(PaymentData: { referenceNo: string; channel: string; amount: number; status: string; client: string; psychotherapist: string; }) {
+    try {
+      await databases.createDocument('Butterfly-Database', 'Payment', 'unique()', PaymentData);
+      console.log("Created Payment Data");
+    } catch (error) {
+      console.error(error); // Log the error for debugging
+    }
+  }
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>

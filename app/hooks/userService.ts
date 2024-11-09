@@ -81,14 +81,14 @@ export const fetchClientId = async (userId: string): Promise<string | null> => {
         const response = await databases.listDocuments('Butterfly-Database', 'Client', [
             Query.equal('userid', userId),
         ]);
-        return response.documents[0]?.psychoId || null;
+        return response.documents[0]?.$id || null;
     } catch (error) {
         console.error('Error fetching client ID:', error);
         return null;
     }
 };
 
-// Fetch psychotherapist ID
+// Fetch client's psychotherapy
 export const fetchClientPsycho = async (userId: string): Promise<string | null> => {
     try {
         const response = await databases.listDocuments('Butterfly-Database', 'Client', [
@@ -98,5 +98,25 @@ export const fetchClientPsycho = async (userId: string): Promise<string | null> 
     } catch (error) {
         console.error('Error fetching clients psychotherapist :', error);
         return null;
+    }
+};
+
+// Update psychotherapist in the Client collection
+export const updateClientPsychotherapist = async (clientId: string, psychoId: string): Promise<boolean> => {
+    try {
+        const response = await databases.updateDocument(
+            'Butterfly-Database',      // Database ID
+            'Client',                  // Collection ID
+            clientId,                  // Document ID (clientId)
+            {
+                psychotherapist: psychoId,  // The new psychotherapist ID to be set
+            }
+        );
+        
+        console.log('Client updated successfully:', response);
+        return true;  // Return true if the update was successful
+    } catch (error) {
+        console.error('Error updating psychotherapist:', error);
+        return false;  // Return false if an error occurred
     }
 };

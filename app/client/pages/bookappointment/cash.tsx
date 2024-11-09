@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import Modal from '@/components/Modal';
 import { account, databases } from '@/appwrite';
 import { fetchClientId, fetchClientPsycho } from '@/hooks/userService';
@@ -6,71 +6,16 @@ import { fetchClientId, fetchClientPsycho } from '@/hooks/userService';
 interface CashPaymentProps {
   isOpen: boolean;
   onClose: () => void;
-  appointmentData;
+  appointmentData: any;
 }
 
 const CashPayment: React.FC<CashPaymentProps> = ({ isOpen, onClose, appointmentData }) => {
   const [referenceNumber, setReferenceNumber] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [psychotherapists, setPsychotherapists] = useState([]);
+  const [client, setClientId] = useState<string>('');
+  const [psycho, setPsychoId] = useState<string>('');
   const [error, setError] = useState<string>('');
-  
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const user = await account.get();
-        const clientId = await fetchClientId(user.$id)
-        const psychoId = await fetchClientPsycho(user.$id)
-  
-        const BookingsData = {
-          client: clientId,
-          psychotherapist: psychoId,
-          slots: appointmentData.selectedTime,
-          status: "pending",
-          createdAt: appointmentData.createdAt,
-          mode: appointmentData.selectedMode,
-          month: appointmentData.selectedMonth,
-          day: appointmentData.selectedDay
-        };
-
-        const PaymentData = {
-          referenceNo: referenceNumber,
-          channel: "gcash",
-          amount: 1000,
-          status: "pending",
-          client: clientId,
-          psychotherapist: psychoId
-        }
-
-        addBookingData(BookingsData);
-        addPaymentData(PaymentData);
-      } catch (err) {
-        console.error(err); // Log the error for debugging
-      }
-    };
-  
-    fetchData();
-  }, []);
-
-  async function addBookingData(BookingsData: { client: string; psychotherapist: string; slots: any; status: any; createdAt: any; mode: any; month: any; day: any; }){
-    try {
-      await databases.createDocument('Butterfly-Database', 'Bookings', 'unique()', BookingsData);
-      console.log("Created Bookings Data");
-    } catch (error) {
-      console.error(error); // Log the error for debugging
-    }
-    console.log('Client Collection document added');
-  }
-
-  async function addPaymentData(PaymentData: { referenceNo: string; channel: string; amount: number; status: string; client: string; psychotherapist: string; }){
-    try {
-      await databases.createDocument('Butterfly-Database', 'Payment', 'unique()', PaymentData);
-      console.log("Created Payment Data");
-    } catch (error) {
-      console.error(error); // Log the error for debugging
-    }
-    console.log('Client Collection document added');
-  }
+  const [paymentAcknowledged, setPaymentAcknowledged] = useState(false);
 
   const handleReferenceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let inputValue = e.target.value;
@@ -99,16 +44,67 @@ const CashPayment: React.FC<CashPaymentProps> = ({ isOpen, onClose, appointmentD
     setError('');
     setIsSubmitting(true);
 
-    // Simulate form submission (e.g., API call)
     try {
-      console.log('Submitting reference number:', referenceNumber);
-      // Add actual submission logic here, like calling an API or saving to state
+      // Fetch user data when submitting the form
+      const user = await account.get();
+      const clientId = await fetchClientId(user.$id);
+      const psychoId = await fetchClientPsycho(user.$id);
+
+      setClientId(clientId); // Set client ID state
+      setPsychoId(psychoId); // Set psychotherapist ID state
+
+      const BookingsData = {
+        client: client,
+        psychotherapist: psycho,
+        slots: appointmentData.selectedTime,
+        status: "pending",
+        createdAt: appointmentData.createdAt,
+        mode: appointmentData.selectedMode,
+        month: appointmentData.selectedMonth,
+        day: appointmentData.selectedDay
+      };
+
+      const PaymentData = {
+        referenceNo: referenceNumber,
+        channel: "cash",
+        amount: 1000,
+        status: "pending",
+        client: client,
+        psychotherapist: psycho
+      };
+
+      // Add booking and payment data to the database
+      await addBookingData(BookingsData);
+      await addPaymentData(PaymentData);
+
+      console.log("Booking and Payment data successfully created.");
+
+      // Close the modal after submission
+      onClose();
     } catch (err) {
       console.error('Submission failed:', err);
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  async function addBookingData(BookingsData: { client: string; psychotherapist: string; slots: any; status: any; createdAt: any; mode: any; month: any; day: any; }) {
+    try {
+      await databases.createDocument('Butterfly-Database', 'Bookings', 'unique()', BookingsData);
+      console.log("Created Bookings Data");
+    } catch (error) {
+      console.error(error); // Log the error for debugging
+    }
+  }
+
+  async function addPaymentData(PaymentData: { referenceNo: string; channel: string; amount: number; status: string; client: string; psychotherapist: string; }) {
+    try {
+      await databases.createDocument('Butterfly-Database', 'Payment', 'unique()', PaymentData);
+      console.log("Created Payment Data");
+    } catch (error) {
+      console.error(error); // Log the error for debugging
+    }
+  }
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
@@ -119,28 +115,30 @@ const CashPayment: React.FC<CashPaymentProps> = ({ isOpen, onClose, appointmentD
           <form onSubmit={handleSubmit}>
             <label className="text-2xl block mb-2 text-gray-800 text-center">Please Scan the QR Code</label>
 
-            <img src="/images/gcashiqr.png" alt="gcashqr" className="mb-4" />
-
             {/* Reference Number Input */}
-            <label htmlFor="referenceNumber" className="block text-gray-800 mb-2">Enter Reference Number</label>
-            <input
-              id="referenceNumber"
-              type="text"
-              value={referenceNumber}
-              onChange={handleReferenceChange}
-              className="w-full p-2 border border-gray-300 rounded-lg mb-4"
-              maxLength={13}
-              placeholder="Enter 13-digit number"
-              required
-            />
+            <label htmlFor="referenceNumber" className="block text-gray-800 mb-2">NOTE: Please pay before the day of the booked appointment</label>
 
             {/* Display error if exists */}
             {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
 
+            {/* Checkbox for acknowledging payment deadline */}
+            <div className="flex items-center mb-4">
+              <input
+                type="checkbox"
+                id="paymentAcknowledgement"
+                checked={paymentAcknowledged}
+                onChange={(e) => setPaymentAcknowledged(e.target.checked)}
+                className="mr-2"
+              />
+              <label htmlFor="paymentAcknowledgement" className="text-gray-800 text-sm">
+                I understand that if payment is not made before the appointment, my booking will be canceled.
+              </label>
+            </div>
+
             <button
               type="submit"
-              className={`w-full p-2 bg-green-500 text-white rounded-lg ${isSubmitting || referenceNumber.trim().length !== 13 ? 'opacity-50 cursor-not-allowed' : ''}`}
-              disabled={isSubmitting || referenceNumber.trim().length !== 13}
+              className={`w-full p-2 bg-green-500 text-white rounded-lg ${isSubmitting || referenceNumber.trim().length !== 13 || !paymentAcknowledged ? 'opacity-50 cursor-not-allowed' : ''}`}
+              disabled={isSubmitting || referenceNumber.trim().length !== 13 || !paymentAcknowledged}
             >
               {isSubmitting ? 'Processing...' : 'Next'}
             </button>
