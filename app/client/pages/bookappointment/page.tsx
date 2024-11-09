@@ -28,7 +28,7 @@ const AppointmentBooking = ({ client }) => { // Pass client data as a prop
     selectedTherapist: null,
     selectedMode: null,
     appointmentBooked: false,
-    isFirstBooking: false, // Track if this is the first booking
+    createdAt: today,
     allowTherapistChange: true, // Control therapist selection ability
   });
   const [psychotherapists, setPsychotherapists] = useState([]);
@@ -76,11 +76,11 @@ const AppointmentBooking = ({ client }) => { // Pass client data as a prop
     console.log(`Proceeding to payment`, {method});
     switch (selectedPaymentMethod) {
       case 'credit card':
-        return <CreditCardPayment isOpen={isModalOpen} onClose={handleCloseModal} />;
+        return <CreditCardPayment isOpen={isModalOpen} onClose={handleCloseModal} appointmentData={appointmentData}/>;
       case 'gcash':
-        return <GCashPayment isOpen={isModalOpen} onClose={handleCloseModal} />;
+        return <GCashPayment isOpen={isModalOpen} onClose={handleCloseModal} appointmentData={appointmentData}/>;
       case 'cash':
-        return <CashPayment isOpen={isModalOpen} onClose={handleCloseModal} />;
+        return <CashPayment isOpen={isModalOpen} onClose={handleCloseModal} appointmentData={appointmentData}/>;
       default:
         return null;
     }
@@ -92,7 +92,7 @@ const AppointmentBooking = ({ client }) => { // Pass client data as a prop
         const therapistResponse = await databases.listDocuments('Butterfly-Database', 'Psychotherapist');
         const therapists = therapistResponse.documents;
         setPsychotherapists(therapists);
-
+    
         // Fetch profile images for each psychotherapist
         const profileImages = {};
         for (const therapist of therapists) {
@@ -104,17 +104,17 @@ const AppointmentBooking = ({ client }) => { // Pass client data as a prop
           }
         }
         setProfileImageUrls(profileImages);
-
+    
         // Check if the client has an existing psychotherapist
-        if (client.psychotherapist && client.psychotherapist.length > 0) {
+        if (client?.psychotherapist?.length > 0) {
           const selectedTherapist = therapists.find(therapist => therapist.$id === client.psychotherapist);
           if (selectedTherapist) {
             setAppointmentData(prev => ({ ...prev, selectedTherapist }));
           }
         }
-
+    
         // Track if it's the user's first booking
-        if (!client.hasBookedBefore) {
+        if (!client?.hasBookedBefore) {
           setAppointmentData(prev => ({ ...prev, isFirstBooking: true }));
         }
       } catch (error) {
@@ -122,7 +122,7 @@ const AppointmentBooking = ({ client }) => { // Pass client data as a prop
       } finally {
         setLoading(false);
       }
-    };
+    };    
 
     fetchData();
 
@@ -153,7 +153,7 @@ const AppointmentBooking = ({ client }) => { // Pass client data as a prop
                   Choose Psychotherapist <span className="text-red-500">{!appointmentData.selectedTherapist && "*"}</span>
                 </h3>
                 <p className="top-0">
-                  **NOTE: Choosing your psychotherapist for the very first time will be permanent throughout your psychologicalbo journey.
+                  **NOTE: Choosing your psychotherapist for the very first time will be permanent throughout your psychological journey.
                 </p>
                 <div className="flex space-x-6 mt-4">
                   {psychotherapists.map((therapist) => (

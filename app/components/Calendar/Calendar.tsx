@@ -35,10 +35,10 @@ const Calendar: React.FC<CalendarProps> = ({
 
     const today = new Date(); // Month is 0-indexed, so 10 is November
     const tomorrow = new Date(today);
-    tomorrow.setDate(today.getDate());
+    tomorrow.setDate(today.getDate() + 4);
 
     const bookingEndDate = new Date(today);
-    bookingEndDate.setDate(today.getDate() + 8);
+    bookingEndDate.setDate(today.getDate() + 12);
 
     // Check if today is on or after the 25th of the month
     const isMonthEndingSoon = today.getDate() >= 25;
@@ -169,7 +169,7 @@ const Calendar: React.FC<CalendarProps> = ({
 
             <h3 className="text-lg font-bold text-blue-900">Select Time {!selectedTime && <span className="text-red-500">*</span>}</h3>
             <div className="grid grid-cols-4 gap-4 mt-4">
-                {["10:00", "11:00", "12:00", "1:00", "2:00", "3:00", "4:00", "5:00"].map((time) => (
+                {["09:00am", "10:00am", "11:00am", "01:00pm", "02:00pm", "03:00pm", "04:00pm"].map((time) => (
                     <button
                         key={time}
                         className={`py-2 px-4 rounded-lg ${selectedTime === time ? "bg-blue-300 text-white" : "bg-gray-300 text-black hover:bg-blue-200 hover:text-white hover:scale-110"}`}

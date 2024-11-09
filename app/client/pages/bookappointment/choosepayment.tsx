@@ -1,7 +1,11 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 const ChoosePaymentModal = ({ isOpen, onClose, onProceed, appointmentData }) => {
   if (!isOpen) return null;
+
+  useEffect(() => {
+    console.log(appointmentData);
+  })
 
   return (
     <div className="fixed inset-0 flex justify-center items-center bg-gray-800 bg-opacity-50 z-50">
@@ -34,7 +38,7 @@ const ChoosePaymentModal = ({ isOpen, onClose, onProceed, appointmentData }) => 
             <img src="/images/gcash.png" alt="GCash" className="w-24 h-24 object-contain" />
           </button>
           <button
-            className="bg-green-700 text-white px-4 rounded-2xl hover:bg-green-500"
+            className="bg-green-400 text-white px-4 rounded-2xl hover:bg-green-200"
             onClick={() => onProceed("cash")}
           >
             <img src="/images/cash.png" alt="Cash" className="w-24 h-24 object-contain" />

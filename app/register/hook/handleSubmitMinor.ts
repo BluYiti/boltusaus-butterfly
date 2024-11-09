@@ -159,9 +159,12 @@ const handleSubmit = async (
             emergencyContactName: formData.emergencyContactName,
             emergencyContact: formData.emergencyContactNumber,
             state: 'new',
-            status: null,
             sex: formData.sex,
-            idFile: fileId
+            idFile: fileId,
+            psychotherapist: null,
+            certificate: null,
+            status: null,
+            allowTherapistChange: true
         };
 
         await databases.createDocument('Butterfly-Database', 'Client', 'unique()', clientData);

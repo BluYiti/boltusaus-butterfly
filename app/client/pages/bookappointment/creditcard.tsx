@@ -1,174 +1,151 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Modal from '@/components/Modal';
-import { account } from '@/appwrite';
-import { fetchClientId } from '@/hooks/userService';
+import { account, databases } from '@/appwrite';
+import { fetchClientId, fetchClientPsycho } from '@/hooks/userService';
 
 interface CreditCardPaymentProps {
   isOpen: boolean;
   onClose: () => void;
-  appointmentData;
+  appointmentData: any; // Update this with the actual type for appointment data
 }
 
-const [error, setError] = useState<string | null>(null);
-
-useEffect(() => {
-  const fetchData = async () => {
-    try {
-      const user = await account.get();
-      
-    } catch (err) {
-      setError('Failed to fetch evaluation data.'); // Set an error message
-      console.error(err); // Log the error for debugging
-    }
-  };
-
-  fetchData();
-}, []);
-
 const CreditCardPayment: React.FC<CreditCardPaymentProps> = ({ isOpen, onClose, appointmentData }) => {
-  const [cardNumber, setCardNumber] = useState('');
-  const [expiryDate, setExpiryDate] = useState('');
-  const [cvc, setCvc] = useState('');
-  const [errors, setErrors] = useState({
-    cardNumber: '',
-    expiryDate: '',
-    cvc: ''
-  });
+  const [referenceNumber, setReferenceNumber] = useState<string>('');
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [psychotherapists, setPsychotherapists] = useState([]);
+  const [error, setError] = useState<string>('');
 
-  const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    // Allow only numeric characters by replacing non-numeric characters
-    if (/[^0-9]/.test(value)) {
-      e.preventDefault(); // Prevent non-numeric characters from being entered
-    } else {
-      setCardNumber(value);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const user = await account.get();
+        const clientId = await fetchClientId(user.$id)
+        const psychoId = await fetchClientPsycho(user.$id)
+  
+        const BookingsData = {
+          client: clientId,
+          psychotherapist: psychoId,
+          slots: appointmentData.selectedTime,
+          status: "pending",
+          createdAt: appointmentData.createdAt,
+          mode: appointmentData.selectedMode,
+          month: appointmentData.selectedMonth,
+          day: appointmentData.selectedDay
+        };
+
+        const PaymentData = {
+          referenceNo: referenceNumber,
+          channel: "bpi",
+          amount: 1000,
+          status: "pending",
+          client: clientId,
+          psychotherapist: psychoId
+        }
+
+        addBookingData(BookingsData);
+        addPaymentData(PaymentData);
+      } catch (err) {
+        console.error(err); // Log the error for debugging
+      }
+    };
+  
+    fetchData();
+  }, []);
+
+  async function addBookingData(BookingsData: { client: string; psychotherapist: string; slots: any; status: any; createdAt: any; mode: any; month: any; day: any; }){
+    try {
+      await databases.createDocument('Butterfly-Database', 'Bookings', 'unique()', BookingsData);
+      console.log("Created Bookings Data");
+    } catch (error) {
+      console.error(error); // Log the error for debugging
     }
-    validateCardNumber(value);
-  };
+    console.log('Client Collection document added');
+  }
 
-  const handleExpiryDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setExpiryDate(value);
-    validateExpiryDate(value);
-  };
-
-  const handleCvcChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setCvc(value);
-    validateCvc(value);
-  };
-
-  const validateCardNumber = (cardNumber: string) => {
-    let error = '';
-    if (!/^\d{12}$/.test(cardNumber)) {
-      error = 'Card number must be exactly 12 digits and numeric.';
+  async function addPaymentData(PaymentData: { referenceNo: string; channel: string; amount: number; status: string; client: string; psychotherapist: string; }){
+    try {
+      await databases.createDocument('Butterfly-Database', 'Payment', 'unique()', PaymentData);
+      console.log("Created Payment Data");
+    } catch (error) {
+      console.error(error); // Log the error for debugging
     }
-    setErrors((prevErrors) => ({ ...prevErrors, cardNumber: error }));
-  };
+    console.log('Client Collection document added');
+  }
 
-  const validateExpiryDate = (expiryDate: string) => {
-    let error = '';
-    const currentDate = new Date();
-    const [expiryMonth, expiryYear] = expiryDate.split('/').map((val) => val.trim());
+  const handleReferenceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let inputValue = e.target.value;
 
-    // Expiry date validation (MM/YY format and not expired)
-    if (!/^\d{2}\/\d{2}$/.test(expiryDate)) {
-      error = 'Expiry date must be in MM/YY format.';
-    } else if (parseInt(expiryYear) < currentDate.getFullYear() % 100 || 
-      (parseInt(expiryYear) === currentDate.getFullYear() % 100 && parseInt(expiryMonth) < currentDate.getMonth() + 1)) {
-      error = 'Expiry date must not be in the past.';
+    // Remove non-numeric characters
+    inputValue = inputValue.replace(/\D/g, '');
+
+    // Limit the value to 13 digits
+    if (inputValue.length > 13) {
+      inputValue = inputValue.substring(0, 13);
     }
 
-    setErrors((prevErrors) => ({ ...prevErrors, expiryDate: error }));
+    setReferenceNumber(inputValue);
   };
 
-  const validateCvc = (cvc: string) => {
-    let error = '';
-    // CVC validation (3 digits)
-    if (!/^\d{3}$/.test(cvc)) {
-      error = 'CVC must be exactly 3 digits and numeric.';
-    }
-    setErrors((prevErrors) => ({ ...prevErrors, cvc: error }));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Just check if there are any errors in the state before submitting
-    if (Object.values(errors).every((error) => error === '')) {
-      // Submit form if no errors
-      console.log('Form submitted');
-    } else {
-      console.log('Form has errors');
+
+    // Simple validation for the reference number
+    if (referenceNumber.length !== 13) {
+      setError('Reference number must be 13 digits long');
+      return;
+    }
+
+    // Reset the error if validation passes
+    setError('');
+    setIsSubmitting(true);
+
+    // Simulate form submission (e.g., API call)
+    try {
+      console.log('Submitting reference number:', referenceNumber);
+      // Add actual submission logic here, like calling an API or saving to state
+    } catch (err) {
+      console.error('Submission failed:', err);
+    } finally {
+      setIsSubmitting(false);
     }
   };
-
-  // Check if all fields are valid (no errors)
-  const isFormValid = Object.values(errors).every((error) => error === '') &&
-                      cardNumber.length === 12 &&
-                      expiryDate.length === 5 &&
-                      cvc.length === 3;
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <div className="p-6 flex flex-col items-center">
-        <h1 id="modal-title" className="text-2xl font-bold mb-4">BPI Card Payment</h1>
+        <h1 id="modal-title" className="text-3xl font-bold mb-4">BPI Card Payment</h1>
         <p id="modal-description" className="text-gray-600">
           You have selected BPI Card as your payment method.
         </p>
         <div className="mt-6 bg-gray-100 p-4 rounded-lg w-full max-w-sm">
           <form onSubmit={handleSubmit}>
-            <label className="block mb-2 text-gray-800">Card Number</label>
-            <input
-              type="text"
-              value={cardNumber}
-              onChange={handleCardNumberChange}
-              className="w-full mb-4 p-2 border rounded-md"
-              placeholder="1234 5678 9012"
-              maxLength={12}
-            />
-            {errors.cardNumber && <p className="text-red-600 text-sm">{errors.cardNumber}</p>}
+            <label className="text-2xl block mb-2 text-gray-800 text-center">Please Scan the QR Code</label>
+            <label className="block mb-2 text-gray-800 text-center">Amount to be paid: ₱1,000.00</label>
 
-            <label className="block mb-2 text-gray-800">Expiry Date</label>
+            <img src="/images/bpiqr.png" alt="bpiqr" className="mb-4" />
+
+            {/* Reference Number Input */}
+            <label htmlFor="referenceNumber" className="block text-gray-800 mb-2">Enter Reference Number</label>
             <input
+              id="referenceNumber"
               type="text"
-              value={expiryDate}
-              onChange={(e) => handleExpiryDateChange(e)}
-              className="w-full mb-4 p-2 border rounded-md"
-              placeholder="MM/YY"
-              maxLength={5}
-              pattern="\d{2}/\d{2}"
-              inputMode="numeric"
-              onInput={(e: React.ChangeEvent<HTMLInputElement>) => {
-                const input = e.target;
-                let value = input.value.replace(/\D/g, '').slice(0, 4); // Allow only digits, limit to 4 characters
-                if (value.length >= 3) {
-                  value = value.slice(0, 2) + '/' + value.slice(2); // Insert slash after MM
-                }
-                // Set the value of the input element
-                input.value = value;
-                // Call the change handler to update the state
-                handleExpiryDateChange(e);
-              }}
+              value={referenceNumber}
+              onChange={handleReferenceChange}
+              className="w-full p-2 border border-gray-300 rounded-lg mb-4"
+              maxLength={13}
+              placeholder="Enter 13-digit number"
+              required
             />
-            {errors.expiryDate && <p className="text-red-600 text-sm">{errors.expiryDate}</p>}
-            
-            <label className="block mb-2 text-gray-800">CVC</label>
-            <input
-              type="text"
-              value={cvc}
-              onChange={handleCvcChange}
-              className="w-full mb-4 p-2 border rounded-md"
-              placeholder="CVC"
-              maxLength={3}
-            />
-            {errors.cvc && <p className="text-red-600 text-sm">{errors.cvc}</p>}
+
+            {/* Display error if exists */}
+            {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
 
             <button
               type="submit"
-              className={`w-full p-2 bg-blue-600 text-white rounded-lg ${!isFormValid ? 'opacity-50 cursor-not-allowed' : ''}`}
-              disabled={!isFormValid} // Disable button if form is not valid
+              className={`w-full p-2 bg-green-500 text-white rounded-lg ${isSubmitting || referenceNumber.trim().length !== 13 ? 'opacity-50 cursor-not-allowed' : ''}`}
+              disabled={isSubmitting || referenceNumber.trim().length !== 13}
             >
-              Pay Now
+              {isSubmitting ? 'Processing...' : 'Next'}
             </button>
           </form>
         </div>
