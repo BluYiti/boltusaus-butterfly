@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import Modal from '@/components/Modal';
 import { account, databases } from '@/appwrite';
-import { fetchClientId, fetchClientPsycho } from '@/hooks/userService';
+import { fetchClientId, fetchClientPsycho, restrictSelectingTherapist, updateClientPsychotherapist } from '@/hooks/userService';
+import SuccessModal from './successfulbooking';
 
 interface CashPaymentProps {
   isOpen: boolean;
@@ -10,36 +11,13 @@ interface CashPaymentProps {
 }
 
 const CashPayment: React.FC<CashPaymentProps> = ({ isOpen, onClose, appointmentData }) => {
-  const [referenceNumber, setReferenceNumber] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [client, setClientId] = useState<string>('');
-  const [psycho, setPsychoId] = useState<string>('');
   const [error, setError] = useState<string>('');
   const [paymentAcknowledged, setPaymentAcknowledged] = useState(false);
-
-  const handleReferenceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let inputValue = e.target.value;
-
-    // Remove non-numeric characters
-    inputValue = inputValue.replace(/\D/g, '');
-
-    // Limit the value to 13 digits
-    if (inputValue.length > 13) {
-      inputValue = inputValue.substring(0, 13);
-    }
-
-    setReferenceNumber(inputValue);
-  };
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Simple validation for the reference number
-    if (referenceNumber.length !== 13) {
-      setError('Reference number must be 13 digits long');
-      return;
-    }
-
     // Reset the error if validation passes
     setError('');
     setIsSubmitting(true);
@@ -48,14 +26,21 @@ const CashPayment: React.FC<CashPaymentProps> = ({ isOpen, onClose, appointmentD
       // Fetch user data when submitting the form
       const user = await account.get();
       const clientId = await fetchClientId(user.$id);
-      const psychoId = await fetchClientPsycho(user.$id);
+      const response = await databases.getDocument('Butterfly-Database', 'Client', clientId);
+      let psychoId = response.psychotherapist.$id;
 
-      setClientId(clientId); // Set client ID state
-      setPsychoId(psychoId); // Set psychotherapist ID state
+      // Check if psychoId is null or empty
+      if (!psychoId) {
+          // If psychoId is null or empty, use the selected psychotherapist's ID
+          psychoId = appointmentData.selectedTherapist.$id;
+          updateClientPsychotherapist(clientId, psychoId);
+      }
+
+      restrictSelectingTherapist(clientId);
 
       const BookingsData = {
-        client: client,
-        psychotherapist: psycho,
+        client: clientId,
+        psychotherapist: appointmentData.selectedTherapist.$id,
         slots: appointmentData.selectedTime,
         status: "pending",
         createdAt: appointmentData.createdAt,
@@ -65,12 +50,12 @@ const CashPayment: React.FC<CashPaymentProps> = ({ isOpen, onClose, appointmentD
       };
 
       const PaymentData = {
-        referenceNo: referenceNumber,
+        referenceNo: null,
         channel: "cash",
         amount: 1000,
         status: "pending",
-        client: client,
-        psychotherapist: psycho
+        client: clientId,
+        psychotherapist: appointmentData.selectedTherapist.$id
       };
 
       // Add booking and payment data to the database
@@ -81,6 +66,14 @@ const CashPayment: React.FC<CashPaymentProps> = ({ isOpen, onClose, appointmentD
 
       // Close the modal after submission
       onClose();
+      
+      // Show success modal
+      setShowSuccessModal(true);
+
+      // Reload the page after 3 seconds (3000 milliseconds)
+      setTimeout(() => {
+        window.location.reload();
+      }, 3000);
     } catch (err) {
       console.error('Submission failed:', err);
     } finally {
@@ -106,6 +99,10 @@ const CashPayment: React.FC<CashPaymentProps> = ({ isOpen, onClose, appointmentD
     }
   }
 
+  const closeSuccessModal = () => {
+    setShowSuccessModal(false); // Hide success modal after user closes it
+  };
+
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <div className="p-6 flex flex-col items-center">
@@ -116,7 +113,7 @@ const CashPayment: React.FC<CashPaymentProps> = ({ isOpen, onClose, appointmentD
             <label className="text-2xl block mb-2 text-gray-800 text-center">Please Scan the QR Code</label>
 
             {/* Reference Number Input */}
-            <label htmlFor="referenceNumber" className="block text-gray-800 mb-2">NOTE: Please pay before the day of the booked appointment</label>
+            <label htmlFor="referenceNumber" className="block text-red-700 mb-2">NOTE: Please pay before the day of the booked appointment</label>
 
             {/* Display error if exists */}
             {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
@@ -137,14 +134,17 @@ const CashPayment: React.FC<CashPaymentProps> = ({ isOpen, onClose, appointmentD
 
             <button
               type="submit"
-              className={`w-full p-2 bg-green-500 text-white rounded-lg ${isSubmitting || referenceNumber.trim().length !== 13 || !paymentAcknowledged ? 'opacity-50 cursor-not-allowed' : ''}`}
-              disabled={isSubmitting || referenceNumber.trim().length !== 13 || !paymentAcknowledged}
+              className={`w-full p-2 bg-green-500 text-white rounded-lg ${isSubmitting && !paymentAcknowledged ? 'opacity-50 cursor-not-allowed' : ''}`}
+              disabled={isSubmitting}
             >
               {isSubmitting ? 'Processing...' : 'Next'}
             </button>
           </form>
         </div>
       </div>
+
+      {/* Success modal */}
+      <SuccessModal isVisible={showSuccessModal} onClose={closeSuccessModal} />
     </Modal>
   );
 };

@@ -48,7 +48,7 @@ const Layout: React.FC<LayoutProps> = ({ children, sidebarTitle, sidebarItems })
     ...item,
     href: state === "new" && item.href === "/client" ? "/client" : item.href,
     icon: item.icon as IconType,
-    isDisabled: (state === "new" || state === "evaluate" || status === "pending") && ["Book Appointment", "Communication", "Payments", "Goals"].includes(item.label),
+    isDisabled: (state === "new" || state === "evaluate") && ["Book Appointment", "Communication", "Payments", "Goals"].includes(item.label),
   }));
 
   if (loading) {

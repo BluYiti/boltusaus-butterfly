@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import Modal from '@/components/Modal';
 import { account, databases } from '@/appwrite';
-import { fetchClientId, fetchClientPsycho, updateClientPsychotherapist } from '@/hooks/userService';
+import { fetchClientId, fetchClientPsycho, restrictSelectingTherapist, updateClientPsychotherapist } from '@/hooks/userService';
+import SuccessModal from './successfulbooking';
 
 interface CreditCardPaymentProps {
   isOpen: boolean;
@@ -13,6 +14,7 @@ const CreditCardPayment: React.FC<CreditCardPaymentProps> = ({ isOpen, onClose, 
   const [referenceNumber, setReferenceNumber] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const handleReferenceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let inputValue = e.target.value;
@@ -47,7 +49,8 @@ const CreditCardPayment: React.FC<CreditCardPaymentProps> = ({ isOpen, onClose, 
       // Fetch user data
       const user = await account.get();
       const clientId = await fetchClientId(user.$id);
-      let psychoId = await fetchClientPsycho(user.$id);
+      const response = await databases.getDocument('Butterfly-Database', 'Client', clientId);
+      let psychoId = response.psychotherapist.$id;
 
       // Check if psychoId is null or empty
       if (!psychoId) {
@@ -56,9 +59,11 @@ const CreditCardPayment: React.FC<CreditCardPaymentProps> = ({ isOpen, onClose, 
           updateClientPsychotherapist(clientId, psychoId);
       }
 
+      restrictSelectingTherapist(clientId);
+
       const BookingsData = {
         client: clientId,
-        psychotherapist: psychoId,
+        psychotherapist: appointmentData.selectedTherapist.$id,
         slots: appointmentData.selectedTime,
         status: "pending",
         createdAt: appointmentData.createdAt,
@@ -73,7 +78,7 @@ const CreditCardPayment: React.FC<CreditCardPaymentProps> = ({ isOpen, onClose, 
         amount: 1000,
         status: "pending",
         client: clientId,
-        psychotherapist: psychoId
+        psychotherapist: appointmentData.selectedTherapist.$id
       };
 
       // Add booking and payment data
@@ -84,6 +89,14 @@ const CreditCardPayment: React.FC<CreditCardPaymentProps> = ({ isOpen, onClose, 
 
       // Close the modal or do something else
       onClose();
+      
+      // Show success modal
+      setShowSuccessModal(true);
+
+      // Reload the page after 3 seconds (3000 milliseconds)
+      setTimeout(() => {
+        window.location.reload();
+      }, 3000);
     } catch (err) {
       console.error('Submission failed:', err);
     } finally {
@@ -108,6 +121,10 @@ const CreditCardPayment: React.FC<CreditCardPaymentProps> = ({ isOpen, onClose, 
       console.error(error); // Log the error for debugging
     }
   }
+
+  const closeSuccessModal = () => {
+    setShowSuccessModal(false); // Hide success modal after user closes it
+  };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
@@ -149,6 +166,9 @@ const CreditCardPayment: React.FC<CreditCardPaymentProps> = ({ isOpen, onClose, 
           </form>
         </div>
       </div>
+      
+      {/* Success modal */}
+      <SuccessModal isVisible={showSuccessModal} onClose={closeSuccessModal} />
     </Modal>
   );
 };

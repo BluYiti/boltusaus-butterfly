@@ -155,7 +155,7 @@ const handleSubmit = async (
             birthdate: formData.birthday,
             age: formData.age,
             address,
-            type: 'adult',
+            type: 'minor',
             emergencyContactName: formData.emergencyContactName,
             emergencyContact: formData.emergencyContactNumber,
             state: 'new',

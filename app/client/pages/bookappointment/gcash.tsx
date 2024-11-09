@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import Modal from '@/components/Modal';
 import { account, databases } from '@/appwrite';
-import { fetchClientId, fetchClientPsycho } from '@/hooks/userService';
+import { fetchClientId, fetchClientPsycho, restrictSelectingTherapist, updateClientPsychotherapist } from '@/hooks/userService';
+import SuccessModal from './successfulbooking';
 
 interface GCashPaymentProps {
   isOpen: boolean;
@@ -15,6 +16,7 @@ const GCashPayment: React.FC<GCashPaymentProps> = ({ isOpen, onClose, appointmen
   const [client, setClientId] = useState<string>('');
   const [psycho, setPsychoId] = useState<string>('');
   const [error, setError] = useState<string>('');
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const handleReferenceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let inputValue = e.target.value;
@@ -49,14 +51,21 @@ const GCashPayment: React.FC<GCashPaymentProps> = ({ isOpen, onClose, appointmen
       // Fetch user data when submitting the form
       const user = await account.get();
       const clientId = await fetchClientId(user.$id);
-      const psychoId = await fetchClientPsycho(user.$id);
+      const response = await databases.getDocument('Butterfly-Database', 'Client', clientId);
+      let psychoId = response.psychotherapist.$id;
 
-      setClientId(clientId); // Set client ID state
-      setPsychoId(psychoId); // Set psychotherapist ID state
+      // Check if psychoId is null or empty
+      if (!psychoId) {
+          // If psychoId is null or empty, use the selected psychotherapist's ID
+          psychoId = appointmentData.selectedTherapist.$id;
+          updateClientPsychotherapist(clientId, psychoId);
+      }
+
+      restrictSelectingTherapist(clientId);
 
       const BookingsData = {
-        client: client,
-        psychotherapist: psycho,
+        client: clientId,
+        psychotherapist: psychoId,
         slots: appointmentData.selectedTime,
         status: "pending",
         createdAt: appointmentData.createdAt,
@@ -70,8 +79,8 @@ const GCashPayment: React.FC<GCashPaymentProps> = ({ isOpen, onClose, appointmen
         channel: "gcash",
         amount: 1000,
         status: "pending",
-        client: client,
-        psychotherapist: psycho
+        client: clientId,
+        psychotherapist: appointmentData.selectedTherapist.$id
       };
 
       // Add booking and payment data to the database
@@ -82,6 +91,14 @@ const GCashPayment: React.FC<GCashPaymentProps> = ({ isOpen, onClose, appointmen
 
       // Close the modal after submission
       onClose();
+      
+      // Show success modal
+      setShowSuccessModal(true);
+
+      // Reload the page after 3 seconds (3000 milliseconds)
+      setTimeout(() => {
+        window.location.reload();
+      }, 3000);
     } catch (err) {
       console.error('Submission failed:', err);
     } finally {
@@ -106,6 +123,10 @@ const GCashPayment: React.FC<GCashPaymentProps> = ({ isOpen, onClose, appointmen
       console.error(error); // Log the error for debugging
     }
   }
+
+  const closeSuccessModal = () => {
+    setShowSuccessModal(false); // Hide success modal after user closes it
+  };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
@@ -145,6 +166,9 @@ const GCashPayment: React.FC<GCashPaymentProps> = ({ isOpen, onClose, appointmen
           </form>
         </div>
       </div>
+      
+      {/* Success modal */}
+      <SuccessModal isVisible={showSuccessModal} onClose={closeSuccessModal} />
     </Modal>
   );
 };

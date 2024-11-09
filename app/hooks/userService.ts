@@ -75,18 +75,7 @@ export const fetchPsychoId = async (userId: string): Promise<string | null> => {
     }
 };
 
-// Fetch client data by client ID
-export const fetchClientData = async (clientId: string): Promise<any | null> => {
-    try {
-        const response = await databases.getDocument('Butterfly-Database', 'Client', clientId);
-        return response || null;
-    } catch (error) {
-        console.error('Error fetching client data:', error);
-        return null;
-    }
-};
-
-// Fetch psychotherapist ID
+// Fetch client ID
 export const fetchClientId = async (userId: string): Promise<string | null> => {
     try {
         const response = await databases.listDocuments('Butterfly-Database', 'Client', [
@@ -102,10 +91,8 @@ export const fetchClientId = async (userId: string): Promise<string | null> => {
 // Fetch client's psychotherapy
 export const fetchClientPsycho = async (userId: string): Promise<string | null> => {
     try {
-        const response = await databases.listDocuments('Butterfly-Database', 'Client', [
-            Query.equal('psychotherapist', userId),
-        ]);
-        return response.documents[0]?.psychoId || null;
+        const response = await databases.getDocument('Butterfly-Database', 'Client', userId);
+        return response?.psychotherapist.$id ?? null; // Returns null if psychotherapist is undefined
     } catch (error) {
         console.error('Error fetching clients psychotherapist :', error);
         return null;
@@ -131,3 +118,13 @@ export const updateClientPsychotherapist = async (clientId: string, psychoId: st
         return false;  // Return false if an error occurred
     }
 };
+
+export const restrictSelectingTherapist = async (clientId: string) => {
+    try {
+        await databases.updateDocument('Butterfly-Database','Client', clientId, {
+            allowTherapistChange: false
+        });
+    } catch (error) {
+        console.error('Error restricting therapist selection :', error);
+    }
+}
