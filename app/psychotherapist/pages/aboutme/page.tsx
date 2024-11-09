@@ -1,16 +1,15 @@
-'use client';
+'use client'
 
 import { useState, useEffect, ChangeEvent } from 'react';
 import Layout from "@/components/Sidebar/Layout";
 import items from "@/psychotherapist/data/Links";
 import { PencilIcon, SaveIcon } from '@heroicons/react/solid';
 import { account, databases } from '@/appwrite';
-import { fetchPsychoId, uploadProfilePicture } from '@/hooks/userService';
+import { fetchProfileImageUrl, fetchPsychoId, uploadProfilePicture } from '@/hooks/userService';
 import LoadingScreen from '@/components/LoadingScreen';
 import UploadProfile from '@/psychotherapist/components/UploadProfile'; // Import UploadProfile modal
 
 const AboutMe = () => {
-  // State variables for user inputs
   const [description, setDescription] = useState("");
   const [professionalBackground, setProfessionalBackground] = useState("");
   const [specialties, setSpecialties] = useState<string[]>([]);
@@ -18,6 +17,8 @@ const AboutMe = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [position, setPosition] = useState("");
+  const [profilepic, setProfilePic] = useState(""); // Profile picture state
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null); // State for the profile image URL
 
   // Editing state for each field
   const [isEditing, setIsEditing] = useState<{
@@ -38,15 +39,19 @@ const AboutMe = () => {
 
   // Fetch the user's information from Appwrite
   const fetchData = async () => {
-    const user = await account.get(); // Get user information
-    const psychoId = await fetchPsychoId(user.$id);
-
     try {
+      // State variables for user inputs
+      const user = await account.get(); // Get user information
+      const psychoId = await fetchPsychoId(user.$id); // Get the psychotherapist's ID
+
       const response = await databases.getDocument(
         'Butterfly-Database', // Your database ID
         'Psychotherapist', // Your collection ID
         psychoId // The document ID to fetch
       );
+
+      // Log the response to see if profilepic is set properly
+      console.log("Fetched profile data:", response);
 
       // Update state with fetched data
       setDescription(response.description || '');
@@ -56,12 +61,30 @@ const AboutMe = () => {
       setProfessionalBackground(response.background || '');
       setSpecialties(Array.isArray(response.specialties) ? response.specialties : []);
       setPosition(response.position || '');
+      setProfilePic(response.profilepic || ''); // Set the profile picture
+      console.log("Profile picture:", response.profilepic); // Check the profile picture value
     } catch (error) {
       console.error("Failed to fetch data", error);
     } finally {
       setIsLoading(false);
     }
   };
+
+  // Fetch profile image URL if the profile picture is set
+  useEffect(() => {
+    const fetchProfileImage = async () => {
+      if (profilepic) {
+        try {
+          const imageUrl = await fetchProfileImageUrl(profilepic); // This is an async operation
+          setProfileImageUrl(imageUrl); // Store the image URL in state
+        } catch (error) {
+          console.error("Error fetching profile image URL:", error);
+        }
+      }
+    };
+
+    fetchProfileImage();
+  }, [profilepic]); // Only run this effect when the profilepic state changes
 
   // Handle phone number change
   const handlePhoneNumberChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -174,12 +197,14 @@ const AboutMe = () => {
               {/* Profile Picture */}
               <div className="flex flex-col items-center mb-6">
                 <div className="w-24 h-24 rounded-full bg-blue-500 mb-4">
-                  {selectedFile && (
+                  {profileImageUrl ? (
                     <img
-                      src={URL.createObjectURL(selectedFile)} // Preview the selected profile picture
+                      src={profileImageUrl} // Use the resolved image URL here
                       alt="Profile Preview"
                       className="w-full h-full object-cover rounded-full"
                     />
+                  ) : (
+                    <span className="text-white text-xl">No Image</span> // Fallback in case there is no image
                   )}
                 </div>
                 <button

@@ -71,6 +71,7 @@ const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpe
       setClientData(refreshedClientData);
   
       alert('Client referred successfully!');
+      window.location.reload();
       setIsConfirmModalOpen(false);
     } catch (err: unknown) {
       console.error("Error referring client:", err);

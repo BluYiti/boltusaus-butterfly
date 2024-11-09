@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Cropper from 'react-cropper';
 import 'cropperjs/dist/cropper.css';
+import { fetchPsychoId, uploadProfilePicture, uploadProfilePictureCollection } from '@/hooks/userService';
+import { account, ID } from '@/appwrite';
 
 interface UploadProfileProps {
   isModalOpen: boolean;
@@ -13,20 +15,31 @@ const UploadProfile: React.FC<UploadProfileProps> = ({
   setIsModalOpen,
   handleFileChange,
 }) => {
+  const user = account.get();
   const [image, setImage] = useState<File | null>(null);
   const [croppedImage, setCroppedImage] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null); // State for object URL
   const cropperRef = useRef<any>(null); // Ref to the Cropper instance
-  const imageUrl = useRef<string | null>(null); // Store object URL
+
+  // Reset image and cropped image when modal opens
+  useEffect(() => {
+    if (isModalOpen) {
+      setImage(null);
+      setCroppedImage(null);
+      setImageUrl(null);
+    }
+  }, [isModalOpen]);
 
   // Cleanup object URL when image changes or component unmounts
   useEffect(() => {
     if (image) {
-      imageUrl.current = URL.createObjectURL(image);
+      const url = URL.createObjectURL(image);
+      setImageUrl(url); // Set image URL in state
     }
 
     return () => {
-      if (imageUrl.current) {
-        URL.revokeObjectURL(imageUrl.current);
+      if (imageUrl) {
+        URL.revokeObjectURL(imageUrl); // Clean up object URL
       }
     };
   }, [image]);
@@ -58,27 +71,51 @@ const UploadProfile: React.FC<UploadProfileProps> = ({
   };
 
   // Convert the cropped image to a file (when uploading)
-  const onUpload = () => {
+  const onUpload = async () => {
     if (croppedImage) {
-      // Convert base64 to Blob and create a File object
-      const byteString = atob(croppedImage.split(',')[1]);
-      const arrayBuffer = new ArrayBuffer(byteString.length);
-      const uintArray = new Uint8Array(arrayBuffer);
-      for (let i = 0; i < byteString.length; i++) {
-        uintArray[i] = byteString.charCodeAt(i);
-      }
-      const blob = new Blob([uintArray], { type: 'image/jpeg' });
-      const file = new File([blob], 'cropped-profile.jpg', { type: 'image/jpeg' });
+      try {
+        // Convert base64 to Blob and create a File object
+        const byteString = atob(croppedImage.split(',')[1]);
+        const arrayBuffer = new ArrayBuffer(byteString.length);
+        const uintArray = new Uint8Array(arrayBuffer);
+        
+        // Fetch psychoId (with error handling)
+        const psychoId = await fetchPsychoId((await user).$id);
 
-      // Call your upload function here (e.g., upload to the server, Appwrite, etc.)
-      console.log('Uploading cropped image:', file);
+        for (let i = 0; i < byteString.length; i++) {
+          uintArray[i] = byteString.charCodeAt(i);
+        }
+        const blob = new Blob([uintArray], { type: 'image/jpeg' });
+        const file = new File([blob], `profile-${psychoId}.jpg`, { type: 'image/jpeg' });
+        
+        // Generate a unique file ID using Appwrite's unique() method
+        const fileId = await ID.unique();
+  
+  
+        if (!psychoId) {
+          throw new Error('Failed to fetch psychoId');
+        }
+  
+        // Upload the profile picture with the unique fileId
+        await uploadProfilePicture(fileId, file);
+  
+        // Upload the profile picture collection with the same fileId
+        await uploadProfilePictureCollection(psychoId, fileId, 'Psychotherapist');
+  
+        // Close the modal after upload
+        setIsModalOpen(false);
+
+        window.location.reload();
+      } catch (error) {
+        console.error('Upload failed:', error);
+        // Handle error gracefully, show an alert or message to the user
+      }
     }
-    setIsModalOpen(false); // Close modal after uploading
-  };
+  };  
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-      <div className="bg-white p-6 rounded-lg max-w-4xl w-full">
+      <div className="bg-white p-6 rounded-lg max-w-4xl w-full sm:w-11/12 md:w-9/12 lg:w-7/12 xl:w-6/12">
         <h2 className="text-xl font-semibold text-center mb-4">Upload Profile Picture</h2>
 
         {/* File input */}
@@ -91,11 +128,11 @@ const UploadProfile: React.FC<UploadProfileProps> = ({
 
         {/* Show the cropper only if there's an image */}
         {image && (
-          <div className="flex space-x-4">
-            <div className="flex-1">
+          <div className="flex flex-col sm:flex-row sm:space-x-4">
+            <div className="flex-1 mb-4 sm:mb-0">
               <Cropper
                 ref={cropperRef} // Pass the ref to Cropper
-                src={imageUrl.current || ''}
+                src={imageUrl || ''} // Use the imageUrl state instead of useRef
                 style={{ width: '100%', height: 400 }}
                 aspectRatio={1} // Aspect ratio set to 1 for 2x2 crop
                 guides={false} // Remove grid guides
@@ -120,7 +157,7 @@ const UploadProfile: React.FC<UploadProfileProps> = ({
         )}
 
         {/* Modal buttons */}
-        <div className="flex justify-between mt-4">
+        <div className="flex justify-between mt-4 flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
           <button
             onClick={() => setIsModalOpen(false)} // Close the modal
             className="bg-gray-400 text-white px-4 py-2 rounded"
