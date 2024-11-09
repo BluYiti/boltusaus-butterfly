@@ -5,7 +5,7 @@ import Layout from "@/components/Sidebar/Layout";
 import items from "@/psychotherapist/data/Links";
 import { PencilIcon, SaveIcon } from '@heroicons/react/solid';
 import { account, databases } from '@/appwrite';
-import { fetchPsychoId } from '@/hooks/userService';
+import { fetchPsychoId, uploadProfilePicture } from '@/hooks/userService';
 import LoadingScreen from '@/components/LoadingScreen';
 import UploadProfile from '@/psychotherapist/components/UploadProfile'; // Import UploadProfile modal
 

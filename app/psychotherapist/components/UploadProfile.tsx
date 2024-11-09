@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Cropper from 'react-cropper';
 import 'cropperjs/dist/cropper.css';
 
@@ -8,10 +8,28 @@ interface UploadProfileProps {
   handleFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-const UploadProfile: React.FC<UploadProfileProps> = ({ isModalOpen, setIsModalOpen, handleFileChange }) => {
+const UploadProfile: React.FC<UploadProfileProps> = ({
+  isModalOpen,
+  setIsModalOpen,
+  handleFileChange,
+}) => {
   const [image, setImage] = useState<File | null>(null);
   const [croppedImage, setCroppedImage] = useState<string | null>(null);
-  const cropperRef = useRef<any>(null); // Reference to the Cropper component
+  const cropperRef = useRef<any>(null); // Ref to the Cropper instance
+  const imageUrl = useRef<string | null>(null); // Store object URL
+
+  // Cleanup object URL when image changes or component unmounts
+  useEffect(() => {
+    if (image) {
+      imageUrl.current = URL.createObjectURL(image);
+    }
+
+    return () => {
+      if (imageUrl.current) {
+        URL.revokeObjectURL(imageUrl.current);
+      }
+    };
+  }, [image]);
 
   if (!isModalOpen) return null; // If the modal is not open, return nothing.
 
@@ -23,21 +41,26 @@ const UploadProfile: React.FC<UploadProfileProps> = ({ isModalOpen, setIsModalOp
     }
   };
 
-  // Crop the image using the cropper ref
+  // Function to crop image and update croppedImage state
   const onCrop = () => {
     if (cropperRef.current) {
-      const croppedCanvas = cropperRef.current.getCroppedCanvas({
+      const cropper = cropperRef.current.cropper;
+      const croppedCanvas = cropper.getCroppedCanvas({
         width: 200, // Width of the cropped image (you can adjust the size)
         height: 200, // Height of the cropped image (you can adjust the size)
       });
-      setCroppedImage(croppedCanvas.toDataURL()); // Convert the canvas to a base64 string
+
+      const croppedImageUrl = croppedCanvas.toDataURL();
+      if (croppedImageUrl !== croppedImage) {
+        setCroppedImage(croppedImageUrl); // Only update if it's different
+      }
     }
   };
 
-  // Convert the cropped image to a file
+  // Convert the cropped image to a file (when uploading)
   const onUpload = () => {
     if (croppedImage) {
-      // You can upload the cropped image as a File object if needed
+      // Convert base64 to Blob and create a File object
       const byteString = atob(croppedImage.split(',')[1]);
       const arrayBuffer = new ArrayBuffer(byteString.length);
       const uintArray = new Uint8Array(arrayBuffer);
@@ -55,7 +78,7 @@ const UploadProfile: React.FC<UploadProfileProps> = ({ isModalOpen, setIsModalOp
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-      <div className="bg-white p-6 rounded-lg max-w-sm w-full">
+      <div className="bg-white p-6 rounded-lg max-w-4xl w-full">
         <h2 className="text-xl font-semibold text-center mb-4">Upload Profile Picture</h2>
 
         {/* File input */}
@@ -68,34 +91,36 @@ const UploadProfile: React.FC<UploadProfileProps> = ({ isModalOpen, setIsModalOp
 
         {/* Show the cropper only if there's an image */}
         {image && (
-          <>
-            <div className="mb-4">
+          <div className="flex space-x-4">
+            <div className="flex-1">
               <Cropper
-                ref={cropperRef}
-                src={URL.createObjectURL(image)}
+                ref={cropperRef} // Pass the ref to Cropper
+                src={imageUrl.current || ''}
                 style={{ width: '100%', height: 400 }}
                 aspectRatio={1} // Aspect ratio set to 1 for 2x2 crop
                 guides={false} // Remove grid guides
-                crop={onCrop}
+                crop={onCrop} // Crop handler function
               />
             </div>
 
-            {/* Show cropped image preview */}
-            {croppedImage && (
-              <div className="mb-4 text-center">
-                <h3 className="text-lg font-semibold">Cropped Preview:</h3>
-                <img
-                  src={croppedImage}
-                  alt="Cropped Preview"
-                  className="mt-2 max-w-xs h-auto rounded-full"
-                />
-              </div>
-            )}
-          </>
+            <div className="flex-1 text-center">
+              {/* Show cropped image preview */}
+              {croppedImage && (
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">Cropped Preview:</h3>
+                  <img
+                    src={croppedImage}
+                    alt="Cropped Preview"
+                    className="max-w-xs h-auto rounded-full mx-auto"
+                  />
+                </div>
+              )}
+            </div>
+          </div>
         )}
 
         {/* Modal buttons */}
-        <div className="flex justify-between">
+        <div className="flex justify-between mt-4">
           <button
             onClick={() => setIsModalOpen(false)} // Close the modal
             className="bg-gray-400 text-white px-4 py-2 rounded"

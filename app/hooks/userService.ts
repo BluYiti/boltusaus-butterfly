@@ -75,3 +75,16 @@ export const fetchPsychoId = async (userId: string): Promise<string | null> => {
     }
 };
 
+// Upload profile picture
+export const uploadProfilePicture = async (userId: string, file: File): Promise<string | null> => {
+    try {
+        // Create a new file in the "Images" bucket with a unique ID for the user
+        const response = await storage.createFile('Images', `profile_${userId}`, file);
+
+        // Return the file ID if upload was successful
+        return response.$id;
+    } catch (error) {
+        console.error('Error uploading profile picture:', error);
+        return null;
+    }
+};
