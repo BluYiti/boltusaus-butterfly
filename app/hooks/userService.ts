@@ -75,6 +75,17 @@ export const fetchPsychoId = async (userId: string): Promise<string | null> => {
     }
 };
 
+// Fetch client data by client ID
+export const fetchClientData = async (clientId: string): Promise<any | null> => {
+    try {
+        const response = await databases.getDocument('Butterfly-Database', 'Client', clientId);
+        return response || null;
+    } catch (error) {
+        console.error('Error fetching client data:', error);
+        return null;
+    }
+};
+
 // Fetch psychotherapist ID
 export const fetchClientId = async (userId: string): Promise<string | null> => {
     try {

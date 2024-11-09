@@ -14,12 +14,12 @@ import CashPayment from "./cash";
 import CreditCardPayment from "./creditcard";
 import GCashPayment from "./gcash";
 
-const AppointmentBooking = ({ client }) => { // Pass client data as a prop
+const AppointmentBooking = () => { // Pass client data as a prop
+  const { loading: authLoading } = useAuthCheck(['client']);
   const today = new Date();
   const currentYear = today.getFullYear();
   const selectedMonth = today.toLocaleString('default', { month: 'long' });
   const nextMonth = new Date(today.setMonth(today.getMonth() + 1)).toLocaleString('default', { month: 'long' });
-  const { loading: authLoading } = useAuthCheck(['client']);
   const [loading, setLoading] = useState(true);
   const [appointmentData, setAppointmentData] = useState({
     selectedMonth,
@@ -89,7 +89,7 @@ const AppointmentBooking = ({ client }) => { // Pass client data as a prop
   useEffect(() => {
     const fetchData = async () => {
       try {
-        console.log("Currently logged-in user data:", client);
+        
         // Fetch list of therapists
         const therapistResponse = await databases.listDocuments('Butterfly-Database', 'Psychotherapist');
         const therapists = therapistResponse.documents;
@@ -141,7 +141,7 @@ const AppointmentBooking = ({ client }) => { // Pass client data as a prop
     return () => {
       window.removeEventListener("resize", handleResize);
     };
-  }, [client]); // Dependency on `client` ensures re-fetch if client changes
+  }, []); // Dependency on `client` ensures re-fetch if client changes
   
   const isFormComplete = appointmentData.selectedDay !== null && appointmentData.selectedTime && appointmentData.selectedTherapist;
 
