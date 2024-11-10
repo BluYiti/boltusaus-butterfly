@@ -1,5 +1,4 @@
-// VideoCall.tsx
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 interface VideoCallProps {
   onEndCall: () => void;
@@ -8,52 +7,84 @@ interface VideoCallProps {
 const VideoCall: React.FC<VideoCallProps> = ({ onEndCall }) => {
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [permissionRequested, setPermissionRequested] = useState<boolean>(false);
+
+  const requestVideoCallPermissions = async () => {
+    try {
+      setErrorMessage(null); // Reset any previous error messages
+      const localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+
+      if (localVideoRef.current) {
+        localVideoRef.current.srcObject = localStream;
+      }
+
+      const remoteStream = new MediaStream(); // Placeholder, real remote stream requires WebRTC setup
+      if (remoteVideoRef.current) {
+        remoteVideoRef.current.srcObject = remoteStream;
+      }
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "NotFoundError") {
+        console.error('Error accessing media devices. No devices found.');
+        setErrorMessage("No camera or microphone found. Please connect them and allow permissions.");
+      } else if (error instanceof DOMException && error.name === "NotAllowedError") {
+        console.error('Permission to access media devices was denied.');
+        setErrorMessage("Please allow camera and microphone permissions to start the video call.");
+      } else {
+        console.error('Unexpected error accessing media devices:', error);
+        setErrorMessage("An unexpected error occurred. Please try again.");
+      }
+    }
+  };
 
   useEffect(() => {
-    const startVideoCall = async () => {
-      try {
-        // Get local video stream
-        const localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-        if (localVideoRef.current) {
-          localVideoRef.current.srcObject = localStream;
-        }
+    // If permission was requested, then attempt to start the video call
+    if (permissionRequested) {
+      requestVideoCallPermissions();
+    }
 
-        // Here you would typically set up the signaling for remote stream, using WebRTC, etc.
-        // For this example, we just simulate receiving a remote stream.
-        const remoteStream = new MediaStream();
-        if (remoteVideoRef.current) {
-          remoteVideoRef.current.srcObject = remoteStream;
-        }
-
-        // This is where you'd handle adding tracks to the remote stream based on your signaling logic
-      } catch (error) {
-        console.error('Error accessing media devices.', error);
-      }
-    };
-
-    startVideoCall();
-
+    // Cleanup media tracks when component unmounts
     return () => {
-      // Clean up on component unmount
-      if (localVideoRef.current) {
-        localVideoRef.current.srcObject?.getTracks().forEach(track => track.stop());
+      if (localVideoRef.current && localVideoRef.current.srcObject) {
+        (localVideoRef.current.srcObject as MediaStream).getTracks().forEach(track => track.stop());
       }
-      if (remoteVideoRef.current) {
-        remoteVideoRef.current.srcObject?.getTracks().forEach(track => track.stop());
+      if (remoteVideoRef.current && remoteVideoRef.current.srcObject) {
+        (remoteVideoRef.current.srcObject as MediaStream).getTracks().forEach(track => track.stop());
       }
     };
-  }, []);
+  }, [permissionRequested]);
 
   return (
     <div className="flex flex-col items-center justify-center h-full">
       <h2 className="text-xl mb-4">Video Call</h2>
-      <div className="flex space-x-4">
-        <video ref={localVideoRef} autoPlay className="w-1/2 rounded-lg border" />
-        <video ref={remoteVideoRef} autoPlay className="w-1/2 rounded-lg border" />
-      </div>
-      <button onClick={onEndCall} className="mt-4 bg-red-500 text-white px-4 py-2 rounded">
-        End Call
-      </button>
+      {!permissionRequested && (
+        <div className="flex flex-col items-center">
+          <p className="mb-4">This call requires access to your camera and microphone.</p>
+          <button
+            onClick={() => setPermissionRequested(true)}
+            className="bg-blue-500 text-white px-4 py-2 rounded"
+          >
+            Allow Access
+          </button>
+        </div>
+      )}
+      {permissionRequested && (
+        <>
+          {errorMessage && (
+            <div className="text-red-500 mb-4">{errorMessage}</div>
+          )}
+          <div className="flex space-x-4">
+            <video ref={localVideoRef} autoPlay muted className="w-1/2 rounded-lg border" />
+            <video ref={remoteVideoRef} autoPlay className="w-1/2 rounded-lg border" />
+          </div>
+          <button onClick={onEndCall} className="mt-4 bg-red-500 text-white px-4 py-2 rounded">
+            End Call
+          </button>
+          <button onClick={requestVideoCallPermissions} className="mt-2 bg-blue-500 text-white px-4 py-2 rounded">
+            Retry
+          </button>
+        </>
+      )}
     </div>
   );
 };
