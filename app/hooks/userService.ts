@@ -43,6 +43,37 @@ export const fetchProfileImageUrl = async (profilepicId: string): Promise<string
     }
 };
 
+// Upload profile picture
+export const uploadProfilePicture = async (fileId: string, file: File): Promise<string | null> => {
+    try {
+        // Create a new file in the "Images" bucket with a unique ID for the user
+        await storage.createFile('Images', fileId, file);
+    } catch (error) {
+        console.error('Error uploading profile picture:', error);
+        return null;
+    }
+};
+
+
+// Upload profile picture
+export const uploadProfilePictureCollection = async (userId: string, photoId: string, collection: string): Promise<string | null> => {
+    try {
+        // Create a new file in the "Images" bucket with a unique ID for the user
+        const result = await databases.updateDocument(
+            'Butterfly-Database', // databaseId
+            collection, // collectionId
+            userId, // documentId
+            {profilepic: photoId}, //data
+        );
+
+        // Return the file ID if upload was successful
+        return "Successfully set profilepic";
+    } catch (error) {
+        console.error('Error setting profilepic:', error);
+        return null;
+    }
+};
+
 // Fetch Certificate
 export const downloadCertificate = async (imageId: string, name: string) => {
     try {
@@ -68,7 +99,7 @@ export const fetchPsychoId = async (userId: string): Promise<string | null> => {
         const response = await databases.listDocuments('Butterfly-Database', 'Psychotherapist', [
             Query.equal('userId', userId),
         ]);
-        return response.documents[0]?.psychoId || null; // Assuming response.documents contains an array and psychoId is a field
+        return response.documents[0]?.$id || null; // Assuming response.documents contains an array and psychoId is a field
     } catch (error) {
         console.error('Error fetching psychotherapist ID:', error);
         return null;
@@ -128,3 +159,42 @@ export const restrictSelectingTherapist = async (clientId: string) => {
         console.error('Error restricting therapist selection :', error);
     }
 }
+
+
+// Overwrite psychotherapist profile picture
+export const overwriteProfilePicture = async (userId: string, file: File): Promise<string | null> => {
+    try {
+        // Fetch the psychotherapist's current profile picture ID
+        const response = await databases.listDocuments('Butterfly-Database', 'Psychotherapist', [
+            Query.equal('userId', userId),
+        ]);
+        const currentProfilePicId = response.documents[0]?.profilepic || null;
+
+        // Delete the existing profile picture if it exists
+        if (currentProfilePicId) {
+            await storage.deleteFile('Images', currentProfilePicId);
+        }
+
+        // Upload the new profile picture
+        const newProfilePicId = await uploadProfilePicture(userId, file);
+
+        // Update the psychotherapist's record with the new profile picture ID
+        if (newProfilePicId) {
+            await databases.updateDocument(
+                'Butterfly-Database',
+                'Psychotherapist',
+                response.documents[0].$id,
+                { profilepic: newProfilePicId }
+            );
+            return newProfilePicId;
+        }
+
+        return null;
+    } catch (error) {
+        console.error('Error overwriting psychotherapist profile picture:', error);
+        return null;
+    }
+};
+
+
+
