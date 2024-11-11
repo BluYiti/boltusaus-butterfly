@@ -16,7 +16,7 @@ const GCashPayment: React.FC<GCashPaymentProps> = ({ isOpen, onClose, appointmen
   const [client, setClientId] = useState<string>('');
   const [psycho, setPsychoId] = useState<string>('');
   const [error, setError] = useState<string>('');
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showSuccess, setShowSuccess] = useState<boolean>(false); // State for success modal
 
   const handleReferenceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let inputValue = e.target.value;
@@ -92,12 +92,15 @@ const GCashPayment: React.FC<GCashPaymentProps> = ({ isOpen, onClose, appointmen
   
       console.log("Booking and Payment data successfully created.");
   
-      // Show success modal only after both Booking and Payment data are added successfully
-      setShowSuccessModal(true);
-  
-      // Close the modal or do something else
-      onClose();
-  
+
+      await addPaymentData(PaymentData);
+
+      setShowSuccess(true); // Show success modal
+      console.log("showing success modal");
+
+      setTimeout(function() {
+          window.location.reload();
+      }, 5000);
     } catch (err) {
       console.error('Submission failed:', err);
     } finally {
@@ -124,10 +127,6 @@ const GCashPayment: React.FC<GCashPaymentProps> = ({ isOpen, onClose, appointmen
       console.error(error); // Log the error for debugging
     }
   }
-
-  const closeSuccessModal = () => {
-    setShowSuccessModal(false); // Hide success modal after user closes it
-  };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
@@ -167,9 +166,12 @@ const GCashPayment: React.FC<GCashPaymentProps> = ({ isOpen, onClose, appointmen
           </form>
         </div>
       </div>
-      
-      {/* Success modal */}
-      <SuccessModal isVisible={showSuccessModal} onClose={closeSuccessModal} />
+
+      {/* Success Modal */}
+      <SuccessModal
+        onClose={() => setShowSuccess(false)} // Close success modal
+        isVisible={showSuccess} // Pass showSuccess state to SuccessModal
+      />
     </Modal>
   );
 };

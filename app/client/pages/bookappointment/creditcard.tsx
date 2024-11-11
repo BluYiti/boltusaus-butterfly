@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import Modal from '@/components/Modal';
+import Modal from '@/components/Modal'; // The updated Modal component
 import { account, databases } from '@/appwrite';
 import { fetchClientId, restrictSelectingTherapist, updateClientPsychotherapist } from '@/hooks/userService';
-import SuccessModal from './successfulbooking';
+import SuccessModal from './successfulbooking'; // Success Modal component
 
 interface CreditCardPaymentProps {
   isOpen: boolean;
@@ -18,47 +18,31 @@ const CreditCardPayment: React.FC<CreditCardPaymentProps> = ({ isOpen, onClose, 
 
   const handleReferenceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let inputValue = e.target.value;
-
-    // Remove non-numeric characters
-    inputValue = inputValue.replace(/\D/g, '');
-
-    // Limit the value to 13 digits
+    inputValue = inputValue.replace(/\D/g, ''); // Remove non-numeric characters
     if (inputValue.length > 13) {
-      inputValue = inputValue.substring(0, 13);
+      inputValue = inputValue.substring(0, 13); // Limit to 13 digits
     }
-
     setReferenceNumber(inputValue);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Simple validation for the reference number
     if (referenceNumber.length !== 13) {
       setError('Reference number must be 13 digits long');
       return;
     }
-
-    // Reset the error if validation passes
-    setError('');
+    setError(''); // Clear previous error
     setIsSubmitting(true);
 
     try {
-      console.log('Submitting reference number:', referenceNumber);
-
-      // Fetch user data
       const user = await account.get();
       const clientId = await fetchClientId(user.$id);
       const response = await databases.getDocument('Butterfly-Database', 'Client', clientId);
       let psychoId = response.psychotherapist;
-
-      // Check if psychoId is null or empty
       if (!psychoId) {
-        // If psychoId is null or empty, use the selected psychotherapist's ID
         psychoId = appointmentData.selectedTherapist.$id;
         updateClientPsychotherapist(clientId, psychoId);
       }
-
       restrictSelectingTherapist(clientId);
 
       const BookingsData = {
@@ -69,10 +53,9 @@ const CreditCardPayment: React.FC<CreditCardPaymentProps> = ({ isOpen, onClose, 
         createdAt: appointmentData.createdAt,
         mode: appointmentData.selectedMode,
         month: appointmentData.selectedMonth,
-        day: appointmentData.selectedDay
+        day: appointmentData.selectedDay,
       };
 
-      // Get the document ID of the newly created booking
       const bookingId = await addBookingData(BookingsData);
 
       const PaymentData = {
@@ -82,20 +65,17 @@ const CreditCardPayment: React.FC<CreditCardPaymentProps> = ({ isOpen, onClose, 
         status: "pending",
         client: clientId,
         psychotherapist: appointmentData.selectedTherapist.$id,
-        booking: bookingId,  // Set the booking document ID
+        booking: bookingId,
       };
 
-      // Add payment data
       await addPaymentData(PaymentData);
 
-      console.log("Booking and Payment data successfully created.");
+      setShowSuccess(true); // Show success modal
+      console.log("showing success modal");
 
-      // Show the success modal after both Booking and Payment data are added successfully
-      setShowSuccess(true); // Trigger the success modal
-
-      // Close the current modal after success
-      onClose();
-
+      setTimeout(function() {
+          window.location.reload();
+      }, 5000);
     } catch (err) {
       console.error('Submission failed:', err);
     } finally {
@@ -103,39 +83,37 @@ const CreditCardPayment: React.FC<CreditCardPaymentProps> = ({ isOpen, onClose, 
     }
   };
 
-  async function addBookingData(BookingsData: { client: string; psychotherapist: string; slots: any; status: any; createdAt: any; mode: any; month: any; day: any; }) {
+  async function addBookingData(BookingsData: any) {
     try {
       const response = await databases.createDocument('Butterfly-Database', 'Bookings', 'unique()', BookingsData);
-      console.log("Created Bookings Data", response);
-      return response.$id; // Return the document ID
+      return response.$id;
     } catch (error) {
-      console.error(error); // Log the error for debugging
-      throw error; // Rethrow the error to handle it in the calling function
+      console.error(error);
+      throw error;
     }
   }
 
-  async function addPaymentData(PaymentData: { referenceNo: string; channel: string; amount: number; status: string; client: string; psychotherapist: string; }) {
+  async function addPaymentData(PaymentData: any) {
     try {
       await databases.createDocument('Butterfly-Database', 'Payment', 'unique()', PaymentData);
-      console.log("Created Payment Data");
     } catch (error) {
-      console.error(error); // Log the error for debugging
+      console.error(error);
     }
   }
 
   return (
     <>
+      {/* Credit Card Payment Modal */}
       <Modal isOpen={isOpen} onClose={onClose}>
         <div className="p-6 flex flex-col items-center">
-          <h1 id="modal-title" className="text-3xl font-bold mb-4">BPI Card Payment</h1>
-          <p id="modal-description" className="text-gray-600">
+          <h1 className="text-3xl font-bold mb-4">BPI Card Payment</h1>
+          <p className="text-gray-600">
             You have selected BPI Card as your payment method.
           </p>
           <div className="mt-6 bg-gray-100 p-4 rounded-lg w-full max-w-sm">
             <form onSubmit={handleSubmit}>
               <label className="text-2xl block mb-2 text-gray-800 text-center">Please Scan the QR Code</label>
               <label className="block mb-2 text-gray-800 text-center">Amount to be paid: ₱1,000.00</label>
-
               <img src="/images/bpiqr.png" alt="bpiqr" className="mb-4" />
 
               {/* Reference Number Input */}
@@ -150,10 +128,7 @@ const CreditCardPayment: React.FC<CreditCardPaymentProps> = ({ isOpen, onClose, 
                 placeholder="Enter 13-digit number"
                 required
               />
-
-              {/* Display error if exists */}
               {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
-
               <button
                 type="submit"
                 className={`w-full p-2 bg-green-500 text-white rounded-lg ${isSubmitting || referenceNumber.trim().length !== 13 ? 'opacity-50 cursor-not-allowed' : ''}`}
@@ -168,8 +143,8 @@ const CreditCardPayment: React.FC<CreditCardPaymentProps> = ({ isOpen, onClose, 
 
       {/* Success Modal */}
       <SuccessModal
-        onClose={() => setShowSuccess(false)}
-        isVisible={showSuccess}
+        onClose={() => setShowSuccess(false)} // Close success modal
+        isVisible={showSuccess} // Pass showSuccess state to SuccessModal
       />
     </>
   );

@@ -14,7 +14,7 @@ const CashPayment: React.FC<CashPaymentProps> = ({ isOpen, onClose, appointmentD
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   const [paymentAcknowledged, setPaymentAcknowledged] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showSuccess, setShowSuccess] = useState<boolean>(false); // State for success modal
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,17 +62,14 @@ const CashPayment: React.FC<CashPaymentProps> = ({ isOpen, onClose, appointmentD
         booking: bookingId,  // Set the booking document ID
       };
   
-      // Add payment data
       await addPaymentData(PaymentData);
-  
-      console.log("Booking and Payment data successfully created.");
-  
-      // Show success modal only after both Booking and Payment data are added successfully
-      setShowSuccessModal(true);
-  
-      // Close the modal or do something else
-      onClose();
-  
+
+      setShowSuccess(true); // Show success modal
+      console.log("showing success modal");
+
+      setTimeout(function() {
+          window.location.reload();
+      }, 5000);
     } catch (err) {
       console.error('Submission failed:', err);
     } finally {
@@ -140,20 +137,11 @@ const CashPayment: React.FC<CashPaymentProps> = ({ isOpen, onClose, appointmentD
         </div>
       </div>
 
-      {/* Success modal */}
-      {showSuccessModal && (
-        <div
-          className="bg-white p-8 rounded-lg shadow-xl max-w-sm w-full text-center z-50"
-          onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside modal
-        >
-          <h2 className="text-3xl font-semibold text-gray-800 mb-6">Booking Successful!</h2>
-          <p className="text-lg text-gray-600 mb-4">Your appointment has been successfully booked.</p>
-          <div className="flex items-center justify-center text-gray-600 text-lg mb-6">
-            <span>Refreshing page</span>
-            <div className="ml-3 w-8 h-8 border-4 border-t-4 border-blue-400 rounded-full animate-spin border-t-blue-800"></div>
-          </div>
-        </div>
-      )}
+      {/* Success Modal */}
+      <SuccessModal
+        onClose={() => setShowSuccess(false)} // Close success modal
+        isVisible={showSuccess} // Pass showSuccess state to SuccessModal
+      />
     </Modal>
   );
 };

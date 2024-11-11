@@ -3,8 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Layout from "@/components/Sidebar/Layout";
 import items from "@/client/data/Links";
-import Confetti from "react-confetti"; // Import Confetti for the success effect
-import { account, databases, Query } from "@/appwrite";
+import { account, databases } from "@/appwrite";
 import useAuthCheck from "@/auth/page";
 import LoadingScreen from "@/components/LoadingScreen";
 import Calendar from "@/components/Calendar/Calendar"; // Import the Calendar component
@@ -40,7 +39,6 @@ const AppointmentBooking = () => { // Pass client data as a prop
   const [showPrompt, setShowPrompt] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string | null>(null);
-  const [windowDimensions, setWindowDimensions] = useState({ width: 0, height: 0 });
 
   const handleOpenModal = () => setIsModalOpen(true);
   const handleCloseModal = () => setIsModalOpen(false);
@@ -145,17 +143,7 @@ const AppointmentBooking = () => { // Pass client data as a prop
       }
     };
   
-    fetchData();
-  
-    const handleResize = () => {
-      setWindowDimensions({ width: window.innerWidth, height: window.innerHeight });
-    };
-  
-    window.addEventListener("resize", handleResize);
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  
+    fetchData(); 
   }, []);
   
   const isFormComplete = appointmentData.selectedDay !== null && appointmentData.selectedTime && appointmentData.selectedTherapist;
@@ -306,7 +294,6 @@ const AppointmentBooking = () => { // Pass client data as a prop
       {/* Success Message and Confetti */}
       {appointmentData.appointmentBooked && (
         <div className="fixed inset-0 flex justify-center items-center bg-gray-800 bg-opacity-50 z-50">
-          <Confetti width={windowDimensions.width} height={windowDimensions.height} />
           <div className="bg-white p-8 rounded-lg shadow-xl max-w-md w-full text-center relative border border-gray-300">
             <button
               className="absolute top-2 right-2 bg-gray-300 rounded-full w-6 h-6 flex items-center justify-center text-black hover:bg-gray-400"
