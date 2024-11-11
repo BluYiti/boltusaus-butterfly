@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Modal from '@/components/Modal';
 import { account, databases } from '@/appwrite';
-import { fetchClientId, fetchClientPsycho, restrictSelectingTherapist, updateClientPsychotherapist } from '@/hooks/userService';
+import { fetchClientId, restrictSelectingTherapist, updateClientPsychotherapist } from '@/hooks/userService';
 import SuccessModal from './successfulbooking';
 
 interface CreditCardPaymentProps {
@@ -14,7 +14,7 @@ const CreditCardPayment: React.FC<CreditCardPaymentProps> = ({ isOpen, onClose, 
   const [referenceNumber, setReferenceNumber] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showSuccess, setShowSuccess] = useState<boolean>(false); // State for success modal
 
   const handleReferenceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let inputValue = e.target.value;
@@ -50,13 +50,13 @@ const CreditCardPayment: React.FC<CreditCardPaymentProps> = ({ isOpen, onClose, 
       const user = await account.get();
       const clientId = await fetchClientId(user.$id);
       const response = await databases.getDocument('Butterfly-Database', 'Client', clientId);
-      let psychoId = response.psychotherapist.$id;
+      let psychoId = response.psychotherapist;
 
       // Check if psychoId is null or empty
       if (!psychoId) {
-          // If psychoId is null or empty, use the selected psychotherapist's ID
-          psychoId = appointmentData.selectedTherapist.$id;
-          updateClientPsychotherapist(clientId, psychoId);
+        // If psychoId is null or empty, use the selected psychotherapist's ID
+        psychoId = appointmentData.selectedTherapist.$id;
+        updateClientPsychotherapist(clientId, psychoId);
       }
 
       restrictSelectingTherapist(clientId);
@@ -72,31 +72,30 @@ const CreditCardPayment: React.FC<CreditCardPaymentProps> = ({ isOpen, onClose, 
         day: appointmentData.selectedDay
       };
 
+      // Get the document ID of the newly created booking
+      const bookingId = await addBookingData(BookingsData);
+
       const PaymentData = {
         referenceNo: referenceNumber,
         channel: "bpi",
         amount: 1000,
         status: "pending",
         client: clientId,
-        psychotherapist: appointmentData.selectedTherapist.$id
+        psychotherapist: appointmentData.selectedTherapist.$id,
+        booking: bookingId,  // Set the booking document ID
       };
 
-      // Add booking and payment data
-      await addBookingData(BookingsData);
+      // Add payment data
       await addPaymentData(PaymentData);
 
       console.log("Booking and Payment data successfully created.");
 
-      // Close the modal or do something else
-      onClose();
-      
-      // Show success modal
-      setShowSuccessModal(true);
+      // Show the success modal after both Booking and Payment data are added successfully
+      setShowSuccess(true); // Trigger the success modal
 
-      // Reload the page after 3 seconds (3000 milliseconds)
-      setTimeout(() => {
-        window.location.reload();
-      }, 3000);
+      // Close the current modal after success
+      onClose();
+
     } catch (err) {
       console.error('Submission failed:', err);
     } finally {
@@ -106,10 +105,12 @@ const CreditCardPayment: React.FC<CreditCardPaymentProps> = ({ isOpen, onClose, 
 
   async function addBookingData(BookingsData: { client: string; psychotherapist: string; slots: any; status: any; createdAt: any; mode: any; month: any; day: any; }) {
     try {
-      await databases.createDocument('Butterfly-Database', 'Bookings', 'unique()', BookingsData);
-      console.log("Created Bookings Data");
+      const response = await databases.createDocument('Butterfly-Database', 'Bookings', 'unique()', BookingsData);
+      console.log("Created Bookings Data", response);
+      return response.$id; // Return the document ID
     } catch (error) {
       console.error(error); // Log the error for debugging
+      throw error; // Rethrow the error to handle it in the calling function
     }
   }
 
@@ -122,54 +123,55 @@ const CreditCardPayment: React.FC<CreditCardPaymentProps> = ({ isOpen, onClose, 
     }
   }
 
-  const closeSuccessModal = () => {
-    setShowSuccessModal(false); // Hide success modal after user closes it
-  };
-
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
-      <div className="p-6 flex flex-col items-center">
-        <h1 id="modal-title" className="text-3xl font-bold mb-4">BPI Card Payment</h1>
-        <p id="modal-description" className="text-gray-600">
-          You have selected BPI Card as your payment method.
-        </p>
-        <div className="mt-6 bg-gray-100 p-4 rounded-lg w-full max-w-sm">
-          <form onSubmit={handleSubmit}>
-            <label className="text-2xl block mb-2 text-gray-800 text-center">Please Scan the QR Code</label>
-            <label className="block mb-2 text-gray-800 text-center">Amount to be paid: ₱1,000.00</label>
+    <>
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <div className="p-6 flex flex-col items-center">
+          <h1 id="modal-title" className="text-3xl font-bold mb-4">BPI Card Payment</h1>
+          <p id="modal-description" className="text-gray-600">
+            You have selected BPI Card as your payment method.
+          </p>
+          <div className="mt-6 bg-gray-100 p-4 rounded-lg w-full max-w-sm">
+            <form onSubmit={handleSubmit}>
+              <label className="text-2xl block mb-2 text-gray-800 text-center">Please Scan the QR Code</label>
+              <label className="block mb-2 text-gray-800 text-center">Amount to be paid: ₱1,000.00</label>
 
-            <img src="/images/bpiqr.png" alt="bpiqr" className="mb-4" />
+              <img src="/images/bpiqr.png" alt="bpiqr" className="mb-4" />
 
-            {/* Reference Number Input */}
-            <label htmlFor="referenceNumber" className="block text-gray-800 mb-2">Enter Reference Number</label>
-            <input
-              id="referenceNumber"
-              type="text"
-              value={referenceNumber}
-              onChange={handleReferenceChange}
-              className="w-full p-2 border border-gray-300 rounded-lg mb-4"
-              maxLength={13}
-              placeholder="Enter 13-digit number"
-              required
-            />
+              {/* Reference Number Input */}
+              <label htmlFor="referenceNumber" className="block text-gray-800 mb-2">Enter Reference Number</label>
+              <input
+                id="referenceNumber"
+                type="text"
+                value={referenceNumber}
+                onChange={handleReferenceChange}
+                className="w-full p-2 border border-gray-300 rounded-lg mb-4"
+                maxLength={13}
+                placeholder="Enter 13-digit number"
+                required
+              />
 
-            {/* Display error if exists */}
-            {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+              {/* Display error if exists */}
+              {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
 
-            <button
-              type="submit"
-              className={`w-full p-2 bg-green-500 text-white rounded-lg ${isSubmitting || referenceNumber.trim().length !== 13 ? 'opacity-50 cursor-not-allowed' : ''}`}
-              disabled={isSubmitting || referenceNumber.trim().length !== 13}
-            >
-              {isSubmitting ? 'Processing...' : 'Next'}
-            </button>
-          </form>
+              <button
+                type="submit"
+                className={`w-full p-2 bg-green-500 text-white rounded-lg ${isSubmitting || referenceNumber.trim().length !== 13 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                disabled={isSubmitting || referenceNumber.trim().length !== 13}
+              >
+                {isSubmitting ? 'Processing...' : 'Next'}
+              </button>
+            </form>
+          </div>
         </div>
-      </div>
-      
-      {/* Success modal */}
-      <SuccessModal isVisible={showSuccessModal} onClose={closeSuccessModal} />
-    </Modal>
+      </Modal>
+
+      {/* Success Modal */}
+      <SuccessModal
+        onClose={() => setShowSuccess(false)}
+        isVisible={showSuccess}
+      />
+    </>
   );
 };
 

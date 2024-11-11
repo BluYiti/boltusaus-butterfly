@@ -34,38 +34,38 @@ const GCashPayment: React.FC<GCashPaymentProps> = ({ isOpen, onClose, appointmen
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+  
     // Simple validation for the reference number
     if (referenceNumber.length !== 13) {
       setError('Reference number must be 13 digits long');
       return;
     }
-
+  
     // Reset the error if validation passes
     setError('');
     setIsSubmitting(true);
-
+  
     try {
       console.log('Submitting reference number:', referenceNumber);
-
-      // Fetch user data when submitting the form
+  
+      // Fetch user data
       const user = await account.get();
       const clientId = await fetchClientId(user.$id);
       const response = await databases.getDocument('Butterfly-Database', 'Client', clientId);
-      let psychoId = response.psychotherapist.$id;
-
+      let psychoId = response.psychotherapist;
+  
       // Check if psychoId is null or empty
       if (!psychoId) {
-          // If psychoId is null or empty, use the selected psychotherapist's ID
-          psychoId = appointmentData.selectedTherapist.$id;
-          updateClientPsychotherapist(clientId, psychoId);
+        // If psychoId is null or empty, use the selected psychotherapist's ID
+        psychoId = appointmentData.selectedTherapist.$id;
+        updateClientPsychotherapist(clientId, psychoId);
       }
-
+  
       restrictSelectingTherapist(clientId);
-
+  
       const BookingsData = {
         client: clientId,
-        psychotherapist: psychoId,
+        psychotherapist: appointmentData.selectedTherapist.$id,
         slots: appointmentData.selectedTime,
         status: "pending",
         createdAt: appointmentData.createdAt,
@@ -73,47 +73,48 @@ const GCashPayment: React.FC<GCashPaymentProps> = ({ isOpen, onClose, appointmen
         month: appointmentData.selectedMonth,
         day: appointmentData.selectedDay
       };
-
+  
+      // Get the document ID of the newly created booking
+      const bookingId = await addBookingData(BookingsData); 
+  
       const PaymentData = {
         referenceNo: referenceNumber,
         channel: "gcash",
         amount: 1000,
         status: "pending",
         client: clientId,
-        psychotherapist: appointmentData.selectedTherapist.$id
+        psychotherapist: appointmentData.selectedTherapist.$id,
+        booking: bookingId,  // Set the booking document ID
       };
-
-      // Add booking and payment data to the database
-      await addBookingData(BookingsData);
+  
+      // Add payment data
       await addPaymentData(PaymentData);
-
+  
       console.log("Booking and Payment data successfully created.");
-
-      // Close the modal after submission
-      onClose();
-      
-      // Show success modal
+  
+      // Show success modal only after both Booking and Payment data are added successfully
       setShowSuccessModal(true);
-
-      // Reload the page after 3 seconds (3000 milliseconds)
-      setTimeout(() => {
-        window.location.reload();
-      }, 3000);
+  
+      // Close the modal or do something else
+      onClose();
+  
     } catch (err) {
       console.error('Submission failed:', err);
     } finally {
       setIsSubmitting(false);
     }
-  };
+  };  
 
   async function addBookingData(BookingsData: { client: string; psychotherapist: string; slots: any; status: any; createdAt: any; mode: any; month: any; day: any; }) {
     try {
-      await databases.createDocument('Butterfly-Database', 'Bookings', 'unique()', BookingsData);
-      console.log("Created Bookings Data");
+      const response = await databases.createDocument('Butterfly-Database', 'Bookings', 'unique()', BookingsData);
+      console.log("Created Bookings Data", response);
+      return response.$id; // Return the document ID
     } catch (error) {
       console.error(error); // Log the error for debugging
+      throw error; // Rethrow the error to handle it in the calling function
     }
-  }
+  }  
 
   async function addPaymentData(PaymentData: { referenceNo: string; channel: string; amount: number; status: string; client: string; psychotherapist: string; }) {
     try {

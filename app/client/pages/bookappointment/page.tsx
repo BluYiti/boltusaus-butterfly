@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import Layout from "@/components/Sidebar/Layout";
 import items from "@/client/data/Links";
 import Confetti from "react-confetti"; // Import Confetti for the success effect
-import { account, databases } from "@/appwrite";
+import { account, databases, Query } from "@/appwrite";
 import useAuthCheck from "@/auth/page";
 import LoadingScreen from "@/components/LoadingScreen";
 import Calendar from "@/components/Calendar/Calendar"; // Import the Calendar component
@@ -33,8 +33,9 @@ const AppointmentBooking = () => { // Pass client data as a prop
   });
 
   const [loading, setLoading] = useState(true);
-  const [clientsPsycho, setClientsPsycho] = useState([]);
+  const [clientsPsycho, setClientsPsycho] = useState(null);
   const [psychotherapists, setPsychotherapists] = useState([]);
+  const [selectedTherapistId, setSelectedTherapistId] = useState(Number);
   const [profileImageUrls, setProfileImageUrls] = useState({});
   const [showPrompt, setShowPrompt] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -94,21 +95,37 @@ const AppointmentBooking = () => { // Pass client data as a prop
       try {
         const user = await account.get();
         const clientId = await fetchClientId(user.$id);
+
         const response = await databases.getDocument('Butterfly-Database', 'Client', clientId);
         const clientsPsycho = response.psychotherapist;
-        const clientsPsychoId = response.psychotherapist.$id;
-        
-        // Fetch psychotherapists
-        const clientsTherapistResponse = await databases.getDocument('Butterfly-Database', 'Psychotherapist', clientsPsychoId);
-        const clientsTherapist = clientsTherapistResponse.documents;
-        setClientsPsycho(clientsTherapist.documents);
-        console.log(clientsPsycho); // To check the structure
+
+        // Check if the client already has an assigned therapist
+        if (!clientsPsycho) {
+          // Client doesn't have a psychotherapist assigned, allow them to select one
+          setAppointmentData(prev => ({
+            ...prev,
+            allowTherapistChange: true, // Allow the user to select a therapist
+          }));
+          console.log("allowed user to select therapist");
+        } else {
+          const clientsPsychoId = response.psychotherapist.$id;
+          setSelectedTherapistId(clientsPsychoId);
+          // Fetch clients psychotherapist
+          const clientsTherapistResponse = await databases.getDocument('Butterfly-Database', 'Psychotherapist', clientsPsychoId);
+          setClientsPsycho(clientsTherapistResponse);
+          console.log("user has a therapist");
+          setAppointmentData(prev => ({
+            ...prev,
+            selectedTherapist: clientsTherapistResponse,
+            allowTherapistChange: false, // Client already has a therapist, can't change
+          }));
+        }
 
         // Fetch list of therapists
         const therapistResponse = await databases.listDocuments('Butterfly-Database', 'Psychotherapist');
         const therapists = therapistResponse.documents;
         setPsychotherapists(therapists);
-  
+
         // Fetch profile images for each therapist
         const profileImages = {};
         for (const therapist of therapists) {
@@ -119,23 +136,8 @@ const AppointmentBooking = () => { // Pass client data as a prop
             }
           }
         }
-        setProfileImageUrls(profileImages);
 
-        // Check if the client already has an assigned therapist
-        if (clientsPsycho) {
-          setAppointmentData(prev => ({
-            ...prev,
-            selectedTherapist: clientsPsychoId,
-            allowTherapistChange: false, // Client already has a therapist, can't change
-          }));
-        } else {
-          // Client doesn't have a psychotherapist assigned, allow them to select one
-          setAppointmentData(prev => ({
-            ...prev,
-            allowTherapistChange: true, // Allow the user to select a therapist
-          }));
-          console.log("allowed user to select therapist");
-        }
+        setProfileImageUrls(profileImages);
       } catch (error) {
         console.error("Error fetching data: ", error);
       } finally {
@@ -176,7 +178,7 @@ const AppointmentBooking = () => { // Pass client data as a prop
                   **NOTE: Choosing your psychotherapist for the very first time will be permanent throughout your psychological journey.
                 </p>
                 <div className="flex space-x-6 mt-4">
-                  {!appointmentData.selectedTherapist ? (
+                  {!clientsPsycho ? (
                     psychotherapists.map((therapist) => (
                       <div key={therapist.$id} className="flex items-center space-x-4">
                         <img
@@ -188,13 +190,13 @@ const AppointmentBooking = () => { // Pass client data as a prop
                           <h3 className="text-lg font-bold">{therapist.firstName} {therapist.lastName}</h3>
                           <p className="text-sm text-gray-500">Specialty: {therapist.specialties}</p>
                           <button
-                            className={`mt-2 py-1 px-3 rounded ${appointmentData.selectedTherapist?.$id === therapist.$id 
-                              ? 'bg-[#2563EB] text-white' 
-                              : 'bg-gray-300 text-blue-500 hover:bg-gray-400'}`}
+                            className={`mt-2 py-1 px-3 rounded ${appointmentData.selectedTherapist?.$id === therapist.$id ? 'bg-[#2563EB] text-white' : 'bg-gray-300 text-blue-500 hover:bg-gray-400'}`}
                             onClick={() => {
-                              setAppointmentData((prev) => ({ ...prev, selectedTherapist: therapist }));
+                              if (appointmentData.allowTherapistChange) {
+                                setAppointmentData((prev) => ({ ...prev, selectedTherapist: therapist }));
+                              }
                             }}
-                            disabled={appointmentData.selectedTherapist?.$id === therapist.$id}
+                            disabled={appointmentData.selectedTherapist?.$id === therapist.$id && !appointmentData.allowTherapistChange}
                           >
                             {appointmentData.selectedTherapist?.$id === therapist.$id ? "Selected" : "Select"}
                           </button>
@@ -204,14 +206,23 @@ const AppointmentBooking = () => { // Pass client data as a prop
                   ) : (
                     <div className="flex items-center space-x-4">
                       <img
-                        src={profileImageUrls[appointmentData.selectedTherapist?.$id] || "/images/default-profile.png"}  // fallback to a default image
-                        alt={`${appointmentData.selectedTherapist?.firstName} ${appointmentData.selectedTherapist?.lastName}`}
+                        src={clientsPsycho && clientsPsycho.$id ? profileImageUrls[clientsPsycho.$id] : "/images/default-profile.png"}  // fallback to a default image
+                        alt={`${clientsPsycho ? clientsPsycho.firstName : "No Therapist"} ${clientsPsycho ? clientsPsycho.lastName : ""}`}
                         className="rounded-full w-16 h-16"
                       />
                       <div>
-                        <h3 className="text-lg font-bold">{appointmentData.selectedTherapist?.firstName} {appointmentData.selectedTherapist?.lastName}</h3>
-                        <p className="text-sm text-gray-500">Specialty: {appointmentData.selectedTherapist?.specialties}</p>
-                        <p className="mt-2 text-sm text-gray-500">You cannot change therapists at the moment.</p>
+                        <h3 className="text-lg font-bold">
+                          {clientsPsycho ? `${clientsPsycho.firstName} ${clientsPsycho.lastName}` : "No Therapist Selected"}
+                        </h3>
+                        <p className="text-sm text-gray-500">
+                          Specialty: {clientsPsycho ? clientsPsycho.specialties : "N/A"}
+                        </p>
+                        <button
+                          className="mt-2 py-1 px-3 rounded bg-[#2563EB] text-white"
+                          disabled={true}
+                        >
+                          Selected
+                        </button>
                       </div>
                     </div>
                   )}
