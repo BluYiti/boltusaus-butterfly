@@ -223,9 +223,12 @@ const AppointmentBooking = () => {
       <Layout sidebarTitle="Butterfly" sidebarItems={items}>
         <div className="min-h-screen flex items-center justify-center bg-gray-100">
           <div className="bg-white p-8 rounded-lg shadow-lg text-center max-w-lg mx-auto">
-            <h1 className="text-3xl font-bold text-red-700 mb-4">Booking Disabled</h1>
-            <p className="text-lg text-gray-600">You can't book until your recent booking is done. </p>
-            <p className="text-lg text-gray-600">{appointmentData.bookingMessage}</p>
+            <h1 className="text-3xl font-bold text-blue-400 mb-4">Appointment Confirmation</h1>
+            <p className="text-xl text-gray-600">
+              You will receive a notification for the confirmation of your appointment in <strong>1-2 days</strong>.
+              If you have any questions you can talk to your therapist via the communication tab.
+            </p>
+            <p className="text-lg text-gray-600 mt-5">{appointmentData.bookingMessage}</p>
           </div>
         </div>
       </Layout>
