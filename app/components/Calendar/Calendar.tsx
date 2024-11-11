@@ -130,6 +130,11 @@ const Calendar: React.FC<CalendarProps> = ({
         );
     };
 
+    const isDayFullyBooked = (day: number) => {
+        const times = ["09:00am", "10:00am", "11:00am", "01:00pm", "02:00pm", "03:00pm", "04:00pm"];
+        return times.every((time) => isSlotBooked(day, time)); // Check if all slots for the day are booked
+    };
+
     return (
         <div>
             <div className="flex justify-between mb-4">
@@ -171,6 +176,7 @@ const Calendar: React.FC<CalendarProps> = ({
                     const day = i + 1;
                     const date = new Date(currentYear, selectedMonth === currentMonth ? currentMonthIndex : nextMonthIndex, day);
                     const isPastDate = !isDateInRange(date);
+                    const isFullyBooked = isDayFullyBooked(day); // Check if the day is fully booked
 
                     return (
                         <button
@@ -179,10 +185,12 @@ const Calendar: React.FC<CalendarProps> = ({
                                 ? "bg-blue-300 rounded-3xl text-white"
                                 : isPastDate || !isTherapistSelected
                                     ? "bg-gray-400 text-gray-700 rounded-3xl cursor-not-allowed"
-                                    : "rounded-3xl bg-[#49c987] text-white font-poppins hover:bg-green-300 hover:text-black hover:scale-110"
+                                    : isFullyBooked
+                                        ? "bg-red-500 text-white rounded-3xl cursor-not-allowed"
+                                        : "rounded-3xl bg-[#49c987] text-white font-poppins hover:bg-green-300 hover:text-black hover:scale-110"
                                 }`}
-                            onClick={() => !isPastDate && isTherapistSelected && setSelectedDay(day)}
-                            disabled={isPastDate || !isTherapistSelected}
+                            onClick={() => !isPastDate && !isFullyBooked && isTherapistSelected && setSelectedDay(day)}
+                            disabled={isPastDate || !isTherapistSelected || isFullyBooked} // Disable the button if fully booked
                         >
                             {day}
                         </button>
