@@ -192,10 +192,11 @@ const AppointmentBooking = () => {
             const bookingDate = new Date(currentYear, monthNumber, day, hour, minute); // Month is 0-based
             // Compare with today's date
             if (bookingDate > today) {
+              const formattedTime = bookingDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
               setAppointmentData((prev) => ({
                 ...prev,
                 isBookingDisabled: true,
-                bookingMessage: "You can't book until your recent booking is done",
+                bookingMessage: `Your appointment is on ${bookingDate.toLocaleDateString()} at ${formattedTime}.`,
               }));
             }
           }
@@ -222,7 +223,8 @@ const AppointmentBooking = () => {
       <Layout sidebarTitle="Butterfly" sidebarItems={items}>
         <div className="min-h-screen flex items-center justify-center bg-gray-100">
           <div className="bg-white p-8 rounded-lg shadow-lg text-center max-w-lg mx-auto">
-            <h1 className="text-3xl font-bold text-red-600 mb-4">Booking Disabled</h1>
+            <h1 className="text-3xl font-bold text-red-700 mb-4">Booking Disabled</h1>
+            <p className="text-lg text-gray-600">You can't book until your recent booking is done. </p>
             <p className="text-lg text-gray-600">{appointmentData.bookingMessage}</p>
           </div>
         </div>
