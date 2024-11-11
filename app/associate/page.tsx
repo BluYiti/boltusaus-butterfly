@@ -14,9 +14,8 @@ const AssociateDashboard: React.FC = () => {
   const [sessionData, setSessionData] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [clients, setClients] = useState<any[]>([]);
-  const [upcomingSessions, setUpcomingSessions] = useState<any[]>([]);
-  const [appointments, setAppointments] = useState<any[]>([]);
   const [payments, setPayments] = useState<any[]>([]);
+  const [loadingPayments, setLoadingPayments] = useState(true); // Separate loading state for payments
   const [selectedClient, setSelectedClient] = useState<any | null>(null); // State for selected client to reschedule
   const [newSchedule, setNewSchedule] = useState<any | null>(null); // State for new schedule details
   const [showFinalConfirm, setShowFinalConfirm] = useState(false); // State for showing the final confirmation modal
@@ -60,6 +59,32 @@ const AssociateDashboard: React.FC = () => {
 
     fetchData();
   }, []);
+
+  // Fetch payments
+useEffect(() => {
+  const fetchPayments = async () => {
+    try {
+      setLoadingPayments(true);
+      const response = await databases.listDocuments(
+        'Butterfly-Database', // Replace with actual database ID
+        'Payment',             // Collection ID for payments
+      );
+      const paymentsData = response.documents.map((doc) => ({
+        clientName: doc.client?.name || 'N/A', // Access client.name with a fallback if undefined
+        accountname: doc.accountname,
+        channel: doc.channel,
+        status: doc.status,
+      }));
+      setPayments(paymentsData);
+    } catch (err) {
+      console.error('Failed to fetch payment data:', err);
+    } finally {
+      setLoadingPayments(false);
+    }
+  };
+
+  fetchPayments();
+}, []);
 
   // Function to handle client selection for reschedule
   const handleViewClient = (client: any) => {
@@ -142,7 +167,7 @@ const AssociateDashboard: React.FC = () => {
         <div className="grid grid-cols-2 gap-4 mx-10">
 
             {/* Client List for Reschedule */}
-            <div className="bg-white rounded-lg shadow-lg p-6">
+            <div className="bg-white rounded-lg shadow-lg p-6 text-blue-500">
               <h3 className="text-xl font-semibold mb-4">Client List for Reschedule</h3>
               {loading ? (
                 <div className="flex justify-center items-center">
@@ -188,7 +213,6 @@ const AssociateDashboard: React.FC = () => {
                     {sessionData.map((doc) => (
                       <li key={doc.$id}>
                         <p>{doc.client.firstname} {doc.client.lastname}</p>
-                        <p>{doc.date} - {doc.time}</p>
                       </li>
                     ))}
                   </ul>
@@ -196,60 +220,61 @@ const AssociateDashboard: React.FC = () => {
               </div>
 
               {/* Appointment List */}
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h3 className="text-xl font-semibold mb-4">Appointment List</h3>
-            {loading ? (
-              <div className="flex justify-center items-center">
-                <span className="text-gray-500">Loading appointments...</span>
-              </div>
-            ) : (
-              <ul className="space-y-3">
-                {appointments.length > 0 ? (
-                  appointments.map((appointment, index) => (
-                    <li key={index} className="flex justify-between items-center bg-gray-100 rounded-lg px-4 py-2">
-                      <span className="flex-1 text-left">{appointment.name}</span>
-                      <span className="flex-1 text-center">{appointment.date}</span>
-                      <span className="flex-1 text-center">{appointment.time}</span>
-                    </li>
-                  ))
+              <div className="bg-white rounded-lg shadow-lg p-6 text-blue-500">
+                <h3 className="text-xl font-semibold mb-4">Appointment List</h3>
+                {loading ? (
+                  <div className="flex justify-center items-center">
+                    <span className="text-gray-500">Loading appointments...</span>
+                  </div>
                 ) : (
-                  <div className="text-gray-500">No appointments available.</div>
+                  <ul className="space-y-3 text-black">
+                    {sessionData.length > 0 ? (
+                      sessionData.map((doc) => (
+                        <li key={doc.$id}>
+                          <p>{doc.client.firstname} {doc.client.lastname}</p>
+                          <p>{doc.month} {doc.day} </p>
+                        </li>
+                      ))
+                    ) : (
+                      <div className="text-gray-500">No appointments available.</div>
+                    )}
+                  </ul>
                 )}
-              </ul>
-            )}
-          </div>
-
-
-              {/* Payment Status */}
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h3 className="text-xl font-semibold mb-4">Payment Status</h3>
-            {loading ? (
-              <div className="flex justify-center items-center">
-                <span className="text-gray-500">Loading payments...</span>
               </div>
-            ) : (
-              <ul className="space-y-3">
-                {payments.length > 0 ? (
-                  payments.map((payment, index) => (
-                    <li key={index} className="flex justify-between items-center bg-gray-100 rounded-lg px-4 py-2">
-                      <span className="flex-1 text-center">{payment.name}</span>
-                      <span className="flex-1 text-center">{payment.date}</span>
-                      <span className="flex-1 text-center">{payment.amount}</span>
-                      <span
-                        className={`flex-none px-4 py-1 rounded-full text-white text-center ${
-                          payment.status === 'PAID' ? 'bg-green-500' : 'bg-yellow-500'
-                        }`}
-                      >
-                        {payment.status}
-                      </span>
-                    </li>
-                  ))
-                ) : (
-                  <div className="text-gray-500">No payment data available.</div>
-                )}
-              </ul>
-            )}
-          </div>
+
+          {/* Payment Status */}
+            <div className="bg-white rounded-lg shadow-lg p-6 text-blue-500">
+              <h3 className="text-xl font-semibold mb-4">
+                Payment Status
+                <span className="text-sm text-gray-500 ml-2">{format(new Date(), 'MMMM d, yyyy')}</span>
+              </h3>
+              {loadingPayments ? (
+                <div className="flex justify-center items-center">
+                  <span className="text-gray-500">Loading payments...</span>
+                </div>
+              ) : (
+                <ul className="space-y-3">
+                  {payments.length > 0 ? (
+                    payments.map((payment, index) => (
+                      <li key={index} className="flex justify-between items-center bg-gray-100 rounded-lg px-4 py-2">
+                        <span className="flex-1 text-center">{payment.accountname}</span>
+                        <span className="flex-1 text-center">{payment.client?.name}</span>
+                        <span className="flex-1 text-center">{payment.channel}</span>
+                        <span
+                          className={`flex-none px-4 py-1 rounded-full text-white text-center ${
+                            payment.status === 'PAID' ? 'bg-green-500' : 'bg-yellow-500'
+                          }`}
+                        >
+                          {payment.status}
+                        </span>
+                      </li>
+                    ))
+                  ) : (
+                    <div className="text-gray-500">No payment data available.</div>
+                  )}
+                </ul>
+              )}
+            </div>
         </div>
 
          
