@@ -4,42 +4,79 @@ import { useState, useEffect } from "react";
 import Layout from "@/components/Sidebar/Layout";
 import items from "@/psychotherapist/data/Links";
 import PaymentModal from "@/psychotherapist/components/PaymentModal"; // Import the new modal component
+import LoadingScreen from "@/components/LoadingScreen";
+import useAuthCheck from "@/auth/page";
+import { account, databases, Query } from "@/appwrite";
+import { fetchPsychoId } from "@/hooks/userService";
+
+interface Payment {
+  referenceNo: string;
+  mode: string;
+  channel: string;
+  amount: number;
+  status: string;
+  client: { firstname: string; lastname: string }; // Client's first and last name
+  psychotherapist: { firstName: string; lastName: string }; // Psychotherapist's first and last name
+  booking: any;
+  id: string; // Add a unique identifier for each payment to use as a key
+  clientFirstName: string;
+  clientLastName: string;
+  psychoFirstName: string;
+  psychoLastName: string;
+  email: string;
+  createdAt: Date;
+}
 
 const ClientsPayment = () => {
+  const { loading: authLoading } = useAuthCheck(['psychotherapist']);
+  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("Pending");
   const [searchTerm, setSearchTerm] = useState("");
-  const [clients, setClients] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [payments, setPayments] = useState<Payment[]>([]);
   const [showModal, setShowModal] = useState(false); // State for modal visibility
   const [selectedClient, setSelectedClient] = useState(null); // State for selected client's payment details
 
   // Mock data for clients
   useEffect(() => {
-    // Simulating fetching data from Appwrite with a delay
-    const mockClients = [
-      { name: "Bella Swan", email: "bella@twilight.com", status: "Paid" },
-      { name: "Michael Bieber", email: "michael@bieber.com", status: "Pending" },
-      { name: "Nicki Minaj", email: "nicki@minaj.com", status: "Paid" },
-      { name: "Ana Smith", email: "ana@smith.com", status: "Pending" },
-      { name: "Chris Grey", email: "chris@grey.com", status: "Paid" },
-      { name: "Lana Dress", email: "lana@dress.com", status: "Pending" },
-      { name: "Sza Padilla", email: "sza@padilla.com", status: "Paid" },
-      { name: "Case Oh", email: "case@oh.com", status: "Pending" },
-      { name: "Jennie Kim", email: "jennie@kim.com", status: "Paid" },
-      { name: "Denzel White", email: "denzel@white.com", status: "Pending" },
-      { name: "Angel Wong", email: "angel@wong.com", status: "Paid" },
-      { name: "Jennifer Lawrence", email: "jennifer@lawrence.com", status: "Pending" },
-    ];
+    const fetchData = async () => {
+      try {
+        const user = await account.get();
+        const psychoId = await fetchPsychoId(user.$id);
 
-    setTimeout(() => {
-      setClients(mockClients);
-      setLoading(false);
-    }, 1000);
+        const response = await databases.listDocuments('Butterfly-Database', 'Payment', [
+          Query.equal('psychotherapist', psychoId), // Adjust based on your schema
+        ]);
+        console.log(response);
+
+        // Assuming each payment document has a 'client' and 'psychotherapist' object with 'firstname' and 'lastname'
+        const fetchedPayments = response.documents.map((doc: any) => ({
+          referenceNo: doc.referenceNo,
+          mode: doc.booking.mode,
+          channel: doc.channel,
+          amount: doc.amount,
+          status: doc.status,
+          client: doc.client, // Assuming the client data is already in this format
+          psychotherapist: doc.psychotherapist, // Same assumption
+          booking: doc.booking,
+          id: doc.$id, 
+          clientFirstName: doc.client.firstname,
+          clientLastName: doc.client.lastname,
+          psychoFirstName: doc.psychotherapist.firstName,
+          psychoLastName: doc.psychotherapist.lastName,
+          email: doc.client.userid.email,
+          createdAt: doc.$createdAt
+        }));        
+
+        setPayments(fetchedPayments); // Store the payments in the state
+      } catch (error) {
+        console.error("Error fetching data: ", error);
+      } finally {
+        setLoading(false); // End the loading state once data is fetched
+      }
+    };
+
+    fetchData();
   }, []);
-
-  const filteredClients = clients.filter((client) =>
-    client.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   const openModal = (client) => {
     setSelectedClient(client);
@@ -53,8 +90,7 @@ const ClientsPayment = () => {
 
   const renderPendingClients = () => (
     <div className="mt-4 space-y-3">
-      {filteredClients
-        .filter((client) => client.status === "Pending")
+      {payments.filter((client) => client.status === "pending")
         .map((client, index) => (
           <div
             key={index}
@@ -63,7 +99,7 @@ const ClientsPayment = () => {
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 rounded-full bg-gray-200"></div>
               <div>
-                <h4 className="font-semibold">{client.name}</h4>
+                <h4 className="font-semibold">{client.clientFirstName}</h4>
                 <p className="text-sm text-gray-500">{client.email}</p>
               </div>
             </div>
@@ -80,8 +116,7 @@ const ClientsPayment = () => {
 
   const renderPaidClients = () => (
     <div className="mt-4 space-y-3">
-      {filteredClients
-        .filter((client) => client.status === "Paid")
+      {payments.filter((client) => client.status === "paid")
         .map((client, index) => (
           <div
             key={index}
@@ -90,7 +125,7 @@ const ClientsPayment = () => {
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 rounded-full bg-gray-200"></div>
               <div>
-                <h4 className="font-semibold">{client.name}</h4>
+                <h4 className="font-semibold">{client.clientFirstName}</h4>
                 <p className="text-sm text-gray-500">{client.email}</p>
               </div>
             </div>
@@ -105,14 +140,8 @@ const ClientsPayment = () => {
     </div>
   );
 
-  if (loading) {
-    return (
-      <Layout sidebarTitle="Butterfly" sidebarItems={items}>
-        <div className="bg-blue-50 min-h-screen overflow-auto flex justify-center items-center">
-          <p>Loading...</p>
-        </div>
-      </Layout>
-    );
+  if (authLoading || loading) {
+    return <LoadingScreen />;
   }
 
   return (

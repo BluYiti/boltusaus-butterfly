@@ -8,8 +8,11 @@ import { account, databases } from '@/appwrite';
 import { fetchProfileImageUrl, fetchPsychoId, uploadProfilePicture } from '@/hooks/userService';
 import LoadingScreen from '@/components/LoadingScreen';
 import UploadProfile from '@/psychotherapist/components/UploadProfile'; // Import UploadProfile modal
+import useAuthCheck from '@/auth/page';
 
 const AboutMe = () => {
+  const { loading: authLoading } = useAuthCheck(['psychotherapist']);
+  const [loading, setLoading] = useState(true);
   const [description, setDescription] = useState("");
   const [professionalBackground, setProfessionalBackground] = useState("");
   const [specialties, setSpecialties] = useState<string[]>([]);
@@ -35,7 +38,6 @@ const AboutMe = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false); // Modal state
   const [selectedFile, setSelectedFile] = useState<File | null>(null); // Selected profile file state
-  const [isLoading, setIsLoading] = useState(true);
 
   // Fetch the user's information from Appwrite
   const fetchData = async () => {
@@ -66,7 +68,7 @@ const AboutMe = () => {
     } catch (error) {
       console.error("Failed to fetch data", error);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
@@ -107,7 +109,7 @@ const AboutMe = () => {
     fetchData();
   }, []);
 
-  if (isLoading) {
+  if (authLoading ||loading) {
     return <LoadingScreen />;
   }
 
@@ -182,6 +184,10 @@ const AboutMe = () => {
     }
   };
 
+  if (authLoading || loading) {
+    return <LoadingScreen />;
+  }
+
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
       <div className="bg-blue-50 min-h-screen overflow-y-auto">
@@ -237,7 +243,7 @@ const AboutMe = () => {
                 </div>
                 <textarea
                   id="description"
-                  rows="5"
+                  rows={5}
                   className="border border-gray-300 rounded-md p-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
@@ -335,7 +341,7 @@ const AboutMe = () => {
                   </div>
                 </div>
                 <textarea
-                  rows="2"
+                  rows={2}
                   className="border border-gray-300 rounded-md p-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
                   value={specialties.join("\n")}
                   onChange={(e) => setSpecialties(e.target.value.split("\n"))}
