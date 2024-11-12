@@ -236,123 +236,24 @@ const GoalsPage = () => {
 
                     {/* Activity Section */}
                     <div className="flex-1 bg-white shadow-lg rounded-xl p-6 border border-gray-200">
-                        <h3 className="text-lg font-semibold text-blue-400">Activity</h3>
-                        <select
-                            value={activities}
-                            onChange={(e) => setActivities(e.target.value)}
-                            className="border rounded-lg p-2 mt-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    <h3 className="text-lg font-semibold text-blue-400">Activity</h3>
+                    <div className="flex flex-col gap-2 mt-2">
+                        {['meditate', 'exercise', 'read', 'music', 'stroll', 'pet', 'arts'].map((activity) => (
+                        <button
+                            key={activity}
+                            onClick={() => setActivities(activity)}
+                            className={`px-4 py-2 rounded-lg focus:outline-none ${
+                            activities === activity
+                                ? 'bg-blue-500 text-white'
+                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            }`}
                         >
-                            <option value="meditate">Meditate</option>
-                            <option value="exercise">Exercise</option>
-                            <option value="read">Read</option>
-                            <option value="music">Music</option>
-                            <option value="stroll">Stroll</option>
-                            <option value="pet">Pet time</option>
-                            <option value="arts">Arts</option>
-                        </select>
-
-                        {/* Start Time Selection */}
-                        <div className="mt-4">
-                            <label className="block font-semibold text-gray-700">Start Time:</label>
-                            <div className="flex space-x-2">
-                                <select
-                                    value={startHour}
-                                    onChange={(e) => handleStartHourChange(e.target.value)}
-                                    className="border rounded-lg p-2 mt-1 w-full focus:outline-none focus:ring-2 focus:ring-blue-300"
-                                >
-                                    {[...Array(12).keys()].map((hour) => (
-                                        <option key={hour + 1} value={hour + 1}>
-                                            {hour + 1}
-                                        </option>
-                                    ))}
-                                </select>
-
-                                <select
-                                    value={startMinute}
-                                    onChange={(e) => setStartMinute(Number(e.target.value))}
-                                    className="border rounded-lg p-2 mt-1 w-full focus:outline-none focus:ring-2 focus:ring-blue-300"
-                                >
-                                    {[0, 10, 15, 20, 30, 40, 45, 50, 55].map((minute) => (
-                                        <option key={minute} value={minute}>
-                                            {minute < 10 ? `0${minute}` : minute}
-                                        </option>
-                                    ))}
-                                </select>
-
-                                <select
-                                    value={startPeriod}
-                                    onChange={(e) => handleStartPeriodChange(e.target.value)}
-                                    className="border rounded-lg p-2 mt-1 w-full focus:outline-none focus:ring-2 focus:ring-blue-300"
-                                >
-                                    <option value="AM">AM</option>
-                                    <option value="PM">PM</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        {/* End Time Selection */}
-                        <div className="mt-4">
-                            <label className="block font-semibold text-gray-700">End Time:</label>
-                            <div className="flex space-x-2">
-                                <select
-                                    value={endHour}
-                                    className="border rounded-lg p-2 mt-1 w-full focus:outline-none focus:ring-2 focus:ring-blue-300"
-                                    disabled={true}
-                                >
-                                    <option value={endHour}>{endHour}</option>
-                                </select>
-
-                                <select
-                                    value={endMinute}
-                                    onChange={(e) => setEndMinute(Number(e.target.value))}
-                                    className="border rounded-lg p-2 mt-1 w-full focus:outline-none focus:ring-2 focus:ring-blue-300"
-                                >
-                                    {[0, 10, 15, 20, 30, 40, 45, 50, 55].map((minute) => (
-                                        <option key={minute} value={minute}>
-                                            {minute < 10 ? `0${minute}` : minute}
-                                        </option>
-                                    ))}
-                                </select>
-
-                                <select
-                                    value={endPeriod}
-                                    className="border rounded-lg p-2 mt-1 w-full focus:outline-none focus:ring-2 focus:ring-blue-300"
-                                    disabled={true}
-                                >
-                                    <option value={endPeriod}>{endPeriod}</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        {/* Reminder Selection */}
-                        <div className="mt-4">
-                            <label className="block font-semibold text-gray-700">Reminder:</label>
-                            <select
-                                value={reminderTime}
-                                onChange={(e) => setReminderTime(Number(e.target.value))}
-                                className="border rounded-lg p-2 mt-1 w-full focus:outline-none focus:ring-2 focus:ring-blue-300"
-                            >
-                                <option value={0}>None</option>
-                                <option value={5}>5 minutes before</option>
-                                <option value={10}>10 minutes before</option>
-                                <option value={15}>15 minutes before</option>
-                                <option value={20}>20 minutes before</option>
-                                <option value={30}>30 minutes before</option>
-                            </select>
-                        </div>
-
-                        <div className="mt-4">
-                            <label className="flex items-center font-semibold text-gray-700">
-                                <input
-                                    type="checkbox"
-                                    checked={goalReminder}
-                                    onChange={() => setGoalReminder(!goalReminder)}
-                                    className="mr-2"
-                                />
-                                Set Goal Reminder
-                            </label>
-                        </div>
+                            {activity.charAt(0).toUpperCase() + activity.slice(1)}
+                        </button>
+                        ))}
                     </div>
+                    </div>
+
 
                     {/* Mood Tracker Section */}
                     <div className="flex-1 bg-white shadow-lg rounded-xl p-6 border border-gray-200">
