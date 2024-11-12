@@ -1,4 +1,4 @@
-"use client";  // Ensure this is a Client Component
+"use client";
 
 import React, { useState } from "react";
 import Layout from '@/components/Sidebar/Layout';
@@ -12,7 +12,6 @@ const SettingsPage = () => {
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
-  const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
 
   // State variables for profile fields and password fields
   const [contactNumber, setContactNumber] = useState("");
@@ -53,15 +52,6 @@ const SettingsPage = () => {
     setActiveSection(activeSection === section ? null : section);
   };
 
-  const handlePrivacyClick = () => {
-    setIsPrivacyModalOpen(true);
-  };
-
-  const handleSavePrivacySettings = () => {
-    console.log("Privacy settings saved:", { trackingCookies, analyticsCookies, functionalCookies });
-    handleModalClose();
-  };
-
   const handleEditProfileClick = () => {
     setIsProfileModalOpen(true);
   };
@@ -73,7 +63,6 @@ const SettingsPage = () => {
   const handleModalClose = () => {
     setIsProfileModalOpen(false);
     setIsChangePasswordModalOpen(false);
-    setIsPrivacyModalOpen(false);
   };
 
   const handleSaveProfile = () => {
@@ -126,41 +115,6 @@ const SettingsPage = () => {
           )}
         </div>
 
-        <div className="bg-white shadow-md rounded-lg p-6 mb-6">
-          <h3 className="text-xl font-semibold text-gray-700 cursor-pointer flex justify-between items-center"
-            onClick={() => toggleSection("privacy")}>
-            Privacy and Security
-            <button className="text-sm text-blue-400 underline">Manage</button>
-          </h3>
-          {activeSection === "privacy" && (
-            <div className="mt-4 text-gray-600">
-              <div className="flex justify-between items-center">
-                <p>Manage your data-sharing preferences:</p>
-                <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-400"
-                  onClick={handlePrivacyClick}>Manage Privacy</button>
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div className="bg-white shadow-md rounded-lg p-6 mb-6">
-          <h3 className="text-xl font-semibold text-gray-700 cursor-pointer flex justify-between items-center"
-            onClick={() => toggleSection("help")}>
-            Help and Support
-            <button className="text-sm text-blue-400 underline">Get Help</button>
-          </h3>
-          {activeSection === "help" && (
-            <div className="mt-4 text-gray-600 space-y-4">
-              <div className="flex justify-between items-center">
-                <p>Contact our support team:</p>
-                <Link href="/client/pages/contactsupport">
-                <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-300">Contact Support</button>
-                </Link>
-              </div>
-            </div>
-          )}
-        </div>
-
         <div className="bg-white shadow-md rounded-lg p-6">
           <h3 className="text-xl font-semibold text-gray-700 cursor-pointer flex justify-between items-center"
             onClick={() => toggleSection("about")}>
@@ -173,7 +127,7 @@ const SettingsPage = () => {
               <ul className="list-disc list-inside mt-2">
                 <li>Version: 1.0.0</li>
                 <li>Developed by: Boltusaurs</li>
-                <li>Website: <a href="#" className="text-blue-400 hover:underline">www.amperalta.com</a></li>
+                <li>Website: <a href="#" className="text-blue-400 hover:underline">amperalta.com</a></li>
               </ul>
             </div>
           )}
@@ -274,36 +228,7 @@ const SettingsPage = () => {
               Update Password
             </button>
           </div>
-        </Modal>
-
-      <Modal isOpen={isPrivacyModalOpen} onClose={handleModalClose} title="Manage Privacy Settings">
-        <p className="mb-4"> {/* Add margin-bottom for spacing */}
-          When you visit a website, it may store or retrieve information in your browser, primarily through cookies, which enhance your browsing experience and are used to tailor the site to your preferences; however, you have the option to reject certain cookies, although doing so may affect your overall experience and the services available to you.
-        </p>
-        <div className="space-y-4">
-          <ToggleSwitch
-            label="Tracking Cookies"
-            isChecked={trackingCookies}
-            onToggle={() => setTrackingCookies(!trackingCookies)}
-          />
-          <ToggleSwitch
-            label="Analytics Cookies"
-            isChecked={analyticsCookies}
-            onToggle={() => setAnalyticsCookies(!analyticsCookies)}
-          />
-          <ToggleSwitch
-            label="Functional Cookies"
-            isChecked={functionalCookies}
-            onToggle={() => setFunctionalCookies(!functionalCookies)}
-          />
-          <button
-            className="w-full py-2 bg-blue-500 hover:bg-blue-600 text-white rounded"
-            onClick={handleSavePrivacySettings}
-          >
-            Save Privacy Settings
-          </button>
-        </div>
-      </Modal>
+        </Modal>s
     </Layout>
   );
 };
