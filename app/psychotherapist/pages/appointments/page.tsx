@@ -7,8 +7,11 @@ import TakeNotesModal from '@/psychotherapist/components/TakeNotesModal';
 import CallModal from '@/psychotherapist/components/CallModal'; 
 import CountdownModal from '@/psychotherapist/components/CountdownModal';
 import RescheduleModal from '@/psychotherapist/components/RescheduleModal'; // Import the new modal
+import useAuthCheck from "@/auth/page";
+import LoadingScreen from "@/components/LoadingScreen";
 
 const Appointments = () => {
+  const { loading: authLoading } = useAuthCheck(['psychotherapist']); // Call the useAuthCheck hook
   const [clientData, setClientData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -72,6 +75,10 @@ const Appointments = () => {
     setIsRescheduleModalOpen(false);
     // Optionally, refresh the data or update the state
   };
+
+  if (authLoading ) {
+    return <LoadingScreen />; // Show the loading screen while the auth check or data loading is in progress
+}
 
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
