@@ -3,8 +3,11 @@ import { FC, useEffect, useRef, useState } from 'react';
 import { FaPhone } from 'react-icons/fa'; // Import the phone icon from react-icons
 import Link from 'next/link';
 import { useRouter } from 'next/navigation'; // Import useRouter for navigation
+import useAuthCheck from '@/auth/page';
+import LoadingScreen from '@/components/LoadingScreen';
 
 const Countdown: FC<{ seconds: number; onComplete: () => void }> = ({ seconds, onComplete }) => {
+  
   const [timeLeft, setTimeLeft] = useState(seconds);
 
   useEffect(() => {
@@ -35,6 +38,11 @@ const Countdown: FC<{ seconds: number; onComplete: () => void }> = ({ seconds, o
 const Page: FC = () => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const router = useRouter(); // Initialize useRouter
+  const { loading: authLoading } = useAuthCheck(['client']); // Call the useAuthCheck hook
+
+  if (authLoading ) {
+      return <LoadingScreen />; // Show the loading screen while the auth check or data loading is in progress
+  }
   
   return (
     <div className="flex flex-col h-screen">

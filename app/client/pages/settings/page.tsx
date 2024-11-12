@@ -4,24 +4,11 @@ import React, { useState } from "react";
 import Layout from '@/components/Sidebar/Layout';
 import items from '@/client/data/Links';
 import Link from "next/link";
-
-const Modal = ({ isOpen, onClose, title, children }) => {
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div className="bg-white rounded-lg p-8 w-96 shadow-lg">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-gray-800">{title}</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">✕</button>
-        </div>
-        {children}
-      </div>
-    </div>
-  );
-};
+import LoadingScreen from "@/components/LoadingScreen";
+import useAuthCheck from "@/auth/page";
 
 const SettingsPage = () => {
+  const { loading: authLoading } = useAuthCheck(['client']); // Call the useAuthCheck hook
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
@@ -105,6 +92,10 @@ const SettingsPage = () => {
     }
   };
 
+
+  if (authLoading ) {
+    return <LoadingScreen />; // Show the loading screen while the auth check or data loading is in progress
+  }
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
       <div className="min-h-screen flex-grow p-8 bg-gray-50">
@@ -314,6 +305,21 @@ const SettingsPage = () => {
         </div>
       </Modal>
     </Layout>
+  );
+};
+
+const Modal = ({ isOpen, onClose, title, children }) => {
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+      <div className="bg-white rounded-lg p-8 w-96 shadow-lg">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold text-gray-800">{title}</h2>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">✕</button>
+        </div>
+        {children}
+      </div>
+    </div>
   );
 };
 
