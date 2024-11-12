@@ -196,5 +196,19 @@ export const overwriteProfilePicture = async (userId: string, file: File): Promi
     }
 };
 
+// Upload receipt image to the "Images" bucket
+export const uploadReceiptImage = async (file: File): Promise<{ id: string } | null> => {
+    try {
+        // Generate a unique ID for the file or use a fileId of your choice
+        const fileId = `receipt_${Date.now()}`;
 
+        // Upload the file to the "Images" bucket
+        const result = await storage.createFile('Images', fileId, file);
 
+        // Return the file ID (receiptId) if the upload was successful
+        return { id: result.$id };  // Assuming the response includes a `$id` field
+    } catch (error) {
+        console.error('Error uploading receipt image:', error);
+        return null;
+    }
+};

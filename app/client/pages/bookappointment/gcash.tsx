@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Modal from '@/components/Modal';
 import { account, databases } from '@/appwrite';
-import { fetchClientId, fetchClientPsycho, restrictSelectingTherapist, updateClientPsychotherapist } from '@/hooks/userService';
+import { fetchClientId, restrictSelectingTherapist, updateClientPsychotherapist } from '@/hooks/userService';
 import SuccessModal from './successfulbooking';
 
 interface GCashPaymentProps {
@@ -13,8 +13,6 @@ interface GCashPaymentProps {
 const GCashPayment: React.FC<GCashPaymentProps> = ({ isOpen, onClose, appointmentData }) => {
   const [referenceNumber, setReferenceNumber] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [client, setClientId] = useState<string>('');
-  const [psycho, setPsychoId] = useState<string>('');
   const [error, setError] = useState<string>('');
   const [showSuccess, setShowSuccess] = useState<boolean>(false); // State for success modal
 

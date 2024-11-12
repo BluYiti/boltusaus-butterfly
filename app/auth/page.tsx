@@ -1,16 +1,15 @@
 import { useEffect, useState } from 'react';
-import { account, databases } from '@/appwrite'; // Import Appwrite account and database instances
+import { account, databases } from '@/appwrite'; // Appwrite instances
 import { useRouter } from 'next/navigation';
-import LoadingScreen from '@/components/LoadingScreen'; // Import the LoadingScreen component
-import { jwtDecode } from 'jwt-decode'; // Correct import for jwt-decode
-import SessionExpirationModal from '@/auth/components/SessionExpirationModal'; // Import the modal
+import SessionExpirationModal from '@/auth/components/SessionExpirationModal'; // Modal component
+import { jwtDecode } from 'jwt-decode'; // jwt-decode import
 
-const VALID_ROLES = ['admin', 'client', 'psychotherapist', 'associate']; // Define allowed roles
+const VALID_ROLES = ['admin', 'client', 'psychotherapist', 'associate']; // Allowed roles
 
 const useAuthCheck = (allowedRoles: string[]) => {
-  const [loading, setLoading] = useState(true); // Loading state for authentication check
-  const [isModalOpen, setIsModalOpen] = useState(false); // State for modal visibility
-  const router = useRouter(); // Router to handle redirects
+  const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false); // Modal state
+  const router = useRouter();
 
   // Validate the allowedRoles prop
   useEffect(() => {
@@ -21,58 +20,41 @@ const useAuthCheck = (allowedRoles: string[]) => {
     }
   }, [allowedRoles]);
 
-  // Function to check if the JWT is valid
+  // Function to check if JWT is valid
   const isJwtValid = (jwt: string | null) => {
     if (!jwt) return false; // No JWT found
 
     try {
       const decoded: any = jwtDecode(jwt);
       const currentTime = Math.floor(Date.now() / 1000); // Get current time in seconds
-
-      if (decoded.exp < currentTime) return false; // JWT expired
-      return true; // JWT is valid
+      return decoded.exp >= currentTime; // JWT is valid if expiration time is greater than current time
     } catch (error) {
       console.error('Invalid JWT:', error);
       return false;
     }
   };
 
-  const handleLogout = async () => {
-    console.log('Logging out...');
-    await account.deleteSession('current');
-    setLoading(false);
-    router.push('/login');
-    setIsModalOpen(false);
-  };
-
-  const handleStay = () => {
-    console.log('Staying logged in...');
-    setIsModalOpen(false);
-    checkAuth();
-  };
-
+  // Function to check authentication
   const checkAuth = async () => {
     const jwt = localStorage.getItem('appwrite_jwt');
-
     if (!isJwtValid(jwt)) {
-      console.log('JWT is invalid or expired. Showing session expiration modal...');
-      setIsModalOpen(true);
+      setIsModalOpen(true); // Show modal if JWT is invalid or expired
       setLoading(false);
       return;
     }
 
     try {
-      const user = await account.get();
+      const user = await account.get(); // Get user info
       const userId = user.$id;
       const roleResponse = await databases.getDocument('Butterfly-Database', 'Accounts', userId);
       const userRole = roleResponse.role;
 
       if (allowedRoles.includes(userRole)) {
-        setLoading(false);
+        setLoading(false); // Set loading to false when role matches
       } else {
-        await account.deleteSession('current');
+        await account.deleteSession('current'); // If role doesn't match, log out
         setLoading(false);
-        router.push('/login');
+        router.push('/login'); // Redirect to login
       }
     } catch (error) {
       console.error('Error during authentication:', error);
@@ -82,15 +64,34 @@ const useAuthCheck = (allowedRoles: string[]) => {
     }
   };
 
+  // Effect hook to check authentication on mount
   useEffect(() => {
-    if (allowedRoles.every((role) => VALID_ROLES.includes(role))) {
-      checkAuth();
-    } else {
-      setLoading(false);
-    }
+    checkAuth();
   }, [allowedRoles, router]);
 
-  return { loading };
+  // Modal handlers
+  const handleLogout = async () => {
+    await account.deleteSession('current'); // Logout the user
+    setIsModalOpen(false); // Close the modal
+    router.push('/login'); // Redirect to login page
+  };
+
+  const handleStay = () => {
+    setIsModalOpen(false); // Close modal if user wants to stay logged in
+  };
+
+  // Return the modal and loading state
+  return {
+    loading,
+    modal: (
+      <SessionExpirationModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onLogout={handleLogout}
+        onStay={handleStay}
+      />
+    ),
+  };
 };
 
 export default useAuthCheck;
