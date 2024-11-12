@@ -1,97 +1,33 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useLogin } from './hooks/useLogin';
 import { useRouter } from 'next/navigation';
 import LoginForm from './components/LoginForm';
 import Back from '@/components/Back';
-import { account, databases } from '@/appwrite'; // Ensure this import is present
-import LoadingScreen from "@/components/LoadingScreen";
 
 const LoginPage: React.FC = () => {
-    const [loading, setLoading] = useState<boolean>(true);  // Start with true to show loading screen initially
     const router = useRouter();
     const { login, error } = useLogin();
+    const [loading, setLoading] = useState<boolean>(false);
 
-    // UseEffect for session check
-    useEffect(() => {
-        const checkLoggedInUser = async () => {
-            try {
-                // Check if there is an active session
-                const user = await account.get();
-                if (user) {
-                    // If a user is logged in, fetch their role
-                    const role = await fetchUserRole(user.$id);
-                    if (role) {
-                        // Redirect based on role
-                        handleUserRoleRedirect(role);
-                    } else {
-                        setLoading(false); // No role, just show login form
-                    }
-                } else {
-                    setLoading(false); // No user session, show login form
-                }
-            } catch (err) {
-                console.log('User is not logged in, proceeding to login page...');
-                setLoading(false); // No session, show login form
-            }
-        };
-
-        checkLoggedInUser();
-    }, []); // Empty dependency array to run this effect only once when the component mounts
-
-    // Fetch user role from the accounts collection
-    const fetchUserRole = async (userId: string) => {
-        try {
-            const response = await databases.getDocument('Butterfly-Database', 'Accounts', userId);
-            return response.role; // Adjust this based on your data structure
-        } catch (err) {
-            console.error('Failed to fetch user role:', err);
-            return null;
-        }
-    };
-
-    // Redirect based on user role and state
-    const handleUserRoleRedirect = (role: string) => {
-        switch (role) {
-            case 'admin':
-                router.push('/admin');
-                break;
-            case 'psychotherapist':
-                router.push('/psychotherapist');
-                break;
-            case 'associate':
-                router.push('/associate');
-                break;
-            case 'client':
-                router.push('/client');
-                break;
-            default:
-                console.log('Unknown role. Please contact support.');
-        }
-    };
-
-    const handleLogin = async (email: string, password: string) => {
+    const handleLogin = async (email: string, password: string, rememberMe: boolean) => {
         setLoading(true);
-        await login(email, password);
+        await login(email, password, rememberMe);
+        setLoading(false);
     };
 
-    const handleForgot = () => {
+    const handleForgot = () =>  {
         router.push('/login/forgot');
-    };
+    }
 
-    const handleRegister = () => {
+    const handleRegister = () =>  {
         router.push('/register');
-    };
-
-    // Return the loading screen if session is being checked
-    if (loading) {
-        return <LoadingScreen />;
     }
 
     return (
         <div className='overflow-hidden'>
-            <Back />
+            <Back/>
             <h1 className="absolute top-5 left-20 text-[#2081c3] text-2xl font-bold">Butterfly</h1>
             <h2 className='absolute font-paintbrush text-8xl text-[#2b4369] top-32 sm:left-16 2xl:left-20 3xl:left-36'>
                 Start your Journey
@@ -111,7 +47,7 @@ const LoginPage: React.FC = () => {
                         <h2 className='absolute mt-20 ml-6 text-sm'>
                             Don't have an account?
                             <button onClick={handleRegister} className='text-blue-400 underline ml-2'>Register</button>
-                        </h2>
+                        </h2> 
                     </div>
                 </div>
             </div>

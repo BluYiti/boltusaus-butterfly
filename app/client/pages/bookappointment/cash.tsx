@@ -104,7 +104,7 @@ const CashPayment: React.FC<CashPaymentProps> = ({ isOpen, onClose, appointmentD
         <p className="text-gray-600">You have selected Cash as your payment method.</p>
         <div className="mt-6 bg-gray-100 p-4 rounded-lg w-full max-w-sm">
           <form onSubmit={handleSubmit}>
-            <label className="text-2xl block mb-2 text-gray-800 text-center">Please Scan the QR Code</label>
+            <label className="text-2xl block mb-2 text-gray-800 text-center">Please Pay at the Clinic</label>
 
             {/* Reference Number Input */}
             <label htmlFor="referenceNumber" className="block text-red-700 mb-2">NOTE: Please pay before the day of the booked appointment</label>

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Layout from "@/components/Sidebar/Layout"; // Adjust the path if necessary
 import items from "@/client/data/Links";
+import SessionHandler from "@/auth/logout/component/SessionHandler"
 import Link from "next/link"; // Import Link for navigation
 import 'typeface-roboto';
 import 'typeface-lora';
@@ -105,6 +106,7 @@ const NewClientDashboard = () => {
 
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
+      <SessionHandler />
       {/* Header Section */}
       <div className="bg-white rounded-b-lg shadow-md p-5 top-0 left-60 w-full">
           <h2 className="text-4xl font-bold text-blue-500 font-roboto">
