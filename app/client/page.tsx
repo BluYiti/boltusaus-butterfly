@@ -11,6 +11,7 @@ import useAuthCheck from "@/auth/page"; // Correct import path for useAuthCheck
 import LoadingScreen from "@/components/LoadingScreen"; // Import LoadingScreen component
 import { fetchProfileImageUrl } from "@/hooks/userService";
 import { downloadCertificate } from "@/hooks/userService";
+import PsychotherapistProfile from '@/client/components/PsychotherapistProfile'; // Adjust the path if necessary
 
 const NewClientDashboard = () => {
   const { loading: authLoading } = useAuthCheck(['client']); // Call the useAuthCheck hook
@@ -20,9 +21,13 @@ const NewClientDashboard = () => {
   const [profileImageUrls, setProfileImageUrls] = useState({});
   const [state, setState] = useState<string | null>(null); // State to track user state
   const [status, setStatus] = useState<string | null>(null); // State to track user status
-  const [cert, setCert] = useState<string | null>(null); // State to track user status
+  const [cert, setCert] = useState<string | null>(null); // State to track user certificate
   const [userName, setUserName] = useState<string | null>(null); // State to track user name
   const [currentIndex, setCurrentIndex] = useState(0);
+  
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedPsychotherapist, setSelectedPsychotherapist] = useState<null | any>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -49,12 +54,11 @@ const NewClientDashboard = () => {
 
         // Fetch psychotherapists
         const therapistResponse = await databases.listDocuments('Butterfly-Database', 'Psychotherapist');
-        const therapists = therapistResponse.documents;
         setPsychotherapists(therapistResponse.documents);
 
         // Fetch profile images for each psychotherapist
         const profileImages = {};
-        for (const therapist of therapists) {
+        for (const therapist of therapistResponse.documents) {
           if (therapist.profilepic) {
             const url = await fetchProfileImageUrl(therapist.profilepic);
             if (url) {
@@ -99,6 +103,16 @@ const NewClientDashboard = () => {
     });
   };
 
+  const handleProfileClick = (psychotherapist: any) => {
+    setSelectedPsychotherapist(psychotherapist); // Set the selected psychotherapist
+    setIsModalOpen(true); // Open the modal
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false); // Close the modal
+    setSelectedPsychotherapist(null); // Reset selected psychotherapist
+  };
+
   if (authLoading || dataLoading) {
     return <LoadingScreen />; // Show the loading screen while the auth check or data loading is in progress
   }
@@ -107,12 +121,12 @@ const NewClientDashboard = () => {
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
       {/* Header Section */}
       <div className="bg-white rounded-b-lg shadow-md p-5 top-0 left-60 w-full">
-          <h2 className="text-4xl font-bold text-blue-500 font-roboto">
+        <h2 className="text-4xl font-bold text-blue-500 font-roboto">
           Welcome, {userName ? userName : "Client"}!
-          </h2>
-          <p className="text-gray-600 text-lg font-lora">
+        </h2>
+        <p className="text-gray-600 text-lg font-lora">
           Book your therapy sessions with ease and embark on your path to well-being.
-          </p>
+        </p>
       </div>
 
       <div className="flex justify-between items-start space-x-4 px-8 ">
@@ -188,11 +202,13 @@ const NewClientDashboard = () => {
                   transform: `translateX(-${(currentIndex / psychotherapists.length) * 100}%)`,
                   width: `${(psychotherapists.length / visibleSlides) * 100}%`,
                 }}
+                
               >
                 {psychotherapists.map((psychotherapist, index) => (
                   <div
                     key={index}
                     className="flex-shrink-0 flex items-center justify-center p-4 w-[33%]"
+                    onClick={() => handleProfileClick(psychotherapist)} // Handle profile click
                   >
                     <div className="flex flex-col items-center bg-white border border-blue-300 p-4 rounded-3xl transform transition-transform duration-500 ease-in-out hover:scale-105 min-w-[300px]">
                       <img
@@ -280,6 +296,14 @@ const NewClientDashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* Psychotherapist Modal */}
+      {isModalOpen && selectedPsychotherapist && (
+        <PsychotherapistProfile
+          psychotherapist={selectedPsychotherapist}
+          onClose={handleCloseModal}
+        />
+      )}
     </Layout>
   );
 };

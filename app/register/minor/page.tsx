@@ -25,7 +25,8 @@ const RegisterPage: React.FC = () => {
                             throw new Error('Function not implemented.');
                         } } 
                         error={null} 
-                        loading={false} />
+                        loading={false} 
+                    />
                 </div>
             </div>
         </div>

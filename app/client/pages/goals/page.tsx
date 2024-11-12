@@ -7,6 +7,8 @@ import items from '@/client/data/Links';
 import { MdArrowBack, MdArrowForward } from 'react-icons/md';
 import ConfirmationModal from "@/components/ConfirmationModal";
 import { databases, account } from '@/appwrite'; // Import Appwrite client configuration and account API
+import LoadingScreen from '@/components/LoadingScreen';
+import useAuthCheck from '@/auth/page';
 
 interface Goal {
     id: string;
@@ -25,6 +27,7 @@ const DATABASE_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || 'Butterfly-D
 const COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_COLLECTION_ID || 'Goals';
 
 const GoalsPage = () => {
+    const { loading: authLoading } = useAuthCheck(['client']); // Call the useAuthCheck hook
     const [goals, setGoals] = useState<Goal[]>([]);
     const [mood, setMood] = useState<'HAPPY' | 'SAD' | 'ANXIOUS' | 'FEAR' | 'FRUSTRATED' | ''>('');
     const [activities, setActivities] = useState('meditate');
@@ -177,6 +180,9 @@ const GoalsPage = () => {
         setEndHour(endHourValue);
         setEndPeriod(endPeriodValue);
     };
+    if (authLoading ) {
+        return <LoadingScreen />; // Show the loading screen while the auth check or data loading is in progress
+    }
 
     return (
         <Layout sidebarTitle="Butterfly" sidebarItems={items}>

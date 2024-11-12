@@ -76,12 +76,8 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error}) => {
         idFile,
         email,
         onRegister: (data) => {
-            // Now you have access to the userId
-            console.log('Registration successful:', data);
+            console.log('Registration successful:', data); // Now you have access to the userId
             const { userId } = data; // Extract the userId from data
-            console.log('User ID:', userId); // You can see the userId here
-            
-            // Now use the userId in the URL param for verification
             router.push(`/register/verify/email/?user=${encodeURIComponent(userId)}`);
         },
         setValidationError,

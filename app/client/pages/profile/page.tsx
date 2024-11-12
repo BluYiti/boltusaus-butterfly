@@ -5,8 +5,12 @@ import React, { useState, useEffect } from 'react';
 import { account, databases } from '@/appwrite'; // Importing Appwrite services
 import { Query } from 'appwrite'; // Import the Query class for filtering
 import { fetchProfileImageUrl } from "@/hooks/userService";
+import useAuthCheck from "@/auth/page";
+import LoadingScreen from "@/components/LoadingScreen";
 
 const ProfilePage: React.FC = () => {
+  
+  const { loading: authLoading } = useAuthCheck(['client']); // Call the useAuthCheck hook
   const [name, setName] = useState<string>(''); // Placeholder for the user's name
   const [userData, setUserData] = useState<any>(null); // State to store user profile data
   const [profileImageUrls, setProfileImageUrls] = useState({});
@@ -54,6 +58,10 @@ const ProfilePage: React.FC = () => {
 
     fetchUserData();
   }, []);
+  
+  if (authLoading ) {
+    return <LoadingScreen />; // Show the loading screen while the auth check or data loading is in progress
+}
 
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>

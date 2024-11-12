@@ -180,8 +180,10 @@ const handleSubmit = async (
         // Customize error message for 409 Conflict
         if (error.code === 409) {
             errorMessage = 'Duplicate User detected.';
+            await account.deleteSessions();
         } else {
             errorMessage = error.message || 'An error occurred during registration.';
+            await account.deleteSessions();
         }
     
         formData.setValidationError(errorMessage);

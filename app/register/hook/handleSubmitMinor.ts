@@ -67,8 +67,6 @@ const handleSubmit = async (
 
     setLoading(true); // Set loading to true when submit starts
     setButtonClicked(true); // Show the button as clicked
-    e.preventDefault();
-    formData.setValidationError(null);
 
     console.log('Email being used for registration:', formData.email);
 
@@ -102,10 +100,10 @@ const handleSubmit = async (
         return;
     }
 
-    const fullName = `${formData.firstName} ${formData.lastName}`;
-    const address = `${formData.street}, ${formData.barangay}, ${formData.city}, ${formData.province}, ${formData.country}`;
-
     try {
+        const fullName = `${formData.firstName} ${formData.lastName}`;
+        const address = `${formData.street}, ${formData.barangay}, ${formData.city}, ${formData.province}, ${formData.country}`;
+        
         // Create the user
         const userResponse = await account.create(ID.unique(), formData.email, formData.password, fullName);
         const accountId = userResponse.$id;
@@ -180,10 +178,10 @@ const handleSubmit = async (
         // Customize error message for 409 Conflict
         if (error.code === 409) {
             errorMessage = 'Duplicate User detected.';
-            setLoading(false);
+            await account.deleteSessions();
         } else {
             errorMessage = error.message || 'An error occurred during registration.';
-            setLoading(false);
+            await account.deleteSessions();
         }
     
         formData.setValidationError(errorMessage);

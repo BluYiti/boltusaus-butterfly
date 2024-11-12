@@ -25,6 +25,7 @@ const AppointmentBooking = () => {
     selectedDay: null,
     selectedTime: null,
     selectedTherapist: null,
+    selectedTherapistId: null,
     selectedMode: null,
     appointmentBooked: false,
     createdAt: today,
@@ -39,7 +40,7 @@ const AppointmentBooking = () => {
   const [paymentStatus, setPaymentStatus] = useState(null);
   const [declineReason, setDeclineReason] = useState(null);
   const [psychotherapists, setPsychotherapists] = useState([]);
-  const [selectedTherapistId, setSelectedTherapistId] = useState(Number);
+  const [selectedTherapistId, setSelectedTherapistId] = useState<Number | null>(null); // Start with null
   const [profileImageUrls, setProfileImageUrls] = useState({});
   const [showPrompt, setShowPrompt] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -91,6 +92,22 @@ const AppointmentBooking = () => {
       default:
         return null;
     }
+  };
+
+  // Define a mapping from month name to number (0-based index)
+  const monthMap: { [key: string]: number } = {
+    January: 0,
+    February: 1,
+    March: 2,
+    April: 3,
+    May: 4,
+    June: 5,
+    July: 6,
+    August: 7,
+    September: 8,
+    October: 9,
+    November: 10,
+    December: 11
   };
 
   useEffect(() => {
@@ -184,22 +201,6 @@ const AppointmentBooking = () => {
           // Extract the day, month, and slots (time)
           const { day, month, slots } = booking;
           console.log("Booking Data:", booking);
-        
-          // Define a mapping from month name to number (0-based index)
-          const monthMap: { [key: string]: number } = {
-            January: 0,
-            February: 1,
-            March: 2,
-            April: 3,
-            May: 4,
-            June: 5,
-            July: 6,
-            August: 7,
-            September: 8,
-            October: 9,
-            November: 10,
-            December: 11
-          };
         
           // Convert the month name to the corresponding number
           const monthNumber = monthMap[month]; // Should give you the correct number (e.g., November -> 10)
@@ -319,7 +320,11 @@ const AppointmentBooking = () => {
                               className={`mt-2 py-1 px-3 rounded ${appointmentData.selectedTherapist?.$id === therapist.$id ? 'bg-[#2563EB] text-white' : 'bg-gray-300 text-blue-500 hover:bg-gray-400'}`}
                               onClick={() => {
                                 if (appointmentData.allowTherapistChange) {
-                                  setAppointmentData((prev) => ({ ...prev, selectedTherapist: therapist }));
+                                  setAppointmentData((prev) => ({
+                                    ...prev,
+                                    selectedTherapist: therapist,
+                                    selectedTherapistId: therapist.$id // Update with therapist ID
+                                  }));
                                 }
                               }}
                               disabled={appointmentData.selectedTherapist?.$id === therapist.$id && !appointmentData.allowTherapistChange}
@@ -367,6 +372,7 @@ const AppointmentBooking = () => {
                       setSelectedMonth={(month) => setAppointmentData((prev) => ({ ...prev, selectedMonth: month, selectedDay: null }))}
                       selectedTime={appointmentData.selectedTime}
                       setSelectedTime={(time) => setAppointmentData((prev) => ({ ...prev, selectedTime: time }))}
+                      selectedTherapistId={appointmentData.selectedTherapistId}
                       isTherapistSelected={!!appointmentData.selectedTherapist} // Pass the selection state
                     />
                   </div>
