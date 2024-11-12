@@ -1,4 +1,4 @@
-import { databases } from '@/appwrite';
+import { databases, Query } from '@/appwrite';
 import React, { useState, useEffect } from 'react';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
@@ -14,6 +14,7 @@ interface CalendarProps {
     setSelectedMonth: (month: string) => void;
     selectedTime: string | null;
     setSelectedTime: (time: string | null) => void;
+    selectedTherapistId: string | null;
     isTherapistSelected: boolean;
 }
 
@@ -29,6 +30,7 @@ const Calendar: React.FC<CalendarProps> = ({
     setSelectedMonth,
     selectedTime,
     setSelectedTime,
+    selectedTherapistId,
     isTherapistSelected,
 }) => {
     const [date, setDate] = useState(new Date());
@@ -77,20 +79,24 @@ const Calendar: React.FC<CalendarProps> = ({
     const isPreviousMonthAvailable = checkPreviousMonthAvailability(); 
 
     useEffect(() => {
-        // Fetch the bookings data from Appwrite's "Bookings" collection
         const fetchBookedSlots = async () => {
-            try {
-                const bookingsResponse = await databases.listDocuments('Butterfly-Database', 'Bookings');
-                const bookedData = bookingsResponse.documents; // Assuming the response has a "documents" field with the slots
+            if (!selectedTherapistId) return; // Ensure therapist is selected
 
-                setBookedSlots(bookedData); // Store the fetched booked slots in state
+            try {
+                const bookingsResponse = await databases.listDocuments(
+                    'Butterfly-Database', 'Bookings',
+                    [Query.equal('psychotherapist', selectedTherapistId)] // Filter by therapistId
+                );
+                const bookedData = bookingsResponse.documents;
+                console.log("Fetched Booked Slots:", bookedData); // Log to verify the fetched data
+                setBookedSlots(bookedData); // Update state with booked slots
             } catch (error) {
                 console.error('Error fetching booked slots:', error);
             }
         };
 
-        fetchBookedSlots(); // Fetch bookings on component mount
-    }, []);
+        fetchBookedSlots();
+    }, [selectedTherapistId]); // Re-run when therapistId changes
 
     const handleNextMonthClick = () => {
         const newDate = new Date(date.getFullYear(), date.getMonth() + 1, 1);
@@ -124,9 +130,15 @@ const Calendar: React.FC<CalendarProps> = ({
         setIsFormComplete(!!selectedDay && !!selectedTime);
     }, [selectedDay, selectedTime]);
 
+    // Check if a specific time slot for the selected day is booked
     const isSlotBooked = (day: number, time: string) => {
         return bookedSlots.some(
-            (slot) => slot.day === day && slot.month === selectedMonth && slot.slots === time && slot.status === 'pending'
+            (slot) => 
+                slot.day === day &&
+                slot.month === selectedMonth && 
+                slot.slots === time &&  
+                (slot.status === 'pending' || slot.status === 'paid') && // Ensure status is either 'pending' or 'paid'
+                slot.therapistId === selectedTherapistId // Ensure therapistId matches
         );
     };
 
@@ -190,7 +202,7 @@ const Calendar: React.FC<CalendarProps> = ({
                                         : "rounded-3xl bg-[#49c987] text-white font-poppins hover:bg-green-300 hover:text-black hover:scale-110"
                                 }`}
                             onClick={() => !isPastDate && !isFullyBooked && isTherapistSelected && setSelectedDay(day)}
-                            disabled={isPastDate || !isTherapistSelected || isFullyBooked} // Disable the button if fully booked
+                            disabled={isPastDate || !isTherapistSelected || isFullyBooked} // Disable if fully booked
                         >
                             {day}
                         </button>
