@@ -25,6 +25,7 @@ interface Payment {
   psychoLastName: string;
   email: string;
   createdAt: Date;
+  declineReason: string;
 }
 
 const ClientsPayment = () => {
@@ -64,10 +65,19 @@ const ClientsPayment = () => {
           psychoFirstName: doc.psychotherapist.firstName,
           psychoLastName: doc.psychotherapist.lastName,
           email: doc.client.userid.email,
-          createdAt: doc.$createdAt
+          createdAt: doc.$createdAt,
+          declineReason: doc.declineReason,
         }));        
 
         setPayments(fetchedPayments); // Store the payments in the state
+
+        // Extract the query parameter from the URL
+        const url = new URL(window.location.href);
+        const tab = url.searchParams.get("tab");
+        
+        if (tab) {
+          setActiveTab(tab); // Set active tab based on the query parameter
+        }
       } catch (error) {
         console.error("Error fetching data: ", error);
       } finally {
@@ -140,6 +150,32 @@ const ClientsPayment = () => {
     </div>
   );
 
+  const renderDeclinedClients = () => (
+    <div className="mt-4 space-y-3">
+      {payments.filter((client) => client.status === "declined")
+        .map((client, index) => (
+          <div
+            key={index}
+            className="flex items-center justify-between p-4 bg-white shadow rounded-lg"
+          >
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 rounded-full bg-gray-200"></div>
+              <div>
+                <h4 className="font-semibold">{client.clientFirstName}</h4>
+                <p className="text-sm text-gray-500">{client.email}</p>
+              </div>
+            </div>
+            <button
+              className="px-4 py-2 text-sm font-semibold text-white bg-blue-400 rounded-full hover:bg-blue-600 transition"
+              onClick={() => openModal(client)}
+            >
+              View Payment
+            </button>
+          </div>
+        ))}
+    </div>
+  );
+
   if (authLoading || loading) {
     return <LoadingScreen />;
   }
@@ -154,7 +190,7 @@ const ClientsPayment = () => {
         <div className="mt-24 px-5">
           <div className="flex items-center justify-between">
             <div className="flex space-x-8 border-b">
-              {["Pending", "Paid"].map((tab) => (
+              {["Pending", "Paid", "Declined"].map((tab) => (
                 <button
                   key={tab}
                   className={`pb-2 text-lg font-medium transition ${
@@ -213,6 +249,16 @@ const ClientsPayment = () => {
               }`}
             >
               {activeTab === "Paid" && renderPaidClients()}
+            </div>
+
+            <div
+              className={`transition-all duration-500 ease-in-out ${
+                activeTab === "Declined"
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-10"
+              }`}
+            >
+              {activeTab === "Declined" && renderDeclinedClients()}
             </div>
           </div>
         </div>
