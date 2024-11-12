@@ -14,17 +14,18 @@ const VerifyPage: React.FC = () => {
         const urlParams = new URLSearchParams(window.location.search);
         const userId = urlParams.get('userId');
         const secret = urlParams.get('secret');
-        
+    
         console.log('userId:', userId, 'secret:', secret); // Log to check the values
     
         const verifyUser = async () => {
             if (userId && secret) {
                 try {
+                    console.log('Making verification request...');
                     const response = await account.updateVerification(userId, secret);
                     console.log('Verification response:', response); // Log success response
                     setIsVerified(true);
                 } catch (error: any) {
-                    console.error('Verification failed:', error.response ? error.response.message : error); // Log the error details
+                    console.error('Verification failed:', error); // Log the entire error object
                     setIsVerified(false);
                 } finally {
                     setLoading(false);
@@ -38,6 +39,7 @@ const VerifyPage: React.FC = () => {
     
         verifyUser();
     }, [router]);
+    
     
 
     const handleLoginRedirect = () => {
