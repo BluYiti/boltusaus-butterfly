@@ -258,33 +258,33 @@ const AppointmentBooking = () => {
         <div className="min-h-screen flex items-center justify-center bg-gray-100">
           <div className="bg-white p-8 rounded-lg shadow-lg text-center max-w-lg mx-auto">
             {paymentStatus === "pending" ? (
-              <>
-                <h1 className="text-3xl font-bold text-blue-400 mb-4">Appointment Confirmation</h1>
-                <p className="text-xl text-gray-600">
-                  You will receive a confirmation notification for your appointment in <strong>1-2 days</strong>. If you have any questions in the meantime, feel free to reach out to your therapist via the communication tab.
-                </p>
-                <p className="text-lg text-gray-600 mt-5">Your payment status is {paymentStatus}.</p>
-              </>
-            ) : paymentStatus === "paid" ? (
-              <>
-                <h1 className="text-3xl font-bold text-green-400 mb-4">Appointment Confirmed</h1><p className="text-xl text-gray-600">
-                Your appointment has been confirmed. Please wait for the scheduled date to arrive, and feel free to contact your psychotherapist with any questions about your upcoming appointment.
-                </p>
-                <p className="text-lg text-gray-600 mt-5">Your payment status is {paymentStatus}.</p>
-              </>
-            ) : (
-              <>
-                <h1 className="text-3xl font-bold text-red-400 mb-4">Appointment Declined</h1><p className="text-xl text-gray-600">
-                  Your appointment has been declined. Please contact your psychotherapist for any questions about your appointment being declined.
-                </p>
-                <p className="text-lg text-gray-600 mt-5">Your payment status is {paymentStatus}.</p>
-                <p className="text-lg text-gray-600 mt-5">The reason for your appointment decline:</p>
-                <p className="text-lg text-gray-600">"{declineReason}"</p>
-              </>
-            )
-
+                <>
+                  <h1 className="text-3xl font-bold text-blue-400 mb-4">Appointment Confirmation</h1>
+                  <p className="text-xl text-gray-600">
+                    You will receive a confirmation notification for your appointment in <strong>1-2 days</strong>. If you have any questions in the meantime, feel free to reach out to your therapist via the communication tab.
+                  </p>
+                  <p className="text-lg text-gray-600 mt-5">Your payment status is {paymentStatus}.</p>
+                  <p className="text-lg text-gray-600 mt-5">Your payment status is {paymentStatus}.</p>
+                  <p className="text-lg text-gray-600 mt-2">{appointmentData.bookingMessage}</p>
+                </>
+              ) : paymentStatus === "paid" ? (
+                <>
+                  <h1 className="text-3xl font-bold text-green-400 mb-4">Appointment Confirmed</h1><p className="text-xl text-gray-600">
+                  Your appointment has been confirmed. Please wait for the scheduled date to arrive, and feel free to contact your psychotherapist with any questions about your upcoming appointment via the communication tab.
+                  </p>
+                  <p className="text-lg text-gray-600 mt-5">Your payment status is {paymentStatus}.</p>
+                  <p className="text-lg text-gray-600 mt-2">{appointmentData.bookingMessage}</p>
+                </>
+              ) : (
+                <>
+                  <h1 className="text-3xl font-bold text-red-400 mb-4">Payment Declined</h1><p className="text-xl text-gray-600">
+                    Your appointment has been declined. Please contact your psychotherapist for any questions about your appointment being declined via the communication tab.
+                  </p>
+                  <p className="text-lg text-gray-600 mt-5">The reason for your appointment decline:</p>
+                  <p className="text-lg text-gray-600">"{declineReason}"</p>
+                </>
+              )
             }
-            <p className="text-lg text-gray-600 mt-2">{appointmentData.bookingMessage}</p>
           </div>
         </div>
       </Layout>
