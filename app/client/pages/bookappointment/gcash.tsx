@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Modal from '@/components/Modal';
 import { account, databases } from '@/appwrite';
-import { fetchClientId, restrictSelectingTherapist, updateClientPsychotherapist } from '@/hooks/userService';
+import { fetchClientId, restrictSelectingTherapist, updateClientPsychotherapist, uploadReceiptImage } from '@/hooks/userService'; // Assuming you have the uploadReceiptImage function
 import SuccessModal from './successfulbooking';
 
 interface GCashPaymentProps {
@@ -15,6 +15,8 @@ const GCashPayment: React.FC<GCashPaymentProps> = ({ isOpen, onClose, appointmen
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   const [showSuccess, setShowSuccess] = useState<boolean>(false); // State for success modal
+  const [receipt, setReceipt] = useState<File | null>(null); // State for receipt file
+  const [receiptPreview, setReceiptPreview] = useState<string | null>(null); // State for receipt preview URL
 
   const handleReferenceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let inputValue = e.target.value;
@@ -30,37 +32,60 @@ const GCashPayment: React.FC<GCashPaymentProps> = ({ isOpen, onClose, appointmen
     setReferenceNumber(inputValue);
   };
 
+  const handleReceiptChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files ? e.target.files[0] : null;
+    if (file) {
+      setReceipt(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setReceiptPreview(reader.result as string); // Set the receipt preview URL
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-  
+
     // Simple validation for the reference number
     if (referenceNumber.length !== 13) {
       setError('Reference number must be 13 digits long');
       return;
     }
-  
-    // Reset the error if validation passes
+
+    // Ensure receipt is uploaded
+    if (!receipt) {
+      setError('Please upload a receipt');
+      return;
+    }
+
     setError('');
     setIsSubmitting(true);
-  
+
     try {
-      console.log('Submitting reference number:', referenceNumber);
-  
-      // Fetch user data
+      // 1. Upload the receipt image to the storage and get the receipt ID
+      const receiptUploadResponse = await uploadReceiptImage(receipt); // Assuming you have the uploadReceiptImage function
+      const receiptId = receiptUploadResponse.id;
+
+      if (!receiptId) {
+        setError('Failed to upload receipt');
+        return;
+      }
+
+      // 2. Fetch user data
       const user = await account.get();
       const clientId = await fetchClientId(user.$id);
       const response = await databases.getDocument('Butterfly-Database', 'Client', clientId);
       let psychoId = response.psychotherapist;
-  
-      // Check if psychoId is null or empty
+
       if (!psychoId) {
-        // If psychoId is null or empty, use the selected psychotherapist's ID
         psychoId = appointmentData.selectedTherapist.$id;
         updateClientPsychotherapist(clientId, psychoId);
       }
-  
+
       restrictSelectingTherapist(clientId);
-  
+
+      // 3. Create the booking data
       const BookingsData = {
         client: clientId,
         psychotherapist: appointmentData.selectedTherapist.$id,
@@ -71,10 +96,10 @@ const GCashPayment: React.FC<GCashPaymentProps> = ({ isOpen, onClose, appointmen
         month: appointmentData.selectedMonth,
         day: appointmentData.selectedDay
       };
-  
-      // Get the document ID of the newly created booking
-      const bookingId = await addBookingData(BookingsData); 
-  
+
+      const bookingId = await addBookingData(BookingsData);
+
+      // 4. Create the payment data with the receipt ID
       const PaymentData = {
         referenceNo: referenceNumber,
         channel: "gcash",
@@ -82,47 +107,43 @@ const GCashPayment: React.FC<GCashPaymentProps> = ({ isOpen, onClose, appointmen
         status: "pending",
         client: clientId,
         psychotherapist: appointmentData.selectedTherapist.$id,
-        booking: bookingId,  // Set the booking document ID
+        booking: bookingId,
+        receipt: receiptId  // Set the receipt ID here
       };
-  
-      // Add payment data
-      await addPaymentData(PaymentData);
-  
-      console.log("Booking and Payment data successfully created.");
-  
 
+      // Add payment data to the database
       await addPaymentData(PaymentData);
+
+      console.log("Booking and Payment data successfully created.");
 
       setShowSuccess(true); // Show success modal
-      console.log("showing success modal");
 
-      setTimeout(function() {
-          window.location.reload();
+      setTimeout(() => {
+        window.location.reload();
       }, 5000);
     } catch (err) {
       console.error('Submission failed:', err);
+      setError('An error occurred while submitting your data. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
-  };  
+  };
 
-  async function addBookingData(BookingsData: { client: string; psychotherapist: string; slots: any; status: any; createdAt: any; mode: any; month: any; day: any; }) {
+  async function addBookingData(BookingsData: any) {
     try {
       const response = await databases.createDocument('Butterfly-Database', 'Bookings', 'unique()', BookingsData);
-      console.log("Created Bookings Data", response);
-      return response.$id; // Return the document ID
+      return response.$id;
     } catch (error) {
-      console.error(error); // Log the error for debugging
-      throw error; // Rethrow the error to handle it in the calling function
+      console.error(error);
+      throw error;
     }
-  }  
+  }
 
-  async function addPaymentData(PaymentData: { referenceNo: string; channel: string; amount: number; status: string; client: string; psychotherapist: string; }) {
+  async function addPaymentData(PaymentData: any) {
     try {
       await databases.createDocument('Butterfly-Database', 'Payment', 'unique()', PaymentData);
-      console.log("Created Payment Data");
     } catch (error) {
-      console.error(error); // Log the error for debugging
+      console.error(error);
     }
   }
 
@@ -137,6 +158,21 @@ const GCashPayment: React.FC<GCashPaymentProps> = ({ isOpen, onClose, appointmen
             <label className="block mb-2 text-gray-800 text-center">Amount to be paid: ₱1,000.00</label>
 
             <img src="/images/gcashqr.png" alt="gcashqr" className="mb-4" />
+
+            {/* Receipt Upload */}
+            <label className="block text-gray-800 mb-2">Upload Your Receipt</label>
+            <input
+              type="file"
+              accept="image/*,application/pdf"
+              onChange={handleReceiptChange}
+              className="w-full p-2 border border-gray-300 rounded-lg mb-4"
+            />
+            {receiptPreview && (
+              <div className="mb-4">
+                <p className="text-gray-800">Receipt Preview:</p>
+                <img src={receiptPreview} alt="Receipt Preview" className="max-w-full max-h-40 object-contain" />
+              </div>
+            )}
 
             {/* Reference Number Input */}
             <label htmlFor="referenceNumber" className="block text-gray-800 mb-2">Enter Reference Number</label>
@@ -156,8 +192,8 @@ const GCashPayment: React.FC<GCashPaymentProps> = ({ isOpen, onClose, appointmen
 
             <button
               type="submit"
-              className={`w-full p-2 bg-green-500 text-white rounded-lg ${isSubmitting || referenceNumber.trim().length !== 13 ? 'opacity-50 cursor-not-allowed' : ''}`}
-              disabled={isSubmitting || referenceNumber.trim().length !== 13}
+              className={`w-full p-2 bg-green-500 text-white rounded-lg ${isSubmitting || referenceNumber.trim().length !== 13 || !receipt ? 'opacity-50 cursor-not-allowed' : ''}`}
+              disabled={isSubmitting || referenceNumber.trim().length !== 13 || !receipt}
             >
               {isSubmitting ? 'Processing...' : 'Next'}
             </button>
@@ -167,8 +203,8 @@ const GCashPayment: React.FC<GCashPaymentProps> = ({ isOpen, onClose, appointmen
 
       {/* Success Modal */}
       <SuccessModal
-        onClose={() => setShowSuccess(false)} // Close success modal
-        isVisible={showSuccess} // Pass showSuccess state to SuccessModal
+        onClose={() => setShowSuccess(false)}
+        isVisible={showSuccess}
       />
     </Modal>
   );
