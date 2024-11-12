@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { Client, Databases } from 'appwrite';
 import items from '@/associate/data/Links';
 import Layout from '@/components/Sidebar/Layout';
-import { CSSTransition, SwitchTransition } from 'react-transition-group'; // For slide transitions
 import PaymentModal from '@/associate/components/PaymentModal';
 
 const PaymentsHistory = () => {

@@ -71,7 +71,7 @@ useEffect(() => {
       );
       const paymentsData = response.documents.map((doc) => ({
         clientName: doc.client?.name || 'N/A', // Access client.name with a fallback if undefined
-        accountname: doc.accountname,
+        firstname: doc.client.firstname,
         channel: doc.channel,
         status: doc.status,
       }));
@@ -257,8 +257,7 @@ useEffect(() => {
                   {payments.length > 0 ? (
                     payments.map((payment, index) => (
                       <li key={index} className="flex justify-between items-center bg-gray-100 rounded-lg px-4 py-2">
-                        <span className="flex-1 text-center">{payment.accountname}</span>
-                        <span className="flex-1 text-center">{payment.client?.name}</span>
+                        <span className="flex-1 text-center">{payment.firstname}</span>
                         <span className="flex-1 text-center">{payment.channel}</span>
                         <span
                           className={`flex-none px-4 py-1 rounded-full text-white text-center ${

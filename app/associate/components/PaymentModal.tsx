@@ -23,12 +23,6 @@ const PaymentModal = ({ isOpen, onClose, client }) => {
           >
             Back
           </button>
-          <button
-            className="px-4 py-2 text-sm font-semibold text-white bg-blue-400 rounded-full hover:bg-blue-600 transition"
-            onClick={onClose} // Handle the confirm action as needed
-          >
-            Confirm
-          </button>
         </div>
       </div>
     </div>
