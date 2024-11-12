@@ -88,7 +88,7 @@ const ProfilePage: React.FC = () => {
 
             {/* Information Section */}
             <div className="bg-gray-50 p-8 rounded-lg shadow-md">
-              <h3 className="text-lg font-bold text-gray-700 mb-6">Personal Information</h3>
+              <h2 className="text-lg font-bold text-blue-400 mb-6">Personal Information</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Column 1 */}
                 <div>
