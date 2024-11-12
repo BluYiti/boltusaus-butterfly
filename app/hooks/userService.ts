@@ -212,3 +212,19 @@ export const uploadReceiptImage = async (file: File): Promise<{ id: string } | n
         return null;
     }
 };
+
+// Fetch receipt image URL
+export const fetchReceiptImage = async (receiptId: string): Promise<string | null> => {
+    try {
+        if (receiptId) {
+            // Retrieve the file URL using Appwrite's getFileView
+            const url = storage.getFileView('Images', receiptId);
+            return url; // Return the image URL
+        }
+        return null;
+    } catch (error) {
+        console.error('Error fetching receipt image URL:', error);
+        return null;
+    }
+};
+

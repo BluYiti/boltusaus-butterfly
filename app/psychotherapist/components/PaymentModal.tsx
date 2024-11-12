@@ -1,6 +1,9 @@
+'use client'
+
 import { databases } from '@/appwrite';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
+import ShowReceiptModal from './ShowReceiptModal'; // Adjust the path as needed
 
 // Helper function to format the date
 const formatDate = (dateString) => {
@@ -22,6 +25,7 @@ const PaymentModal = ({ isOpen, onClose, client }) => {
   const router = useRouter();
   const [declineReason, setDeclineReason] = useState('');
   const [isDeclining, setIsDeclining] = useState(false); // Flag for showing decline reason input
+  const [showReceipt, setShowReceipt] = useState(false); // State for modal visibility
   const [error, setError] = useState(''); // State to manage the error message
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -70,6 +74,10 @@ const PaymentModal = ({ isOpen, onClose, client }) => {
       .join(' '); // Join the words back together
   };
 
+  const handleShowReceipt = () => {
+    setShowReceipt(true); // Open the receipt modal
+  };
+
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded-lg shadow-lg w-96">
@@ -85,6 +93,15 @@ const PaymentModal = ({ isOpen, onClose, client }) => {
         <p><strong>Status:</strong> {client.status}</p>
         {/* Format the date */}
         <p><strong>Transaction Date and Time:</strong> {formatDate(client.createdAt)}</p>
+        <p className="text-gray-800">
+          <strong>Receipt:</strong>
+          <button 
+            className="bg-blue-400 ml-2 text-white py-2 px-6 rounded-3xl text-md hover:bg-blue-600 transition duration-300"
+            onClick={handleShowReceipt}
+          >
+            Click to view
+          </button>
+        </p>
         {client.status === 'declined' ? (
           <p className='mt-1'><strong>Reason for decline:</strong> {client.declineReason}</p>
         ): (<></>)}
@@ -116,6 +133,13 @@ const PaymentModal = ({ isOpen, onClose, client }) => {
             </div>
           </div>
         )}
+
+        {/* ShowReceiptModal integration */}
+        <ShowReceiptModal
+          isOpen={showReceipt}
+          onClose={() => setShowReceipt(false)}
+          imageUrl={client.receipt} // Pass the receipt object
+        />
 
         {/* Buttons */}
         {!isDeclining && (

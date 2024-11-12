@@ -26,6 +26,7 @@ interface Payment {
   email: string;
   createdAt: Date;
   declineReason: string;
+  receipt: string;
 }
 
 const ClientsPayment = () => {
@@ -67,6 +68,7 @@ const ClientsPayment = () => {
           email: doc.client.userid.email,
           createdAt: doc.$createdAt,
           declineReason: doc.declineReason,
+          receipt: doc.receipt
         }));        
 
         setPayments(fetchedPayments); // Store the payments in the state
