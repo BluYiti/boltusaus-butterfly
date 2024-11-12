@@ -311,7 +311,7 @@ const Dashboard: React.FC = () => {
           {/* Payments Status Section */}
           <div className="bg-white p-4 rounded-lg shadow-md transition hover:shadow-lg">
             <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold mb-4 text-green-500">Payments Status</h3>
+              <h3 className="text-lg font-semibold mb-4 text-yellow-500">Pending Payments</h3>
               <button
                   onClick={handleViewPaymentClick}
                   className="bg-blue-400 rounded-full text-white px-2 py-1 hover:bg-blue-600 transition -mt-2"
