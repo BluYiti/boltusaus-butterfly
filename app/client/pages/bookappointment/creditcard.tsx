@@ -105,7 +105,7 @@ const CreditCardPayment: React.FC<CreditCardPaymentProps> = ({ isOpen, onClose, 
     <>
       {/* Credit Card Payment Modal */}
       <Modal isOpen={isOpen} onClose={onClose}>
-        <div className="p-6 flex flex-col items-center">
+        <div className="p-6 flex flex-col items-center max-h-[85vh] overflow-y-auto"> {/* Make modal content scrollable */}
           <h1 className="text-3xl font-bold mb-4">BPI Card Payment</h1>
           <p className="text-gray-600">
             You have selected BPI Card as your payment method.

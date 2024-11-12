@@ -11,7 +11,7 @@ import Calendar from '@/components/Calendar/Calendar';
 import { fetchPsychoId } from '@/hooks/userService';
 
 const Dashboard: React.FC = () => {
-  const authLoading = useAuthCheck(['psychotherapist']); // Call the useAuthCheck hook
+  const { loading: authLoading} = useAuthCheck(['psychotherapist']); // Call the useAuthCheck hook
   const [userName, setUserName] = useState<string | null>(null); // State to track user name
   const [evaluationData, setEvaluationData] = useState<any[]>([]);
   const [missedData, setMissedData] = useState<any[]>([]);

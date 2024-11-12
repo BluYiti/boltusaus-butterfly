@@ -130,7 +130,7 @@ const GCashPayment: React.FC<GCashPaymentProps> = ({ isOpen, onClose, appointmen
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <div className="p-6 flex flex-col items-center">
+      <div className="p-6 flex flex-col items-center max-h-[85vh] overflow-y-auto">
         <h1 className="text-2xl font-bold mb-4">GCash Payment</h1>
         <p className="text-gray-600">You have selected GCash as your payment method.</p>
         <div className="mt-6 bg-gray-100 p-4 rounded-lg w-full max-w-sm">
