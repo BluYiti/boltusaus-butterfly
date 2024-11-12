@@ -180,7 +180,11 @@ const GoalsPage = () => {
 
     return (
         <Layout sidebarTitle="Butterfly" sidebarItems={items}>
-            <div className="flex-grow p-8 bg-gradient-to-br from-blue-50 to-blue-100">
+            <div 
+                className="min-h-screen p-8 bg-cover bg-center"
+                style={{ backgroundImage: "url('/images/contact.jpeg')" }} // Update the path to your image
+            > 
+            
                 <div className="bg-white shadow-lg rounded-xl p-8 mb-10 border border-blue-200">
                     <h2 className="text-4xl font-bold text-blue-500 mb-4">Hello, {userName}!</h2>
                     <p className="text-gray-600 text-lg">Set and track your personal goals with ease.</p>
@@ -255,10 +259,10 @@ const GoalsPage = () => {
                     </div>
 
 
-                    {/* Mood Tracker Section */}
+                   {/* Mood Tracker Section */}
                     <div className="flex-1 bg-white shadow-lg rounded-xl p-6 border border-gray-200">
                         <h3 className="font-semibold text-blue-400">Mood Tracker</h3>
-                        <div className="grid grid-cols-2 gap-3 mt-4">
+                        <div className="flex flex-col gap-3 mt-4">
                             {[
                                 { label: 'HAPPY', emoji: '😊' },
                                 { label: 'SAD', emoji: '😢' },
@@ -295,13 +299,8 @@ const GoalsPage = () => {
                                 );
                             })}
                         </div>
-                        <button
-                            onClick={() => setMood('')}
-                            className="mt-6 bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition-colors duration-300 shadow-md"
-                        >
-                            Cancel Mood Selection
-                        </button>
                     </div>
+
                 </div>
 
                 {/* Save Button and Modal */}
