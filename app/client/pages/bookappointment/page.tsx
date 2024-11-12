@@ -265,7 +265,6 @@ const AppointmentBooking = () => {
                     You will receive a confirmation notification for your appointment in <strong>1-2 days</strong>. If you have any questions in the meantime, feel free to reach out to your therapist via the communication tab.
                   </p>
                   <p className="text-lg text-gray-600 mt-5">Your payment status is {paymentStatus}.</p>
-                  <p className="text-lg text-gray-600 mt-5">Your payment status is {paymentStatus}.</p>
                   <p className="text-lg text-gray-600 mt-2">{appointmentData.bookingMessage}</p>
                 </>
               ) : paymentStatus === "paid" ? (
