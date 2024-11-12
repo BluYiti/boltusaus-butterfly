@@ -155,22 +155,20 @@ const handleSubmit = async (
             birthdate: formData.birthday,
             age: formData.age,
             address,
-            type: 'adult',
+            type: 'minor',
             emergencyContactName: formData.emergencyContactName,
             emergencyContact: formData.emergencyContactNumber,
             state: 'new',
-            status: null,
             sex: formData.sex,
-            idFile: fileId
+            idFile: fileId,
+            psychotherapist: null,
+            certificate: null,
+            status: null,
+            allowTherapistChange: true
         };
 
         await databases.createDocument('Butterfly-Database', 'Client', 'unique()', clientData);
         console.log('Client Collection document added');
-
-        // Optionally, store the role and status in the user preferences
-        await account.updatePrefs({
-            role: 'New Client',
-        });        
 
         // Redirect or perform further actions after successful login and JWT creation
         formData.onRegister({ ...accountData, userId: accountId });
@@ -182,8 +180,10 @@ const handleSubmit = async (
         // Customize error message for 409 Conflict
         if (error.code === 409) {
             errorMessage = 'Duplicate User detected.';
+            setLoading(false);
         } else {
             errorMessage = error.message || 'An error occurred during registration.';
+            setLoading(false);
         }
     
         formData.setValidationError(errorMessage);

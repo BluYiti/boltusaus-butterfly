@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { databases, storage } from "@/appwrite"; // Make sure to initialize the Appwrite storage service
 import Image from "next/image";
 import { Models, Query } from 'appwrite';
+import { useRouter } from "next/navigation";
 
 interface ReferredClientProfileModalProps {
   clientId: string;
@@ -13,6 +14,7 @@ const ReferredClientProfileModal: React.FC<ReferredClientProfileModalProps> = ({
   const [clientData, setClientData] = useState<Models.Document | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [isReportsModalOpen, setIsReportsModalOpen] = useState(false);
   const [selectedReportDetails, setSelectedReportDetails] = useState<string | null>(null);
@@ -77,8 +79,9 @@ const ReferredClientProfileModal: React.FC<ReferredClientProfileModalProps> = ({
       );
   
       console.log('Document updated with status "attached":', updatedDocument);
-  
+
       window.location.reload();
+      router.push(`/psychotherapist/pages/clients?tab=For%20Referral`);
       setIsConfirmModalOpen(false);
     } catch (err: unknown) {
       console.error("Error referring client:", err);

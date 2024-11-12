@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Question from '@/preassessment/components/Question';
 import NavigationButtons from '@/preassessment/components/NavigationButtons';
 import { useAssessment } from '@/preassessment/hooks/useAssessment';
@@ -23,8 +23,15 @@ export default function PreAssessmentPage() {
     closeModal, // Close modal handler
     isAllAnswered,
   } = useAssessment(questions || []);
+  
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isReviewPage = currentQuestionIndex === questions.length;
+
+  const handleSubmit = () => {
+    setIsSubmitting(true);
+    handleFormSubmit(); // Proceed with the existing form submission logic
+  };
 
   return (
     <div className="min-h-screen flex justify-center items-center bg-blue-500">
@@ -61,9 +68,10 @@ export default function PreAssessmentPage() {
             </button>
             <button
               className="flex-1 bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-700"
-              onClick={handleFormSubmit} // Opens the confirmation modal
+              onClick={handleSubmit} // Now this triggers the submission logic
+              disabled={isSubmitting} // Disable the button while submitting
             >
-              Submit
+              {isSubmitting ? "Submitting..." : "Submit"}
             </button>
           </div>
         </div>
