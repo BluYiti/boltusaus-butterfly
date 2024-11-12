@@ -1,7 +1,6 @@
 'use client'
 import React, { useState, useEffect } from 'react';
 import Layout from '@/components/Sidebar/Layout';
-import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { account, databases } from '@/appwrite';
 import { Query } from 'appwrite';
 import items from './data/Links';
@@ -304,7 +303,9 @@ const Dashboard: React.FC = () => {
               setSelectedMonth={(month) => setAppointmentData((prev) => ({ ...prev, selectedMonth: month, selectedDay: null }))}
               selectedTime={appointmentData.selectedTime}
               setSelectedTime={(time) => setAppointmentData((prev) => ({ ...prev, selectedTime: time }))}
-              isTherapistSelected={true}>
+              isTherapistSelected={true} 
+              selectedTherapistId={appointmentData.selectedTherapist}
+              >
             </Calendar>
           </div>
 
