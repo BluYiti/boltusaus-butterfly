@@ -202,6 +202,7 @@ const NewClientDashboard = () => {
                   transform: `translateX(-${(currentIndex / psychotherapists.length) * 100}%)`,
                   width: `${(psychotherapists.length / visibleSlides) * 100}%`,
                 }}
+                
               >
                 {psychotherapists.map((psychotherapist, index) => (
                   <div
