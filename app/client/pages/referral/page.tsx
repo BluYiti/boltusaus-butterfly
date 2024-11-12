@@ -4,8 +4,12 @@ import React, { useState, useEffect } from "react";
 import Layout from "@/components/Sidebar/Layout"; // Adjust the path if necessary
 import items from "@/client/data/Links";
 import Link from "next/link";
+import useAuthCheck from "@/auth/page";
+import LoadingScreen from "@/components/LoadingScreen";
 
 const AppointmentBooking = () => {
+  
+  const { loading: authLoading } = useAuthCheck(['client']); // Call the useAuthCheck hook
   const [modalOpen, setModalOpen] = useState(true); // State to control the modal
  
   useEffect(() => {
@@ -15,6 +19,10 @@ const AppointmentBooking = () => {
   const closeModal = () => {
     setModalOpen(false);
   };
+
+  if (authLoading ) {
+    return <LoadingScreen />; // Show the loading screen while the auth check or data loading is in progress
+}
 
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
