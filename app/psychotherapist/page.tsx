@@ -11,18 +11,14 @@ import Calendar from '@/components/Calendar/Calendar';
 import { fetchPsychoId } from '@/hooks/userService';
 
 const Dashboard: React.FC = () => {
-  const { loading: authLoading } = useAuthCheck(['psychotherapist']); // Call the useAuthCheck hook
-  const [dataLoading, setDataLoading] = useState(true); // State to track if data is still loading
+  const authLoading = useAuthCheck(['psychotherapist']); // Call the useAuthCheck hook
   const [userName, setUserName] = useState<string | null>(null); // State to track user name
-  const [date, setDate] = useState(new Date());
   const [evaluationData, setEvaluationData] = useState<any[]>([]);
   const [missedData, setMissedData] = useState<any[]>([]);
   const [sessionData, setSessionData] = useState<any[]>([]); 
   const [paymentsData, setPaymentsData] = useState<any[]>([]); 
   const [error, setError] = useState<string | null>(null);
-  const [slotsInfo, setSlotsInfo] = useState<number | null>(null);
   const [loading, setLoading] = useState<boolean>(true); // Loading state
-  const [year, setYear] = useState(date.getFullYear());
 
   const today = new Date();
   const currentYear = today.getFullYear();
