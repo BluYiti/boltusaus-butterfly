@@ -23,11 +23,6 @@ const SettingsPage = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  // State for cookie settings
-  const [trackingCookies, setTrackingCookies] = useState(false);
-  const [analyticsCookies, setAnalyticsCookies] = useState(false);
-  const [functionalCookies, setFunctionalCookies] = useState(true);
-
   // Validation check for the password
   const isPasswordValid = newPassword.match(
     /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,12}$/) && newPassword === confirmPassword;
