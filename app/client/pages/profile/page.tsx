@@ -4,12 +4,14 @@ import items from "@/client/data/Links";
 import React, { useState, useEffect } from 'react';
 import { account, databases } from '@/appwrite'; // Importing Appwrite services
 import { Query } from 'appwrite'; // Import the Query class for filtering
+import { fetchProfileImageUrl } from "@/hooks/userService";
 
 const ProfilePage: React.FC = () => {
   const [name, setName] = useState<string>(''); // Placeholder for the user's name
-  const [profilePic, setProfilePic] = useState<string>('/images/hanni2.jpg'); // Path to the profile picture
   const [userData, setUserData] = useState<any>(null); // State to store user profile data
+  const [profileImageUrls, setProfileImageUrls] = useState({});
   const [email, setEmail] = useState<string>(''); // State to store user's email from Appwrite auth
+
 
   useEffect(() => {
     async function fetchUserData() {
@@ -32,6 +34,19 @@ const ProfilePage: React.FC = () => {
         } else {
           console.error("No profile document found for this user.");
         }
+
+        // Fetch profile images for each psychotherapist
+        const profileImages = {};
+        for (const client of userData) {
+          if (client.profilepic) {
+            const url = await fetchProfileImageUrl(client.profilepic);
+            if (url) {
+              profileImages[user.$id] = url;
+            }
+          }
+        }
+
+        setProfileImageUrls(profileImages);
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
@@ -56,7 +71,7 @@ const ProfilePage: React.FC = () => {
             {/* Profile Picture and Name */}
             <div className="relative flex flex-col items-center text-center mb-10">
               <img
-                src={profilePic} // Updated profile picture path
+                src={profileImageUrls[userData?.$id] || "/images/default-profile.png"} // Updated profile picture path
                 alt="Profile"
                 className="rounded-full w-40 h-40 object-cover bg-gray-200 shadow-lg border-4 border-white"
               />
