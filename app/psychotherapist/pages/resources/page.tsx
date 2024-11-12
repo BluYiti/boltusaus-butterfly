@@ -3,8 +3,11 @@ import { Client, Databases, Storage } from 'appwrite';
 import Layout from "@/components/Sidebar/Layout";
 import items from "@/psychotherapist/data/Links";
 import React, { useState, useEffect, useRef } from 'react';
+import useAuthCheck from '@/auth/page';
+import LoadingScreen from '@/components/LoadingScreen';
 
 const ResourcesPage: React.FC = () => {
+  const { loading: authLoading } = useAuthCheck(['psychotherapist']); // Call the useAuthCheck hook
   const [resources, setResources] = useState<any[]>([]);
   const [newCategory, setNewCategory] = useState('');
   const [newTitle, setNewTitle] = useState('');
@@ -248,6 +251,9 @@ const handleModalImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   }
 };
 
+if (authLoading ) {
+  return <LoadingScreen />; // Show the loading screen while the auth check or data loading is in progress
+}
 
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>

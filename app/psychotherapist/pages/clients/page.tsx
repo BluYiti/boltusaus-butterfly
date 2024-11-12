@@ -6,6 +6,8 @@ import { databases } from "@/appwrite";
 import ClientProfileModal from "@/psychotherapist/components/ClientProfileModal";
 import ReferredClientProfileModal from "@/psychotherapist/components/ReferredClientProfileModal";
 import ReviewPreAssModal from "@/psychotherapist/components/EvaluateModal"; // Import your new modal
+import useAuthCheck from "@/auth/page";
+import LoadingScreen from "@/components/LoadingScreen";
 
 interface ClientType {
   id: string;
@@ -30,6 +32,7 @@ interface AccountType {
 }
 
 const Clients = () => {
+  const { loading: authLoading } = useAuthCheck(['psychotherapist']); // Call the useAuthCheck hook
   const [activeTab, setActiveTab] = useState("Current");
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
@@ -129,6 +132,10 @@ const Clients = () => {
     if (loading) {
       return <div className="text-center">Loading clients...</div>;
     }
+
+    if (authLoading ) {
+      return <LoadingScreen />; // Show the loading screen while the auth check or data loading is in progress
+  }
 
     return (
       <div className="mt-4 space-y-3">
