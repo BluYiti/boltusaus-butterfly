@@ -9,8 +9,10 @@ import LoadingScreen from '@/components/LoadingScreen';
 import { useRouter } from 'next/navigation';
 import Calendar from '@/components/Calendar/Calendar';
 import { fetchPsychoId } from '@/hooks/userService';
+import { HappeningAppointment } from './components/HappeningAppointment';
 
 const Dashboard: React.FC = () => {
+  HappeningAppointment();
   const { loading: authLoading} = useAuthCheck(['psychotherapist']); // Call the useAuthCheck hook
   const [userName, setUserName] = useState<string | null>(null); // State to track user name
   const [evaluationData, setEvaluationData] = useState<any[]>([]);
