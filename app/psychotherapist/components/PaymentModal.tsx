@@ -1,6 +1,9 @@
+'use client'
+
 import { databases } from '@/appwrite';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
+import ShowReceiptModal from './ShowReceiptModal'; // Adjust the path as needed
 
 // Helper function to format the date
 const formatDate = (dateString) => {
@@ -22,12 +25,17 @@ const PaymentModal = ({ isOpen, onClose, client }) => {
   const router = useRouter();
   const [declineReason, setDeclineReason] = useState('');
   const [isDeclining, setIsDeclining] = useState(false); // Flag for showing decline reason input
+  const [showReceipt, setShowReceipt] = useState(false); // State for modal visibility
   const [error, setError] = useState(''); // State to manage the error message
+  const [actionType, setActionType] = useState(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       await databases.updateDocument('Butterfly-Database', 'Payment', client.id, {
+        status: 'paid',
+      });
+      await databases.updateDocument('Butterfly-Database', 'Bookings', client.booking.$id, {
         status: 'paid',
       });
       onClose();
@@ -42,22 +50,24 @@ const PaymentModal = ({ isOpen, onClose, client }) => {
     setIsDeclining(true); // Show the input box for decline reason
     setError(''); // Clear previous error
   };
-
   const handleDeclineSubmit = async () => {
-    if (!declineReason.trim()) {
-      setError('Please provide a reason for decline.');
-      return;
-    }
-
     try {
-      await databases.updateDocument('Butterfly-Database', 'Payment', client.id, {
-        status: 'declined',
-        declineReason: declineReason,
-      });
-      onClose();
-      window.location.href = `/psychotherapist/pages/clientspayment?tab=Declined`;
+      if (!declineReason.trim()) {
+        setError('Please provide a reason for decline.');
+        return;
+      } else if (!actionType) {
+        setError('Please select an action above');
+        return;
+      }
+      if (actionType === 'reschedule') {
+        // Call the reschedule function
+        await handleReschedule();
+      } else if (actionType === 'refund') {
+        // Call the refund function
+        await handleRefund();
+      }
     } catch (error) {
-      console.error('Failed to update document', error);
+      console.error('Failed to submit decline action', error);
     }
   };
 
@@ -68,6 +78,43 @@ const PaymentModal = ({ isOpen, onClose, client }) => {
       .split(' ') // Split by spaces
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize the first letter of each word
       .join(' '); // Join the words back together
+  };
+
+  const handleShowReceipt = () => {
+    setShowReceipt(true); // Open the receipt modal
+  };
+
+  // Functions for handling Reschedule and Refund actions
+  const handleReschedule = async () => {
+    try {
+      await databases.updateDocument('Butterfly-Database', 'Bookings', client.booking.$id, {
+        status: 'rescheduled'
+      });
+      await databases.updateDocument('Butterfly-Database', 'Payment', client.id, {
+        status: 'rescheduled',
+        declineReason: declineReason,
+      });
+      onClose();
+      window.location.href = `/psychotherapist/pages/clientspayment?tab=Reschedule`;
+    } catch (error) {
+      console.error('Failed to update document', error);
+    }
+  };
+
+  const handleRefund = async () => {
+    try {
+      await databases.updateDocument('Butterfly-Database', 'Bookings', client.booking.$id, {
+        status: 'refunded'
+      });
+      await databases.updateDocument('Butterfly-Database', 'Payment', client.id, {
+        status: 'refunded',
+        declineReason: declineReason,
+      });
+      onClose();
+      window.location.href = `/psychotherapist/pages/clientspayment?tab=Refund`;
+    } catch (error) {
+      console.error('Failed to update document', error);
+    }
   };
 
   return (
@@ -85,6 +132,15 @@ const PaymentModal = ({ isOpen, onClose, client }) => {
         <p><strong>Status:</strong> {client.status}</p>
         {/* Format the date */}
         <p><strong>Transaction Date and Time:</strong> {formatDate(client.createdAt)}</p>
+        <p className="text-gray-800">
+          <strong>Receipt:</strong>
+          <button 
+            className="bg-blue-400 ml-2 text-white py-2 px-6 rounded-3xl text-md hover:bg-blue-600 transition duration-300"
+            onClick={handleShowReceipt}
+          >
+            Click to view
+          </button>
+        </p>
         {client.status === 'declined' ? (
           <p className='mt-1'><strong>Reason for decline:</strong> {client.declineReason}</p>
         ): (<></>)}
@@ -92,14 +148,36 @@ const PaymentModal = ({ isOpen, onClose, client }) => {
         {/* Decline Reason Input */}
         {isDeclining && (
           <div className="mt-4">
+            {/* Reschedule, Refund, and Others Buttons */}
+            <div className="flex mt-4">
+              <button
+                className={`ml-14 px-4 py-2 text-sm font-semibold text-white rounded-full ${
+                  actionType === 'reschedule' ? 'bg-red-950' : 'bg-red-800 border-red-400 border-solid hover:bg-red-400 text-white'
+                }`}
+                onClick={() => setActionType('reschedule')}
+              >
+                Reschedule
+              </button>
+              <button
+                className={`ml-7 px-4 py-2 text-sm font-semibold text-white rounded-full ${
+                  actionType === 'refund' ? 'bg-red-950' : 'bg-red-800 hover:bg-red-400 text-white'
+                }`}
+                onClick={() => setActionType('refund')}
+              >
+                Refund
+              </button>
+            </div>
+            
+            {/* Decline Reason Textarea */}
             <textarea
               value={declineReason}
               onChange={(e) => setDeclineReason(e.target.value)}
               placeholder="Provide a reason for decline..."
               rows={4}
-              className="w-full border border-gray-300 p-2 rounded-md"
+              className="w-full border border-gray-300 p-2 rounded-md mt-4"
             />
             {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+
             <div className="flex justify-between mt-4">
               <button
                 className="px-4 py-2 text-sm font-semibold text-gray-500 bg-transparent border border-gray-400 rounded-full hover:bg-gray-200"
@@ -109,13 +187,20 @@ const PaymentModal = ({ isOpen, onClose, client }) => {
               </button>
               <button
                 className="ml-4 px-4 py-2 text-sm font-semibold text-white bg-red-400 rounded-full hover:bg-red-300"
-                onClick={handleDeclineSubmit} // Submit the decline reason
+                onClick={handleDeclineSubmit} // Handle Decline, Reschedule, Refund, or Others
               >
                 Decline
               </button>
             </div>
           </div>
         )}
+
+        {/* ShowReceiptModal integration */}
+        <ShowReceiptModal
+          isOpen={showReceipt}
+          onClose={() => setShowReceipt(false)}
+          imageUrl={client.receipt} // Pass the receipt object
+        />
 
         {/* Buttons */}
         {!isDeclining && (

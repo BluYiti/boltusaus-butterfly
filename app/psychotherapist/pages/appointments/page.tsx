@@ -1,4 +1,5 @@
-'use client'
+'use client';
+
 import Layout from "@/components/Sidebar/Layout";
 import items from "@/psychotherapist/data/Links";
 import { useEffect, useState } from "react";
@@ -6,34 +7,49 @@ import { client, databases } from "@/appwrite";
 import TakeNotesModal from '@/psychotherapist/components/TakeNotesModal'; 
 import CallModal from '@/psychotherapist/components/CallModal'; 
 import CountdownModal from '@/psychotherapist/components/CountdownModal';
-import RescheduleModal from '@/psychotherapist/components/RescheduleModal'; // Import the new modal
+import RescheduleModal from '@/psychotherapist/components/RescheduleModal';
+import useAuthCheck from "@/auth/page";
+import LoadingScreen from "@/components/LoadingScreen";
+import { HappeningAppointment } from "@/psychotherapist/components/HappeningAppointment"
 
 const Appointments = () => {
+  HappeningAppointment();
+  const { loading: authLoading } = useAuthCheck(['psychotherapist']); // Call the useAuthCheck hook
   const [clientData, setClientData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [isTakeNotesModalOpen, setIsTakeNotesModalOpen] = useState(false);
   const [isCallModalOpen, setIsCallModalOpen] = useState(false);
   const [isCountdownModalOpen, setIsCountdownModalOpen] = useState(false);
-  const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false); // State for the reschedule modal
-  const [selectedClient, setSelectedClient] = useState(null);
-  const [selectedBooking, setSelectedBooking] = useState(null); // State to track the booking being rescheduled
+  const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<string | null>(null);
+  const [selectedBooking, setSelectedBooking] = useState<any | null>(null); // State to track the booking being rescheduled
+
+  // State for filtered bookings
+  const [happeningBookings, setHappeningBookings] = useState<any[]>([]);
+  const [paidBookings, setPaidBookings] = useState<any[]>([]);
+  const [missedBookings, setMissedBookings] = useState<any[]>([]);
 
   // Fetch data from Appwrite
   useEffect(() => {
     const fetchData = async () => {
-      try {
+      try { 
         const response = await databases.listDocuments('Butterfly-Database', 'Bookings');
         const formattedData = response.documents.map((doc: any) => ({
           id: doc.$id,
           clientName: `${doc.client.firstname} ${doc.client.lastname}`,
-          date: doc.date,
+          date: `${doc.month} ${doc.day}`,
           time: doc.slots,
           status: doc.status,
           mode: doc.mode,
         }));
 
+        // Update state based on booking status
         setClientData(formattedData);
+        setHappeningBookings(formattedData.filter((booking) => booking.status === "happening"));
+        setPaidBookings(formattedData.filter((booking) => booking.status === "paid"));
+        setMissedBookings(formattedData.filter((booking) => booking.status === "missed"));
+        
         setLoading(false);
       } catch (err) {
         setError("Failed to fetch data.");
@@ -44,12 +60,13 @@ const Appointments = () => {
     fetchData();
   }, []);
 
-  const handleTakeNotesOpen = (clientName) => {
+  // Modal handlers
+  const handleTakeNotesOpen = (clientName: string) => {
     setSelectedClient(clientName);
     setIsTakeNotesModalOpen(true);
   };
 
-  const handleCallOpen = (clientName) => {
+  const handleCallOpen = (clientName: string) => {
     setSelectedClient(clientName);
     setIsCountdownModalOpen(true);
   };
@@ -59,19 +76,21 @@ const Appointments = () => {
     setIsCallModalOpen(true);
   };
 
-  // New function to open reschedule modal
-  const handleRescheduleOpen = (booking) => {
+  const handleRescheduleOpen = (booking: any) => {
     setSelectedBooking(booking);
     setIsRescheduleModalOpen(true);
   };
 
-  // Function to handle the confirmation of rescheduling
   const handleConfirmReschedule = () => {
     // Logic to reschedule the booking goes here
     console.log('Rescheduling:', selectedBooking); // For now, just log it
     setIsRescheduleModalOpen(false);
     // Optionally, refresh the data or update the state
   };
+
+  if (authLoading) {
+    return <LoadingScreen />;
+  }
 
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
@@ -92,10 +111,10 @@ const Appointments = () => {
               {/* Currently Happening */}
               <div>
                 <h3 className="font-semibold text-lg border-b-2 border-gray-300 pb-2">Currently Happening</h3>
-                {clientData.length > 0 ? (
+                {happeningBookings.length > 0 ? (
                   <div className="grid grid-cols-1 gap-6 mt-4">
-                    {clientData.filter(bookings => bookings.status === "happening").map((booking, bookingIndex) => (
-                      <div key={bookingIndex} className="bg-green-100 rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-200 border-l-4 border-green-500 flex justify-between items-center">
+                    {happeningBookings.map((booking, index) => (
+                      <div key={index} className="bg-green-100 rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-200 border-l-4 border-green-500 flex justify-between items-center">
                         <div>
                           <h4 className="font-semibold text-green-700">{booking.clientName}</h4>
                           <p className="text-gray-600">Date: <span className="font-semibold">{booking.date}</span></p>
@@ -119,39 +138,38 @@ const Appointments = () => {
                         )}
                       </div>
                     ))}
-
                   </div>
                 ) : (
-                  <p>No missed bookings found.</p>
+                  <p>No ongoing appointments.</p>
                 )}
               </div>
-              
+
               {/* Upcoming bookings */}
               <div className="mt-6">
                 <h3 className="font-semibold text-lg border-b-2 border-gray-300 pb-2">Upcoming bookings</h3>
-                {clientData.length > 0 ? (
+                {paidBookings.length > 0 ? (
                   <div className="grid grid-cols-1 gap-6 mt-4">
-                    {clientData.filter(bookings => bookings.status === "paid").map((booking, bookingIndex) => (
-                      <div key={bookingIndex} className="bg-blue-50 rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-200 border-l-4 border-blue-500">
+                    {paidBookings.map((booking, index) => (
+                      <div key={index} className="bg-blue-50 rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-200 border-l-4 border-blue-500">
                         <h4 className="font-semibold text-blue-700">{booking.clientName}</h4>
                         <p className="text-gray-600">Date: <span className="font-semibold">{booking.date}</span></p>
                         <p className="text-gray-600">Time: <span className="font-semibold">{booking.time}</span></p>
                         <p className="text-gray-600">Mode: <span className="font-semibold">{booking.mode}</span></p>
                       </div>
-                    ))} 
+                    ))}
                   </div>
                 ) : (
-                  <p>No upcoming bookings found.</p>
+                  <p>No upcoming appointments.</p>
                 )}
               </div>
 
               {/* Missed bookings */}
               <div className="mt-6">
                 <h3 className="font-semibold text-lg border-b-2 border-gray-300 pb-2">Missed bookings</h3>
-                {clientData.length > 0 ? (
+                {missedBookings.length > 0 ? (
                   <div className="grid grid-cols-1 gap-6 mt-4">
-                    {clientData.filter(bookings => bookings.status === "missed").map((booking, bookingIndex) => (
-                      <div key={bookingIndex} className="bg-red-50 rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-200 border-l-4 border-red-500 flex justify-between items-center">
+                    {missedBookings.map((booking, index) => (
+                      <div key={index} className="bg-red-50 rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-200 border-l-4 border-red-500 flex justify-between items-center">
                         <div>
                           <h4 className="font-semibold text-red-700">{booking.clientName}</h4>
                           <p className="text-gray-600">Date: <span className="font-semibold">{booking.date}</span></p>
@@ -160,15 +178,15 @@ const Appointments = () => {
                         </div>
                         <button 
                           className="bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-600 transition-colors duration-200"
-                          onClick={() => handleRescheduleOpen(booking)} // Open the reschedule modal
+                          onClick={() => handleRescheduleOpen(booking)}
                         >
                           Reschedule
                         </button>
                       </div>
-                    ))} 
+                    ))}
                   </div>
                 ) : (
-                  <p>No missed bookings found.</p>
+                  <p>No missed appointments.</p>
                 )}
               </div>
             </div>
@@ -193,7 +211,7 @@ const Appointments = () => {
         onComplete={handleCountdownComplete} 
         seconds={5} // Set your countdown duration here
       />
-      <RescheduleModal // Include the reschedule confirmation modal
+      <RescheduleModal 
         isOpen={isRescheduleModalOpen} 
         onClose={() => setIsRescheduleModalOpen(false)} 
         onConfirm={handleConfirmReschedule}

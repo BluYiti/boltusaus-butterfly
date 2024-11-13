@@ -259,38 +259,38 @@ const AppointmentBooking = () => {
         <div className="min-h-screen flex items-center justify-center bg-gray-100">
           <div className="bg-white p-8 rounded-lg shadow-lg text-center max-w-lg mx-auto">
             {paymentStatus === "pending" ? (
-                <>
-                  <h1 className="text-3xl font-bold text-blue-400 mb-4">Appointment Confirmation</h1>
-                  <p className="text-xl text-gray-600">
-                    You will receive a confirmation notification for your appointment in <strong>1-2 days</strong>. If you have any questions in the meantime, feel free to reach out to your therapist via the communication tab.
-                  </p>
-                  <p className="text-lg text-gray-600 mt-5">Your payment status is {paymentStatus}.</p>
-                  <p className="text-lg text-gray-600 mt-5">Your payment status is {paymentStatus}.</p>
-                  <p className="text-lg text-gray-600 mt-2">{appointmentData.bookingMessage}</p>
-                </>
-              ) : paymentStatus === "paid" ? (
-                <>
-                  <h1 className="text-3xl font-bold text-green-400 mb-4">Appointment Confirmed</h1><p className="text-xl text-gray-600">
+              <>
+                <h1 className="text-3xl font-bold text-blue-400 mb-4">Appointment Confirmation</h1>
+                <p className="text-xl text-gray-600">
+                  You will receive a confirmation notification for your appointment in <strong>1-2 days</strong>. If you have any questions in the meantime, feel free to reach out to your therapist via the communication tab.
+                </p>
+                <p className="text-lg text-gray-600 mt-5">Your payment status is {paymentStatus}.</p>
+                <p className="text-lg text-gray-600 mt-2">{appointmentData.bookingMessage}</p>
+              </>
+            ) : paymentStatus === "paid" ? (
+              <>
+                <h1 className="text-3xl font-bold text-green-400 mb-4">Appointment Confirmed</h1>
+                <p className="text-xl text-gray-600">
                   Your appointment has been confirmed. Please wait for the scheduled date to arrive, and feel free to contact your psychotherapist with any questions about your upcoming appointment via the communication tab.
-                  </p>
-                  <p className="text-lg text-gray-600 mt-5">Your payment status is {paymentStatus}.</p>
-                  <p className="text-lg text-gray-600 mt-2">{appointmentData.bookingMessage}</p>
-                </>
-              ) : (
-                <>
-                  <h1 className="text-3xl font-bold text-red-400 mb-4">Payment Declined</h1><p className="text-xl text-gray-600">
-                    Your appointment has been declined. Please contact your psychotherapist for any questions about your appointment being declined via the communication tab.
-                  </p>
-                  <p className="text-lg text-gray-600 mt-5">The reason for your appointment decline:</p>
-                  <p className="text-lg text-gray-600">"{declineReason}"</p>
-                </>
-              )
-            }
+                </p>
+                <p className="text-lg text-gray-600 mt-5">Your payment status is {paymentStatus}.</p>
+                <p className="text-lg text-gray-600 mt-2">{appointmentData.bookingMessage}</p>
+              </>
+            ) : (
+              <>
+                <h1 className="text-3xl font-bold text-red-400 mb-4">Payment Declined</h1>
+                <p className="text-xl text-gray-600">
+                  Your appointment has been declined. Please contact your psychotherapist for any questions about your appointment being declined via the communication tab.
+                </p>
+                <p className="text-lg text-gray-600 mt-5">The reason for your appointment decline:</p>
+                <p className="text-lg text-gray-600">"{declineReason}"</p>
+              </>
+            )}
           </div>
         </div>
       </Layout>
     );
-  }else{
+  } else {
     return (
       <Layout sidebarTitle="Butterfly" sidebarItems={items}>
         <div className="text-black min-h-screen flex">
@@ -309,7 +309,7 @@ const AppointmentBooking = () => {
                       psychotherapists.map((therapist) => (
                         <div key={therapist.$id} className="flex items-center space-x-4">
                           <img
-                            src={profileImageUrls[therapist.$id] || "/images/default-profile.png"}  // fallback to a default image
+                            src={profileImageUrls[therapist.$id] || "/images/default-profile.png"}
                             alt={`${therapist.firstName} ${therapist.lastName}`}
                             className="rounded-full w-16 h-16"
                           />
@@ -337,7 +337,7 @@ const AppointmentBooking = () => {
                     ) : (
                       <div className="flex items-center space-x-4">
                         <img
-                          src={clientsPsycho && clientsPsycho.$id ? profileImageUrls[clientsPsycho.$id] : "/images/default-profile.png"}  // fallback to a default image
+                          src={clientsPsycho && clientsPsycho.$id ? profileImageUrls[clientsPsycho.$id] : "/images/default-profile.png"}
                           alt={`${clientsPsycho ? clientsPsycho.firstName : "No Therapist"} ${clientsPsycho ? clientsPsycho.lastName : ""}`}
                           className="rounded-full w-16 h-16"
                         />
@@ -358,7 +358,7 @@ const AppointmentBooking = () => {
                       </div>
                     )}
                   </div>
-  
+
                   <h2 className="text-3xl font-bold text-left text-blue-900 mt-8">Counseling and Therapy Sessions</h2>
                   <div className="bg-gray-50 p-4 rounded-lg shadow border border-gray-200 mt-4">
                     <Calendar
@@ -372,11 +372,11 @@ const AppointmentBooking = () => {
                       setSelectedMonth={(month) => setAppointmentData((prev) => ({ ...prev, selectedMonth: month, selectedDay: null }))}
                       selectedTime={appointmentData.selectedTime}
                       setSelectedTime={(time) => setAppointmentData((prev) => ({ ...prev, selectedTime: time }))}
-                      selectedTherapistId={appointmentData.selectedTherapistId}
-                      isTherapistSelected={!!appointmentData.selectedTherapist} // Pass the selection state
+                      selectedTherapistId={appointmentData.selectedTherapistId} // Pass therapist ID to Calendar
+                      isTherapistSelected={!!appointmentData.selectedTherapist} // Indicate whether a therapist is selected
                     />
                   </div>
-  
+
                   {/* Therapy Mode Selection */}
                   <div className="mb-4">
                     <label className="block mb-2 text-lg font-medium text-gray-700">
@@ -392,7 +392,7 @@ const AppointmentBooking = () => {
                       <option value="f2f">In-Person</option>
                     </select>
                   </div>
-  
+
                   {/* Selected Info */}
                   <div className="mt-6">
                       <p className="text-gray-500">
@@ -411,7 +411,7 @@ const AppointmentBooking = () => {
             </div>
           </div>
         </div>
-  
+
         {/* Confirmation Prompt */}
         {showPrompt && (
           <div className="fixed inset-0 flex justify-center items-center bg-gray-800 bg-opacity-50 z-50">
@@ -434,7 +434,7 @@ const AppointmentBooking = () => {
             </div>
           </div>
         )}
-  
+
         {/* Success Message and Confetti */}
         {appointmentData.appointmentBooked && (
           <div className="fixed inset-0 flex justify-center items-center bg-gray-800 bg-opacity-50 z-50">
@@ -448,8 +448,8 @@ const AppointmentBooking = () => {
               <h3 className="text-2xl font-bold text-green-600">You Are Almost Done With Booking your Appointment!</h3>
               <p className="mt-2">
                 Service Counseling and Therapy<br />
-                <strong>Date & Time</strong>: {appointmentData.selectedMonth} {appointmentData.selectedDay}, {currentYear} | {appointmentData.selectedTime}<br/>
-                <strong>Mode</strong>: {appointmentData.selectedMode}<br/>
+                <strong>Date & Time</strong>: {appointmentData.selectedMonth} {appointmentData.selectedDay}, {currentYear} | {appointmentData.selectedTime}<br />
+                <strong>Mode</strong>: {appointmentData.selectedMode}<br />
                 <strong>Psychotherapist</strong>: {appointmentData.selectedTherapist ? `${appointmentData.selectedTherapist.firstName} ${appointmentData.selectedTherapist.lastName}` : "No therapist selected"}
               </p>
               <p className="text-lg text-gray-700">You can proceed to payment to complete the booking.</p>
@@ -472,7 +472,7 @@ const AppointmentBooking = () => {
             appointmentData={appointmentData} // Pass booking details here
           />
         )}
-  
+    
         {/* Render selected payment component based on `selectedPaymentMethod` */}
         {selectedPaymentMethod === "credit card" && (
           <React.Suspense fallback={<LoadingScreen />}>

@@ -196,5 +196,35 @@ export const overwriteProfilePicture = async (userId: string, file: File): Promi
     }
 };
 
+// Upload receipt image to the "Images" bucket
+export const uploadReceiptImage = async (file: File): Promise<{ id: string } | null> => {
+    try {
+        // Generate a unique ID for the file or use a fileId of your choice
+        const fileId = `receipt_${Date.now()}`;
 
+        // Upload the file to the "Images" bucket
+        const result = await storage.createFile('Images', fileId, file);
+
+        // Return the file ID (receiptId) if the upload was successful
+        return { id: result.$id };  // Assuming the response includes a `$id` field
+    } catch (error) {
+        console.error('Error uploading receipt image:', error);
+        return null;
+    }
+};
+
+// Fetch receipt image URL
+export const fetchReceiptImage = async (receiptId: string): Promise<string | null> => {
+    try {
+        if (receiptId) {
+            // Retrieve the file URL using Appwrite's getFileView
+            const url = storage.getFileView('Images', receiptId);
+            return url; // Return the image URL
+        }
+        return null;
+    } catch (error) {
+        console.error('Error fetching receipt image URL:', error);
+        return null;
+    }
+};
 

@@ -179,12 +179,6 @@ useEffect(() => {
                     clients.map((client, index) => (
                       <li key={index} className="flex justify-between items-center">
                         <span>{client.name}</span>
-                        <button
-                          className="text-blue-500 hover:text-blue-600"
-                          onClick={() => handleViewClient(client)}
-                        >
-                          view
-                        </button>
                       </li>
                     ))
                   ) : (
@@ -232,7 +226,6 @@ useEffect(() => {
                       sessionData.map((doc) => (
                         <li key={doc.$id}>
                           <p>{doc.client.firstname} {doc.client.lastname}</p>
-                          <p>{doc.month} {doc.day} </p>
                         </li>
                       ))
                     ) : (
@@ -243,66 +236,38 @@ useEffect(() => {
               </div>
 
           {/* Payment Status */}
-            <div className="bg-white rounded-lg shadow-lg p-6 text-blue-500">
-              <h3 className="text-xl font-semibold mb-4">
-                Payment Status
-                <span className="text-sm text-gray-500 ml-2">{format(new Date(), 'MMMM d, yyyy')}</span>
-              </h3>
-              {loadingPayments ? (
-                <div className="flex justify-center items-center">
-                  <span className="text-gray-500">Loading payments...</span>
-                </div>
-              ) : (
-                <ul className="space-y-3">
-                  {payments.length > 0 ? (
-                    payments.map((payment, index) => (
-                      <li key={index} className="flex justify-between items-center bg-gray-100 rounded-lg px-4 py-2">
-                        <span className="flex-1 text-center">{payment.firstname}</span>
-                        <span className="flex-1 text-center">{payment.channel}</span>
-                        <span
-                          className={`flex-none px-4 py-1 rounded-full text-white text-center ${
-                            payment.status === 'PAID' ? 'bg-green-500' : 'bg-yellow-500'
-                          }`}
-                        >
-                          {payment.status}
-                        </span>
-                      </li>
-                    ))
-                  ) : (
-                    <div className="text-gray-500">No payment data available.</div>
-                  )}
-                </ul>
-              )}
-            </div>
-        </div>
-
-         
-
-          {/* Modal for Confirming Reschedule */}
-          {selectedClient && newSchedule && !showFinalConfirm && (
-            <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
-              <div className="bg-white rounded-lg p-6 w-full max-w-md">
-                <h3 className="text-xl font-semibold mb-4">Confirm Reschedule for {selectedClient.name}</h3>
-                <p><strong>Therapist:</strong> Mrs. Angelica Peralta</p>
-                <p><strong>New Date:</strong> {newSchedule.date}</p>
-                <p><strong>New Time:</strong> {newSchedule.time}</p>
-                <div className="mt-4 flex justify-end">
-                  <button
-                    className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-                    onClick={handleConfirmSchedule}
-                  >
-                    Confirm
-                  </button>
-                  <button
-                    className="text-gray-500 ml-4"
-                    onClick={() => setSelectedClient(null)} // Close the modal
-                  >
-                    Cancel
-                  </button>
-                </div>
+          <div className="bg-white rounded-lg shadow-lg p-6 text-blue-500">
+            <h3 className="text-xl font-semibold mb-4">
+              Payment Status
+              <span className="text-sm text-gray-500 ml-2">{format(new Date(), 'MMMM d, yyyy')}</span>
+            </h3>
+            {loadingPayments ? (
+              <div className="flex justify-center items-center">
+                <span className="text-gray-500">Loading payments...</span>
               </div>
-            </div>
-          )}
+            ) : (
+              <ul className="space-y-3">
+                {payments.length > 0 ? (
+                  payments.map((payment, index) => (
+                    <li key={index} className="flex justify-between items-center bg-gray-100 rounded-lg px-4 py-2">
+                      <span className="flex-1 text-center">{payment.firstname}</span>
+                      <span className="flex-1 text-center">{payment.channel}</span>
+                      <span
+                        className={`flex-none min-w-[90px] px-4 py-1 rounded-full text-white text-center ${
+                          payment.status && payment.status.toUpperCase() === 'PAID' ? 'bg-green-500' : 'bg-yellow-500'
+                        }`}
+                      >
+                        {payment.status}
+                      </span>
+                    </li>
+                  ))
+                ) : (
+                  <div className="text-gray-500">No payment data available.</div>
+                )}
+              </ul>
+            )}
+          </div>
+        </div>
 
           {/* Final Confirmation Modal (Yes/No) */}
           {showFinalConfirm && (

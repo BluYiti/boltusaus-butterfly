@@ -104,10 +104,10 @@ const CashPayment: React.FC<CashPaymentProps> = ({ isOpen, onClose, appointmentD
         <p className="text-gray-600">You have selected Cash as your payment method.</p>
         <div className="mt-6 bg-gray-100 p-4 rounded-lg w-full max-w-sm">
           <form onSubmit={handleSubmit}>
-            <label className="text-2xl block mb-2 text-gray-800 text-center">Please Scan the QR Code</label>
+            <label className="text-2xl block mb-2 text-gray-800 text-center">Please Pay at the Clinic</label>
 
             {/* Reference Number Input */}
-            <label htmlFor="referenceNumber" className="block text-red-700 mb-2">NOTE: Please pay before the day of the booked appointment</label>
+            <label htmlFor="referenceNumber" className="block text-red-700 mb-2">NOTE: To secure your appointment, kindly ensure payment is made 2-3 days in advance. If payment is not received, your appointment will be canceled.</label>
 
             {/* Display error if exists */}
             {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
@@ -128,7 +128,7 @@ const CashPayment: React.FC<CashPaymentProps> = ({ isOpen, onClose, appointmentD
 
             <button
               type="submit"
-              className={`w-full p-2 bg-green-500 text-white rounded-lg ${isSubmitting && !paymentAcknowledged ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`w-full p-2 bg-green-500 text-white rounded-lg ${isSubmitting && !paymentAcknowledged ? 'bg-green-200 opacity-50 cursor-not-allowed' : ''}`}
               disabled={isSubmitting || !paymentAcknowledged}
             >
               {isSubmitting ? 'Processing...' : 'Next'}

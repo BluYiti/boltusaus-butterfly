@@ -1,6 +1,6 @@
 // admin/page.tsx
-import Analytics from "./pages/analytics/page";
+import Account from "./pages/account/page";
 
 export default function AdminPage() {
-  return <Analytics />;
+  return <Account />;
 }

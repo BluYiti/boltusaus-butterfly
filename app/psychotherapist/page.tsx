@@ -1,7 +1,6 @@
 'use client'
 import React, { useState, useEffect } from 'react';
 import Layout from '@/components/Sidebar/Layout';
-import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { account, databases } from '@/appwrite';
 import { Query } from 'appwrite';
 import items from './data/Links';
@@ -10,20 +9,18 @@ import LoadingScreen from '@/components/LoadingScreen';
 import { useRouter } from 'next/navigation';
 import Calendar from '@/components/Calendar/Calendar';
 import { fetchPsychoId } from '@/hooks/userService';
+import { HappeningAppointment } from './components/HappeningAppointment';
 
 const Dashboard: React.FC = () => {
-  const { loading: authLoading } = useAuthCheck(['psychotherapist']); // Call the useAuthCheck hook
-  const [dataLoading, setDataLoading] = useState(true); // State to track if data is still loading
+  HappeningAppointment();
+  const { loading: authLoading} = useAuthCheck(['psychotherapist']); // Call the useAuthCheck hook
   const [userName, setUserName] = useState<string | null>(null); // State to track user name
-  const [date, setDate] = useState(new Date());
   const [evaluationData, setEvaluationData] = useState<any[]>([]);
   const [missedData, setMissedData] = useState<any[]>([]);
   const [sessionData, setSessionData] = useState<any[]>([]); 
   const [paymentsData, setPaymentsData] = useState<any[]>([]); 
   const [error, setError] = useState<string | null>(null);
-  const [slotsInfo, setSlotsInfo] = useState<number | null>(null);
   const [loading, setLoading] = useState<boolean>(true); // Loading state
-  const [year, setYear] = useState(date.getFullYear());
 
   const today = new Date();
   const currentYear = today.getFullYear();
@@ -304,7 +301,9 @@ const Dashboard: React.FC = () => {
               setSelectedMonth={(month) => setAppointmentData((prev) => ({ ...prev, selectedMonth: month, selectedDay: null }))}
               selectedTime={appointmentData.selectedTime}
               setSelectedTime={(time) => setAppointmentData((prev) => ({ ...prev, selectedTime: time }))}
-              isTherapistSelected={true}>
+              isTherapistSelected={true} 
+              selectedTherapistId={appointmentData.selectedTherapist}
+              >
             </Calendar>
           </div>
 

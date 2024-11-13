@@ -2,10 +2,13 @@
 import { useState, useEffect } from "react";
 import Layout from "@/components/Sidebar/Layout";
 import items from "@/psychotherapist/data/Links";
-import { databases } from "@/appwrite";
+import { account, databases, Query } from "@/appwrite";
 import ClientProfileModal from "@/psychotherapist/components/ClientProfileModal";
 import ReferredClientProfileModal from "@/psychotherapist/components/ReferredClientProfileModal";
 import ReviewPreAssModal from "@/psychotherapist/components/EvaluateModal"; // Import your new modal
+import useAuthCheck from "@/auth/page";
+import LoadingScreen from "@/components/LoadingScreen";
+import { fetchPsychoId } from "@/hooks/userService";
 
 interface ClientType {
   id: string;
@@ -30,10 +33,12 @@ interface AccountType {
 }
 
 const Clients = () => {
+  const { loading: authLoading } = useAuthCheck(['psychotherapist']); // Call the useAuthCheck hook
   const [activeTab, setActiveTab] = useState("Current");
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
   const [clients, setClients] = useState<(ClientType & AccountType)[]>([]);
+  const [evaluateClients, setEvaluateClients] = useState<(ClientType & AccountType)[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Modal state
@@ -46,7 +51,13 @@ const Clients = () => {
     const fetchClientsAndAccounts = async () => {
       setLoading(true);
       try {
-        const clientResponse = await databases.listDocuments('Butterfly-Database', 'Client');
+        const user = await account.get();
+        const psychoId = fetchPsychoId(user.$id)
+
+        const clientResponse = await databases.listDocuments('Butterfly-Database', 'Client', [
+          Query.equal('psychotherapist', await psychoId)
+        ]
+        );
 
         const combinedClients = clientResponse.documents.map((clientDoc) => {
           const email = clientDoc.userid.email;
@@ -71,7 +82,38 @@ const Clients = () => {
           };
         });
 
+
+
         setClients(combinedClients);
+
+        const clientEvaluate = await databases.listDocuments('Butterfly-Database', 'Client', [
+          Query.equal('state', 'evaluate')
+        ])
+
+        const combinedEvaluateClients = clientEvaluate.documents.map((clientDoc) => {
+          const email = clientDoc.userid.email;
+          const username = clientDoc.userid.username;
+
+          return {
+            id: clientDoc.$id,
+            clientid: clientDoc.clientid,
+            userid: clientDoc.userid.$id,
+            firstname: clientDoc.firstname,
+            lastname: clientDoc.lastname,
+            phonenum: clientDoc.phonenum,
+            birthdate: clientDoc.birthdate,
+            age: clientDoc.age,
+            address: clientDoc.address,
+            type: clientDoc.type,
+            state: clientDoc.state,
+            emergencyContact: clientDoc.emergencyContact,
+            status: clientDoc.status,
+            email: email || "No email available",
+            username: username || "",
+          };
+        });
+
+        setEvaluateClients(combinedEvaluateClients);
         
         // Extract the query parameter from the URL
         const url = new URL(window.location.href);
@@ -112,7 +154,13 @@ const Clients = () => {
   };
 
   const renderClients = () => {
-    const stateFilteredClients = filteredClients();
+    let stateFilteredClients = filteredClients(); // This keeps the filter logic for other tabs.
+  
+    // For the "To Be Evaluated" tab, use the `evaluateClients` state
+    if (activeTab === "To Be Evaluated") {
+      stateFilteredClients = evaluateClients; // Replace with `evaluateClients`
+    }
+  
     switch (activeTab) {
       case "Current":
         return stateFilteredClients.filter(client => client.state === "current");
@@ -124,11 +172,16 @@ const Clients = () => {
         return stateFilteredClients;
     }
   };
+  
 
   const renderClientList = () => {
     if (loading) {
       return <div className="text-center">Loading clients...</div>;
     }
+
+    if (authLoading ) {
+      return <LoadingScreen />; // Show the loading screen while the auth check or data loading is in progress
+  }
 
     return (
       <div className="mt-4 space-y-3">

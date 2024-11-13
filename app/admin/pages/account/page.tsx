@@ -8,6 +8,8 @@ import useAuthCheck from "@/auth/page";
 import LoadingScreen from "@/components/LoadingScreen";
 import { PencilIcon, TrashIcon } from "@heroicons/react/solid"; // Heroicons for pencil and trash icons
 import AddAccountModal from "@/admin/components/AddAccountModal";
+import EditAccountModal from "@/admin/components/EditACcountModal";
+import DeleteAccountModal from "@/admin/components/DeleteAccountModal";
 
 const ROLES = ["Client", "Associate", "Psychotherapist"];
 
@@ -151,6 +153,16 @@ const Account = () => {
       </div>
 
       <AddAccountModal 
+        isOpen={isModalOpen} 
+        onClose={closeModal} 
+        selectedTab={selectedTab} 
+      />
+      <EditAccountModal 
+        isOpen={isModalOpen} 
+        onClose={closeModal} 
+        selectedTab={selectedTab} 
+      />
+      <DeleteAccountModal 
         isOpen={isModalOpen} 
         onClose={closeModal} 
         selectedTab={selectedTab} 

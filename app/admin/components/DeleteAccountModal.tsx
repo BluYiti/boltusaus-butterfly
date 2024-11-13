@@ -62,7 +62,7 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, sele
       console.log('Logged in admin');
 
       {isModalOpen && (
-        <SuccessModal selectedTab={selectedTab} message={"added"} onClose={() => setModalOpen(false)} />
+        <SuccessModal selectedTab={selectedTab} message={"deleted"} onClose={() => setModalOpen(false)} />
       )}
       if (!loginResponse) {
         throw new Error('Failed to log in the admin');
