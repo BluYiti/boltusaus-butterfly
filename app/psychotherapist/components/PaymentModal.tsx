@@ -65,9 +65,6 @@ const PaymentModal = ({ isOpen, onClose, client }) => {
       } else if (actionType === 'refund') {
         // Call the refund function
         await handleRefund();
-      } else if (actionType === 'others'){
-        // Call the refund function
-        await handleOthers();
       }
     } catch (error) {
       console.error('Failed to submit decline action', error);
@@ -104,21 +101,12 @@ const PaymentModal = ({ isOpen, onClose, client }) => {
 
   const handleRefund = async () => {
     try {
-      await databases.updateDocument('Butterfly-Database', 'Payment', client.id, {
+      await databases.updateDocument('Butterfly-Database', 'Bookings', client.id, {
         status: 'refunded',
         declineReason: declineReason,
       });
-      onClose();
-      window.location.href = `/psychotherapist/pages/clientspayment?tab=Declined`;
-    } catch (error) {
-      console.error('Failed to update document', error);
-    }
-  };
-  
-  const handleOthers = async () => {
-    try {
       await databases.updateDocument('Butterfly-Database', 'Payment', client.id, {
-        status: 'declined',
+        status: 'refunded',
         declineReason: declineReason,
       });
       onClose();
@@ -162,7 +150,7 @@ const PaymentModal = ({ isOpen, onClose, client }) => {
             {/* Reschedule, Refund, and Others Buttons */}
             <div className="flex mt-4">
               <button
-                className={`ml-[0.23rem] px-4 py-2 text-sm font-semibold text-white rounded-full ${
+                className={`ml-14 px-4 py-2 text-sm font-semibold text-white rounded-full ${
                   actionType === 'reschedule' ? 'bg-red-950' : 'bg-red-800 border-red-400 border-solid hover:bg-red-400 text-white'
                 }`}
                 onClick={() => setActionType('reschedule')}
@@ -176,14 +164,6 @@ const PaymentModal = ({ isOpen, onClose, client }) => {
                 onClick={() => setActionType('refund')}
               >
                 Refund
-              </button>
-              <button
-                className={`ml-7 px-4 py-2 text-sm font-semibold text-white rounded-full ${
-                  actionType === 'others' ? 'bg-red-950' : 'bg-red-800 hover:bg-red-400 text-white'
-                }`}
-                onClick={() => setActionType('others')}
-              >
-                Others
               </button>
             </div>
             

@@ -137,7 +137,7 @@ const ClientsPayment = () => {
         <div className="mt-24 px-5">
           <div className="flex items-center justify-between">
             <div className="flex space-x-8 border-b">
-              {["Pending", "Paid", "Rescheduled", "Refunded", "Declined"].map((tab) => (
+              {["Pending", "Paid", "Rescheduled", "Refunded"].map((tab) => (
                 <button
                   key={tab}
                   className={`pb-2 text-lg font-medium transition ${
@@ -216,16 +216,6 @@ const ClientsPayment = () => {
               }`}
             >
               {activeTab === "Refunded" && renderClientsByStatus("refunded")}
-            </div>
-
-            <div
-              className={`transition-all duration-500 ease-in-out ${
-                activeTab === "Declined"
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-10"
-              }`}
-            >
-              {activeTab === "Declined" && renderClientsByStatus("declined")}
             </div>
           </div>
         </div>
