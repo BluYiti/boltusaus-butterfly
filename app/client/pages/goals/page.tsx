@@ -186,7 +186,11 @@ const GoalsPage = () => {
 
     return (
         <Layout sidebarTitle="Butterfly" sidebarItems={items}>
-            <div className="flex-grow p-8 bg-gradient-to-br from-blue-50 to-blue-100">
+            <div 
+                className="min-h-screen p-8 bg-cover bg-center"
+                style={{ backgroundImage: "url('/images/contact.jpeg')" }} // Update the path to your image
+            >
+            <div className="flex-grow p-8">
                 <div className="bg-white shadow-lg rounded-xl p-8 mb-10 border border-blue-200">
                     <h2 className="text-4xl font-bold text-blue-500 mb-4">Hello, {userName}!</h2>
                     <p className="text-gray-600 text-lg">Set and track your personal goals with ease.</p>
@@ -330,32 +334,13 @@ const GoalsPage = () => {
                             </div>
                         </div>
 
-                        {/* Reminder Selection */}
-                        <div className="mt-4">
-                            <label className="block font-semibold text-gray-700">Reminder:</label>
-                            <select
-                                value={reminderTime}
-                                onChange={(e) => setReminderTime(Number(e.target.value))}
-                                className="border rounded-lg p-2 mt-1 w-full focus:outline-none focus:ring-2 focus:ring-blue-300"
-                            >
-                                <option value={0}>None</option>
-                                <option value={5}>5 minutes before</option>
-                                <option value={10}>10 minutes before</option>
-                                <option value={15}>15 minutes before</option>
-                                <option value={20}>20 minutes before</option>
-                                <option value={30}>30 minutes before</option>
-                            </select>
-                        </div>
-
                         <div className="mt-4">
                             <label className="flex items-center font-semibold text-gray-700">
                                 <input
-                                    type="checkbox"
                                     checked={goalReminder}
                                     onChange={() => setGoalReminder(!goalReminder)}
                                     className="mr-2"
                                 />
-                                Set Goal Reminder
                             </label>
                         </div>
                     </div>
@@ -400,12 +385,6 @@ const GoalsPage = () => {
                                 );
                             })}
                         </div>
-                        <button
-                            onClick={() => setMood('')}
-                            className="mt-6 bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition-colors duration-300 shadow-md"
-                        >
-                            Cancel Mood Selection
-                        </button>
                     </div>
                 </div>
 
@@ -498,7 +477,7 @@ const GoalsPage = () => {
         <p className="mt-2 text-gray-600">No goals logged yet.</p>
     )}
 </div>
-
+</div>
             </div>
         </Layout>
     );
