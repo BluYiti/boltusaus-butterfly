@@ -115,7 +115,7 @@ const handleSubmit = async (
         console.log('User logged in successfully.');
 
         // Generate JWT after account creation
-        const jwtToken: any = await createJWT();
+        const jwtToken: string = await createJWT();
         console.log('JWT created:', jwtToken);
 
         // Store JWT in an HTTP-only cookie
@@ -173,7 +173,7 @@ const handleSubmit = async (
         // Redirect or perform further actions after successful login and JWT creation
         formData.onRegister({ ...accountData, userId: accountId });
 
-    } catch (error: any) {
+    } catch (error) {
         console.error('Error during registration:', error);
         let errorMessage;
     

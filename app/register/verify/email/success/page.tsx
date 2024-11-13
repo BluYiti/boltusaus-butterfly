@@ -24,7 +24,7 @@ const VerifyPage: React.FC = () => {
                     const response = await account.updateVerification(userId, secret);
                     console.log('Verification response:', response); // Log success response
                     setIsVerified(true);
-                } catch (error: any) {
+                } catch (error) {
                     console.error('Verification failed:', error); // Log the entire error object
                     setIsVerified(false);
                 } finally {

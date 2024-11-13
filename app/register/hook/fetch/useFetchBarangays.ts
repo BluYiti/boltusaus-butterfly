@@ -1,8 +1,15 @@
-'use client'
-
 import { useEffect } from 'react';
 
-export const useFetchBarangays = (city: string, cities: any[], setBarangays: React.Dispatch<React.SetStateAction<any[]>>) => {
+interface Barangay {
+    name: string;
+}
+
+interface City {
+    name: string;
+    code: string;
+}
+
+export const useFetchBarangays = (city: string, cities: City[], setBarangays: React.Dispatch<React.SetStateAction<Barangay[]>>) => {
     useEffect(() => {
         const fetchBarangays = async () => {
             if (city) {
@@ -10,7 +17,7 @@ export const useFetchBarangays = (city: string, cities: any[], setBarangays: Rea
                 if (selectedCity) {
                     try {
                         const response = await fetch(`https://psgc.gitlab.io/api/cities-municipalities/${selectedCity.code}/barangays/`);
-                        const data = await response.json();
+                        const data: Barangay[] = await response.json();  // Define the type here
                         setBarangays(data);
                     } catch (error) {
                         console.error('Error fetching barangay data:', error);

@@ -1,7 +1,7 @@
 'use client'
 
 import { useSearchParams } from 'next/navigation'; // Import from 'next/navigation' in Next.js 14
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { account } from '@/appwrite';
 import Back from '@/components/Back';
 
@@ -75,7 +75,7 @@ const RegisterPage: React.FC = () => {
                             )}
                         </p>
                         <p className="text-sm text-[#333] mt-4">
-                            If you didn't request this email, you can safely ignore it
+                            If you didn&apos;t request this email, you can safely ignore it
                         </p>
                     </div>
                 </div>

@@ -16,7 +16,7 @@ import { useFetchCities } from '@/register/hook/fetch/useFetchCitiesAndMunicipal
 import { useFetchBarangays } from '@/register/hook/fetch/useFetchBarangays';
 import { useRouter } from 'next/navigation';
 
-const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error}) => {
+const RegisterForm: React.FC<RegisterFormProps> = ({ error }) => {
     const router = useRouter();
 
     const {

@@ -5,6 +5,7 @@ import { FaVideo, FaSearch } from 'react-icons/fa';
 import Link from 'next/link';
 import Layout from '@/components/Sidebar/Layout';
 import items from '@/psychotherapist/data/Links';
+import Image from 'next/image';
 
 interface Contact {
   id: number;
@@ -71,10 +72,12 @@ const ContactList: FC<{ onContactClick: (id: number) => void; selectedContact: n
             }`}
             onClick={() => onContactClick(contact.id)}
           >
-            <img
+            <Image
               src={contact.imageUrl}
               alt={contact.name}
-              className="w-12 h-12 rounded-full mr-4"
+              width={48}  // 12 * 4 = 48px width
+              height={48} // 12 * 4 = 48px height
+              className="rounded-full mr-4"
             />
             <div className="flex-grow">
               <div className="flex justify-between items-center">
@@ -106,14 +109,16 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[] }> = ({
     <div className="w-3/4 p-6 flex flex-col justify-between">
       {/* Chat Header */}
       <div className="flex items-center mb-4 justify-between">
-        <div className="flex items-center">
-          <img
-            src={selectedContact.imageUrl}
-            alt={selectedContact.name}
-            className="w-12 h-12 rounded-full mr-4"
-          />
-          <h2 className="text-xl font-bold">{selectedContact.name}</h2>
-        </div>
+      <div className="flex items-center">
+        <Image
+          src={selectedContact.imageUrl}
+          alt={selectedContact.name}
+          width={48}  // 12 * 4 = 48px for the width
+          height={48} // 12 * 4 = 48px for the height
+          className="rounded-full mr-4"
+        />
+        <h2 className="text-xl font-bold">{selectedContact.name}</h2>
+      </div>
         {/* Video Call Icon */}
         <Link href='/psychotherapist/pages/vcountdown'>
           <button className="p-2 bg-blue-500 text-white rounded-full">

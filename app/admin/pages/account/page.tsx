@@ -8,7 +8,7 @@ import useAuthCheck from "@/auth/page";
 import LoadingScreen from "@/components/LoadingScreen";
 import { PencilIcon, TrashIcon } from "@heroicons/react/solid"; // Heroicons for pencil and trash icons
 import AddAccountModal from "@/admin/components/AddAccountModal";
-import EditAccountModal from "@/admin/components/EditACcountModal";
+import EditAccountModal from "@/admin/components/EditAccountModal";
 import DeleteAccountModal from "@/admin/components/DeleteAccountModal";
 
 const ROLES = ["Client", "Associate", "Psychotherapist"];
@@ -43,8 +43,8 @@ const Account = () => {
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
-  const handleEdit = (userId: any) => console.log("Edit user with ID:", userId);
-  const handleDelete = (userId: any) => console.log("Delete user with ID:", userId);
+  const handleEdit = (userId: string) => console.log("Edit user with ID:", userId);
+  const handleDelete = (userId: string) => console.log("Delete user with ID:", userId);
 
   const filteredUsers = useMemo(() => {
     const lowerSearchQuery = searchQuery.toLowerCase();

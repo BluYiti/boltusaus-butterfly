@@ -10,15 +10,27 @@ import { account, databases, Query } from "@/appwrite";
 import { fetchPsychoId } from "@/hooks/userService";
 
 interface Payment {
+  $id: string;
+  $createdAt: string;
   referenceNo: string;
   mode: string;
   channel: string;
   amount: number;
   status: string;
-  client: { firstname: string; lastname: string }; // Client's first and last name
-  psychotherapist: { firstName: string; lastName: string }; // Psychotherapist's first and last name
-  booking: any;
-  id: string; // Add a unique identifier for each payment to use as a key
+  client: {
+    userid: string;
+    firstname: string;
+    lastname: string;
+  };
+  psychotherapist: {
+    firstName: string;
+    lastName: string;
+  };
+  booking: {
+    mode: string;
+    date: string;
+  };
+  id: string;
   clientFirstName: string;
   clientLastName: string;
   psychoFirstName: string;
@@ -44,30 +56,36 @@ const ClientsPayment = () => {
       try {
         const user = await account.get();
         const psychoId = await fetchPsychoId(user.$id);
-
+  
         const response = await databases.listDocuments('Butterfly-Database', 'Payment', [
           Query.equal('psychotherapist', psychoId),
         ]);
-
-        const fetchedPayments = response.documents.map((doc: any) => ({
-          referenceNo: doc.referenceNo,
-          mode: doc.booking.mode,
-          channel: doc.channel,
-          amount: doc.amount,
-          status: doc.status,
-          client: doc.client, 
-          psychotherapist: doc.psychotherapist, 
-          booking: doc.booking,
-          id: doc.$id, 
-          clientFirstName: doc.client.firstname,
-          clientLastName: doc.client.lastname,
-          psychoFirstName: doc.psychotherapist.firstName,
-          psychoLastName: doc.psychotherapist.lastName,
-          email: doc.client.userid.email,
-          createdAt: doc.$createdAt,
-          declineReason: doc.declineReason,
-          receipt: doc.receipt
-        }));
+  
+        // Map fetched data to match Payment type
+        const fetchedPayments: Payment[] = response.documents.map((doc) => {
+          // Ensure fields match the expected type and structure
+          return {
+            referenceNo: doc.referenceNo,
+            mode: doc.booking.mode,  // Accessing `mode` from `booking`
+            channel: doc.channel,
+            amount: doc.amount,
+            status: doc.status,
+            client: doc.client,
+            psychotherapist: doc.psychotherapist,
+            booking: doc.booking,
+            id: doc.$id,
+            clientFirstName: doc.client.firstname,
+            clientLastName: doc.client.lastname,
+            psychoFirstName: doc.psychotherapist.firstName,
+            psychoLastName: doc.psychotherapist.lastName,
+            email: doc.client.userid.email,
+            createdAt: new Date(doc.$createdAt),
+            declineReason: doc.declineReason,
+            receipt: doc.receipt,
+            $id: doc.$id,  // Ensure the ID is included
+            $createdAt: doc.$createdAt, // Include createdAt field
+          };
+        });
 
         setPayments(fetchedPayments);
 
@@ -83,7 +101,7 @@ const ClientsPayment = () => {
         setLoading(false);
       }
     };
-
+  
     fetchData();
   }, []);
 
@@ -131,7 +149,7 @@ const ClientsPayment = () => {
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
       <div className="bg-blue-50 min-h-screen overflow-auto">
         <div className="bg-white width rounded-b-lg fixed p-5 top-0 w-full z-10">
-          <h2 className="text-2xl font-bold text-blue-400">Client's Payment</h2>
+          <h2 className="text-2xl font-bold text-blue-400">Client&apos;s Payment</h2>
         </div>
 
         <div className="mt-24 px-5">
