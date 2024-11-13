@@ -7,6 +7,9 @@ import items from '@/client/data/Links';
 import { MdArrowBack, MdArrowForward } from 'react-icons/md';
 import ConfirmationModal from "@/components/ConfirmationModal";
 import { Account, Client, Databases, Permission, Query, Role } from 'appwrite';
+import { useProgressUpdate } from '@/hooks/userProgress';
+
+
 
 interface Goal {
     id: string;
@@ -31,7 +34,6 @@ client
 const CLIENT_COLLECTION_ID = 'Client';
 
 const GoalsPage = () => {
-    const [goals, setGoals] = useState<Goal[]>([]);
     const [mood, setMood] = useState<'HAPPY' | 'SAD' | 'ANXIOUS' | 'FEAR' | 'FRUSTRATED' | ''>(''); 
     const [activities, setActivities] = useState('meditate');
     const [startHour, setStartHour] = useState(1);
@@ -49,6 +51,14 @@ const GoalsPage = () => {
     const [userName, setUserName] = useState('Client');
     const [clientId, setClientId] = useState<string | null>(null);
     const [psychotherapistId, setPsychotherapistId] = useState<string | null>(null);
+
+    // Use goals, updateProgress, fetchGoals, error, and loading from useProgressUpdate
+    const { updateProgress, fetchGoals, goals, error, loading } = useProgressUpdate();
+
+    useEffect(() => {
+        // Fetch goals when the component mounts
+        fetchGoals();
+    }, []);
 
     const oneWeekAhead = addDays(new Date(), 7);
 
@@ -211,31 +221,10 @@ useEffect(() => {
 
     // Function to handle progress change and update in the database
 // Function to handle progress change and update in the database
-const handleProgressChange = async (newProgress: Goal['progress'], goalId: string, goalIndex: number) => {
-    try {
-        if (!goalId) {
-            console.error("Missing goalId for update.");
-            return;
-        }
+    const handleProgressChange = async (newProgress: Goal['progress'], goalId: string) => {
+    await updateProgress(goalId, newProgress);
+    };
 
-        console.log(`Updating goal with ID: ${goalId} to progress: ${newProgress}`);
-
-        // Update the progress in the Appwrite database
-        await databases.updateDocument('Butterfly-Database', 'Goals', goalId, {
-            progress: newProgress
-        });
-
-        // Update the local state to reflect the new progress
-        const updatedGoals = goals.map((g, idx) =>
-            idx === goalIndex ? { ...g, progress: newProgress } : g
-        );
-        setGoals(updatedGoals);
-
-        console.log("Goal progress updated successfully in database.");
-    } catch (error) {
-        console.error("Error updating goal progress:", error);
-    }
-};
     
     const changeMonth = (increment: number) => {
         const newDate = addMonths(new Date(currentYear, currentMonth), increment);
@@ -512,54 +501,45 @@ const handleProgressChange = async (newProgress: Goal['progress'], goalId: strin
 
                 {/* Logged Goals Section */}
                 <div className="mt-12 bg-white shadow-lg rounded-xl p-6 border border-gray-200">
-    <h3 className="text-lg font-semibold text-blue-400">Logged Goals</h3>
-    {goals.length > 0 ? (
-        <ul className="mt-4 space-y-3">
-            {goals.map((goal, index) => {
-                const goalId = goal.$id; // Use goal.$id as the document ID
-                const currentTime = new Date().getTime();
-                const goalEndTime = new Date(goal.endTime).getTime();
+                    <h3 className="text-lg font-semibold text-blue-400">Logged Goals</h3>
+                    {goals.length > 0 ? (
+                        <ul className="mt-4 space-y-3">
+                            {goals.map((goal) => {
+                                const currentTime = new Date().getTime();
+                                const goalEndTime = new Date(goal.endTime).getTime();
+                                const isPastEndTime = currentTime > goalEndTime;
+                                const displayProgress = isPastEndTime ? 'missed' : goal.progress;
 
-                // Check if the goal's end time has passed
-                const isPastEndTime = currentTime > goalEndTime;
-
-                // Determine the display progress
-                const displayProgress = isPastEndTime ? 'missing' : goal.progress;
-
-                return (
-                    <li
-                        key={goalId} // Ensure a unique key using `goal.$id`
-                        className="p-4 bg-gray-50 rounded-lg shadow-md flex justify-between items-center"
-                    >
-                        <div>
-                            <p className="text-sm">
-                                {goal.activities} for {goal.duration} minutes on {goal.date} (Mood: {goal.mood})
-                            </p>
-                            <p className="text-xs text-gray-500">Status: {displayProgress}</p>
-                        </div>
-                        {!isPastEndTime ? (
-                            <select
-                                value={goal.progress}
-                                onChange={(e) => handleProgressChange(e.target.value as Goal['progress'], goalId, index)}
-                                className="border rounded-lg p-2 text-gray-700 focus:outline-none focus:ring-2 transition-colors duration-200"
-                                disabled={isPastEndTime}
-                            >
-                                <option value="todo">To Do</option>
-                                <option value="doing">Doing</option>
-                                <option value="done">Done</option>
-                            </select>
-                        ) : (
-                            <span className="text-red-500">Missing</span>
-                        )}
-                    </li>
-                );
-            })}
-        </ul>
-    ) : (
-        <p className="mt-2 text-gray-600">No goals logged yet.</p>
-    )}
-</div>
-
+                                return (
+                                    <li key={goal.$id} className="p-4 bg-gray-50 rounded-lg shadow-md flex justify-between items-center">
+                                        <div>
+                                            <p className="text-sm">
+                                                {goal.activities} for {goal.duration} minutes on {goal.date} (Mood: {goal.mood})
+                                            </p>
+                                            <p className="text-xs text-gray-500">Status: {displayProgress}</p>
+                                        </div>
+                                        {!isPastEndTime ? (
+                                            <select
+                                                value={goal.progress}
+                                                onChange={(e) => handleProgressChange(e.target.value as Goal['progress'], goal.$id)}
+                                                className="border rounded-lg p-2 text-gray-700 focus:outline-none focus:ring-2 transition-colors duration-200"
+                                                disabled={isPastEndTime}
+                                            >
+                                                <option value="todo">To Do</option>
+                                                <option value="doing">Doing</option>
+                                                <option value="done">Done</option>
+                                            </select>
+                                        ) : (
+                                            <span className="text-red-500">Missed</span>
+                                        )}
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                    ) : (
+                        <p className="mt-2 text-gray-600">No goals logged yet.</p>
+                    )}
+                </div>
             </div>
         </Layout>
     );
