@@ -34,6 +34,9 @@ const PaymentModal = ({ isOpen, onClose, client }) => {
       await databases.updateDocument('Butterfly-Database', 'Payment', client.id, {
         status: 'paid',
       });
+      await databases.updateDocument('Butterfly-Database', 'Bookings', client.booking.$id, {
+        status: 'paid',
+      });
       onClose();
       window.location.href = `/psychotherapist/pages/clientspayment?tab=Paid`;
     } catch (error) {
