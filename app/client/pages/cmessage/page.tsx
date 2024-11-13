@@ -4,6 +4,7 @@ import Layout from '@/components/Sidebar/Layout';
 import items from '@/client/data/Links';
 import { Client, Databases, Account, Query, ID } from 'appwrite';
 import CallNotification from '@/components/CallNotification';
+import ClientVideoCall from '@/components/ClientVideoCall';
 
 // Interface Definitions
 interface Psychotherapist {
@@ -40,28 +41,29 @@ const ChatPage: FC = () => {
   const [call, setCall] = useState<Call>({ isActive: false, caller: null });
   const [isVideoCallActive, setIsVideoCallActive] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [clientDocumentId, setClientDocumentId] = useState<string | null>(null);
+  const [notificationDocumentId, setNotificationDocumentId] = useState<string | null>(null); // To store Call-Notification ID
+  const [isPollingActive, setIsPollingActive] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Fetching the Psychotherapist and Conversation ID
   useEffect(() => {
     const fetchPsychotherapist = async () => {
       try {
-        // Get logged-in user details
         const user = await account.get();
 
-        // Fetch the client's document
         const clientResponse = await databases.listDocuments(
           'Butterfly-Database',
           'Client',
-          [Query.equal('userid', user.$id)] // Use 'userid' to match the logged-in user's ID
+          [Query.equal('userid', user.$id)]
         );
 
         if (clientResponse.documents.length > 0) {
           const clientData = clientResponse.documents[0];
+          setClientDocumentId(clientData.$id);
+
           if (clientData.psychotherapist) {
-            let psychotherapistId = typeof clientData.psychotherapist === 'object' && clientData.psychotherapist.$id
-              ? clientData.psychotherapist.$id
-              : clientData.psychotherapist;
+            const psychotherapistId = clientData.psychotherapist.$id || clientData.psychotherapist;
 
             if (psychotherapistId) {
               const psychotherapistResponse = await databases.getDocument(
@@ -76,7 +78,6 @@ const ChatPage: FC = () => {
                 imageUrl: psychotherapistResponse.imageUrl || '/default-avatar.jpg',
               });
 
-              // Fetch or create a conversation
               const conversationResponse = await databases.listDocuments(
                 'Butterfly-Database',
                 'Conversation',
@@ -110,6 +111,7 @@ const ChatPage: FC = () => {
     fetchPsychotherapist();
   }, []);
 
+  // Function to handle sending a message
   const handleSendMessage = async () => {
     if (messageInput.trim() && psychotherapist && conversationId) {
       try {
@@ -163,35 +165,35 @@ const ChatPage: FC = () => {
     }
   };
 
+  // Polling for messages in the conversation
   useEffect(() => {
     let fetchInterval: NodeJS.Timeout | null = null;
-  
+
     const fetchMessages = async () => {
       if (!conversationId || !psychotherapist) return;
-  
+
       try {
         const response = await databases.listDocuments(
           'Butterfly-Database',
           'Messages',
           [Query.equal('conversationId', conversationId), Query.orderAsc('dateTime')]
         );
-  
+
         const messageData = response.documents.map((msg: any) => ({
           id: msg.$id,
           text: msg.content,
           sender: msg.senderId === psychotherapist.id ? 'psychotherapist' : 'client',
           time: new Date(msg.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         }));
-  
+
         setMessages(messageData);
       } catch (error) {
         console.error('Error fetching messages:', error);
       }
     };
-  
+
     if (conversationId && psychotherapist) {
       fetchMessages();
-
       fetchInterval = setInterval(fetchMessages, 3000);
     }
 
@@ -201,10 +203,59 @@ const ChatPage: FC = () => {
       }
     };
   }, [conversationId, psychotherapist?.id]);
-  
-  
-  
 
+  // Polling for Call Notification
+  useEffect(() => {
+    const pollForCallNotifications = async () => {
+      if (!clientDocumentId || !isPollingActive) return;
+
+      try {
+        const response = await databases.listDocuments(
+          'Butterfly-Database',
+          'Call-Notification',
+          [Query.equal('receiverId', clientDocumentId), Query.equal('isActive', true)]
+        );
+
+        if (response.documents.length > 0) {
+          const notification = response.documents[0];
+          if (notification.callerId === psychotherapist?.id) {
+            setCall({ isActive: true, caller: psychotherapist });
+            setNotificationDocumentId(notification.$id); // Capture Call-Notification ID for updating
+          }
+        } else {
+          setCall({ isActive: false, caller: null });
+        }
+      } catch (error) {
+        console.error("Error polling for call notifications:", error);
+      }
+    };
+
+    const interval = setInterval(pollForCallNotifications, 3000);
+    return () => clearInterval(interval);
+  }, [clientDocumentId, psychotherapist, isPollingActive]);
+
+  // Function to accept the call
+  const handleAcceptCall = async () => {
+    if (isVideoCallActive) return;
+    setIsVideoCallActive(true);
+    setCall({ isActive: false, caller: null });
+    setIsPollingActive(false);
+
+    if (notificationDocumentId) { // Use notificationDocumentId to update the correct Call-Notification document
+      try {
+        await databases.updateDocument(
+          'Butterfly-Database',
+          'Call-Notification',
+          notificationDocumentId,
+          { isActive: false }
+        );
+      } catch (error) {
+        console.error('Error updating call notification:', error);
+      }
+    }
+  };
+
+  // Scroll to the bottom of the messages
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -234,11 +285,7 @@ const ChatPage: FC = () => {
                 <div className="flex-grow overflow-y-auto space-y-4">
                   {messages.map((message) => (
                     <div key={message.id} className={`flex ${message.sender === 'client' ? 'justify-end' : 'justify-start'}`}>
-                      <div
-                        className={`max-w-xs p-4 rounded-lg shadow ${
-                          message.sender === 'client' ? 'bg-blue-100' : 'bg-gray-100'
-                        }`}
-                      >
+                      <div className={`max-w-xs p-4 rounded-lg shadow ${message.sender === 'client' ? 'bg-blue-100' : 'bg-gray-100'}`}>
                         <p>{message.text}</p>
                         <span className="block text-xs text-gray-400">{message.time}</span>
                       </div>
@@ -277,7 +324,20 @@ const ChatPage: FC = () => {
         </div>
 
         {call.isActive && (
-          <CallNotification caller={call.caller} onAccept={() => setIsVideoCallActive(true)} />
+          <CallNotification 
+            caller={call.caller} 
+            onAccept={handleAcceptCall} 
+          />
+        )}
+        {isVideoCallActive && psychotherapist && clientDocumentId && (
+          <ClientVideoCall 
+            callerId={psychotherapist.id} 
+            receiverId={clientDocumentId} 
+            onEndCall={() => {
+              setIsVideoCallActive(false);
+              setIsPollingActive(true); // Resume polling after call ends
+            }} 
+          />
         )}
       </div>
     </Layout>

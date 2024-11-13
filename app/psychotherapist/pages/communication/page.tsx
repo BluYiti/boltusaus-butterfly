@@ -2,12 +2,10 @@
 
 import { FC, useState, useEffect, useRef } from 'react';
 import { FaVideo, FaSearch } from 'react-icons/fa';
-import Link from 'next/link';
 import Layout from '@/components/Sidebar/Layout';
 import VideoCall from '@/components/VideoCall';
 import items from '@/psychotherapist/data/Links';
 import { Client, Databases, Account, Query, Storage, ID } from 'appwrite';
-
 
 // Define interfaces
 interface Contact {
@@ -178,16 +176,48 @@ const Communication: FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [loggedInUser, setLoggedInUser] = useState<any>(null);
+  const [psychotherapistDocumentId, setPsychotherapistDocumentId] = useState<string | null>(null); // Store psychotherapist document ID
   const [isVideoCallActive, setIsVideoCallActive] = useState(false);
 
   const selectedContact = contacts.find(contact => contact.id === selectedContactId) || null;
 
-  const handleStartCall = () => {
-    setIsVideoCallActive(true);
-  };
+  const handleStartCall = async () => {
+    if (!selectedContactId || !psychotherapistDocumentId) return;
 
-  const handleEndCall = () => {
-    setIsVideoCallActive(false);
+    try {
+      const callNotificationData = {
+        isActive: true,
+        callerId: psychotherapistDocumentId, // Use psychotherapist document ID here
+        receiverId: selectedContactId, // ID of the client being called
+        timestamp: new Date().toISOString(),
+      };
+
+      const existingNotificationResponse = await databases.listDocuments(
+        'Butterfly-Database',
+        'Call-Notification',
+        [Query.equal('receiverId', selectedContactId)]
+      );
+
+      if (existingNotificationResponse.documents.length > 0) {
+        await databases.updateDocument(
+          'Butterfly-Database',
+          'Call-Notification',
+          existingNotificationResponse.documents[0].$id,
+          callNotificationData
+        );
+      } else {
+        await databases.createDocument(
+          'Butterfly-Database',
+          'Call-Notification',
+          ID.unique(),
+          callNotificationData
+        );
+      }
+
+      setIsVideoCallActive(true);
+    } catch (error) {
+      console.error('Failed to notify client of call:', error);
+    }
   };
 
   useEffect(() => {
@@ -195,35 +225,34 @@ const Communication: FC = () => {
       try {
         const loggedInUser = await account.get();
         setLoggedInUser(loggedInUser);
-  
-        // Get the psychotherapist document
+
         const psychotherapistResponse = await databases.listDocuments(
           'Butterfly-Database',
           'Psychotherapist',
           [Query.equal('userId', loggedInUser.$id)]
         );
-  
+
         if (psychotherapistResponse.documents.length === 0) {
           throw new Error('No psychotherapist found for the logged-in user');
         }
-  
+
         const psychotherapistDocumentId = psychotherapistResponse.documents[0].$id;
-  
-        // Get the clients related to the psychotherapist
+        setPsychotherapistDocumentId(psychotherapistDocumentId); // Store psychotherapist document ID
+        console.log("Psychotherapist Document ID:", psychotherapistDocumentId);
+
         const clientResponse = await databases.listDocuments(
           'Butterfly-Database',
           'Client',
           [Query.equal('psychotherapist', psychotherapistDocumentId)]
         );
-  
+
         const clientDataPromises = clientResponse.documents.map(async (doc: any) => {
           let profilePicUrl = '/default-avatar.jpg';
           if (doc.idFile) {
             const imagePreview = storage.getFilePreview('Images', doc.idFile);
             profilePicUrl = imagePreview;
           }
-  
-          // Fetch the latest message for this client
+
           const conversationResponse = await databases.listDocuments(
             'Butterfly-Database',
             'Conversation',
@@ -232,31 +261,30 @@ const Communication: FC = () => {
               Query.equal('psychotherapistId', psychotherapistDocumentId),
             ]
           );
-  
+
           let lastMessage = 'No messages yet';
           let lastMessageTime = '';
-  
+
           if (conversationResponse.documents.length > 0) {
             const conversationId = conversationResponse.documents[0].$id;
-  
-            // Fetch the latest message for the conversation
+
             const messageResponse = await databases.listDocuments(
               'Butterfly-Database',
               'Messages',
               [
                 Query.equal('conversationId', conversationId),
-                Query.orderDesc('dateTime'),  // Order messages by date in descending order
-                Query.limit(1),  // Get only the latest message
+                Query.orderDesc('dateTime'),
+                Query.limit(1),
               ]
             );
-  
+
             if (messageResponse.documents.length > 0) {
               const latestMessage = messageResponse.documents[0];
               lastMessage = `${latestMessage.senderId === loggedInUser.$id ? 'You' : doc.firstname}: ${latestMessage.content}`;
               lastMessageTime = new Date(latestMessage.dateTime).toLocaleTimeString();
             }
           }
-  
+
           return {
             id: doc.$id,
             name: `${doc.firstname} ${doc.lastname}`,
@@ -266,34 +294,21 @@ const Communication: FC = () => {
             isSession: false
           };
         });
-  
+
         const clientData = await Promise.all(clientDataPromises);
         setContacts(clientData);
       } catch (error) {
         console.error('Failed to fetch data:', error);
       }
     };
-  
+
     fetchPsychotherapistData();
   }, []);
-  
 
   const fetchOrCreateConversation = async (contactId: string): Promise<string | null> => {
     try {
-      // Fetch the logged-in psychotherapist
-      const psychotherapistResponse = await databases.listDocuments(
-        'Butterfly-Database',
-        'Psychotherapist',
-        [Query.equal('userId', loggedInUser.$id)]
-      );
-  
-      if (psychotherapistResponse.documents.length === 0) {
-        throw new Error('No psychotherapist found for the logged-in user');
-      }
-  
-      const psychotherapistDocumentId = psychotherapistResponse.documents[0].$id;
-  
-      // Check if a conversation already exists using the new `clientId` and `psychotherapistId` fields
+      if (!psychotherapistDocumentId) return null;
+
       const response = await databases.listDocuments(
         'Butterfly-Database',
         'Conversation',
@@ -302,18 +317,16 @@ const Communication: FC = () => {
           Query.equal('psychotherapistId', psychotherapistDocumentId)
         ]
       );
-  
+
       if (response.documents.length > 0) {
-        // Use the existing conversation
         const existingConversation = response.documents[0];
         setConversationId(existingConversation.$id);
         return existingConversation.$id;
       } else {
-        // Create a new conversation if none exists
         const newConversation = await databases.createDocument(
           'Butterfly-Database',
           'Conversation',
-          ID.unique(), // Generate a unique ID
+          ID.unique(),
           {
             clientId: contactId,
             psychotherapistId: psychotherapistDocumentId,
@@ -329,175 +342,131 @@ const Communication: FC = () => {
       return null;
     }
   };
-  
- // Updated handleSendMessage to ensure only messages are sent
-const handleSendMessage = async (text: string) => {
-  if (!selectedContactId) return;
 
-  try {
-    const user = await account.get();
+  const handleSendMessage = async (text: string) => {
+    if (!selectedContactId) return;
 
-    const psychotherapistResponse = await databases.listDocuments(
-      'Butterfly-Database',
-      'Psychotherapist',
-      [Query.equal('userId', user.$id)]
-    );
+    try {
+      const conversationIdToUse = conversationId || await fetchOrCreateConversation(selectedContactId);
 
-    if (psychotherapistResponse.documents.length === 0) {
-      console.error("Psychotherapist not found.");
-      return;
-    }
-
-    const psychotherapistDocumentId = psychotherapistResponse.documents[0].$id;
-
-    const conversationIdToUse = conversationId || await fetchOrCreateConversation(selectedContactId);
-
-    if (!conversationIdToUse) {
-      console.error('Failed to create or retrieve conversation.');
-      return;
-    }
-
-
-    const messagePayload = {
-      senderId: psychotherapistDocumentId, // Use psychotherapist document ID as senderId
-      receiverId: selectedContactId,
-      content: text,
-      conversationId: conversationIdToUse,
-      dateTime: new Date().toISOString(),
-      status: 'sent',
-    };
-
-    const uniqueMessageId = ID.unique();
-
-    const newMessage = await databases.createDocument(
-      'Butterfly-Database',
-      'Messages',
-      uniqueMessageId,
-      messagePayload
-    );
-
-    const message: Message = {
-      id: newMessage.$id,
-      text: messagePayload.content,
-      sender: messagePayload.senderId,
-      time: new Date(messagePayload.dateTime).toLocaleTimeString(),
-    };
-
-    setMessages((prevMessages) => 
-      prevMessages.map((msg) =>
-        msg.id === uniqueMessageId
-          ? { ...msg, id: newMessage.$id }
-          : msg
-      )
-    );
-
-    setContacts((prevContacts) =>
-      prevContacts.map((contact) =>
-        contact.id === selectedContactId
-          ? { ...contact, lastMessage: `You: ${text}`, time: new Date().toLocaleTimeString() }
-          : contact
-      )
-    );
-  } catch (error) {
-    console.error('Error sending message:', error);
-  }
-  
-  
-};
-
-  
-
-useEffect(() => {
-  let fetchInterval: NodeJS.Timeout | null = null;
-
-  const fetchMessages = async () => {
-    if (selectedContactId && conversationId) {
-      try {
-
-        const psychotherapistResponse = await databases.listDocuments(
-          'Butterfly-Database',
-          'Psychotherapist',
-          [Query.equal('userId', loggedInUser?.$id)]
-        );
-
-        if (psychotherapistResponse.documents.length === 0) {
-          console.error("Psychotherapist not found.");
-          return;
-        }
-
-        const psychotherapistDocumentId = psychotherapistResponse.documents[0].$id;
-
-        const response = await databases.listDocuments(
-          'Butterfly-Database',
-          'Messages',
-          [Query.equal('conversationId', conversationId), Query.orderAsc('dateTime')]
-        );
-
-        const filteredMessages = response.documents.filter((msg) => {
-          return (
-            (msg.senderId === selectedContactId && msg.receiverId === psychotherapistDocumentId) ||
-            (msg.senderId === psychotherapistDocumentId && msg.receiverId === selectedContactId)
-          );
-        });
-
-        const messageData = filteredMessages.map((msg) => ({
-          id: msg.$id,
-          text: msg.content,
-          sender: msg.senderId === psychotherapistDocumentId ? 'psychotherapist' : 'client',
-          time: new Date(msg.dateTime).toLocaleTimeString(),
-        }));
-
-        setMessages(messageData);
-      } catch (error) {
-        console.error('Failed to fetch messages:', error);
+      if (!conversationIdToUse || !psychotherapistDocumentId) {
+        console.error('Failed to create or retrieve conversation.');
+        return;
       }
+
+      const messagePayload = {
+        senderId: psychotherapistDocumentId, // Use psychotherapist document ID as senderId
+        receiverId: selectedContactId,
+        content: text,
+        conversationId: conversationIdToUse,
+        dateTime: new Date().toISOString(),
+        status: 'sent',
+      };
+
+      const newMessage = await databases.createDocument(
+        'Butterfly-Database',
+        'Messages',
+        ID.unique(),
+        messagePayload
+      );
+
+      const message: Message = {
+        id: newMessage.$id,
+        text: messagePayload.content,
+        sender: 'psychotherapist',
+        time: new Date(messagePayload.dateTime).toLocaleTimeString(),
+      };
+
+      setMessages((prevMessages) => [...prevMessages, message]);
+
+      setContacts((prevContacts) =>
+        prevContacts.map((contact) =>
+          contact.id === selectedContactId
+            ? { ...contact, lastMessage: `You: ${text}`, time: new Date().toLocaleTimeString() }
+            : contact
+        )
+      );
+    } catch (error) {
+      console.error('Error sending message:', error);
     }
   };
 
-  fetchMessages();
+  useEffect(() => {
+    let fetchInterval: NodeJS.Timeout | null = null;
 
-  // Set up interval to auto-refresh messages every 3 seconds
-  fetchInterval = setInterval(fetchMessages, 3000);
+    const fetchMessages = async () => {
+      if (selectedContactId && conversationId && psychotherapistDocumentId) {
+        try {
+          const response = await databases.listDocuments(
+            'Butterfly-Database',
+            'Messages',
+            [Query.equal('conversationId', conversationId), Query.orderAsc('dateTime')]
+          );
 
-  // Clear interval when component unmounts or when the conversation changes
-  return () => {
-    if (fetchInterval) {
-      clearInterval(fetchInterval);
-    }
-  };
-}, [selectedContactId, conversationId, loggedInUser?.$id]);
+          const filteredMessages = response.documents.filter((msg) => {
+            return (
+              (msg.senderId === selectedContactId && msg.receiverId === psychotherapistDocumentId) ||
+              (msg.senderId === psychotherapistDocumentId && msg.receiverId === selectedContactId)
+            );
+          });
 
+          const messageData = filteredMessages.map((msg) => ({
+            id: msg.$id,
+            text: msg.content,
+            sender: msg.senderId === psychotherapistDocumentId ? 'psychotherapist' : 'client',
+            time: new Date(msg.dateTime).toLocaleTimeString(),
+          }));
 
+          setMessages(messageData);
+        } catch (error) {
+          console.error('Failed to fetch messages:', error);
+        }
+      }
+    };
 
+    fetchMessages();
 
+    fetchInterval = setInterval(fetchMessages, 3000);
 
+    return () => {
+      if (fetchInterval) {
+        clearInterval(fetchInterval);
+      }
+    };
+  }, [selectedContactId, conversationId, psychotherapistDocumentId]);
 
-return (
-  <Layout sidebarTitle="Butterfly" sidebarItems={items}>
-    <div className="flex h-screen bg-blue-50">
-      {isVideoCallActive ? (
-        <VideoCall onEndCall={handleEndCall} />
-      ) : (
-        <>
-          <ContactList
-            onContactClick={(id) => {
-              setSelectedContactId(id);
-              fetchOrCreateConversation(id);
-            }}
-            selectedContact={selectedContactId}
-            contacts={contacts}
+  return (
+    <Layout sidebarTitle="Butterfly" sidebarItems={items}>
+      <div className="flex h-screen bg-blue-50">
+        {isVideoCallActive && psychotherapistDocumentId && selectedContactId ? (
+          <VideoCall
+            onEndCall={() => {
+              setIsVideoCallActive(false);
+            }} 
+            callerId={psychotherapistDocumentId} // Use the psychotherapist document ID as the caller ID
+            receiverId={selectedContactId}
           />
-          <ChatBox
-            selectedContact={selectedContact}
-            messages={messages}
-            onSendMessage={handleSendMessage}
-            onStartCall={handleStartCall}
-          />
-        </>
-      )}
-    </div>
-  </Layout>
-);
+        ) : (
+          <>
+            <ContactList
+              onContactClick={(id) => {
+                setSelectedContactId(id);
+                fetchOrCreateConversation(id);
+              }}
+              selectedContact={selectedContactId}
+              contacts={contacts}
+            />
+            <ChatBox
+              selectedContact={selectedContact}
+              messages={messages}
+              onSendMessage={handleSendMessage}
+              onStartCall={handleStartCall}
+            />
+          </>
+        )}
+      </div>
+    </Layout>
+  );
 };
 
 export default Communication;

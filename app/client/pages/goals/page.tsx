@@ -6,27 +6,33 @@ import Layout from '@/components/Sidebar/Layout';
 import items from '@/client/data/Links';
 import { MdArrowBack, MdArrowForward } from 'react-icons/md';
 import ConfirmationModal from "@/components/ConfirmationModal";
-import { databases, account } from '@/appwrite'; // Import Appwrite client configuration and account API
+import { Account, Client, Databases, Permission, Query, Role } from 'appwrite';
 
 interface Goal {
     id: string;
+    client: string;
+    clientId: string;
+    psychotherapist: string;
+    psychotherapistId: string; 
     mood: 'HAPPY' | 'SAD' | 'ANXIOUS' | 'FEAR' | 'FRUSTRATED';
     activities: string;
-    duration: number;
     date: string;
     startTime: string;
     endTime: string;
-    setReminder: string;
     progress: 'todo' | 'doing' | 'done' | 'missed';
 }
 
-// Appwrite database and collection IDs
-const DATABASE_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || 'Butterfly-Database';
-const COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_COLLECTION_ID || 'Goals';
+const client = new Client();
+client
+  .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT as string)
+  .setProject(process.env.NEXT_PUBLIC_PROJECT_ID as string);
+  const databases = new Databases(client);
+  const account = new Account(client);
+const CLIENT_COLLECTION_ID = 'Client';
 
 const GoalsPage = () => {
     const [goals, setGoals] = useState<Goal[]>([]);
-    const [mood, setMood] = useState<'HAPPY' | 'SAD' | 'ANXIOUS' | 'FEAR' | 'FRUSTRATED' | ''>('');
+    const [mood, setMood] = useState<'HAPPY' | 'SAD' | 'ANXIOUS' | 'FEAR' | 'FRUSTRATED' | ''>(''); 
     const [activities, setActivities] = useState('meditate');
     const [startHour, setStartHour] = useState(1);
     const [startMinute, setStartMinute] = useState(0);
@@ -34,44 +40,93 @@ const GoalsPage = () => {
     const [endHour, setEndHour] = useState(2);
     const [endMinute, setEndMinute] = useState(0);
     const [endPeriod, setEndPeriod] = useState('AM');
-    const [reminderTime, setReminderTime] = useState(0);
     const [goalReminder, setGoalReminder] = useState(false);
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
     const [showConfirmationModal, setShowConfirmationModal] = useState(false);
     const [showModal, setShowModal] = useState(false);
-    const [userName, setUserName] = useState('Client'); // Default to "Client" before fetching real name
+    const [userName, setUserName] = useState('Client');
+    const [clientId, setClientId] = useState<string | null>(null);
+    const [psychotherapistId, setPsychotherapistId] = useState<string | null>(null);
 
     const oneWeekAhead = addDays(new Date(), 7);
 
-    // Fetch the real name of the logged-in user from Appwrite
+    // Fetch the real name of the logged-in user and client/psychotherapist IDs
     useEffect(() => {
-        const fetchUserName = async () => {
+        const fetchUserData = async () => {
             try {
-                const user = await account.get(); // Fetch user details from Appwrite
+                const user = await account.get();
                 if (user && user.name) {
-                    setUserName(user.name); // Set the user's real name
+                    setUserName(user.name);
+                    console.log('User:', user);
+
+                    // Fetch the client document for the logged-in user
+                    const clientResponse = await databases.listDocuments('Butterfly-Database', CLIENT_COLLECTION_ID, [
+                        Query.equal("userid", user.$id),
+                    ]);
+
+                    if (clientResponse.documents.length > 0) {
+                        const clientDoc = clientResponse.documents[0];
+                        setClientId(clientDoc.$id);
+                        console.log('Client Document:', clientDoc);
+
+                        // Check if psychotherapist is linked in the client document
+                        if (clientDoc.psychotherapist) {
+                            setPsychotherapistId(clientDoc.psychotherapist);
+                        } else {
+                            console.warn('Psychotherapist ID not found in Client document.');
+                        }
+                    } else {
+                        console.warn('Client document not found for user.');
+                    }
                 }
             } catch (error) {
-                console.error('Error fetching user name:', error);
+                console.error('Error fetching user data:', error);
             }
         };
-        fetchUserName();
+        fetchUserData();
     }, []);
 
-    // Fetch goals from Appwrite when component mounts
-    useEffect(() => {
-        const fetchGoals = async () => {
-            try {
-                const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID);
-                setGoals(response.documents);
-            } catch (error) {
-                console.error('Error fetching goals:', error);
+    // Function to fetch goals created by the authenticated user
+useEffect(() => {
+    const fetchUserGoals = async () => {
+        try {
+            // Retrieve the current user
+            const user = await account.get().catch(error => {
+                console.error("User not authenticated:", error);
+                alert("Please log in to view goals.");
+                return null;
+            });
+
+            if (!user) return;
+
+            // Fetch the Client document ID for the current user
+            const clientResponse = await databases.listDocuments('Butterfly-Database', 'Client', [
+                Query.equal('userid', user.$id)
+            ]);
+
+            if (clientResponse.documents.length === 0) {
+                throw new Error("Client document not found for the current user.");
             }
-        };
-        fetchGoals();
-    }, []);
+
+            const clientDocument = clientResponse.documents[0];
+            const clientId = clientDocument.$id;
+
+            // Fetch goals where the clientId matches the logged-in user's clientId
+            const response = await databases.listDocuments('Butterfly-Database', 'Goals', [
+                Query.equal('clientId', clientId)
+            ]);
+
+            // Set only the goals created by this user
+            setGoals(response.documents);
+        } catch (error) {
+            console.error('Error fetching user goals:', error);
+        }
+    };
+
+    fetchUserGoals();
+}, []);
 
     const handleSave = async () => {
         if (!selectedDate) {
@@ -79,15 +134,42 @@ const GoalsPage = () => {
             return;
         }
     
-        const validMood = mood.toLowerCase(); // Convert mood to lowercase
-        const validReminderTime = String(reminderTime || 5); // Default to 5 if no reminderTime is selected
-        const initialProgress = 'todo'; // Default progress to 'todo'
+        // Retrieve the current user
+        const user = await account.get().catch(error => {
+            console.error("User not authenticated:", error);
+            alert("Please log in to save goals.");
+            return null;
+        });
+        
+        if (!user) return;
     
-        // Combine selectedDate with startTime and endTime
-        const startHour24 = startPeriod === 'PM' && startHour !== 12 ? startHour + 12 : startHour; // Convert to 24-hour format
-        const endHour24 = endPeriod === 'PM' && endHour !== 12 ? endHour + 12 : endHour; // Convert to 24-hour format
+        // Fetch the Client document ID for the current user
+        const clientResponse = await databases.listDocuments('Butterfly-Database', 'Client', [
+            Query.equal('userid', user.$id)
+        ]);
+        
+        if (clientResponse.documents.length === 0) {
+            throw new Error("Client document not found for the current user.");
+        }
     
-        // Create DateTime objects for start and end times
+        const clientDocument = clientResponse.documents[0];
+        const clientId = clientDocument.$id;
+    
+        // Fetch the Psychotherapist document ID associated with this client
+        const psychotherapistId = clientDocument.psychotherapist.$id;
+        console.log("psychotherpistid",psychotherapistId)
+        
+        if (!psychotherapistId) {
+            throw new Error("Psychotherapist data is missing for the current client.");
+        }
+    
+        // Define the goal data
+        const validMood = mood.toLowerCase();
+        const initialProgress = 'todo';
+    
+        const startHour24 = startPeriod === 'PM' && startHour !== 12 ? startHour + 12 : startHour;
+        const endHour24 = endPeriod === 'PM' && endHour !== 12 ? endHour + 12 : endHour;
+    
         const startTimeISO = new Date(
             selectedDate.getFullYear(),
             selectedDate.getMonth(),
@@ -104,26 +186,57 @@ const GoalsPage = () => {
             endMinute
         ).toISOString();
     
-        // Create the goal object without errors
         const newGoal: Omit<Goal, 'id'> = {
             mood: validMood as Goal['mood'],
-            activities, // Ensure this is being passed correctly
+            activities,
             date: format(selectedDate, 'yyyy-MM-dd'),
-            startTime: startTimeISO, // Set the valid ISO string for startTime
-            endTime: endTimeISO, // Set the valid ISO string for endTime
-            setReminder: validReminderTime,
+            startTime: startTimeISO,
+            endTime: endTimeISO,
             progress: initialProgress,
+            clientId: clientId, // String field for direct access
+            psychotherapistId: psychotherapistId,
+            psychotherapist: '',
+            client: '',
         };
     
         try {
-            const response = await databases.createDocument(DATABASE_ID, COLLECTION_ID, 'unique()', newGoal);
+            const response = await databases.createDocument('Butterfly-Database', 'Goals', 'unique()', newGoal);
             setGoals([...goals, { ...newGoal, id: response.$id }]);
             setShowModal(true);
         } catch (error) {
             console.error('Error saving goal:', error);
         }
     };
+    
 
+    // Function to handle progress change and update in the database
+// Function to handle progress change and update in the database
+const handleProgressChange = async (newProgress: Goal['progress'], goalId: string, goalIndex: number) => {
+    try {
+        if (!goalId) {
+            console.error("Missing goalId for update.");
+            return;
+        }
+
+        console.log(`Updating goal with ID: ${goalId} to progress: ${newProgress}`);
+
+        // Update the progress in the Appwrite database
+        await databases.updateDocument('Butterfly-Database', 'Goals', goalId, {
+            progress: newProgress
+        });
+
+        // Update the local state to reflect the new progress
+        const updatedGoals = goals.map((g, idx) =>
+            idx === goalIndex ? { ...g, progress: newProgress } : g
+        );
+        setGoals(updatedGoals);
+
+        console.log("Goal progress updated successfully in database.");
+    } catch (error) {
+        console.error("Error updating goal progress:", error);
+    }
+};
+    
     const changeMonth = (increment: number) => {
         const newDate = addMonths(new Date(currentYear, currentMonth), increment);
         setCurrentMonth(newDate.getMonth());
@@ -167,8 +280,8 @@ const GoalsPage = () => {
 
     const updateEndTime = (newStartHour, newStartPeriod) => {
         let endHourValue = parseInt(newStartHour) + 1;
-
         let endPeriodValue = newStartPeriod;
+
         if (endHourValue > 12) {
             endHourValue = 1;
             endPeriodValue = newStartPeriod === "AM" ? "PM" : "AM";
@@ -324,34 +437,6 @@ const GoalsPage = () => {
                             </div>
                         </div>
 
-                        {/* Reminder Selection */}
-                        <div className="mt-4">
-                            <label className="block font-semibold text-gray-700">Reminder:</label>
-                            <select
-                                value={reminderTime}
-                                onChange={(e) => setReminderTime(Number(e.target.value))}
-                                className="border rounded-lg p-2 mt-1 w-full focus:outline-none focus:ring-2 focus:ring-blue-300"
-                            >
-                                <option value={0}>None</option>
-                                <option value={5}>5 minutes before</option>
-                                <option value={10}>10 minutes before</option>
-                                <option value={15}>15 minutes before</option>
-                                <option value={20}>20 minutes before</option>
-                                <option value={30}>30 minutes before</option>
-                            </select>
-                        </div>
-
-                        <div className="mt-4">
-                            <label className="flex items-center font-semibold text-gray-700">
-                                <input
-                                    type="checkbox"
-                                    checked={goalReminder}
-                                    onChange={() => setGoalReminder(!goalReminder)}
-                                    className="mr-2"
-                                />
-                                Set Goal Reminder
-                            </label>
-                        </div>
                     </div>
 
                     {/* Mood Tracker Section */}
@@ -425,12 +510,13 @@ const GoalsPage = () => {
                     onConfirm={handleSave}
                 />
 
-{/* Logged Goals Section */}
-<div className="mt-12 bg-white shadow-lg rounded-xl p-6 border border-gray-200">
+                {/* Logged Goals Section */}
+                <div className="mt-12 bg-white shadow-lg rounded-xl p-6 border border-gray-200">
     <h3 className="text-lg font-semibold text-blue-400">Logged Goals</h3>
     {goals.length > 0 ? (
         <ul className="mt-4 space-y-3">
             {goals.map((goal, index) => {
+                const goalId = goal.$id; // Use goal.$id as the document ID
                 const currentTime = new Date().getTime();
                 const goalEndTime = new Date(goal.endTime).getTime();
 
@@ -440,49 +526,30 @@ const GoalsPage = () => {
                 // Determine the display progress
                 const displayProgress = isPastEndTime ? 'missing' : goal.progress;
 
-                // Define dropdown class based on progress or if the end time has passed
-                let dropdownClass = 'border rounded-lg p-2 focus:outline-none focus:ring-2 text-gray-700 transition-colors duration-200';
-
-                // Apply background color based on progress
-                if (isPastEndTime) {
-                    dropdownClass += ' bg-red-500 text-white'; // Red if the end time has passed
-                } else if (goal.progress === 'done') {
-                    dropdownClass += ' bg-green-500 text-white'; // Green for "done"
-                } else if (goal.progress === 'doing') {
-                    dropdownClass += ' bg-yellow-500 text-white'; // Yellow for "doing"
-                } else {
-                    dropdownClass += ' bg-white'; // Default white for "to do"
-                }
-
                 return (
                     <li
-                        key={goal.id || index} // Ensure a unique key using `goal.id` or fallback to `index`
+                        key={goalId} // Ensure a unique key using `goal.$id`
                         className="p-4 bg-gray-50 rounded-lg shadow-md flex justify-between items-center"
                     >
                         <div>
                             <p className="text-sm">
                                 {goal.activities} for {goal.duration} minutes on {goal.date} (Mood: {goal.mood})
                             </p>
-                            <p className="text-xs text-gray-500">Status: {displayProgress}</p> {/* Display 'missing' if applicable */}
+                            <p className="text-xs text-gray-500">Status: {displayProgress}</p>
                         </div>
-                        {!isPastEndTime ? ( // Render the dropdown only if the end time has not passed
+                        {!isPastEndTime ? (
                             <select
                                 value={goal.progress}
-                                onChange={(e) => {
-                                    const updatedGoals = goals.map((g, idx) =>
-                                        idx === index ? { ...g, progress: e.target.value as Goal['progress'] } : g
-                                    );
-                                    setGoals(updatedGoals); // Update only the specific goal's state
-                                }}
-                                className={dropdownClass}
-                                disabled={isPastEndTime} // Disable dropdown if the end time has passed
+                                onChange={(e) => handleProgressChange(e.target.value as Goal['progress'], goalId, index)}
+                                className="border rounded-lg p-2 text-gray-700 focus:outline-none focus:ring-2 transition-colors duration-200"
+                                disabled={isPastEndTime}
                             >
                                 <option value="todo">To Do</option>
                                 <option value="doing">Doing</option>
                                 <option value="done">Done</option>
                             </select>
                         ) : (
-                            <span className="text-red-500">Missing</span> // Show 'Missing' if the end time has passed
+                            <span className="text-red-500">Missing</span>
                         )}
                     </li>
                 );
