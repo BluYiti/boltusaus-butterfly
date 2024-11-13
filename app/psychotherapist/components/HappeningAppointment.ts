@@ -13,7 +13,7 @@ const timeSlots = [
 
 export const HappeningAppointment = async () => {
   try {
-    const currentTime = new Date(2024, 10, 19, 9, 0, 0, 0); // November 19, 2024, 09:00:00 AM
+    const currentTime = new Date(); // November 19, 2024, 09:00:00 AM
     console.log(currentTime); //(year, monthIndex, day, hours, minutes, seconds, milliseconds)
     const currentMonth = monthNames[currentTime.getMonth()]; // Months are zero-indexed (0-11)
     const currentDay = currentTime.getDate();

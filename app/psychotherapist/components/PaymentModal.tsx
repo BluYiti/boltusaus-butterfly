@@ -87,13 +87,15 @@ const PaymentModal = ({ isOpen, onClose, client }) => {
   // Functions for handling Reschedule and Refund actions
   const handleReschedule = async () => {
     try {
-      await databases.updateDocument('Butterfly-Database', 'Bookings', client.id, {
+      await databases.updateDocument('Butterfly-Database', 'Bookings', client.booking.$id, {
         status: 'rescheduled'
       });
       await databases.updateDocument('Butterfly-Database', 'Payment', client.id, {
-        status: 'rescheduled'
+        status: 'rescheduled',
+        declineReason: declineReason,
       });
-      // Add any additional actions here if needed (like confirmation or redirection)
+      onClose();
+      window.location.href = `/psychotherapist/pages/clientspayment?tab=Reschedule`;
     } catch (error) {
       console.error('Failed to update document', error);
     }
@@ -101,16 +103,15 @@ const PaymentModal = ({ isOpen, onClose, client }) => {
 
   const handleRefund = async () => {
     try {
-      await databases.updateDocument('Butterfly-Database', 'Bookings', client.id, {
-        status: 'refunded',
-        declineReason: declineReason,
+      await databases.updateDocument('Butterfly-Database', 'Bookings', client.booking.$id, {
+        status: 'refunded'
       });
       await databases.updateDocument('Butterfly-Database', 'Payment', client.id, {
         status: 'refunded',
         declineReason: declineReason,
       });
       onClose();
-      window.location.href = `/psychotherapist/pages/clientspayment?tab=Declined`;
+      window.location.href = `/psychotherapist/pages/clientspayment?tab=Refund`;
     } catch (error) {
       console.error('Failed to update document', error);
     }
@@ -188,7 +189,7 @@ const PaymentModal = ({ isOpen, onClose, client }) => {
                 className="ml-4 px-4 py-2 text-sm font-semibold text-white bg-red-400 rounded-full hover:bg-red-300"
                 onClick={handleDeclineSubmit} // Handle Decline, Reschedule, Refund, or Others
               >
-                {actionType === 'reschedule' ? 'Reschedule' : actionType === 'refund' ? 'Refund' : actionType === 'others' ? 'Submit' : 'Decline'}
+                Decline
               </button>
             </div>
           </div>

@@ -173,7 +173,8 @@ const ClientsPayment = () => {
                   <option value="all">All Status</option>
                   <option value="pending">Pending</option>
                   <option value="paid">Paid</option>
-                  <option value="declined">Declined</option>
+                  <option value="rescheduled">Reschedule</option>
+                  <option value="refunded">Refund</option>
                 </select>
               </div>
             </div>

@@ -36,6 +36,7 @@ const Calendar: React.FC<CalendarProps> = ({
     const [bookedSlots, setBookedSlots] = useState<any[]>([]); // To store fetched booked slots
     const [isNextMonthAvailable, setIsNextMonthAvailable] = useState(false);
     const [isFormComplete, setIsFormComplete] = useState(false);
+    const [accountRole, setAccountRole] = useState(null);
 
     const today = new Date();
     const tomorrow = new Date(today);
@@ -204,6 +205,9 @@ const Calendar: React.FC<CalendarProps> = ({
             </div>
 
             <h3 className="text-lg font-bold text-blue-900">Select Time {!selectedTime && <span className="text-red-500">*</span>}</h3>
+            {accountRole === "client"
+
+            }
             <div className="grid grid-cols-4 gap-4 mt-4">
                 {["09:00am", "10:00am", "11:00am", "01:00pm", "02:00pm", "03:00pm", "04:00pm"].map((time) => {
                     const isBooked = isSlotBooked(selectedDay || 0, time);
