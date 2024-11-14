@@ -26,6 +26,7 @@
     "@types/peerjs": "^0.0.30",
     "appwrite": "^16.0.2",
     "axios": "^1.7.7",
+    "boltusaus-butterfly": "file:",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",

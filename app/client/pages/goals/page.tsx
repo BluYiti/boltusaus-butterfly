@@ -9,8 +9,6 @@ import ConfirmationModal from "@/components/ConfirmationModal";
 import { Account, Client, Databases, Permission, Query, Role } from 'appwrite';
 import { useProgressUpdate } from '@/hooks/userProgress';
 
-
-
 interface Goal {
     id: string;
     client: string;
@@ -54,7 +52,8 @@ const GoalsPage = () => {
 
     // Use goals, updateProgress, fetchGoals, error, and loading from useProgressUpdate
     const { updateProgress, fetchGoals, goals, error, loading } = useProgressUpdate();
-
+    const [newGoal, setNewGoal] = useState<string>('');
+    
     useEffect(() => {
         // Fetch goals when the component mounts
         fetchGoals();
@@ -221,9 +220,14 @@ useEffect(() => {
 
     // Function to handle progress change and update in the database
 // Function to handle progress change and update in the database
-    const handleProgressChange = async (newProgress: Goal['progress'], goalId: string) => {
-    await updateProgress(goalId, newProgress);
-    };
+const handleProgressChange = async (newProgress: string, goalId: string) => {
+    if (newProgress) {
+        console.log(`Changing progress to: ${newProgress} for goal ID: ${goalId}`);
+        await updateProgress(goalId, newProgress);
+    } else {
+        console.error('No new progress value selected');
+    }
+};
 
     
     const changeMonth = (increment: number) => {
@@ -512,27 +516,28 @@ useEffect(() => {
 
                                 return (
                                     <li key={goal.$id} className="p-4 bg-gray-50 rounded-lg shadow-md flex justify-between items-center">
-                                        <div>
-                                            <p className="text-sm">
-                                                {goal.activities} for {goal.duration} minutes on {goal.date} (Mood: {goal.mood})
-                                            </p>
-                                            <p className="text-xs text-gray-500">Status: {displayProgress}</p>
-                                        </div>
-                                        {!isPastEndTime ? (
-                                            <select
-                                                value={goal.progress}
-                                                onChange={(e) => handleProgressChange(e.target.value as Goal['progress'], goal.$id)}
-                                                className="border rounded-lg p-2 text-gray-700 focus:outline-none focus:ring-2 transition-colors duration-200"
-                                                disabled={isPastEndTime}
-                                            >
-                                                <option value="todo">To Do</option>
-                                                <option value="doing">Doing</option>
-                                                <option value="done">Done</option>
-                                            </select>
-                                        ) : (
-                                            <span className="text-red-500">Missed</span>
-                                        )}
-                                    </li>
+                                    <div>
+                                        <p className="text-sm">
+                                            {goal.activities} for {goal.duration} minutes on {goal.date} (Mood: {goal.mood})
+                                        </p>
+                                        <p className="text-xs text-gray-500">Status: {displayProgress}</p>
+                                    </div>
+                                    {!isPastEndTime ? (
+                                        <select
+                                            value={goal.progress}
+                                            onChange={(e) => handleProgressChange(e.target.value, goal.$id)}
+                                            className="border rounded-lg p-2 text-gray-700 focus:outline-none focus:ring-2 transition-colors duration-200"
+                                            disabled={isPastEndTime}
+                                        >
+                                            <option value="todo">To Do</option>
+                                            <option value="doing">Doing</option>
+                                            <option value="done">Done</option>
+                                        </select>
+                                    ) : (
+                                        <span className="text-red-500">Missed</span>
+                                    )}
+                                </li>
+
                                 );
                             })}
                         </ul>

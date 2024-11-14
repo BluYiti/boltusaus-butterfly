@@ -28,37 +28,42 @@ export const useProgressUpdate = () => {
 
     // Function to update the progress of a goal
     const updateProgress = async (goalId: string, newProgress: Goal['progress']) => {
-        setError(null);
-        setLoading(true);
-
-        // Validate the `newProgress` value against allowed enum values
+        console.log(`Updating goal ID: ${goalId} with progress: ${newProgress}`); // Log the values
+    
+        // Ensure `newProgress` is one of the valid enum values
         const validProgressValues = ['todo', 'doing', 'done', 'missed'];
         if (!validProgressValues.includes(newProgress)) {
-            setError('Invalid progress value. Please select a valid option.');
-            setLoading(false);
+            console.error('Invalid progress value:', newProgress);
             return;
         }
-
+    
         try {
-            // Update the progress in the Appwrite database
-            console.log(`Updating goal with ID: ${goalId} to progress: ${newProgress}`);
             await databases.updateDocument('Butterfly-Database', 'Goals', goalId, {
                 progress: newProgress,
             });
-
-            // Update the local state if needed
-            const updatedGoals = goals.map((goal) =>
-                goal.$id === goalId ? { ...goal, progress: newProgress } : goal
-            );
-            setGoals(updatedGoals);
-
-            console.log('Goal progress updated successfully.');
-        } catch (err: any) {
-            console.error('Error updating goal progress:', err);
-            setError(`Failed to update progress: ${err.message}`);
-        } finally {
-            setLoading(false);
+            console.log('Successfully updated progress to:', newProgress);
+        } catch (error) {
+            console.error('Error updating progress in Appwrite:', error);
         }
+    };
+
+    const handleSaveGoal = async () => {
+        // Call your Appwrite function to save the new goal here
+        // Example:
+        await databases.createDocument('Butterfly-Database', 'Goals', {
+            activities: newGoal,
+            // Include other required fields here...
+        });
+
+        // Clear the input and refetch the goals
+        setNewGoal('');
+        fetchGoals();
+    };
+
+    // Function to handle progress change
+    const handleProgressChange = async (newProgress: string, goalId: string) => {
+        await updateProgress(goalId, newProgress);
+        fetchGoals(); // Refresh goals after updating progress
     };
 
     // Function to redirect after successful update, if needed
