@@ -218,6 +218,7 @@ const AboutMe = () => {
                       className="w-full h-full object-cover rounded-full"
                       width={100}  // Specify the width of the image (adjust as needed)
                       height={100} // Specify the height of the image (adjust as needed)
+                      unoptimized
                     />
                   ) : (
                     <span className="text-white text-xl">No Image</span> // Fallback in case there is no image
