@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useCallback, useEffect } from 'react';
 import termsContent from '@/constants/terms';
 import privacyContent from '@/constants/privacy';
 import TermsAndPrivacy from './TermsAndPrivacy';
@@ -55,6 +55,62 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ error }) => {
 
     const [modalContentType, setModalContentType] = React.useState<'terms' | 'privacy'>('terms');
 
+    // Assuming the form field setters are available in your component
+    const setters = {
+        firstName: setFirstName,
+        lastName: setLastName,
+        birthday: setBirthday,
+        sex: setSex,
+        password: setPassword,
+        rePassword: setRePassword,
+        age: setAge,
+        street: setStreet,
+        barangay: setBarangay,
+        city: setCity,
+        province: setProvince,
+        country: setCountry,
+        contactNumber: setContactNumber,
+        emergencyContactName: setEmergencyContactName,
+        emergencyContactNumber: setEmergencyContactNumber,
+        idFile: setIdFile,
+        email: setEmail,
+    };
+    
+    // Memoize resetForm using useCallback
+    const resetForm = useCallback(() => {
+        setFirstName('');
+        setLastName('');
+        setBirthday('');
+        setSex('');
+        setCountry('');
+        setRegion('');
+        setProvince('');
+        setCity('');
+        setBarangay('');
+        setStreet('');
+        setContactNumber('');
+        setEmergencyContactName('');
+        setEmergencyContactNumber('');
+        setIdFile(null);
+        setEmail('');
+        setPassword('');
+        setRePassword('');
+        setAgreeToTerms(false);
+        setPasswordCriteria({
+            length: false,
+            number: false,
+            specialChar: false,
+            uppercase: false,
+            lowercase: false,
+        });
+        setIsPasswordValid(false);
+        setValidationError(null); // Reset validation errors
+        setAge(null);
+        setProvinces([]);
+        setCities([]);
+        setBarangays([]);
+    }, [setFirstName, setLastName, setBirthday, setSex, setCountry, setRegion, setProvince, setCity, setBarangay, setStreet, setContactNumber, setEmergencyContactName, setEmergencyContactNumber, setIdFile, setEmail, setPassword, setRePassword, setAgreeToTerms, setPasswordCriteria, setIsPasswordValid, setValidationError, setAge, setProvinces, setCities, setBarangays]);
+
     // Handle form submission
     const handleSubmit = createSubmitHandler({
         firstName,
@@ -81,7 +137,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ error }) => {
             router.push(`/register/verify/email/?user=${encodeURIComponent(userId)}`);
         },
         setValidationError,
-    }, setLoading, setButtonClicked); // Pass setLoading and setButtonClicked here
+    }, setLoading, setButtonClicked, resetForm, setters);  // Pass setLoading and setButtonClicked here
 
     // Use custom hooks to fetch data
     useFetchCountries(setCountries);
@@ -136,6 +192,12 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ error }) => {
         setPassword(newPassword);
         validatePassword(newPassword);
     };
+
+    useEffect(() => {
+        if (error) {
+            resetForm();
+        }
+    }, [error, resetForm]);
 
     return (
         <div className="w-full p-8">

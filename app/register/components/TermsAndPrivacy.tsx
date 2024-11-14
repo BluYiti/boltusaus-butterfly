@@ -32,15 +32,9 @@ const TermsAndPrivacy: React.FC<TermsAndPrivacyProps> = ({ isOpen, onClose, cont
                 <div className="flex justify-between mt-4">
                     <button
                         onClick={onClose}
-                        className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                        className="bg-blue-400 text-white px-4 py-2 rounded hover:bg-blue-700"
                     >
-                        Decline
-                    </button>
-                    <button
-                        onClick={onClose}
-                        className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-                    >
-                        Accept
+                        Back
                     </button>
                 </div>
             </div>

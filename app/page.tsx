@@ -6,6 +6,9 @@ import { motion } from "framer-motion";
 import BackToTopButton from './components/BackToTop';
 import { FaMapMarkerAlt, FaEnvelope, FaPhone, FaFacebookF, FaMap } from 'react-icons/fa';
 import Image from 'next/image';
+import termsContent from '@/constants/terms';
+import privacyContent from '@/constants/privacy';
+import TermsAndPrivacy from "./register/components/TermsAndPrivacy";
 
 const navItems = [
   { label: "About Us", href: "#about" },
@@ -37,6 +40,8 @@ const bookingSteps = [
 
 const HomePage: React.FC = () => {
   const [open, setOpen] = useState<number | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [modalContentType, setModalContentType] = React.useState<'terms' | 'privacy'>('terms');
 
   const toggleOpen = (index: number) => {
     setOpen(open === index ? null : index);
@@ -274,14 +279,41 @@ const HomePage: React.FC = () => {
         </div>
 
 
-  <div className="text-left mt-4 ml-36 flex justify-between items-center">
-    <div>
-      <a href="#" className="text-sm">Terms and Conditions</a> | <a href="#" className="text-sm">Privacy Policy</a>
-    </div>
-
-  </div>
+        <div className="text-left mt-4 ml-36 flex justify-between items-center">
+          <div>
+            <button
+                type="button"
+                onClick={() => {
+                    setIsModalOpen(true);
+                    setModalContentType('terms');
+                }}
+                className="text-blue-500 hover:underline ml-1"
+            >
+                Terms and Conditions
+            </button>
+            &nbsp;|&nbsp;
+            <button
+                type="button"
+                onClick={() => {
+                    setIsModalOpen(true);
+                    setModalContentType('privacy');
+                }}
+                className="text-blue-500 hover:underline ml-1"
+            >
+                Privacy Policy
+            </button>
+          </div>
+        </div>
       </section>
-    </div>
+      {/* Terms and Privacy Modal */}
+      <TermsAndPrivacy
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          contentType={modalContentType}  
+          termsContent={termsContent} 
+          privacyContent={privacyContent} 
+      />
+    </div>    
   );
 };
 
