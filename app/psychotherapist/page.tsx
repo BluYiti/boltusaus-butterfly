@@ -11,7 +11,6 @@ import Calendar from '@/components/Calendar/Calendar';
 import { fetchPsychoId } from '@/hooks/userService';
 import { HappeningAppointment } from './components/HappeningAppointment';
 
-// Define types for each type of data
 type Client = {
   $id: string;
   firstname: string;
@@ -21,14 +20,13 @@ type Client = {
 
 type Booking = {
   $id: string;
-  clientId: string; // The ID of the client
-  status: string; // The status of the booking (e.g., "paid", "missed")
-  client?: { // Optional field for client details
+  clientId: string;
+  status: string;
+  client?: {
     firstname: string;
     lastname: string;
   };
 };
-
 
 type Payment = {
   $id: string;
@@ -42,15 +40,19 @@ type Payment = {
 
 const Dashboard: React.FC = () => {
   HappeningAppointment();
-  const { loading: authLoading } = useAuthCheck(['psychotherapist']); 
-  const [userName, setUserName] = useState<string | null>(null); 
-  const [evaluationData, setEvaluationData] = useState<Client[]>([]); // Use Client type
-  const [missedData, setMissedData] = useState<Booking[]>([]); // Use Booking type
-  const [sessionData, setSessionData] = useState<Booking[]>([]); // Use Booking type
-  const [paymentsData, setPaymentsData] = useState<Payment[]>([]); // Use Payment type
+  const { loading: authLoading } = useAuthCheck(['psychotherapist']);
+  const [userName, setUserName] = useState<string | null>(null);
+  const [evaluationData, setEvaluationData] = useState<Client[]>([]);
+  const [missedData, setMissedData] = useState<Booking[]>([]);
+  const [sessionData, setSessionData] = useState<Booking[]>([]);
+  const [paymentsData, setPaymentsData] = useState<Payment[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-
+  
+  const [loading, setLoading] = useState<boolean>(true);  // General loading state
+  const [loadingUpcomingSessions, setLoadingUpcomingSessions] = useState<boolean>(true); // Track loading state for upcoming sessions
+  const [loadingMissedSessions, setLoadingMissedSessions] = useState<boolean>(true);  // Track loading state for missed sessions
+  const [loadingPayments, setLoadingPayments] = useState<boolean>(true); // Track loading state for payments
+  
   const today = new Date();
   const currentYear = today.getFullYear();
   const selectedMonth = today.toLocaleString('default', { month: 'long' });
@@ -62,132 +64,143 @@ const Dashboard: React.FC = () => {
     selectedTherapist: null,
     selectedMode: null,
     appointmentBooked: false,
-    isFirstBooking: false, 
+    isFirstBooking: false,
     allowTherapistChange: true,
   });
 
   const router = useRouter();
 
   const fetchEvaluation = async () => {
-    const evaluationResponse = await databases.listDocuments(
-      'Butterfly-Database', // Database ID
-      'Client', // Collection ID
-      [Query.equal('state', 'evaluate')] // Query to filter records
-    );
+    try {
+      const evaluationResponse = await databases.listDocuments(
+        'Butterfly-Database', 
+        'Client', 
+        [Query.equal('state', 'evaluate')] 
+      );
+      
+      const clients: Client[] = evaluationResponse.documents.map((doc) => ({
+        $id: doc.$id,
+        firstname: doc.firstname,
+        lastname: doc.lastname,
+        state: doc.state,
+      }));
     
-    // Map the response to the Client type
-    const clients: Client[] = evaluationResponse.documents.map((doc) => ({
-      $id: doc.$id,
-      firstname: doc.firstname,
-      lastname: doc.lastname,
-      state: doc.state,
-    }));
-  
-    setEvaluationData(clients); // Store mapped clients in state
+      setEvaluationData(clients); 
+    } catch (error) {
+      setError('Failed to fetch evaluation data');
+    }
   };
-  
 
   const fetchUpcomingSessions = async () => {
-    const sessionResponse = await databases.listDocuments(
-      'Butterfly-Database', // Your database ID
-      'Bookings', // Your collection ID
-      [Query.equal('status', 'paid')] // Filter for paid sessions
-    );
+    setLoadingUpcomingSessions(true); // Set loading state for upcoming sessions
+    try {
+      const sessionResponse = await databases.listDocuments(
+        'Butterfly-Database', 
+        'Bookings', 
+        [Query.equal('status', 'paid')] 
+      );
+      
+      const clientIds = sessionResponse.documents.map((booking) => booking.client.$id).filter((id) => id);
     
-    // Extract client IDs from the session data
-    const clientIds = sessionResponse.documents.map((booking) => booking.client.$id).filter((id) => id);
-  
-    // Fetch client data based on the client IDs
-    const clientPromises = clientIds.map((clientId) => {
-      if (!clientId) return Promise.resolve(null); // Skip missing clientIds
-      return databases.getDocument('Butterfly-Database', 'Client', clientId); // Fetch the client data
-    });
-  
-    const clientData = await Promise.all(clientPromises);
-    const validClientData = clientData.filter((client) => client !== null);
-  
-    // Now, map the session data and merge the client information
-    const sessionsWithClientNames: Booking[] = sessionResponse.documents.map((booking) => {
-      const client = validClientData.find((client) => client.$id === booking.client.$id);
-  
-      // Map the session to the Booking type
-      return {
-        $id: booking.$id,
-        clientId: booking.clientId, // Ensure clientId is included
-        status: booking.status, // Ensure status is included
-        client: {
-          firstname: client?.firstname || 'Unknown', // Fallback in case client is not found
-          lastname: client?.lastname || 'Unknown',  // Fallback in case client is not found
-        },
-      };
-    });
-  
-    setSessionData(sessionsWithClientNames); // Update state with the correctly mapped session data
+      const clientPromises = clientIds.map((clientId) => {
+        if (!clientId) return Promise.resolve(null);
+        return databases.getDocument('Butterfly-Database', 'Client', clientId);
+      });
+    
+      const clientData = await Promise.all(clientPromises);
+      const validClientData = clientData.filter((client) => client !== null);
+    
+      const sessionsWithClientNames: Booking[] = sessionResponse.documents.map((booking) => {
+        const client = validClientData.find((client) => client.$id === booking.client.$id);
+        return {
+          $id: booking.$id,
+          clientId: booking.clientId,
+          status: booking.status,
+          client: {
+            firstname: client?.firstname || 'Unknown',
+            lastname: client?.lastname || 'Unknown',
+          },
+        };
+      });
+    
+      setSessionData(sessionsWithClientNames);
+    } catch (error) {
+      setError('Failed to fetch upcoming sessions');
+    } finally {
+      setLoadingUpcomingSessions(false); // Set loading state to false after data is fetched
+    }
   };
 
   const fetchMissedSessions = async () => {
-    const missedResponse = await databases.listDocuments(
-      'Butterfly-Database',
-      'Bookings',
-      [Query.equal('status', 'missed')]  // Fetch missed sessions
-    );
-  
-    // Extract client IDs from the missed sessions
-    const missedClientIds = missedResponse.documents
-      .map((booking) => booking.clientId)
-      .filter((id) => id); // Filter out any null or undefined clientIds
-  
-    // Fetch client data based on the client IDs
-    const missedClientPromises = missedClientIds.map((clientId) => {
-      if (!clientId) return Promise.resolve(null); // Skip invalid client IDs
-      return databases.getDocument('Butterfly-Database', 'Client', clientId); // Fetch client data
-    });
-  
-    const missedClientData = await Promise.all(missedClientPromises);
-    const validMissedClientData = missedClientData.filter((client) => client !== null);
-  
-    // Map missed sessions to the correct type
-    const missedSessionsWithClientNames: Booking[] = missedResponse.documents.map((booking) => {
-      const client = validMissedClientData.find((client) => client.$id === booking.clientId);
-  
-      // Ensure the clientId and status are included in the mapped data
-      return {
-        $id: booking.$id,  // Map all necessary fields from the original booking
-        clientId: booking.clientId,  // Ensure clientId is included
-        status: booking.status,  // Ensure status is included
-        client: {
-          firstname: client.firstname || 'Unknown',  // Fallback if client not found
-          lastname: client.lastname || 'Unknown',    // Fallback if client not found
-        },
-      };
-    });
-  
-    // Update state with the correctly mapped missed session data
-    setMissedData(missedSessionsWithClientNames);
+    setLoadingMissedSessions(true); // Set loading state for missed sessions
+    try {
+      const missedResponse = await databases.listDocuments(
+        'Butterfly-Database',
+        'Bookings',
+        [Query.equal('status', 'missed')]
+      );
+    
+      const missedClientIds = missedResponse.documents
+        .map((booking) => booking.clientId)
+        .filter((id) => id);
+    
+      const missedClientPromises = missedClientIds.map((clientId) => {
+        if (!clientId) return Promise.resolve(null);
+        return databases.getDocument('Butterfly-Database', 'Client', clientId);
+      });
+    
+      const missedClientData = await Promise.all(missedClientPromises);
+      const validMissedClientData = missedClientData.filter((client) => client !== null);
+    
+      const missedSessionsWithClientNames: Booking[] = missedResponse.documents.map((booking) => {
+        const client = validMissedClientData.find((client) => client.$id === booking.clientId);
+        return {
+          $id: booking.$id,
+          clientId: booking.clientId,
+          status: booking.status,
+          client: {
+            firstname: client.firstname || 'Unknown',
+            lastname: client.lastname || 'Unknown',
+          },
+        };
+      });
+    
+      setMissedData(missedSessionsWithClientNames);
+    } catch (error) {
+      setError('Failed to fetch missed sessions');
+    } finally {
+      setLoadingMissedSessions(false); // Set loading state to false after data is fetched
+    }
   };
-  
+
   const fetchPayments = async () => {
-    const user = await account.get();
-    const psychoId = await fetchPsychoId(user.$id);
-  
-    const response = await databases.listDocuments('Butterfly-Database', 'Payment', [
-      Query.equal('psychotherapist', psychoId),
-      Query.equal('status', "Pending")
-    ]);
-  
-    // Map the payment data to the Payment type
-    const payments: Payment[] = response.documents.map((doc) => ({
-      $id: doc.$id,
-      client: {
-        firstname: doc.client.firstname,
-        lastname: doc.client.lastname,
-      },
-      psychotherapist: doc.psychotherapist,
-      status: doc.status,
-    }));
-  
-    setPaymentsData(payments); // Store mapped payments in state
-  };  
+    setLoadingPayments(true); // Set loading state for payments
+    try {
+      const user = await account.get();
+      const psychoId = await fetchPsychoId(user.$id);
+    
+      const response = await databases.listDocuments('Butterfly-Database', 'Payment', [
+        Query.equal('psychotherapist', psychoId),
+        Query.equal('status', "Pending")
+      ]);
+    
+      const payments: Payment[] = response.documents.map((doc) => ({
+        $id: doc.$id,
+        client: {
+          firstname: doc.client.firstname,
+          lastname: doc.client.lastname,
+        },
+        psychotherapist: doc.psychotherapist,
+        status: doc.status,
+      }));
+    
+      setPaymentsData(payments);
+    } catch (error) {
+      setError('Failed to fetch payments');
+    } finally {
+      setLoadingPayments(false); // Set loading state to false after data is fetched
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -196,7 +209,7 @@ const Dashboard: React.FC = () => {
         setUserName(user.name); 
         const psychoId = await fetchPsychoId(user.$id);
         
-        setAppointmentData(prevData => ({
+        setAppointmentData((prevData) => ({
           ...prevData,
           selectedTherapist: psychoId,
         }));
@@ -205,7 +218,6 @@ const Dashboard: React.FC = () => {
         fetchUpcomingSessions();
         fetchMissedSessions();
         fetchPayments();
-
       } catch (err) {
         setError('Failed to fetch data.');
         console.error(err);
@@ -229,7 +241,7 @@ const Dashboard: React.FC = () => {
     router.push(`/psychotherapist/pages/clientspayment`);
   };
 
-  if (authLoading || loading) {
+  if (authLoading || loading || loadingUpcomingSessions || loadingMissedSessions || loadingPayments) {
     return <LoadingScreen />;
   }
 
