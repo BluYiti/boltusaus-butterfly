@@ -11,7 +11,6 @@ import { databases, storage } from '@/appwrite';
 interface Resource {
   $id: string;
   id: number;          // Unique identifier for the resource
-  duration: string;    // Duration (e.g., time period or length)
   description: string; // Description of the resource
   file: string;        // File associated with the resource (could be a path or URL)
   createdAt: Date;     // Timestamp of when the resource was created
@@ -25,7 +24,6 @@ interface Payload {
   file: string;
   category: string;    // Category of the resource (e.g., 'video', 'document', etc.)
   title: string;       // Title of the resource
-  duration: string;    // Duration (e.g., time period or length)
   description: string; // Description of the resource
 }
 
@@ -34,7 +32,6 @@ const ResourcesPage: React.FC = () => {
   const [resources, setResources] = useState<Resource[]>([]);
   const [newCategory, setNewCategory] = useState('');
   const [newTitle, setNewTitle] = useState('');
-  const [newDuration, setNewDuration] = useState('');
   const [newDescription, setNewDescription] = useState('');
   const [, setNewResourceId] = useState<string | null>(null); 
   const [fileUrl, setFileUrl] = useState(''); 
@@ -43,7 +40,6 @@ const ResourcesPage: React.FC = () => {
   const [modalImageUrl, setModalImageUrl] = useState(''); 
   const [modalCategory, setModalCategory] = useState('');
   const [modalTitle, setModalTitle] = useState('');
-  const [modalDuration, setModalDuration] = useState('');
   const [modalDescription, setModalDescription] = useState('');
   const [, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -65,7 +61,6 @@ const fetchResources = useCallback(async () => {
       id: document.id || Date.now(), // Use Date.now() as a fallback for `id` if it's missing
       category: document.category || '', // Set default empty string if `category` is missing
       title: document.title || '', // Set default empty string if `title` is missing
-      duration: document.duration || '', // Set default empty string if `duration` is missing
       description: document.description || '', // Set default empty string if `description` is missing
       file: document.file || '', // Default to empty string if `file` is missing
       createdAt: document.createdAt ? new Date(document.createdAt) : new Date(), // Use current date if `createdAt` is missing
@@ -132,7 +127,6 @@ useEffect(() => {
       const updatePayload: Payload = {
         category: modalCategory || existingResource.category,
         title: modalTitle || existingResource.title,
-        duration: modalDuration || existingResource.duration,
         description: modalDescription || existingResource.description,
         image: '',
         file: ''
@@ -171,7 +165,7 @@ useEffect(() => {
   };
 
   const handleCreateResource = async () => {
-    if (!newCategory.trim() || !newTitle.trim() || !newDuration.trim() || !newDescription.trim()) {
+    if (!newCategory.trim() || !newTitle.trim() || !newDescription.trim()) {
       setError('All fields must be filled.');
       return;
     }
@@ -198,8 +192,7 @@ useEffect(() => {
         {
           id: Date.now(), 
           category: newCategory, 
-          title: newTitle, 
-          duration: newDuration, 
+          title: newTitle,  
           description: newDescription, 
           image: uploadedImageId,  // Store image ID
           file: uploadedFileId,    // Store file ID
@@ -210,7 +203,6 @@ useEffect(() => {
       setNewResourceId(response.$id);
       setNewCategory(''); 
       setNewTitle('');
-      setNewDuration('');
       setNewDescription('');
       setSelectedFile(null); 
       setSelectedImage(null); 
@@ -230,7 +222,6 @@ useEffect(() => {
     if (resource) {
       setModalCategory(resource.category);
       setModalTitle(resource.title);
-      setModalDuration(resource.duration);
       setModalDescription(resource.description);
     }
     setSelectedResourceId(resourceId);
@@ -320,7 +311,6 @@ if (authLoading ) {
                   )}
                   <div className="p-4">
                     <h3 className="text-lg font-semibold text-gray-800">{resource.title}</h3>
-                    <p className="text-sm text-gray-500">{resource.duration}</p>
                     <p className="text-gray-600 mt-2">{resource.description}</p>
                     <div className="border-t mt-4 pt-2">
                       <p className="text-sm text-gray-500">{resource.category}</p>
@@ -359,11 +349,8 @@ if (authLoading ) {
                 <label className="block text-gray-700">Title:</label>
                 <input type="text" value={modalTitle} onChange={(e) => setModalTitle(e.target.value)} className="border border-gray-300 rounded px-4 py-2 mb-4 w-full" />
 
-                <label className="block text-gray-700">Duration:</label>
-                <input type="text" value={modalDuration} onChange={(e) => setModalDuration(e.target.value)} className="border border-gray-300 rounded px-4 py-2 mb-4 w-full" />
-
                 <label className="block text-gray-700">Description:</label>
-                <textarea value={modalDescription} onChange={(e) => setModalDescription(e.target.value)} className="border border-gray-300 rounded px-4 py-2 mb-4 w-full" />
+                <textarea value={modalDescription} onChange={(e) => setModalDescription(e.target.value)} className="border border-gray-300 rounded px-4 py-2 mb-4 h-40 w-full" />
 
                 <label className="block text-gray-700">Update Cover Image:</label>
                 <input type="file" className="mb-4" ref={imageInputRef} onChange={handleModalImageChange} />
@@ -401,11 +388,8 @@ if (authLoading ) {
                 <label className="block text-gray-700">Title:</label>
                 <input type="text" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} placeholder="Enter or add new title" className="border border-gray-300 rounded px-4 py-2 mb-4 w-full" />
 
-                <label className="block text-gray-700">Duration:</label>
-                <input type="text" value={newDuration} onChange={(e) => setNewDuration(e.target.value)} placeholder="Enter duration (e.g., 5 mins)" className="border border-gray-300 rounded px-4 py-2 mb-4 w-full" />
-
                 <label className="block text-gray-700">Description:</label>
-                <textarea value={newDescription} onChange={(e) => setNewDescription(e.target.value)} placeholder="Enter description" className="border border-gray-300 rounded px-4 py-2 mb-4 w-full" />
+                <textarea value={newDescription} onChange={(e) => setNewDescription(e.target.value)} placeholder="Enter description" className="border border-gray-300 rounded px-4 py-2 mb-4 h-40 w-full" />
 
                 <label className="block text-gray-700">Upload Cover Image:</label>
                 <input type="file" ref={imageInputRef} className="mb-4" onChange={handleImageChange} />
