@@ -8,7 +8,6 @@ const monthNames = [
 export const HappeningAppointment = async () => {
   try {
     const currentTime = new Date();
-    console.log(currentTime);
     const currentMonth = monthNames[currentTime.getMonth()];
     const currentDay = currentTime.getDate();
     
@@ -20,9 +19,13 @@ export const HappeningAppointment = async () => {
       Query.equal('day', currentDay),
       Query.equal('slots', currentSlot)
     ]);
-
-    console.log(response.documents);
     const appointmentsData = response.documents;
+
+    // Check if there are no appointments for the current slot
+    if (appointmentsData.length === 0) {
+      console.log("No currently happening appointment");
+      return; // Exit early if no appointments are found
+    }
 
     // Use a for...of loop to handle async correctly
     for (const appointment of appointmentsData) {

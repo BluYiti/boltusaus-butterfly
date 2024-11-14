@@ -1,5 +1,3 @@
-'use client'
-
 import { databases } from '@/appwrite';
 import React, { useState } from 'react';
 import ShowReceiptModal from './ShowReceiptModal'; // Adjust the path as needed
@@ -26,6 +24,11 @@ const PaymentModal = ({ onClose, client }) => {
   const [showReceipt, setShowReceipt] = useState(false); // State for modal visibility
   const [error, setError] = useState(''); // State to manage the error message
   const [actionType, setActionType] = useState(null);
+
+  // Check if client is available
+  if (!client) {
+    return <div>Loading...</div>; // Show loading message or fallback UI if client is not available
+  }
 
   // Move logic into the conditionally rendered sections or useEffect if needed
   const handleSubmit = async (e: React.FormEvent) => {
@@ -120,7 +123,7 @@ const PaymentModal = ({ onClose, client }) => {
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-        <h2 className="text-xl font-bold mb-4 text-blue-400">{capitalize(client.status)} Payment</h2>
+        <h2 className="text-xl font-bold mb-4 text-blue-400">{client.status ? capitalize(client.status) : 'Loading...'} Payment</h2>
 
         {/* Payment details */}
         <p><strong>Appointment ID:</strong> {client.id}</p>

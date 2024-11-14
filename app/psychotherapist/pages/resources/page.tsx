@@ -311,6 +311,7 @@ if (authLoading ) {
                       width={800}  // Define a width (adjust based on your needs)
                       height={160} // Define a height (adjust based on your needs)
                       className="w-full h-40 object-cover rounded-t-lg"
+                      unoptimized
                     />
                   ) : (
                     <div className="w-full h-40 bg-gray-200 rounded-t-lg flex items-center justify-center">
@@ -373,6 +374,7 @@ if (authLoading ) {
                     width={800}  // Replace with your desired width in pixels
                     height={320} // Replace with your desired height in pixels
                     className="w-full h-40 object-cover rounded mb-4"
+                    unoptimized
                   />
                 )}
                 <label className="block text-gray-700">Update File:</label>
@@ -414,6 +416,7 @@ if (authLoading ) {
                     width={800} // specify the width
                     height={320} // specify the height
                     className="object-cover rounded mb-4"
+                    unoptimized
                   />
                 )}
                 <label className="block text-gray-700">Upload File:</label>
