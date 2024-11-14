@@ -95,7 +95,7 @@ const Dashboard: React.FC = () => {
     );
     
     // Extract client IDs from the session data
-    const clientIds = sessionResponse.documents.map((booking) => booking.clientId).filter((id) => id);
+    const clientIds = sessionResponse.documents.map((booking) => booking.client.$id).filter((id) => id);
   
     // Fetch client data based on the client IDs
     const clientPromises = clientIds.map((clientId) => {
@@ -108,7 +108,7 @@ const Dashboard: React.FC = () => {
   
     // Now, map the session data and merge the client information
     const sessionsWithClientNames: Booking[] = sessionResponse.documents.map((booking) => {
-      const client = validClientData.find((client) => client.$id === booking.clientId);
+      const client = validClientData.find((client) => client.$id === booking.client.$id);
   
       // Map the session to the Booking type
       return {
@@ -156,8 +156,8 @@ const Dashboard: React.FC = () => {
         clientId: booking.clientId,  // Ensure clientId is included
         status: booking.status,  // Ensure status is included
         client: {
-          firstname: client?.firstname || 'Unknown',  // Fallback if client not found
-          lastname: client?.lastname || 'Unknown',    // Fallback if client not found
+          firstname: client.firstname || 'Unknown',  // Fallback if client not found
+          lastname: client.lastname || 'Unknown',    // Fallback if client not found
         },
       };
     });
