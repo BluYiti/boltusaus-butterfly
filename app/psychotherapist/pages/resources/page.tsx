@@ -339,7 +339,7 @@ if (authLoading ) {
 
           {/* Modal for Updating Resource */}
           {isModalOpen && (
-            <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
+            <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50 overflow-auto">
               <div className="bg-white rounded-lg p-8 w-full max-w-md">
                 <h3 className="text-lg font-semibold mb-4">Update Resource</h3>
 
@@ -378,7 +378,7 @@ if (authLoading ) {
 
           {/* Modal for Creating a Resource */}
           {isCreateModalOpen && (
-            <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
+            <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50 overflow-auto">
               <div className="bg-white rounded-lg p-8 w-full max-w-md">
                 <h3 className="text-lg font-semibold mb-4">Add a Resource Card</h3>
 
