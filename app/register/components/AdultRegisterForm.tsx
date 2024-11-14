@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useEffect } from 'react';
+import React from 'react';
 import termsContent from '@/constants/terms';
 import privacyContent from '@/constants/privacy';
 import TermsAndPrivacy from './TermsAndPrivacy';
@@ -16,7 +16,7 @@ import { useFetchCities } from '@/register/hook/fetch/useFetchCitiesAndMunicipal
 import { useFetchBarangays } from '@/register/hook/fetch/useFetchBarangays';
 import { useRouter } from 'next/navigation';
 
-const RegisterForm: React.FC<RegisterFormProps> = ({ error }) => {
+const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, error}) => {
     const router = useRouter();
 
     const {
@@ -55,62 +55,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ error }) => {
 
     const [modalContentType, setModalContentType] = React.useState<'terms' | 'privacy'>('terms');
 
-    // Assuming the form field setters are available in your component
-    const setters = {
-        firstName: setFirstName,
-        lastName: setLastName,
-        birthday: setBirthday,
-        sex: setSex,
-        password: setPassword,
-        rePassword: setRePassword,
-        age: setAge,
-        street: setStreet,
-        barangay: setBarangay,
-        city: setCity,
-        province: setProvince,
-        country: setCountry,
-        contactNumber: setContactNumber,
-        emergencyContactName: setEmergencyContactName,
-        emergencyContactNumber: setEmergencyContactNumber,
-        idFile: setIdFile,
-        email: setEmail,
-    };
-    
-    // Memoize resetForm using useCallback
-    const resetForm = useCallback(() => {
-        setFirstName('');
-        setLastName('');
-        setBirthday('');
-        setSex('');
-        setCountry('');
-        setRegion('');
-        setProvince('');
-        setCity('');
-        setBarangay('');
-        setStreet('');
-        setContactNumber('');
-        setEmergencyContactName('');
-        setEmergencyContactNumber('');
-        setIdFile(null);
-        setEmail('');
-        setPassword('');
-        setRePassword('');
-        setAgreeToTerms(false);
-        setPasswordCriteria({
-            length: false,
-            number: false,
-            specialChar: false,
-            uppercase: false,
-            lowercase: false,
-        });
-        setIsPasswordValid(false);
-        setValidationError(null); // Reset validation errors
-        setAge(null);
-        setProvinces([]);
-        setCities([]);
-        setBarangays([]);
-    }, [setFirstName, setLastName, setBirthday, setSex, setCountry, setRegion, setProvince, setCity, setBarangay, setStreet, setContactNumber, setEmergencyContactName, setEmergencyContactNumber, setIdFile, setEmail, setPassword, setRePassword, setAgreeToTerms, setPasswordCriteria, setIsPasswordValid, setValidationError, setAge, setProvinces, setCities, setBarangays]);
-
+    // Handle form submission
     const handleSubmit = createSubmitHandler({
         firstName,
         lastName,
@@ -131,13 +76,12 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ error }) => {
         idFile,
         email,
         onRegister: (data) => {
-            console.log('Registration successful:', data); 
+            console.log('Registration successful:', data);
             const { userId } = data;
             router.push(`/register/verify/email/?user=${encodeURIComponent(userId)}`);
         },
         setValidationError,
-    }, setLoading, setButtonClicked, resetForm, setters); // Pass resetForm and other handlers
-    
+    }, setLoading, setButtonClicked); // Pass setLoading and setButtonClicked here
 
     // Use custom hooks to fetch data
     useFetchCountries(setCountries);
@@ -193,16 +137,13 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ error }) => {
         validatePassword(newPassword);
     };
 
-    useEffect(() => {
-        if (error) {
-            resetForm();
-        }
-    }, [error, resetForm]);
-
     return (
         <div className="w-full p-8">
             <h2 className="text-center text-6xl text-[#4982ae] font-paintbrush">Register</h2>
             <form className="mt-8 space-y-4" onSubmit={handleSubmit}>
+                {error && <div className="text-red-600 text-lg font-bold">{error}</div>}
+                {validationError && <div className="text-red-600 text-lg font-bold">{validationError}</div>}
+
                 <div className="rounded-md shadow-sm space-y-2">
                     {/* First Name */}
                     <div>
@@ -557,14 +498,12 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ error }) => {
                     {/* Submit Button */}
                     <div className="mt-8">
                     <button
-                        type="submit"
-                        disabled={loading || !agreeToTerms}
-                        className={`bg-gradient-to-r from-[#38b6ff] to-[#4982ae] text-white font-bold py-2 px-4 rounded-xl transition-all duration-300 ease-in-out shadow-lg transform hover:scale-105 hover:shadow-xl ${!agreeToTerms ? 'opacity-50 cursor-not-allowed' : ''} ${buttonClicked ? 'bg-green-500' : ''}`}
-                    >
-                        {loading ? 'Registering...' : 'Register'}
-                    </button>
-                    {error && <div className="text-red-600 text-lg font-bold">{error}</div>}
-                    {validationError && <div className="text-red-600 text-lg font-bold">{validationError}</div>}
+                    type="submit"
+                    disabled={loading || !agreeToTerms}
+                    className={`bg-gradient-to-r from-[#38b6ff] to-[#4982ae] text-white font-bold py-2 px-4 rounded-xl transition-all duration-300 ease-in-out shadow-lg transform hover:scale-105 hover:shadow-xl ${!agreeToTerms ? 'opacity-50 cursor-not-allowed' : ''} ${buttonClicked ? 'bg-green-500' : ''}`}
+                >
+                    {loading ? 'Registering...' : 'Register'}
+                </button>
                     </div>
                 </div>
             </form>

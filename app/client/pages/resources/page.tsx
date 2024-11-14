@@ -72,6 +72,7 @@ const ResourcesPage: React.FC = () => {
                       height={160}                       // Set a fixed height
                       className="rounded-t-lg"          // Any additional styling you need
                       objectFit="cover"                 // Ensures the image is cropped to fill the container (like 'object-cover')
+                      unoptimized
                     />
                   ) : (
                     <div className="w-full h-40 bg-gray-200 rounded-t-lg flex items-center justify-center">
