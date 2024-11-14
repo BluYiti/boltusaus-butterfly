@@ -118,11 +118,11 @@ useEffect(() => {
   
   const handleUpdateResource = async () => {
     if (!selectedResourceId) return;
-  
+
     try {
       const existingResource = resources.find(resource => resource.$id === selectedResourceId);
       if (!existingResource) return;
-  
+
       // Prepare the update payload
       const updatePayload: Payload = {
         category: modalCategory || existingResource.category,
@@ -131,115 +131,91 @@ useEffect(() => {
         image: '',
         file: ''
       };
-  
+
       // Check if a new image has been selected
       if (modalImageUrl && imageInputRef.current?.files?.length) {
         if (existingResource.image) {
           await storage.deleteFile(BUCKET_ID, existingResource.image); // Delete existing image using its ID
         }
-  
+
         // Upload the new image and store its ID
         const uploadedImageId = await uploadFile(imageInputRef.current.files[0]);
         updatePayload.image = uploadedImageId; // Store new image ID
       }
-  
+
       // Check if a new file has been selected
       if (modalFileUrl && fileInputRef.current?.files?.length) {
         if (existingResource.file) {
           await storage.deleteFile(BUCKET_ID, existingResource.file); // Delete existing file using its ID
         }
-  
+
         // Upload the new file and store its ID
         const uploadedFileId = await uploadFile(fileInputRef.current.files[0]);
         updatePayload.file = uploadedFileId; // Store new file ID
       }
-  
+
       // Update the resource document in the database
       await databases.updateDocument(DATABASE_ID, COLLECTION_ID, selectedResourceId, updatePayload);
-  
-      // Optimistically update the resource in the state
-      setResources(prevResources => prevResources.map(resource =>
-        resource.$id === selectedResourceId
-          ? { ...resource, ...updatePayload } // Update the modified resource
-          : resource
-      ));
-  
+
       setIsModalOpen(false); // Close the modal after updating
+      fetchResources(); // Refresh the resource list to show updates
     } catch (error) {
       console.error('Error updating resource:', error);
     }
   };
-  
 
   const handleCreateResource = async () => {
     if (!newCategory.trim() || !newTitle.trim() || !newDescription.trim()) {
       setError('All fields must be filled.');
       return;
     }
-  
+
     try {
       let uploadedImageId = null;
       let uploadedFileId = null;
-  
+
       // Upload the image only if the user selected an image
       if (selectedImage) {
         uploadedImageId = await uploadFile(selectedImage); // Store the image ID in 'image'
       }
-  
+
       // Upload the file only if the user selected a file
       if (selectedFile) {
         uploadedFileId = await uploadFile(selectedFile); // Store the file ID in 'file'
       }
-  
-      // Create the resource in the database
+
+      // Create the resource in the database with the IDs (not URLs)
       const response = await databases.createDocument(
-        DATABASE_ID,
-        COLLECTION_ID,
+        DATABASE_ID, 
+        COLLECTION_ID, 
         'unique()', 
         {
-          id: Date.now(),
-          category: newCategory,
-          title: newTitle,
-          description: newDescription,
-          image: uploadedImageId, 
-          file: uploadedFileId,
-          createdAt: new Date().toISOString(),
+          id: Date.now(), 
+          category: newCategory, 
+          title: newTitle,  
+          description: newDescription, 
+          image: uploadedImageId,  // Store image ID
+          file: uploadedFileId,    // Store file ID
+          createdAt: new Date().toISOString(), 
         }
       );
-  
-      // Optimistically add the new resource to the state
-      setResources(prevResources => [
-        ...prevResources,
-        {
-          $id: response.$id,
-          id: Date.now(),
-          category: newCategory,
-          title: newTitle,
-          description: newDescription,
-          file: uploadedFileId || '',
-          image: uploadedImageId || '',
-          createdAt: new Date(),
-        },
-      ]);
-  
-      // Clear the form fields
-      setNewCategory('');
+
+      setNewResourceId(response.$id);
+      setNewCategory(''); 
       setNewTitle('');
       setNewDescription('');
-      setSelectedFile(null);
-      setSelectedImage(null);
-      setFileUrl('');
-      setImageUrl('');
+      setSelectedFile(null); 
+      setSelectedImage(null); 
+      setFileUrl(''); 
+      setImageUrl(''); 
       setError(null);
-  
-      // Close the modal after creation
-      setIsCreateModalOpen(false);
+      fetchResources(); // Fetch updated resources
+      setIsCreateModalOpen(false); // Close modal after creation
     } catch (error) {
       console.error('Error creating resource:', error);
       setError('Failed to create resource.');
     }
   };
-  
 
   const openModal = (resourceId: string) => {
     const resource = resources.find(res => res.$id === resourceId);
@@ -256,27 +232,24 @@ useEffect(() => {
     try {
       const resource = resources.find(res => res.$id === resourceId);
       if (!resource) return;
-  
+
       const fileId = resource.file; // Stored file ID
       const imageId = resource.image; // Stored image ID
-  
+
       if (fileId) {
         await storage.deleteFile(BUCKET_ID, fileId);
       }
-  
+
       if (imageId) {
         await storage.deleteFile(BUCKET_ID, imageId);
       }
-  
+
       await databases.deleteDocument(DATABASE_ID, COLLECTION_ID, resourceId);
-  
-      // Optimistically remove the resource from the list
-      setResources(prevResources => prevResources.filter(resource => resource.$id !== resourceId));
+      fetchResources();
     } catch (error) {
       console.error('Error deleting resource and file:', error);
     }
   };
-  
 
   // Handle file change in the modal for updating
 const handleModalFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
