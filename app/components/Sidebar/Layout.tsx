@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { account, databases, Query } from "@/appwrite";
+import { account } from "@/appwrite";
 import Sidebar from "./SideBar";
 import { IconType } from "react-icons";
 import { fetchUserStatus, fetchUserState } from '@/hooks/userService';
@@ -13,7 +13,7 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children, sidebarTitle, sidebarItems }) => {
   const [isMinimized, setIsMinimized] = useState(false);
-  const [status, setStatus] = useState<string | null>(null);
+  const [, setStatus] = useState<string | null>(null);
   const [state, setState] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 

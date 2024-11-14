@@ -1,61 +1,55 @@
-// VideoCall.tsx
-import React, { useEffect, useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 
-interface VideoCallProps {
-  onEndCall: () => void;
-}
+// Define the VideoCall component
+const VideoCall = () => {
+  // Create refs for local and remote video elements
+  const localVideoRef = useRef<HTMLVideoElement | null>(null);
+  const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
 
-const VideoCall: React.FC<VideoCallProps> = ({ onEndCall }) => {
-  const localVideoRef = useRef<HTMLVideoElement>(null);
-  const remoteVideoRef = useRef<HTMLVideoElement>(null);
-
+  // useEffect to handle the video streams and cleanup
   useEffect(() => {
-    const startVideoCall = async () => {
-      try {
-        // Get local video stream
-        const localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-        if (localVideoRef.current) {
-          localVideoRef.current.srcObject = localStream;
-        }
+    // Define local variables to store current video elements
+    const localVideo = localVideoRef.current;
+    const remoteVideo = remoteVideoRef.current;
 
-        // Here you would typically set up the signaling for remote stream, using WebRTC, etc.
-        // For this example, we just simulate receiving a remote stream.
-        const remoteStream = new MediaStream();
-        if (remoteVideoRef.current) {
-          remoteVideoRef.current.srcObject = remoteStream;
-        }
+    // Simulate getting a MediaStream (you would likely get this from getUserMedia or some media API)
+    const mediaStream: MediaStream = getMediaStreamSomehow();  // You need to implement this function
 
-        // This is where you'd handle adding tracks to the remote stream based on your signaling logic
-      } catch (error) {
-        console.error('Error accessing media devices.', error);
-      }
-    };
+    if (localVideo) {
+      localVideo.srcObject = mediaStream; // Set the local video stream
+    }
 
-    startVideoCall();
+    if (remoteVideo) {
+      remoteVideo.srcObject = mediaStream; // Set the remote video stream
+    }
 
+    // Cleanup function
     return () => {
-      // Clean up on component unmount
-      if (localVideoRef.current) {
-        localVideoRef.current.srcObject?.getTracks().forEach(track => track.stop());
+      // Cleanup video streams or other resources when the component unmounts
+      if (localVideo && localVideo.srcObject) {
+        const tracks = (localVideo.srcObject as MediaStream).getTracks();
+        tracks.forEach((track) => track.stop());  // Stop each track in the stream
       }
-      if (remoteVideoRef.current) {
-        remoteVideoRef.current.srcObject?.getTracks().forEach(track => track.stop());
+
+      if (remoteVideo && remoteVideo.srcObject) {
+        const tracks = (remoteVideo.srcObject as MediaStream).getTracks();
+        tracks.forEach((track) => track.stop());  // Stop each track in the stream
       }
     };
-  }, []);
+  }, []); // Empty dependency array, so this runs on mount/unmount
 
   return (
-    <div className="flex flex-col items-center justify-center h-full">
-      <h2 className="text-xl mb-4">Video Call</h2>
-      <div className="flex space-x-4">
-        <video ref={localVideoRef} autoPlay className="w-1/2 rounded-lg border" />
-        <video ref={remoteVideoRef} autoPlay className="w-1/2 rounded-lg border" />
-      </div>
-      <button onClick={onEndCall} className="mt-4 bg-red-500 text-white px-4 py-2 rounded">
-        End Call
-      </button>
+    <div>
+      <video ref={localVideoRef} autoPlay muted style={{ width: '300px' }} />
+      <video ref={remoteVideoRef} autoPlay style={{ width: '300px' }} />
     </div>
   );
+};
+
+// This is just a placeholder function, replace it with the actual method to get a MediaStream
+const getMediaStreamSomehow = (): MediaStream => {
+  // For example, use navigator.mediaDevices.getUserMedia
+  return new MediaStream();
 };
 
 export default VideoCall;

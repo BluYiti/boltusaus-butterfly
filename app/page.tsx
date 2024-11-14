@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { motion } from "framer-motion";
 import BackToTopButton from './components/BackToTop';
 import { FaMapMarkerAlt, FaEnvelope, FaPhone, FaFacebookF, FaMap } from 'react-icons/fa';
+import Image from 'next/image';
 
 const navItems = [
   { label: "About Us", href: "#about" },
@@ -40,34 +41,22 @@ const HomePage: React.FC = () => {
   const toggleOpen = (index: number) => {
     setOpen(open === index ? null : index);
   };
-  
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [contentType, setContentType] = useState<'terms' | 'privacy'>('terms');
-
-  const openModal = (type: 'terms' | 'privacy') => {
-    setContentType(type);
-    setIsModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-  };
 
   const aboutRef = useRef<HTMLDivElement | null>(null);
   const [hasAnimated, setHasAnimated] = useState(false);
 
-  const handleScroll = () => {
-    if (aboutRef.current && !hasAnimated) {
-      const rect = aboutRef.current.getBoundingClientRect();
-      const isVisible = rect.top >= 0 && rect.bottom <= window.innerHeight;
-
-      if (isVisible) {
-        setHasAnimated(true); // Set to true to trigger the animation
-      }
-    }
-  };
-
   useEffect(() => {
+    const handleScroll = () => {
+      if (aboutRef.current && !hasAnimated) {
+        const rect = aboutRef.current.getBoundingClientRect();
+        const isVisible = rect.top >= 0 && rect.bottom <= window.innerHeight;
+  
+        if (isVisible) {
+          setHasAnimated(true); // Set to true to trigger the animation
+        }
+      }
+    };
+
     window.addEventListener('scroll', handleScroll);
     return () => {
       window.removeEventListener('scroll', handleScroll);
@@ -155,7 +144,14 @@ const HomePage: React.FC = () => {
               </p>
             </div>
             <div className="md:w-1/3 flex justify-right md:justify-end md:ml-2">
-              <img src="/images/amperalta.jpg" alt="A.M. Peralta Psychological Services" className="w-72 h-72 rounded-full" />
+              <Image 
+                src="/images/amperalta.jpg" 
+                alt="A.M. Peralta Psychological Services" 
+                width={288} // 72 * 4 (for example, you can adjust width/height to suit your design)
+                height={288} 
+                className="rounded-full" 
+                priority // Optional: if it's a critical image that should be loaded first
+              />
             </div>
           </div>
         </motion.div>
@@ -169,7 +165,7 @@ const HomePage: React.FC = () => {
             How to Book a Session
           </h2>
           <p className="mb-8 text-base md:text-lg text-left max-w-2xl">
-          A.M. Peralta Psychological Services' web application is designed to help you easily book an appointment in just a few simple steps.
+          A.M. Peralta Psychological Services&apos; web application is designed to help you easily book an appointment in just a few simple steps.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="md:col-span-2">

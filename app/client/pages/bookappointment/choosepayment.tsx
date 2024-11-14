@@ -1,11 +1,7 @@
-import React, { useEffect } from "react";
+import Image from 'next/image';
 
 const ChoosePaymentModal = ({ isOpen, onClose, onProceed, appointmentData }) => {
   if (!isOpen) return null;
-
-  useEffect(() => {
-    console.log(appointmentData);
-  }, [appointmentData]);  // Add dependency to log only when appointmentData changes
 
   return (
     <div className="fixed inset-0 flex justify-center items-center bg-gray-800 bg-opacity-50 z-50">
@@ -37,19 +33,37 @@ const ChoosePaymentModal = ({ isOpen, onClose, onProceed, appointmentData }) => 
             className="bg-red-700 text-white px-4 rounded-2xl hover:bg-red-400"
             onClick={() => onProceed("credit card")}
           >
-            <img src="/images/bpi.png" alt="Credit Card" className="w-24 h-24 object-contain" />
+            <Image
+              src="/images/bpi.png"
+              alt="Credit Card"
+              className="w-24 h-24 object-contain"
+              width={96}
+              height={96}
+            />
           </button>
           <button
             className="bg-blue-400 text-white px-4 rounded-2xl hover:bg-blue-300"
             onClick={() => onProceed("gcash")}
           >
-            <img src="/images/gcash.png" alt="GCash" className="w-24 h-24 object-contain" />
+            <Image
+              src="/images/gcash.png"
+              alt="GCash"
+              className="w-24 h-24 object-contain"
+              width={96}
+              height={96}
+            />
           </button>
           <button
             className="bg-green-400 text-white px-4 rounded-2xl hover:bg-green-200"
             onClick={() => onProceed("cash")}
           >
-            <img src="/images/cash.png" alt="Cash" className="w-24 h-24 object-contain" />
+            <Image
+              src="/images/cash.png"
+              alt="Cash"
+              className="w-24 h-24 object-contain"
+              width={96}  // 24 * 4 (since 1rem = 4px in most setups)
+              height={96} // 24 * 4
+            />
           </button>
         </div>
       </div>

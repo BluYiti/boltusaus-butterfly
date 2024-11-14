@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { fetchProfileImageUrl } from '@/hooks/userService'; // Adjust import path as needed
+import Image from 'next/image';
 
 type Psychotherapist = {
   $id: string;
@@ -55,10 +56,12 @@ const PsychotherapistProfile: React.FC<PsychotherapistProfileProps> = ({ psychot
 
         {/* Profile Image and Info */}
         <div className="flex flex-col justify-center items-center mb-2">
-          <img
-            src={profileImageUrl || "/images/default-profile.png"}  // Dynamically set the image URL, fallback to default if loading
+          <Image
+            src={profileImageUrl || "/images/default-profile.png"}  // Fallback to default image
             alt={`${psychotherapist.firstName} ${psychotherapist.lastName}`}
-            className="rounded-full w-36 h-36 object-cover border-4 border-blue-500 shadow-md"
+            className="rounded-full object-cover border-4 border-blue-500 shadow-md"
+            width={144}  // 36 * 4 (as 1rem = 4px)
+            height={144} // 36 * 4 (as 1rem = 4px)
           />
           {/* Psychotherapist's name under the image */}
           <h3 className="mt-4 text-2xl font-semibold text-gray-700">

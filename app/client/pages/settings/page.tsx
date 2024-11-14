@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Layout from '@/components/Sidebar/Layout';
 import items from '@/client/data/Links';
 import LoadingScreen from "@/components/LoadingScreen";

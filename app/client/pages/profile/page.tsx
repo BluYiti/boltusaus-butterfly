@@ -7,12 +7,25 @@ import { Query } from 'appwrite'; // Import the Query class for filtering
 import { fetchProfileImageUrl } from "@/hooks/userService";
 import useAuthCheck from "@/auth/page";
 import LoadingScreen from "@/components/LoadingScreen";
+import Image from 'next/image';
+
+interface UserProfile {
+  $id: string;
+  address?: string;
+  birthdate?: string;
+  phonenum?: string;
+  sex?: string;
+  age?: number;
+  emergencyContactName?: string;
+  emergencyContact?: string;
+  profilepic?: string; // Assuming the profile image is represented as a string
+}
 
 const ProfilePage: React.FC = () => {
   
   const { loading: authLoading } = useAuthCheck(['client']); // Call the useAuthCheck hook
   const [name, setName] = useState<string>(''); // Placeholder for the user's name
-  const [userData, setUserData] = useState<any>(null); // State to store user profile data
+  const [userData, setUserData] = useState<UserProfile>(null); // State to store user profile data
   const [profileImageUrls, setProfileImageUrls] = useState({});
   const [email, setEmail] = useState<string>(''); // State to store user's email from Appwrite auth
 
@@ -40,12 +53,14 @@ const ProfilePage: React.FC = () => {
         }
 
         // Fetch profile images for each psychotherapist
-        const profileImages = {};
-        for (const client of userData) {
-          if (client.profilepic) {
-            const url = await fetchProfileImageUrl(client.profilepic);
-            if (url) {
-              profileImages[user.$id] = url;
+        const profileImages: { [key: string]: string } = {};
+        if (userData) {
+          for (const client of userData) {
+            if (client.profilepic) {
+              const url = await fetchProfileImageUrl(client.profilepic);
+              if (url) {
+                profileImages[user.$id] = url;
+              }
             }
           }
         }
@@ -57,7 +72,7 @@ const ProfilePage: React.FC = () => {
     }
 
     fetchUserData();
-  }, []);
+  }, [userData]);
   
   if (authLoading ) {
     return <LoadingScreen />; // Show the loading screen while the auth check or data loading is in progress
@@ -78,10 +93,12 @@ const ProfilePage: React.FC = () => {
           <div className="bg-white shadow-xl p-10 rounded-lg">
             {/* Profile Picture and Name */}
             <div className="relative flex flex-col items-center text-center mb-10">
-              <img
+              <Image
                 src={profileImageUrls[userData?.$id] || "/images/default-profile.png"} // Updated profile picture path
                 alt="Profile"
                 className="rounded-full w-40 h-40 object-cover bg-gray-200 shadow-lg border-4 border-white"
+                width={160}  // Specify width in pixels
+                height={160} // Specify height in pixels
               />
               <h2 className="mt-6 text-2xl font-semibold text-gray-900">{name || 'Loading...'}</h2>
             </div>

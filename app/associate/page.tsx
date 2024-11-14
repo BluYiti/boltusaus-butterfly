@@ -8,42 +8,71 @@ import LoadingScreen from '@/components/LoadingScreen';
 import items from './data/Links';
 import { format } from 'date-fns'; // Import format
 
+interface Client {
+  [x: string]: string;
+  name: string;
+  status: string; // e.g., 'for reschedule'
+}
+
+interface Payment {
+  clientName: string;
+  firstname: string;
+  channel: string;
+  status: string; // e.g., 'PAID', 'PENDING'
+}
+
+interface Session {
+  $id: string; // Include $id here
+  client: {
+    firstname: string;
+    lastname: string;
+  };
+  date: string;
+  status: string; // e.g., 'paid'
+}
+
 const AssociateDashboard: React.FC = () => {
   const { loading: authLoading } = useAuthCheck(['associate']);
   const [loading, setLoading] = useState(true);
-  const [sessionData, setSessionData] = useState<any[]>([]);
+  const [sessionData, setSessionData] = useState<Session[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [clients, setClients] = useState<any[]>([]);
-  const [payments, setPayments] = useState<any[]>([]);
+  const [clients, setClients] = useState<Client[]>([]);
+  const [payments, setPayments] = useState<Payment[]>([]);
   const [loadingPayments, setLoadingPayments] = useState(true); // Separate loading state for payments
-  const [selectedClient, setSelectedClient] = useState<any | null>(null); // State for selected client to reschedule
-  const [newSchedule, setNewSchedule] = useState<any | null>(null); // State for new schedule details
+  const [selectedClient, setSelectedClient] = useState<Client  | null>(null); // State for selected client to reschedule
+  const [newSchedule, ] = useState<{
+    date: string;
+    time: string;
+  } | null>(null); // Example for a more structured state
   const [showFinalConfirm, setShowFinalConfirm] = useState(false); // State for showing the final confirmation modal
 
-  // Get current date formatted as 'Month Day, Year'
-  const todayDate = format(new Date(), 'MMMM d, yyyy');
-
-  // Mock Data for Clients List (Client for Reschedule)
-  const clientsMock = [
-    { name: 'Ana Smith', status: 'for reschedule' },
-    { name: 'Hev Abigail', status: 'for reschedule' },
-    { name: 'Snoop Dog', status: 'for reschedule' },
-    { name: 'Chris Grey', status: 'for reschedule' },
-    { name: 'Ariana Grande', status: 'for reschedule' },
-  ];
-
-  const appointmentsMock = [
-    { name: 'Leon Kennedy', date: 'October 10, 2024', time: '1:30 PM' },
-    { name: 'Sza Padilla', date: 'October 12, 2024', time: '9:00 AM' },
-  ];
-
-  const paymentsMock = [
-    { name: 'Leon Kennedy', date: 'October 4, 2024', amount: '$150', status: 'PAID' },
-    { name: 'Sza Padilla', date: 'October 1, 2024', amount: '$200', status: 'PENDING' },
-  ];
-
+  
   // Fetch clients, upcoming sessions, appointments, and payments from Appwrite
   useEffect(() => {
+    // Mock Data for Clients List (Client for Reschedule)
+    const clientsMock = [
+      { name: 'Ana Smith', status: 'for reschedule' },
+      { name: 'Hev Abigail', status: 'for reschedule' },
+      { name: 'Snoop Dog', status: 'for reschedule' },
+      { name: 'Chris Grey', status: 'for reschedule' },
+      { name: 'Ariana Grande', status: 'for reschedule' },
+    ];
+  
+    const paymentsMock: Payment[] = [
+      {
+        clientName: 'Leon Kennedy', // Added 'clientName'
+        firstname: 'Leon',         // Added 'firstname'
+        channel: 'Bank',           // Added 'channel'
+        status: 'PAID',            // Already has 'status'
+      },
+      {
+        clientName: 'Sza Padilla', // Added 'clientName'
+        firstname: 'Sza',          // Added 'firstname'
+        channel: 'Paypal',         // Added 'channel'
+        status: 'PENDING',         // Already has 'status'
+      },
+    ];
+    
     const fetchData = async () => {
       try {
         setLoading(true); // Set loading to true before fetching data
@@ -86,21 +115,6 @@ useEffect(() => {
   fetchPayments();
 }, []);
 
-  // Function to handle client selection for reschedule
-  const handleViewClient = (client: any) => {
-    setSelectedClient(client); // Set selected client for rescheduling
-    // Mock new schedule for demonstration purposes (This should come from user input)
-    setNewSchedule({
-      date: 'October 10, 2024', // Mock date
-      time: '1:30 PM' // Mock time
-    });
-  };
-
-  // Function to show final confirmation modal
-  const handleConfirmSchedule = () => {
-    setShowFinalConfirm(true); // Show the Yes/No confirmation modal
-  };
-
   // Function to handle the final confirmation (yes)
   const handleFinalYes = async () => {
     if (newSchedule && selectedClient) {
@@ -137,10 +151,22 @@ useEffect(() => {
       try {
         const response = await databases.listDocuments(
           'Butterfly-Database', // Replace with actual database ID
-          'Bookings',         // Replace with your actual collection ID
+          'Bookings',           // Replace with your actual collection ID
           [Query.equal('status', 'paid')] // Ensure 'status' field exists and 'paid' is correct
         );
-        setSessionData(response.documents); // Store fetched sessions
+  
+        // Mapping the document fields to the expected Session structure
+        const sessionsData = response.documents.map((doc) => ({
+          $id: doc.$id,  // Ensure you include the $id field
+          client: {
+            firstname: doc.client?.firstname || '',
+            lastname: doc.client?.lastname || '',
+          },
+          date: doc.date || '',  // Ensure the date field is mapped correctly
+          status: doc.status || '',  // Ensure the status field is mapped correctly
+        }));
+  
+        setSessionData(sessionsData); // Store the mapped data
       } catch (err) {
         setError(`Failed to fetch data: ${err.message}`); // Detailed error message
         console.error(err); // Log error for debugging
@@ -148,7 +174,7 @@ useEffect(() => {
         setLoading(false); // Stop loading after fetching
       }
     };
-
+  
     fetchSessionData();
   }, []);
 

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Question } from '@/preassessment/data/questions';
-import { databases, account, ID, Query, client } from '@/appwrite';
+import { databases, account, ID, Query } from '@/appwrite';
 import { useRouter } from 'next/navigation';
 
 const DATABASE_ID = 'Butterfly-Database';

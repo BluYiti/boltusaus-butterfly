@@ -18,12 +18,15 @@ const CallModal = ({ isOpen, onClose, clientName }) => {
           console.error('Error accessing media devices.', err);
         }
       };
-
+  
       startVideoCall();
-
+  
+      // Store the current videoRef value in a variable to avoid accessing ref directly in cleanup
+      const currentVideoRef = videoRef.current;
+  
       return () => {
-        if (videoRef.current && videoRef.current.srcObject) {
-          (videoRef.current.srcObject as MediaStream).getTracks().forEach((track) => track.stop());
+        if (currentVideoRef && currentVideoRef.srcObject) {
+          (currentVideoRef.srcObject as MediaStream).getTracks().forEach((track) => track.stop());
         }
       };
     }

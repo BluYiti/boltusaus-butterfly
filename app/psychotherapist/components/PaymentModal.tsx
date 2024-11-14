@@ -1,12 +1,11 @@
 'use client'
 
 import { databases } from '@/appwrite';
-import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import ShowReceiptModal from './ShowReceiptModal'; // Adjust the path as needed
 
 // Helper function to format the date
-const formatDate = (dateString) => {
+const formatDate = (dateString: string) => {
   const date = new Date(dateString);
   return date.toLocaleString('en-US', {
     weekday: 'long', // e.g., "Monday"
@@ -20,15 +19,15 @@ const formatDate = (dateString) => {
   });
 };
 
-const PaymentModal = ({ isOpen, onClose, client }) => {
-  if (!isOpen || !client) return null; // Don't render if modal is not open or client is null
-  const router = useRouter();
+const PaymentModal = ({ onClose, client }) => {
+  // Always call hooks unconditionally
   const [declineReason, setDeclineReason] = useState('');
   const [isDeclining, setIsDeclining] = useState(false); // Flag for showing decline reason input
   const [showReceipt, setShowReceipt] = useState(false); // State for modal visibility
   const [error, setError] = useState(''); // State to manage the error message
   const [actionType, setActionType] = useState(null);
 
+  // Move logic into the conditionally rendered sections or useEffect if needed
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -50,6 +49,7 @@ const PaymentModal = ({ isOpen, onClose, client }) => {
     setIsDeclining(true); // Show the input box for decline reason
     setError(''); // Clear previous error
   };
+
   const handleDeclineSubmit = async () => {
     try {
       if (!declineReason.trim()) {
@@ -71,7 +71,7 @@ const PaymentModal = ({ isOpen, onClose, client }) => {
     }
   };
 
-  const capitalize = (str) => {
+  const capitalize = (str: string) => {
     if (!str) return str; // Check if string is empty or null
     return str
       .toLowerCase() // Convert the whole string to lowercase first

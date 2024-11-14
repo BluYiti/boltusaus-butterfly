@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { FiMenu, FiChevronLeft } from "react-icons/fi";
 import { IconType } from "react-icons"; // Import IconType from react-icons
 import SidebarItem from "./SidebarItem";
@@ -20,7 +20,7 @@ const Sidebar: React.FC<SidebarProps> = ({ title, items, isMinimized, setIsMinim
     } else {
       setIsMinimized(false);
     }
-  }, []);
+  }, [setIsMinimized]);
 
   const toggleSidebar = () => {
     const newState = !isMinimized;

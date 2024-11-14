@@ -1,12 +1,11 @@
 'use client'
 
 import { databases } from '@/appwrite';
-import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import ShowReceiptModal from '@/psychotherapist/components/ShowReceiptModal'; // Adjust the path as needed
 
 // Helper function to format the date
-const formatDate = (dateString) => {
+const formatDate = (dateString: string) => {
   const date = new Date(dateString);
   return date.toLocaleString('en-US', {
     weekday: 'long', // e.g., "Monday"
@@ -21,11 +20,14 @@ const formatDate = (dateString) => {
 };
 
 const PaymentModal = ({ isOpen, onClose, client }) => {
-  if (!isOpen || !client) return null; // Don't render if modal is not open or client is null
+  // Always call hooks first
   const [declineReason, setDeclineReason] = useState('');
-  const [isDeclining, setIsDeclining] = useState(false); // Flag for showing decline reason input
-  const [showReceipt, setShowReceipt] = useState(false); // State for modal visibility
-  const [error, setError] = useState(''); // State to manage the error message
+  const [isDeclining, setIsDeclining] = useState(false);
+  const [showReceipt, setShowReceipt] = useState(false);
+  const [error, setError] = useState('');
+
+  // Return null if modal is not open or client is not provided
+  if (!isOpen || !client) return null;
 
   const handleSubmit = async () => {
     if (!declineReason.trim()) {
@@ -45,13 +47,13 @@ const PaymentModal = ({ isOpen, onClose, client }) => {
     }
   };
 
-  const capitalize = (str) => {
-    if (!str) return str; // Check if string is empty or null
+  const capitalize = (str: string) => {
+    if (!str) return str;
     return str
-      .toLowerCase() // Convert the whole string to lowercase first
-      .split(' ') // Split by spaces
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize the first letter of each word
-      .join(' '); // Join the words back together
+      .toLowerCase()
+      .split(' ')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
   };
 
   const handleShowReceipt = () => {
@@ -82,9 +84,9 @@ const PaymentModal = ({ isOpen, onClose, client }) => {
             Click to view
           </button>
         </p>
-        {client.status === 'declined' ? (
+        {client.status === 'declined' && (
           <p className='mt-1'><strong>Reason for decline:</strong> {client.declineReason}</p>
-        ): (<></>)}
+        )}
 
         {/* Decline Reason Input */}
         {isDeclining && (
@@ -122,14 +124,14 @@ const PaymentModal = ({ isOpen, onClose, client }) => {
         />
 
         {/* Buttons */}
-          <div className="flex mt-6">
-            <button
-              className="px-4 py-2 text-sm font-semibold text-blue-500 bg-transparent border border-blue-400 rounded-full hover:bg-blue-400 hover:text-white transition"
-              onClick={onClose}
-            >
-              Back
-            </button>
-          </div>
+        <div className="flex mt-6">
+          <button
+            className="px-4 py-2 text-sm font-semibold text-blue-500 bg-transparent border border-blue-400 rounded-full hover:bg-blue-400 hover:text-white transition"
+            onClick={onClose}
+          >
+            Back
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -3,11 +3,26 @@ import Modal from '@/components/Modal'; // The updated Modal component
 import { account, databases } from '@/appwrite';
 import { fetchClientId, restrictSelectingTherapist, updateClientPsychotherapist, uploadReceiptImage } from '@/hooks/userService';
 import SuccessModal from './successfulbooking'; // Success Modal component
+import Image from 'next/image';
 
 interface CreditCardPaymentProps {
   isOpen: boolean;
   onClose: () => void;
-  appointmentData: any; // Update this with the actual type for appointment data
+  appointmentData: AppointmentData; // Update this with the actual type for appointment data
+}
+
+interface Therapist {
+  $id: string;
+  name: string;
+}
+
+interface AppointmentData {
+  selectedTherapist: Therapist;
+  selectedTime: string; // Assuming it's a time string
+  selectedMode: string; // Payment method or mode of appointment (e.g., GCash)
+  selectedMonth: string;
+  selectedDay: string;
+  createdAt: string; // Timestamp when appointment was created
 }
 
 const CreditCardPayment: React.FC<CreditCardPaymentProps> = ({ isOpen, onClose, appointmentData }) => {
@@ -120,7 +135,7 @@ const CreditCardPayment: React.FC<CreditCardPaymentProps> = ({ isOpen, onClose, 
   };
   
 
-  async function addBookingData(BookingsData: any) {
+  async function addBookingData(BookingsData) {
     try {
       const response = await databases.createDocument('Butterfly-Database', 'Bookings', 'unique()', BookingsData);
       return response.$id;
@@ -130,7 +145,7 @@ const CreditCardPayment: React.FC<CreditCardPaymentProps> = ({ isOpen, onClose, 
     }
   }
 
-  async function addPaymentData(PaymentData: any) {
+  async function addPaymentData(PaymentData) {
     try {
       await databases.createDocument('Butterfly-Database', 'Payment', 'unique()', PaymentData);
     } catch (error) {
@@ -151,8 +166,13 @@ const CreditCardPayment: React.FC<CreditCardPaymentProps> = ({ isOpen, onClose, 
             <form onSubmit={handleSubmit}>
               <label className="text-2xl block mb-2 text-gray-800 text-center">Please Scan the QR Code</label>
               <label className="block mb-2 text-gray-800 text-center">Amount to be paid: ₱1,000.00</label>
-              <img src="/images/bpiqr.png" alt="bpiqr" className="mb-4" />
-
+              <Image
+                src="/images/bpiqr.png"
+                alt="bpiqr"
+                className="mb-4"
+                width={400}  // Set an appropriate width for the image
+                height={400} // Set an appropriate height for the image
+              />
               {/* Receipt Upload */}
               <label className="block text-gray-800 mb-2">Upload Your Receipt</label>
               <input
@@ -164,7 +184,13 @@ const CreditCardPayment: React.FC<CreditCardPaymentProps> = ({ isOpen, onClose, 
               {receiptPreview && (
                 <div className="mb-4">
                   <p className="text-gray-800">Receipt Preview:</p>
-                  <img src={receiptPreview} alt="Receipt Preview" className="max-w-full max-h-40 object-contain" />
+                  <Image 
+                    src={receiptPreview} 
+                    alt="Receipt Preview" 
+                    className="max-w-full max-h-40 object-contain"
+                    width={400} // Set an appropriate width (use the image's intrinsic width or a fixed value)
+                    height={160} // Set an appropriate height (use the image's intrinsic height or a fixed value)
+                  />
                 </div>
               )}
 

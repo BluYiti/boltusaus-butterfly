@@ -4,6 +4,7 @@ import { FaSearch, FaTimes } from 'react-icons/fa';
 import Layout from '@/components/Sidebar/Layout';
 import items from '@/client/data/Links';
 import CallNotification from '@/components/CallNotification';
+import Image from 'next/image';
 
 // Interface Definitions
 interface Contact {
@@ -90,10 +91,12 @@ const ContactList: FC<{ onContactClick: (id: number) => void; selectedContact: n
               }`}
               onClick={() => onContactClick(contact.id)}
             >
-              <img
+              <Image
                 src={contact.imageUrl}
                 alt={contact.name}
-                className="w-12 h-12 rounded-full mr-4"
+                width={48}
+                height={48}
+                className="rounded-full mr-4"
               />
               <div className="flex-grow">
                 <div className="flex justify-between items-center">
@@ -149,10 +152,12 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSend
     <div className="w-3/4 p-6 flex flex-col justify-between">
       <div className="flex items-center mb-4 justify-between">
         <div className="flex items-center">
-          <img
+          <Image
             src={selectedContact.imageUrl}
             alt={selectedContact.name}
-            className="w-12 h-12 rounded-full mr-4"
+            width={48}  // Equivalent to w-12 (12px * 4)
+            height={48} // Equivalent to h-12 (12px * 4)
+            className="rounded-full mr-4"
           />
           <h2 className="text-xl font-bold">{selectedContact.name}</h2>
         </div>
@@ -224,10 +229,6 @@ const ChatPage: FC = () => {
     }));
   };
 
-  const handleIncomingCall = (caller: Contact) => {
-    setCall({ isActive: true, caller });
-  };
-
   const handleAcceptCall = () => {
     setCall({ isActive: false, caller: null }); // Hide call notification
     setIsVideoCallActive(true); // Start video call
@@ -243,10 +244,15 @@ const ChatPage: FC = () => {
           console.error('Error accessing media devices.', err);
         }
       };
+
       startVideoCall();
+
+      // Copy the current ref to a local variable to avoid stale ref issues
+      const currentVideoRef = videoRef.current;
+
       return () => {
-        if (videoRef.current && videoRef.current.srcObject) {
-          (videoRef.current.srcObject as MediaStream).getTracks().forEach(track => track.stop());
+        if (currentVideoRef && currentVideoRef.srcObject) {
+          (currentVideoRef.srcObject as MediaStream).getTracks().forEach(track => track.stop());
         }
       };
     }

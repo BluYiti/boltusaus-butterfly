@@ -37,13 +37,13 @@ const GoalsPage = () => {
     const [endHour, setEndHour] = useState(2);
     const [endMinute, setEndMinute] = useState(0);
     const [endPeriod, setEndPeriod] = useState('AM');
-    const [reminderTime, setReminderTime] = useState(0);
+    const [reminderTime, ] = useState(0);
     const [goalReminder, setGoalReminder] = useState(false);
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
     const [showConfirmationModal, setShowConfirmationModal] = useState(false);
-    const [showModal, setShowModal] = useState(false);
+    const [, setShowModal] = useState(false);
     const [userName, setUserName] = useState('Client'); // Default to "Client" before fetching real name
 
     const oneWeekAhead = addDays(new Date(), 7);
@@ -356,14 +356,6 @@ const GoalsPage = () => {
                                 { label: 'FEAR', emoji: '😨' },
                                 { label: 'FRUSTRATED', emoji: '😠' }
                             ].map((moodOption) => {
-                                const moodColors = {
-                                    HAPPY: 'bg-yellow-200 hover:bg-yellow-400 hover:text-white',
-                                    SAD: 'bg-blue-200 hover:bg-blue-400 hover:text-white',
-                                    ANXIOUS: 'bg-orange-200 hover:bg-orange-400 hover:text-white',
-                                    FEAR: 'bg-red-200 hover:bg-red-400 hover:text-white',
-                                    FRUSTRATED: 'bg-purple-200 hover:bg-purple-400 hover:text-white',
-                                };
-
                                 const selectedMoodColors = {
                                     HAPPY: 'bg-yellow-500 text-white',
                                     SAD: 'bg-blue-500 text-white',

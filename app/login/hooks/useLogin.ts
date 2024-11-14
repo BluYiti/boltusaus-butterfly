@@ -68,7 +68,7 @@ export const useLogin = () => {
                     await account.createEmailPasswordSession(email, password);
                     user = await account.get(); // Fetch the user after successful login
                     console.log('Logged in user:', user.$id);
-                } catch (err: any) {
+                } catch (err) {
                     console.error('Login failed:', err);
                     setError('Invalid email or password. Please try again.');
                     return;
@@ -98,7 +98,7 @@ export const useLogin = () => {
             // Handle role-based redirection
             handleUserRoleRedirect(role);
 
-        } catch (err: any) {
+        } catch (err) {
             console.error('Error during login:', err);
             setError(`Login failed: ${err.message || 'An unexpected error occurred.'}`);
         } finally {

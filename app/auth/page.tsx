@@ -4,6 +4,11 @@ import { useRouter } from 'next/navigation';
 import SessionExpirationModal from '@/auth/components/SessionExpirationModal'; // Modal component
 import { jwtDecode } from 'jwt-decode'; // jwt-decode import
 
+// Define the interface for the decoded JWT payload
+interface DecodedJWT {
+  exp: number; // Expiration time in seconds
+}
+
 const VALID_ROLES = ['admin', 'client', 'psychotherapist', 'associate']; // Allowed roles
 
 const useAuthCheck = (allowedRoles: string[]) => {
@@ -25,7 +30,7 @@ const useAuthCheck = (allowedRoles: string[]) => {
     if (!jwt) return false; // No JWT found
 
     try {
-      const decoded: any = jwtDecode(jwt);
+      const decoded: DecodedJWT = jwtDecode(jwt);
       const currentTime = Math.floor(Date.now() / 1000); // Get current time in seconds
       return decoded.exp >= currentTime; // JWT is valid if expiration time is greater than current time
     } catch (error) {
@@ -34,38 +39,38 @@ const useAuthCheck = (allowedRoles: string[]) => {
     }
   };
 
-  // Function to check authentication
-  const checkAuth = async () => {
-    const jwt = localStorage.getItem('appwrite_jwt');
-    if (!isJwtValid(jwt)) {
-      setIsModalOpen(true); // Show modal if JWT is invalid or expired
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const user = await account.get(); // Get user info
-      const userId = user.$id;
-      const roleResponse = await databases.getDocument('Butterfly-Database', 'Accounts', userId);
-      const userRole = roleResponse.role;
-
-      if (allowedRoles.includes(userRole)) {
-        setLoading(false); // Set loading to false when role matches
-      } else {
-        await account.deleteSession('current'); // If role doesn't match, log out
-        setLoading(false);
-        router.push('/login'); // Redirect to login
-      }
-    } catch (error) {
-      console.error('Error during authentication:', error);
-      await account.deleteSession('current');
-      setLoading(false);
-      router.push('/login');
-    }
-  };
-
+  
   // Effect hook to check authentication on mount
   useEffect(() => {
+    // Function to check authentication
+    const checkAuth = async () => {
+      const jwt = localStorage.getItem('appwrite_jwt');
+      if (!isJwtValid(jwt)) {
+        setIsModalOpen(true); // Show modal if JWT is invalid or expired
+        setLoading(false);
+        return;
+      }
+  
+      try {
+        const user = await account.get(); // Get user info
+        const userId = user.$id;
+        const roleResponse = await databases.getDocument('Butterfly-Database', 'Accounts', userId);
+        const userRole = roleResponse.role;
+  
+        if (allowedRoles.includes(userRole)) {
+          setLoading(false); // Set loading to false when role matches
+        } else {
+          await account.deleteSession('current'); // If role doesn't match, log out
+          setLoading(false);
+          router.push('/login'); // Redirect to login
+        }
+      } catch (error) {
+        console.error('Error during authentication:', error);
+        await account.deleteSession('current');
+        setLoading(false);
+        router.push('/login');
+      }
+    };
     checkAuth();
   }, [allowedRoles, router]);
 
