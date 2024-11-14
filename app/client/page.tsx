@@ -220,6 +220,7 @@ const NewClientDashboard = () => {
                         className="rounded-full mb-4"
                         width={96}  // Set width explicitly
                         height={96} // Set height explicitly
+                        unoptimized
                       />
                       <div className="flex flex-col items-center text-center">
                         <h4 className="text-lg font-bold text-blue-500 font-roboto">
