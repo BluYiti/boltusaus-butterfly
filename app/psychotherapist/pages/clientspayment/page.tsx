@@ -47,7 +47,7 @@ const ClientsPayment = () => {
   const [activeTab, setActiveTab] = useState("Pending");
   const [searchTerm, setSearchTerm] = useState("");
   const [payments, setPayments] = useState<Payment[]>([]);
-  const [showModal, setShowModal] = useState(false); // State for modal visibility
+  const [, setShowModal] = useState(false); // State for modal visibility
   const [selectedClient, setSelectedClient] = useState(null); // State for selected client's payment details
 
   // Fetch payment data
@@ -64,6 +64,9 @@ const ClientsPayment = () => {
         // Map fetched data to match Payment type
         const fetchedPayments: Payment[] = response.documents.map((doc) => {
           // Ensure fields match the expected type and structure
+          const client = doc.client || {}; // Fallback to an empty object if doc.client is null or undefined
+          const psychotherapist = doc.psychotherapist || {}; // Similarly, handle psychotherapist
+        
           return {
             referenceNo: doc.referenceNo,
             mode: doc.booking.mode,  // Accessing `mode` from `booking`
@@ -74,11 +77,11 @@ const ClientsPayment = () => {
             psychotherapist: doc.psychotherapist,
             booking: doc.booking,
             id: doc.$id,
-            clientFirstName: doc.client.firstname,
-            clientLastName: doc.client.lastname,
-            psychoFirstName: doc.psychotherapist.firstName,
-            psychoLastName: doc.psychotherapist.lastName,
-            email: doc.client.userid.email,
+            clientFirstName: client.firstname || "",  // Fallback to empty string if firstname is missing
+            clientLastName: client.lastname || "",    // Fallback to empty string if lastname is missing
+            psychoFirstName: psychotherapist.firstName || "",  // Fallback to empty string if missing
+            psychoLastName: psychotherapist.lastName || "",    // Fallback to empty string if missing
+            email: client.userid?.email || "",  // Safely access the email with optional chaining
             createdAt: new Date(doc.$createdAt),
             declineReason: doc.declineReason,
             receipt: doc.receipt,
@@ -86,6 +89,7 @@ const ClientsPayment = () => {
             $createdAt: doc.$createdAt, // Include createdAt field
           };
         });
+        
 
         setPayments(fetchedPayments);
 
@@ -241,7 +245,6 @@ const ClientsPayment = () => {
 
       {/* Modal for Payment Details */}
       <PaymentModal 
-        isOpen={showModal} 
         onClose={closeModal} 
         client={selectedClient} 
       />
