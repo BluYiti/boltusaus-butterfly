@@ -313,6 +313,7 @@ const AppointmentBooking = () => {
                             width={64}   // Equivalent to w-16 (16 * 4)
                             height={64}  // Equivalent to h-16 (16 * 4)
                             className="rounded-full"
+                            unoptimized
                           />
                           <div>
                             <h3 className="text-lg font-bold">{therapist.firstName} {therapist.lastName}</h3>
@@ -343,6 +344,7 @@ const AppointmentBooking = () => {
                           width={64}   // Equivalent to 16 * 4
                           height={64}  // Equivalent to 16 * 4
                           className="rounded-full"
+                          unoptimized
                         />
                         <div>
                           <h3 className="text-lg font-bold">

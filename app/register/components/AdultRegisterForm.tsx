@@ -111,7 +111,6 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ error }) => {
         setBarangays([]);
     }, [setFirstName, setLastName, setBirthday, setSex, setCountry, setRegion, setProvince, setCity, setBarangay, setStreet, setContactNumber, setEmergencyContactName, setEmergencyContactNumber, setIdFile, setEmail, setPassword, setRePassword, setAgreeToTerms, setPasswordCriteria, setIsPasswordValid, setValidationError, setAge, setProvinces, setCities, setBarangays]);
 
-    // Handle form submission
     const handleSubmit = createSubmitHandler({
         firstName,
         lastName,
@@ -132,12 +131,13 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ error }) => {
         idFile,
         email,
         onRegister: (data) => {
-            console.log('Registration successful:', data);
+            console.log('Registration successful:', data); 
             const { userId } = data;
             router.push(`/register/verify/email/?user=${encodeURIComponent(userId)}`);
         },
         setValidationError,
-    }, setLoading, setButtonClicked, resetForm, setters);  // Pass setLoading and setButtonClicked here
+    }, setLoading, setButtonClicked, resetForm, setters); // Pass resetForm and other handlers
+    
 
     // Use custom hooks to fetch data
     useFetchCountries(setCountries);
@@ -203,9 +203,6 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ error }) => {
         <div className="w-full p-8">
             <h2 className="text-center text-6xl text-[#4982ae] font-paintbrush">Register</h2>
             <form className="mt-8 space-y-4" onSubmit={handleSubmit}>
-                {error && <div className="text-red-600 text-lg font-bold">{error}</div>}
-                {validationError && <div className="text-red-600 text-lg font-bold">{validationError}</div>}
-
                 <div className="rounded-md shadow-sm space-y-2">
                     {/* First Name */}
                     <div>
@@ -560,12 +557,14 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ error }) => {
                     {/* Submit Button */}
                     <div className="mt-8">
                     <button
-                    type="submit"
-                    disabled={loading || !agreeToTerms}
-                    className={`bg-gradient-to-r from-[#38b6ff] to-[#4982ae] text-white font-bold py-2 px-4 rounded-xl transition-all duration-300 ease-in-out shadow-lg transform hover:scale-105 hover:shadow-xl ${!agreeToTerms ? 'opacity-50 cursor-not-allowed' : ''} ${buttonClicked ? 'bg-green-500' : ''}`}
-                >
-                    {loading ? 'Registering...' : 'Register'}
-                </button>
+                        type="submit"
+                        disabled={loading || !agreeToTerms}
+                        className={`bg-gradient-to-r from-[#38b6ff] to-[#4982ae] text-white font-bold py-2 px-4 rounded-xl transition-all duration-300 ease-in-out shadow-lg transform hover:scale-105 hover:shadow-xl ${!agreeToTerms ? 'opacity-50 cursor-not-allowed' : ''} ${buttonClicked ? 'bg-green-500' : ''}`}
+                    >
+                        {loading ? 'Registering...' : 'Register'}
+                    </button>
+                    {error && <div className="text-red-600 text-lg font-bold">{error}</div>}
+                    {validationError && <div className="text-red-600 text-lg font-bold">{validationError}</div>}
                     </div>
                 </div>
             </form>
