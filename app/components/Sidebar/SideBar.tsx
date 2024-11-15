@@ -1,7 +1,4 @@
-// components/Sidebar.tsx
-"use client";
-
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { FiMenu, FiChevronLeft } from "react-icons/fi";
 import { IconType } from "react-icons"; // Import IconType from react-icons
 import SidebarItem from "./SidebarItem";
@@ -10,14 +7,12 @@ import LogoutButton from '@/auth/logout/component/logoutButton';
 
 interface SidebarProps {
   title: string;
-  items: Array<{ href: string; label: string; icon: IconType; }>;
+  items: Array<{ href: string; label: string; icon: IconType; isDisabled?: boolean }>; // Accept isDisabled
   isMinimized: boolean;
   setIsMinimized: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ title, items, isMinimized, setIsMinimized }) => {
-  const [isLoading, setIsLoading] = useState(true);
-
   useEffect(() => {
     const savedState = localStorage.getItem('sidebarMinimized');
     if (savedState) {
@@ -25,7 +20,7 @@ const Sidebar: React.FC<SidebarProps> = ({ title, items, isMinimized, setIsMinim
     } else {
       setIsMinimized(false);
     }
-  }, []);
+  }, [setIsMinimized]);
 
   const toggleSidebar = () => {
     const newState = !isMinimized;
@@ -56,6 +51,7 @@ const Sidebar: React.FC<SidebarProps> = ({ title, items, isMinimized, setIsMinim
             icon={item.icon}
             label={item.label}
             isMinimized={isMinimized}
+            isDisabled={item.isDisabled} // Pass isDisabled
           />
         ))}
       </nav>

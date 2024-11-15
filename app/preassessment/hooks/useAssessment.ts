@@ -2,39 +2,53 @@
 
 import { useState, useEffect } from 'react';
 import { Question } from '@/preassessment/data/questions';
-import { databases, account, ID } from '@/appwrite';
+import { databases, account, ID, Query } from '@/appwrite';
 import { useRouter } from 'next/navigation';
 
 const DATABASE_ID = 'Butterfly-Database';
-const COLLECTION_ID = 'Pre-Assessment';
+const COLLECTION_ID_PREASSESSMENT = 'Pre-Assessment';
+const COLLECTION_ID_CLIENT = 'Client';
+
+type Answer = {
+  question: string;
+  answerInt: number;
+  answerStr: string;
+};
 
 export const useAssessment = (questions: Question[] = []) => {
-  type Answer = {
-    question: string;
-    answerInt: number;
-    answerStr: string;
-  };
-
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [answers, setAnswers] = useState<Answer[]>(Array(questions.length).fill(null));
   const [modalMessage, setModalMessage] = useState<string>('');
   const [modalType, setModalType] = useState<'confirmation' | 'error' | 'success'>('confirmation');
   const [isModalOpen, setModalOpen] = useState(false);
   const [userName, setUserName] = useState<string>('');
-  const [userID, setUserID] = useState<string>('');
+  const [clientID, setClientID] = useState<string>('');
   const router = useRouter();
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [answers, setAnswers] = useState<Answer[]>(Array(questions.length).fill(null));
 
-  // Fetch the current authenticated user's name and ID
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const user = await account.get();
         setUserName(user.name);
-        setUserID(user.$id);
+
+        // Fetch the Client Collection document using the user ID
+        const client = await databases.listDocuments('Butterfly-Database', 'Client', [
+          Query.equal('userid', user.$id),
+        ]);
+
+        if (client.documents.length > 0) {
+          // Assuming you want the first match
+          const clientDocument = client.documents[0];
+          setClientID(clientDocument.$id);
+          console.log('This is the Client ID', setClientID)
+        } else {
+          console.log('No client document found for this user.');
+        }
       } catch (error) {
-        console.error('Error fetching user data:', error);
+        console.error('Error fetching user data or client document:', error);
       }
     };
+
     fetchUser();
   }, []);
 
@@ -79,23 +93,41 @@ export const useAssessment = (questions: Question[] = []) => {
 
   const confirmSubmit = async () => {
     try {
-      const serializedAnswers = JSON.stringify(answers);
-
+      // Transform the answers array to include question, answer string, and answer integer
+      const transformedAnswers = answers.map((answer) => 
+        `Question: ${answer.question}, Answer Int: ${answer.answerInt}, Answer: ${answer.answerStr || answer.answerInt}`
+      );
+  
+      // Store the transformed answers as an array of strings
       await databases.createDocument(
         DATABASE_ID,
-        COLLECTION_ID,
+        COLLECTION_ID_PREASSESSMENT,
         ID.unique(),
         {
-          userID,
+          userID: clientID,
           userName,
-          answers: serializedAnswers,
+          answers: transformedAnswers, // Pass the transformed array
           date: new Date().toISOString(),
         }
       );
-
-      setModalMessage('Your answers have been submitted successfully.');
-      setModalType('success');
-      setModalOpen(true);
+  
+      try {
+        // Update the state attribute of the client document to "evaluate"
+        await databases.updateDocument(
+          DATABASE_ID,
+          COLLECTION_ID_CLIENT,
+          clientID,
+          { state: 'evaluate' }
+        ); 
+  
+        setModalMessage('Your answers have been submitted successfully');
+        setModalType('success');
+        setModalOpen(true);
+      } catch (error) {
+        setModalMessage(`Error updating client state: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        setModalType('error');
+        setModalOpen(true);
+      }
     } catch (error) {
       setModalMessage(`Error submitting answers: ${error instanceof Error ? error.message : 'Unknown error'}`);
       setModalType('error');
@@ -106,7 +138,7 @@ export const useAssessment = (questions: Question[] = []) => {
   const closeModal = () => {
     if (modalType === 'success') {
       setModalOpen(false);
-      router.push('/auth/login');
+      router.push('../../client');
     } else {
       setModalOpen(false);
     }

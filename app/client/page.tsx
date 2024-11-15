@@ -1,214 +1,317 @@
 'use client'
 
-import useAuthCheck from "@/auth/page";
-import React, { useState } from "react";
-import { FaUser } from "react-icons/fa";
-import Layout from "@/components/Sidebar/Layout";
+import React, { useState, useEffect } from "react";
+import Layout from "@/components/Sidebar/Layout"; // Adjust the path if necessary
 import items from "@/client/data/Links";
-import Link from "next/link";
-import RescheduleModal from "@/components/Reschedule"; // Assuming you have this component
+import SessionHandler from "@/auth/logout/component/SessionHandler"
+import Link from "next/link"; // Import Link for navigation
+import 'typeface-roboto';
+import 'typeface-lora';
+import { account, databases, Query } from "@/appwrite"; // Import Appwrite account service for fetching user data
+import useAuthCheck from "@/auth/page"; // Correct import path for useAuthCheck
+import LoadingScreen from "@/components/LoadingScreen"; // Import LoadingScreen component
+import { fetchProfileImageUrl } from "@/hooks/userService";
+import { downloadCertificate } from "@/hooks/userService";
+import PsychotherapistProfile from '@/client/components/PsychotherapistProfile'; // Adjust the path if necessary
+import Image from 'next/image';
 
-const Dashboard: React.FC = () => {
-  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
-  const [showModal, setShowModal] = useState(false);
-  const today = new Date();
-  const currentDay = today.getDate();
-  const currentMonth = today.getMonth();
-  const currentYear = today.getFullYear();
-  const userName = "John"; // Placeholder for dynamic user data
+const NewClientDashboard = () => {
+  const { loading: authLoading } = useAuthCheck(['client']); // Call the useAuthCheck hook
+  const [dataLoading, setDataLoading] = useState(true); // State to track if data is still loading
+  const [, setUsers] = useState([]);
+  const [psychotherapists, setPsychotherapists] = useState([]);
+  const [profileImageUrls, setProfileImageUrls] = useState({});
+  const [state, setState] = useState<string | null>(null); // State to track user state
+  const [status, setStatus] = useState<string | null>(null); // State to track user status
+  const [cert, setCert] = useState<string | null>(null); // State to track user certificate
+  const [userName, setUserName] = useState<string | null>(null); // State to track user name
+  const [currentIndex, setCurrentIndex] = useState(0);
+  
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedPsychotherapist, setSelectedPsychotherapist] = useState<null>(null);
 
-  const { loading, LoadingScreen } = useAuthCheck();
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const user = await account.get(); // Get user information
+        setUserName(user.name); // Assuming Appwrite returns 'name' field for the user
 
-  if (loading) {
-    return <LoadingScreen />; // Show loading screen
+        // Fetch users
+        const userResponse = await databases.listDocuments("Butterfly-Database", "Client");
+        setUsers(userResponse.documents);
+
+        // Fetch user state
+        const stateResponse = await databases.listDocuments(
+          'Butterfly-Database',
+          'Client',
+          [Query.equal('userid', user.$id)] // Fetch documents where userid matches the logged-in user
+        );
+        const userState = stateResponse.documents[0]?.state;
+        const userStatus = stateResponse.documents[0]?.status;
+        const userCert = stateResponse.documents[0]?.certificate;
+        setState(userState);
+        setStatus(userStatus);
+        setCert(userCert);
+
+        // Fetch psychotherapists
+        const therapistResponse = await databases.listDocuments('Butterfly-Database', 'Psychotherapist');
+        setPsychotherapists(therapistResponse.documents);
+
+        // Fetch profile images for each psychotherapist
+        const profileImages = {};
+        for (const therapist of therapistResponse.documents) {
+          if (therapist.profilepic) {
+            const url = await fetchProfileImageUrl(therapist.profilepic);
+            if (url) {
+              profileImages[therapist.$id] = url;
+            }
+          }
+        }
+        setProfileImageUrls(profileImages);
+
+      } catch (error) {
+        console.error("Error fetching data: ", error);
+      } finally {
+        setDataLoading(false); // Set dataLoading to false when all data is fetched
+      }
+    };
+
+    fetchData();
+  }, []); // Empty dependency array to run once on component mount
+
+  const handleDownload = () => {
+    const documentId = cert; // Assuming userCert is defined in the same scope
+    downloadCertificate(documentId, userName);
+  };
+
+  const visibleSlides = 2;
+
+  // Function to go to the next slide
+  const handleNext = () => {
+    setCurrentIndex((prevIndex) => {
+      const nextIndex = prevIndex + visibleSlides;
+      return nextIndex >= psychotherapists.length ? 0 : nextIndex;
+    });
+  };
+
+  // Function to go to the previous slide
+  const handlePrevious = () => {
+    setCurrentIndex((prevIndex) => {
+      const prevIndexAdjusted = prevIndex - visibleSlides;
+      return prevIndexAdjusted < 0
+        ? psychotherapists.length - (psychotherapists.length % visibleSlides || visibleSlides)
+        : prevIndexAdjusted;
+    });
+  };
+
+  const handleProfileClick = (psychotherapist) => {
+    setSelectedPsychotherapist(psychotherapist); // Set the selected psychotherapist
+    setIsModalOpen(true); // Open the modal
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false); // Close the modal
+    setSelectedPsychotherapist(null); // Reset selected psychotherapist
+  };
+
+  if (authLoading || dataLoading) {
+    return <LoadingScreen />; // Show the loading screen while the auth check or data loading is in progress
   }
-
-  const months = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-  ];
-
-  const daysInMonth = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-
-  const handleMonthChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedMonth(parseInt(event.target.value));
-  };
-
-  const firstDayOfMonth = new Date(currentYear, selectedMonth, 1).getDay();
-
-  const handleRescheduleClick = () => {
-    setShowModal(true);
-  };
-
-  const closeModal = () => {
-    setShowModal(false);
-  };
 
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
-      <div className="text-black min-h-screen flex">
-        <div className="flex-grow flex flex-col justify-between bg-blue-100">
-          {/* Top Section with User Info and Header */}
-          <div className="bg-white shadow-lg py-4 px-6 flex justify-between items-center">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white">
-                <FaUser size={24} />
-              </div>
-              <h1 className="text-xl font-semibold">
-                Good Morning, <span className="font-bold">{userName}!</span>
-              </h1>
-            </div>
-          </div>
+      <SessionHandler />
+      {/* Header Section */}
+      <div className="bg-white rounded-b-lg shadow-md p-5 top-0 left-60 w-full">
+        <h2 className="text-4xl font-bold text-blue-500 font-roboto">
+          Welcome, {userName ? userName : "Client"}!
+        </h2>
+        <p className="text-gray-600 text-lg font-lora">
+          Book your therapy sessions with ease and embark on your path to well-being.
+        </p>
+      </div>
 
-          {/* Upcoming Sessions Section */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 mx-8">
-            <div className="bg-white rounded-lg shadow-lg p-6 flex flex-col">
-              <h2 className="text-bold text-xl font-bold mb-4">
-                <span className="bg-blue-500 text-white p-2 px-10 rounded-lg">Upcoming Sessions</span>
-              </h2>
-              <div className="space-y-2 flex-grow overflow-y-auto max-h-[300px]">
-                <div className="flex justify-between items-center p-2 rounded-lg text-black py-2 px-4">
-                  <span className="font-bold">PLACEHOLDER FOR THE FIRST SESSION</span>
-                  <span className="text-gray-600 font-semibold">Date and Time</span>
-                </div>
-              </div>
-            </div>
+      <div className="flex justify-between items-start space-x-4 px-8 ">
+        {/* Left side - Pre-assessment and Psychotherapists Section */}
+        <div className="flex-1 bg-white p-6 rounded-lg shadow-lg mb-6 mt-8 h-[27rem] w-[56%]">
+          {/* Conditionally render based on client state */}
+          {state === "new" && (
+            <Link href="/preassessment">
+              <button className="bg-[#2563EB] text-white py-2 px-4 mb-4 rounded text-xl font-semibold hover:bg-blue-300 hover:scale-105">
+                Start Pre-assessment test
+              </button>
+            </Link>
+          )}
 
-            {/* Announcements & Reminders Section */}
-            <div className="bg-white rounded-lg shadow-lg p-6 flex flex-col h-full">
-              <h2 className="text-xl font-semibold mb-4">Announcements & Reminders:</h2>
-              <div className="space-y-4 flex-grow overflow-y-auto max-h-[300px]">
-                <div className="bg-gray-50 p-4 rounded-lg shadow">
-                  <h3 className="font-semibold text-lg"></h3>
-                  <p className="text-gray-700">Placeholder for announcement</p>
-                </div>
-                <div className="bg-gray-50 p-4 rounded-lg shadow">
-                  <h3 className="font-semibold text-lg"></h3>
-                  <p className="text-gray-700">Placeholder for announcement</p>
-                </div>
-                <div className="bg-gray-50 p-4 rounded-lg shadow">
-                  <h3 className="font-semibold text-lg"></h3>
-                  <p className="text-gray-700">Placeholder for announcement</p>
-                </div>
-              </div>
+          {state === "current" && (
+            <div className="mb-4 text-green-600 text-4xl flex items-center">
+              <Link href="/client/pages/bookappointment">
+                <button className="text-xl font-semibold bg-blue-500 hover:bg-gray-500 text-white py-2 px-4 rounded">
+                  Book your appointment
+                </button>
+              </Link>
+              <span className="ml-3 text-green-600 animate-bounce">✅</span>
+              <span className="text-lg font-bold">Evaluation Completed!</span>
             </div>
-          </div>
+          )}
 
-          {/* Missed Sessions and Calendar Section */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 mx-8">
-            <div className="bg-white rounded-lg shadow-lg p-6 flex flex-col">
-              <h2 className="text-bold text-xl font-bold mb-4">
-                <span className="bg-blue-500 text-white p-2 px-14 rounded-lg">Missed Sessions</span>
-              </h2>
-              <div className="space-y-2 flex-grow overflow-y-auto max-h-[300px]">
-                <div className="flex justify-between items-center p-2 rounded-lg bg-white text-black py-2 px-4">
-                  <span className="font-bold">PLACEHOLDER FOR MISSED SESSION</span>
-                  <button
-                    className="bg-blue-300 font-bold text-white py-1 px-3 rounded-xl hover:bg-blue-500"
-                    onClick={handleRescheduleClick}
-                  >
-                    Reschedule
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Calendar */}
-            <div className="bg-white rounded-lg shadow-lg p-6">
-              <h2 className="text-lg font-semibold">Calendar</h2>
-              <div className="mt-4">
-                <label htmlFor="month-select" className="font-medium text-gray-700">
-                  Choose a month:
-                </label>
-                <select
-                  id="month-select"
-                  value={selectedMonth}
-                  onChange={handleMonthChange}
-                  className="ml-2 p-2 border border-gray-300 rounded-lg"
+          {state === "evaluate" && (
+            <>
+              <div className="relative group flex"> {/* Wrapper for hover effect */}
+                <button
+                  className="bg-gray-300 text-gray-600 font-bold mb-4 py-2 px-4 rounded cursor-not-allowed"
+                  disabled
                 >
-                  {months.map((month, index) => (
-                    <option key={index} value={index}>
-                      {month}
-                    </option>
-                  ))}
-                </select>
+                  Pre-assessment Done!
+                </button>
+                <p className="ml-2 bg-[#2563EB] text-white mb-4 py-2 px-4 rounded">
+                    Please wait for the confirmation via SMS, it might take 1-2 days! Thank You!
+                  </p>
               </div>
-              <div className="mt-6">
-                <div className="text-center">
-                  <div className="text-bold text-xl font-bold">{months[selectedMonth]}</div>
-                  <div className="grid grid-cols-7 text-center mt-4">
-                    {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
-                      <div key={day} className="text-sm font-medium text-gray-700">
-                        {day}
+            </>
+          )}
+
+          {state === "referred" && status === "pending" && (
+            <div className="mb-4 text-green-600 text-4xl flex items-center">
+              <span className="text-green-600 animate-bounce">✅</span>
+              <span className="ml-2 text-lg font-bold">You have been referred. Your certificate of referral is on the way!</span>
+            </div>
+          )}
+
+          {state === "referred" && status === "attached" && (
+            <div className="mb-4 text-green-600 text-4xl flex items-center">
+              <button
+                className="text-xl font-semibold bg-blue-500 hover:bg-gray-500 text-white py-2 px-4 rounded"
+                onClick={handleDownload}
+              >
+                Click me to download Certificate.
+              </button>
+              <span className="text-green-600 animate-bounce">✅</span>
+              <span className="ml-2 text-lg font-bold">You have been referred</span>
+            </div>
+          )}
+
+          {/* Psychotherapists Section */}
+          <div>
+            <h3 className="text-2xl font-bold text-blue-500 text-left mb-2 font-lora">
+              Meet our caring psychotherapists, here to guide your healing!
+            </h3>
+            <div className="relative overflow-hidden">
+              {/* Container for carousel */}
+              <div
+                className="flex transition-transform duration-500 ease-in-out"
+                style={{
+                  transform: `translateX(-${(currentIndex / psychotherapists.length) * 100}%)`,
+                  width: `${(psychotherapists.length / visibleSlides) * 100}%`,
+                }}
+                
+              >
+                {psychotherapists.map((psychotherapist, index) => (
+                  <div
+                    key={index}
+                    className="flex-shrink-0 flex items-center justify-center p-4 w-[33%]"
+                    onClick={() => handleProfileClick(psychotherapist)} // Handle profile click
+                  >
+                    <div className="flex flex-col items-center bg-white border border-blue-300 p-4 rounded-3xl transform transition-transform duration-500 ease-in-out hover:scale-105 min-w-[300px]">
+                      <Image
+                        src={profileImageUrls[psychotherapist.$id] || "/images/default-profile.png"}
+                        alt={`${psychotherapist.firstName} ${psychotherapist.lastName}`}
+                        className="rounded-full mb-4"
+                        width={96}  // Set width explicitly
+                        height={96} // Set height explicitly
+                        unoptimized
+                      />
+                      <div className="flex flex-col items-center text-center">
+                        <h4 className="text-lg font-bold text-blue-500 font-roboto">
+                          {psychotherapist.firstName} {psychotherapist.lastName}
+                        </h4>
+                        <p className="text-sm text-gray-600 font-lora">
+                          {psychotherapist.specialties}
+                        </p>
+                        <h3 className="text-gray-600 font-lora">
+                          {psychotherapist.position
+                            ? psychotherapist.position.charAt(0).toUpperCase() +
+                              psychotherapist.position.slice(1)
+                            : 'Position not specified'}
+                        </h3>
                       </div>
-                    ))}
+                    </div>
                   </div>
-                  <div className="grid grid-cols-7 text-center gap-y-4 mt-4">
-                    {[...Array(firstDayOfMonth)].map((_, index) => (
-                      <div key={index}></div>
-                    ))}
-                    {[...Array(daysInMonth[selectedMonth])].map((_, dayIndex) => (
-                      <div
-                        key={dayIndex}
-                        className={`p-2 rounded-full cursor-pointer ${
-                          dayIndex + 1 === currentDay && selectedMonth === currentMonth
-                            ? "bg-blue-500 text-white"
-                            : "text-gray-700"
-                        }`}
-                      >
-                        {dayIndex + 1}
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                ))}
               </div>
+
+              {/* Navigation Buttons */}
+              <button
+                className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-[#2563EB] text-white p-2 rounded-full"
+                onClick={handlePrevious}
+              >
+                &nbsp;&lt;&nbsp;
+              </button>
+              <button
+                className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-[#2563EB] text-white p-2 rounded-full"
+                onClick={handleNext}
+              >
+                &nbsp;&gt;&nbsp;
+              </button>
             </div>
           </div>
+        </div>
 
-          {/* What to do section */}
-          <div className="grid grid-cols-1 gap-6 mt-6 mx-8">
-            <div className="bg-white rounded-lg shadow-lg p-6">
-              <h2 className="text-xl font-semibold">What to do?</h2>
-              <div className="space-y-4 mt-4">
-                {/* Mood Tracker */}
-                <div className="bg-white rounded-lg shadow-lg p-6">
-                  <h2 className="text-xl font-semibold mb-4">Mood Tracker</h2>
-                  <div className="flex justify-between items-center">
-                    <p className="text-lg font-medium">How are you feeling today?</p>
-                    <Link href="/client/pages/goals">
-                      <button className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
-                        START
-                      </button>
-                    </Link>
-                  </div>
-                </div>
-
-                {/* Reading Resources */}
-                <div className="bg-white rounded-lg shadow-lg p-6">
-                  <h2 className="text-xl font-semibold mb-4">Reading Resources</h2>
-                  <div className="flex justify-between items-center">
-                    <p className="text-lg font-medium">Start your day by reading something inspiring!</p>
-                    <Link href="/client/pages/explore">
-                      <button className="bg-blue-500 text-white py-2 px-5 rounded hover:bg-blue-600">
-                        VIEW
-                      </button>
-                    </Link>
-                  </div>
-                </div>
+        {/* Right side - A Daily Reminder Section */}
+        <div className="flex-1 bg-white p-6 rounded-lg shadow-lg mt-8 h-[27rem]">
+          <h2 className="font-bold sm:text-2xl 2xl:text-4xl text-blue-950 mb-6">A Daily Reminder to Yourself</h2>
+          <div className="sm:space-y-5 3xl:space-y-8 max-h-[300px] text-black">
+              <div className="bg-blue-50 border-blue-300 p-2 rounded-lg shadow-lg transition-transform transform hover:scale-105 hover:shadow-2xl duration-300">
+                  <h2 className="font-semibold text-lg mb-2">😊 This Too Shall Pass</h2>
+                  <p className="text-gray-800">Feelings are temporary. Hold on, better days are coming.</p>
               </div>
+              <div className="bg-blue-50 border-blue-300 p-2 rounded-lg shadow-lg transition-transform transform hover:scale-105 hover:shadow-2xl duration-300">
+                  <h3 className="font-semibold text-lg mb-2">😮‍💨 Breathe In, Let Go</h3>
+                  <p className="text-gray-800">Take a moment to breathe. Release the tension in your mind and body.</p>
+              </div>
+              <div className="bg-blue-50 border-blue-300 p-2 rounded-lg shadow-lg transition-transform transform hover:scale-105 hover:shadow-2xl duration-300">
+                  <h3 className="font-semibold text-lg mb-2">🫵 You Are Enough.</h3>
+                  <p className="text-gray-800">Your worth isn&apos;t measured by your struggles. You are enough just as you are.</p>
+              </div>
+          </div>
+        </div>
+      </div>
+
+      {/* What to do section */}
+      <div className="flex justify-between items-start space-x-8 px-8 w-full">
+        <div className="bg-white rounded-lg shadow-lg p-6 w-full mb-8">
+          <h2 className="text-lg font-semibold text-blue-500">What to do during your freetime?</h2>
+          <div className="grid grid-cols-4 gap-4 mt-4">
+            <div className="bg-blue-50 p-4 rounded-lg shadow transition-all duration-300 hover:shadow-xl hover:scale-105">
+              <div className="font-semibold text-blue-500">Read a Book</div>
+              <p className="text-sm text-gray-600">Lose yourself in a world of knowledge or stories.</p>
+            </div>
+            <div className="bg-blue-50 p-4 rounded-lg shadow transition-all duration-300 hover:shadow-xl hover:scale-105">
+              <div className="font-semibold text-blue-500">Do Yoga</div>
+              <p className="text-sm text-gray-600">Stretch, breathe, and relax.</p>
+            </div>
+            <div className="bg-blue-50 p-4 rounded-lg shadow transition-all duration-300 hover:shadow-xl hover:scale-105">
+              <div className="font-semibold text-blue-500">Take a Walk</div>
+              <p className="text-sm text-gray-600">Enjoy some fresh air and a change of scenery.</p>
+            </div>
+            <div className="bg-blue-50 p-4 rounded-lg shadow transition-all duration-300 hover:shadow-xl hover:scale-105">
+              <div className="font-semibold text-blue-500">Listen to Music</div>
+              <p className="text-sm text-gray-600">Let music uplift or soothe your soul.</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Modal for rescheduling */}
-      {showModal && (
-        <RescheduleModal onClose={closeModal}>
-          <img src="/mnt/data/image.png" alt="Reschedule Details" />
-        </RescheduleModal>
+      {/* Psychotherapist Modal */}
+      {isModalOpen && selectedPsychotherapist && (
+        <PsychotherapistProfile
+          psychotherapist={selectedPsychotherapist}
+          onClose={handleCloseModal}
+        />
       )}
     </Layout>
   );
 };
 
-export default Dashboard;
+export default NewClientDashboard;

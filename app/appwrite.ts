@@ -1,4 +1,4 @@
-import { Client, Account, Databases, Storage, ID } from 'appwrite';
+import { Client, Account, Databases, Storage, ID, Query, Functions } from 'appwrite';
 
 // Initialize Appwrite client
 const client = new Client();
@@ -22,6 +22,7 @@ client.setEndpoint(APPWRITE_ENDPOINT).setProject(PROJECT_ID);
 const account = new Account(client); // For user authentication and sessions
 const databases = new Databases(client); // For database operations
 const storage = new Storage(client); // For file storage operations
+const functions = new Functions(client);
 
 // JWT Function: Create a JWT for the current authenticated user
 async function createJWT() {
@@ -64,4 +65,4 @@ sdk
   .setProject(PROJECT_ID); // Use the environment variable for the project ID
 
 // Export the initialized services, JWT functions, and SDK for use in other modules
-export { client, account, databases, storage, ID, createJWT, verifyJWT, getSession, sdk };
+export { client, account, databases, storage, functions, ID, Query, createJWT, verifyJWT, getSession, sdk };

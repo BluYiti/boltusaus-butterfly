@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { databases } from "@/appwrite";
-import { useRouter } from "next/navigation";
+import Image from 'next/image';
 import { Models } from 'appwrite';
 
 interface ClientProfileModalProps {
@@ -57,19 +57,21 @@ const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpe
         console.error('No client data available');
         return;
       }
-
+  
+      // Update both state and status in the document
       const updatedDocument = await databases.updateDocument(
         'Butterfly-Database',
         'Client',
         clientId,
-        { state: 'referred' }
+        { state: 'referred', status: 'pending' } // Updating state and status
       );
-
+  
       console.log('Document updated:', updatedDocument);
       const refreshedClientData = await fetchClientData(clientId);
       setClientData(refreshedClientData);
-
+  
       alert('Client referred successfully!');
+      window.location.reload();
       setIsConfirmModalOpen(false);
     } catch (err: unknown) {
       console.error("Error referring client:", err);
@@ -80,6 +82,7 @@ const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpe
       }
     }
   };
+  
 
   const handleViewDetails = (details: string) => {
     setSelectedReportDetails(details);
@@ -112,10 +115,12 @@ const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpe
             <>
               <div className="flex space-x-12 items-center">
                 <div className="flex-shrink-0 text-center">
-                  <img
+                  <Image
                     src={clientData.profilePictureUrl || '/default-profile.jpg'}
                     alt="Profile"
-                    className="w-48 h-48 rounded-full object-cover mx-auto"
+                    width={192} // Equivalent to 48 * 4 for a consistent image size
+                    height={192} // Equivalent to 48 * 4 for a consistent image size
+                    className="rounded-full object-cover mx-auto"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
                       target.onerror = null;
@@ -127,7 +132,7 @@ const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpe
                   </h2>
                 </div>
                 <div className="flex-grow">
-                  <h3 className="text-xl font-bold mb-2 text-gray-900">Client’s Profile</h3>
+                  <h3 className="text-xl font-bold mb-2 text-gray-900">Client&apos;s Profile</h3>
                   <div className="grid grid-cols-2 gap-6 text-gray-700">
                     <div>
                       <p><strong>Home Address:</strong> {clientData.address}</p>

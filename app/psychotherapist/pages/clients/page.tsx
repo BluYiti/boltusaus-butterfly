@@ -2,9 +2,13 @@
 import { useState, useEffect } from "react";
 import Layout from "@/components/Sidebar/Layout";
 import items from "@/psychotherapist/data/Links";
-import { databases } from "@/appwrite";
+import { account, databases, Query } from "@/appwrite";
 import ClientProfileModal from "@/psychotherapist/components/ClientProfileModal";
-import ReferredClientProfileModal from "@/psychotherapist/components/ReferredClientProfileModal"; // Import your new modal
+import ReferredClientProfileModal from "@/psychotherapist/components/ReferredClientProfileModal";
+import ReviewPreAssModal from "@/psychotherapist/components/EvaluateModal"; // Import your new modal
+import useAuthCheck from "@/auth/page";
+import LoadingScreen from "@/components/LoadingScreen";
+import { fetchPsychoId } from "@/hooks/userService";
 
 interface ClientType {
   id: string;
@@ -29,22 +33,31 @@ interface AccountType {
 }
 
 const Clients = () => {
+  const { loading: authLoading } = useAuthCheck(['psychotherapist']); // Call the useAuthCheck hook
   const [activeTab, setActiveTab] = useState("Current");
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
   const [clients, setClients] = useState<(ClientType & AccountType)[]>([]);
+  const [evaluateClients, setEvaluateClients] = useState<(ClientType & AccountType)[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Modal state
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isReferredProfileModalOpen, setIsReferredProfileModalOpen] = useState(false);
+  const [isPreAssessmentModalOpen, setIsPreAssessmentModalOpen] = useState(false); // New modal state
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchClientsAndAccounts = async () => {
       setLoading(true);
       try {
-        const clientResponse = await databases.listDocuments('Butterfly-Database', 'Client');
+        const user = await account.get();
+        const psychoId = fetchPsychoId(user.$id)
+
+        const clientResponse = await databases.listDocuments('Butterfly-Database', 'Client', [
+          Query.equal('psychotherapist', await psychoId)
+        ]
+        );
 
         const combinedClients = clientResponse.documents.map((clientDoc) => {
           const email = clientDoc.userid.email;
@@ -69,7 +82,46 @@ const Clients = () => {
           };
         });
 
+
+
         setClients(combinedClients);
+
+        const clientEvaluate = await databases.listDocuments('Butterfly-Database', 'Client', [
+          Query.equal('state', 'evaluate')
+        ])
+
+        const combinedEvaluateClients = clientEvaluate.documents.map((clientDoc) => {
+          const email = clientDoc.userid.email;
+          const username = clientDoc.userid.username;
+
+          return {
+            id: clientDoc.$id,
+            clientid: clientDoc.clientid,
+            userid: clientDoc.userid.$id,
+            firstname: clientDoc.firstname,
+            lastname: clientDoc.lastname,
+            phonenum: clientDoc.phonenum,
+            birthdate: clientDoc.birthdate,
+            age: clientDoc.age,
+            address: clientDoc.address,
+            type: clientDoc.type,
+            state: clientDoc.state,
+            emergencyContact: clientDoc.emergencyContact,
+            status: clientDoc.status,
+            email: email || "No email available",
+            username: username || "",
+          };
+        });
+
+        setEvaluateClients(combinedEvaluateClients);
+        
+        // Extract the query parameter from the URL
+        const url = new URL(window.location.href);
+        const tab = url.searchParams.get("tab");
+        
+        if (tab) {
+          setActiveTab(tab); // Set active tab based on the query parameter
+        }
       } catch (error) {
         console.error(error);
       } finally {
@@ -78,7 +130,7 @@ const Clients = () => {
     };
 
     fetchClientsAndAccounts();
-  }, [databases]);
+  }, []);
 
   const filteredClients = () => {
     let searchFiltered = clients.filter(client =>
@@ -102,7 +154,13 @@ const Clients = () => {
   };
 
   const renderClients = () => {
-    const stateFilteredClients = filteredClients();
+    let stateFilteredClients = filteredClients(); // This keeps the filter logic for other tabs.
+  
+    // For the "To Be Evaluated" tab, use the `evaluateClients` state
+    if (activeTab === "To Be Evaluated") {
+      stateFilteredClients = evaluateClients; // Replace with `evaluateClients`
+    }
+  
     switch (activeTab) {
       case "Current":
         return stateFilteredClients.filter(client => client.state === "current");
@@ -114,11 +172,16 @@ const Clients = () => {
         return stateFilteredClients;
     }
   };
+  
 
   const renderClientList = () => {
     if (loading) {
       return <div className="text-center">Loading clients...</div>;
     }
+
+    if (authLoading ) {
+      return <LoadingScreen />; // Show the loading screen while the auth check or data loading is in progress
+  }
 
     return (
       <div className="mt-4 space-y-3">
@@ -186,7 +249,8 @@ const Clients = () => {
             {activeTab === "To Be Evaluated" && (
               <button
                 onClick={() => {
-                  // Handle viewing pre-assessment logic here
+                  setSelectedClientId(client.id);
+                  setIsPreAssessmentModalOpen(true); // Open the new pre-assessment modal
                 }}
                 className="px-4 py-2 text-sm font-semibold text-white bg-blue-400 rounded-full hover:bg-blue-600 transition"
               >
@@ -201,12 +265,12 @@ const Clients = () => {
 
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
-      <div className="bg-gray-100 min-h-screen overflow-auto">
-        <div className="bg-white rounded-b-lg shadow-md p-5 top-0 left-60 w-full z-10 sticky">
-          <h2 className="text-2xl font-bold">Clients</h2>
+      <div className="bg-blue-50 min-h-screen overflow-auto">
+        <div className="bg-white width rounded-b-lg fixed p-5 top-0 w-full z-10">
+      <h2 className="text-2xl font-bold text-blue-400">Clients</h2>
         </div>
 
-        <div className="mt-6 px-5">
+        <div className="mt-24 px-5">
           <div className="flex items-center justify-between">
             <div className="flex space-x-8 border-b">
               {["Current", "To Be Evaluated", "For Referral"].map((tab) => (
@@ -284,6 +348,14 @@ const Clients = () => {
         isOpen={isReferredProfileModalOpen}
         onClose={() => {
           setIsReferredProfileModalOpen(false);
+          setSelectedClientId(null);
+        }}
+      />
+      <ReviewPreAssModal
+        clientId={selectedClientId}
+        isOpen={isPreAssessmentModalOpen} // Use the new modal's state
+        onClose={() => {
+          setIsPreAssessmentModalOpen(false); // Close modal
           setSelectedClientId(null);
         }}
       />

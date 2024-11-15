@@ -1,207 +1,385 @@
-'use client';
-
+'use client'
 import React, { useState, useEffect } from 'react';
 import Layout from '@/components/Sidebar/Layout';
-import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
-import { Client, Databases } from 'appwrite';
+import { account, databases } from '@/appwrite';
+import { Query } from 'appwrite';
 import items from './data/Links';
+import useAuthCheck from '@/auth/page';
+import LoadingScreen from '@/components/LoadingScreen';
+import { useRouter } from 'next/navigation';
+import Calendar from '@/components/Calendar/Calendar';
+import { fetchPsychoId } from '@/hooks/userService';
+import { HappeningAppointment } from './components/HappeningAppointment';
 
-// Define types for the availability response
-interface Availability {
-  date: string;
-  slotsAvailable: number;
-}
+type Client = {
+  $id: string;
+  firstname: string;
+  lastname: string;
+  state: string;
+};
+
+type Booking = {
+  $id: string;
+  clientId: string;
+  status: string;
+  client?: {
+    firstname: string;
+    lastname: string;
+  };
+};
+
+type Payment = {
+  $id: string;
+  client: {
+    firstname: string;
+    lastname: string;
+  };
+  psychotherapist: string;
+  status: string;
+};
 
 const Dashboard: React.FC = () => {
-  const [date, setDate] = useState(new Date());
-  const [availability, setAvailability] = useState<Availability[]>([]);
+  HappeningAppointment();
+  const { loading: authLoading } = useAuthCheck(['psychotherapist']);
+  const [userName, setUserName] = useState<string | null>(null);
+  const [evaluationData, setEvaluationData] = useState<Client[]>([]);
+  const [missedData, setMissedData] = useState<Booking[]>([]);
+  const [sessionData, setSessionData] = useState<Booking[]>([]);
+  const [paymentsData, setPaymentsData] = useState<Payment[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [slotsInfo, setSlotsInfo] = useState<number | null>(null);
-  const [loading, setLoading] = useState<boolean>(true); // Loading state
-  const [year, setYear] = useState(date.getFullYear());
+  
+  const [loading, setLoading] = useState<boolean>(true);  // General loading state
+  const [loadingUpcomingSessions, setLoadingUpcomingSessions] = useState<boolean>(true); // Track loading state for upcoming sessions
+  const [loadingMissedSessions, setLoadingMissedSessions] = useState<boolean>(true);  // Track loading state for missed sessions
+  const [loadingPayments, setLoadingPayments] = useState<boolean>(true); // Track loading state for payments
+  
+  const today = new Date();
+  const currentYear = today.getFullYear();
+  const selectedMonth = today.toLocaleString('default', { month: 'long' });
+  const nextMonth = new Date(today.setMonth(today.getMonth() + 1)).toLocaleString('default', { month: 'long' });
+  const [appointmentData, setAppointmentData] = useState({
+    selectedMonth,
+    selectedDay: null,
+    selectedTime: null,
+    selectedTherapist: null,
+    selectedMode: null,
+    appointmentBooked: false,
+    isFirstBooking: false,
+    allowTherapistChange: true,
+  });
 
-  // Set up Appwrite Client
-  const client = new Client();
-  const databases = new Databases(client);
+  const router = useRouter();
 
-  client.setEndpoint('https://[YOUR-ENDPOINT]') // Replace with your Appwrite endpoint
-        .setProject('[YOUR-PROJECT-ID]'); // Replace with your project ID
+  const fetchEvaluation = async () => {
+    try {
+      const evaluationResponse = await databases.listDocuments(
+        'Butterfly-Database', 
+        'Client', 
+        [Query.equal('state', 'evaluate')] 
+      );
+      
+      const clients: Client[] = evaluationResponse.documents.map((doc) => ({
+        $id: doc.$id,
+        firstname: doc.firstname,
+        lastname: doc.lastname,
+        state: doc.state,
+      }));
+    
+      setEvaluationData(clients); 
+    } catch (error) {
+      setError('Failed to fetch evaluation data');
+    }
+  };
+
+  const fetchUpcomingSessions = async () => {
+    setLoadingUpcomingSessions(true); // Set loading state for upcoming sessions
+    try {
+      const sessionResponse = await databases.listDocuments(
+        'Butterfly-Database', 
+        'Bookings', 
+        [Query.equal('status', 'paid')] 
+      );
+      
+      const clientIds = sessionResponse.documents.map((booking) => booking.client.$id).filter((id) => id);
+    
+      const clientPromises = clientIds.map((clientId) => {
+        if (!clientId) return Promise.resolve(null);
+        return databases.getDocument('Butterfly-Database', 'Client', clientId);
+      });
+    
+      const clientData = await Promise.all(clientPromises);
+      const validClientData = clientData.filter((client) => client !== null);
+    
+      const sessionsWithClientNames: Booking[] = sessionResponse.documents.map((booking) => {
+        const client = validClientData.find((client) => client.$id === booking.client.$id);
+        return {
+          $id: booking.$id,
+          clientId: booking.clientId,
+          status: booking.status,
+          client: {
+            firstname: client?.firstname || 'Unknown',
+            lastname: client?.lastname || 'Unknown',
+          },
+        };
+      });
+    
+      setSessionData(sessionsWithClientNames);
+    } catch (error) {
+      setError('Failed to fetch upcoming sessions');
+    } finally {
+      setLoadingUpcomingSessions(false); // Set loading state to false after data is fetched
+    }
+  };
+
+  const fetchMissedSessions = async () => {
+    setLoadingMissedSessions(true); // Set loading state for missed sessions
+    try {
+      const missedResponse = await databases.listDocuments(
+        'Butterfly-Database',
+        'Bookings',
+        [Query.equal('status', 'missed')]
+      );
+    
+      const missedClientIds = missedResponse.documents
+        .map((booking) => booking.clientId)
+        .filter((id) => id);
+    
+      const missedClientPromises = missedClientIds.map((clientId) => {
+        if (!clientId) return Promise.resolve(null);
+        return databases.getDocument('Butterfly-Database', 'Client', clientId);
+      });
+    
+      const missedClientData = await Promise.all(missedClientPromises);
+      const validMissedClientData = missedClientData.filter((client) => client !== null);
+    
+      const missedSessionsWithClientNames: Booking[] = missedResponse.documents.map((booking) => {
+        const client = validMissedClientData.find((client) => client.$id === booking.clientId);
+        return {
+          $id: booking.$id,
+          clientId: booking.clientId,
+          status: booking.status,
+          client: {
+            firstname: client.firstname || 'Unknown',
+            lastname: client.lastname || 'Unknown',
+          },
+        };
+      });
+    
+      setMissedData(missedSessionsWithClientNames);
+    } catch (error) {
+      setError('Failed to fetch missed sessions');
+    } finally {
+      setLoadingMissedSessions(false); // Set loading state to false after data is fetched
+    }
+  };
+
+  const fetchPayments = async () => {
+    setLoadingPayments(true); // Set loading state for payments
+    try {
+      const user = await account.get();
+      const psychoId = await fetchPsychoId(user.$id);
+    
+      const response = await databases.listDocuments('Butterfly-Database', 'Payment', [
+        Query.equal('psychotherapist', psychoId),
+        Query.equal('status', "Pending")
+      ]);
+    
+      const payments: Payment[] = response.documents.map((doc) => ({
+        $id: doc.$id,
+        client: {
+          firstname: doc.client.firstname,
+          lastname: doc.client.lastname,
+        },
+        psychotherapist: doc.psychotherapist,
+        status: doc.status,
+      }));
+    
+      setPaymentsData(payments);
+    } catch (error) {
+      setError('Failed to fetch payments');
+    } finally {
+      setLoadingPayments(false); // Set loading state to false after data is fetched
+    }
+  };
 
   useEffect(() => {
-    const fetchAvailability = async () => {
-      setLoading(true);
+    const fetchData = async () => {
       try {
-        const response = await databases.listDocuments(
-          '[your_database_id]',  // Replace with your database ID
-          '[your_collection_id]', // Replace with your availability collection ID
-        );
-        const fetchedAvailability = response.documents.map((doc: any) => ({
-          date: doc.date,
-          slotsAvailable: doc.slotsAvailable,
+        const user = await account.get();
+        setUserName(user.name); 
+        const psychoId = await fetchPsychoId(user.$id);
+        
+        setAppointmentData((prevData) => ({
+          ...prevData,
+          selectedTherapist: psychoId,
         }));
-        setAvailability(fetchedAvailability);
-      } catch (error) {
-        console.error('Error fetching availability from Appwrite:', error);
-        setError('Failed to fetch availability. Using mock data.');
-        setAvailability([
-          { date: '2024-10-04', slotsAvailable: 3 },
-          { date: '2024-10-05', slotsAvailable: 0 }, // Fully booked day
-          { date: '2024-10-06', slotsAvailable: 1 },
-        ]);
+
+        fetchEvaluation();
+        fetchUpcomingSessions();
+        fetchMissedSessions();
+        fetchPayments();
+      } catch (err) {
+        setError('Failed to fetch data.');
+        console.error(err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchAvailability();
+    fetchData();
   }, []);
 
-  const formatDate = (date: Date) => {
-    return date.toISOString().split('T')[0];
+  const handleViewListClick = () => {
+    router.push(`/psychotherapist/pages/clients?tab=To%20Be%20Evaluated`);
   };
 
-  const getAvailabilityForDate = (date: Date) => {
-    const formattedDate = formatDate(date);
-    const availabilityForDate = availability.find((item) => item.date === formattedDate);
-    return availabilityForDate ? availabilityForDate.slotsAvailable : null;
+  const handleViewUpcomingListClick = () => {
+    router.push(`/psychotherapist/pages/appointments`);
   };
 
-  const handleDateClick = (value: Date) => {
-    const slotsAvailable = getAvailabilityForDate(value);
-    setSlotsInfo(slotsAvailable !== null ? slotsAvailable : null);
+  const handleViewPaymentClick = () => {
+    router.push(`/psychotherapist/pages/clientspayment`);
   };
 
-  const getCurrentMonthWeeks = (currentDate: Date) => {
-    const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-    const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
-    const weekStart = new Date(startOfMonth);
-    weekStart.setDate(startOfMonth.getDate() - startOfMonth.getDay()); // Adjust to the start of the week
-
-    const weeks = [];
-    let dateIterator = weekStart;
-
-    while (dateIterator <= endOfMonth || dateIterator.getDay() !== 0) {
-      weeks.push(new Date(dateIterator));
-      dateIterator.setDate(dateIterator.getDate() + 1);
-    }
-
-    return weeks;
-  };
-
-  const currentMonthWeeks = getCurrentMonthWeeks(date);
+  if (authLoading || loading || loadingUpcomingSessions || loadingMissedSessions || loadingPayments) {
+    return <LoadingScreen />;
+  }
 
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
-      <div className="bg-blue-50 min-h-screen"> {/* Changed gray background to light blue */}
-        <div className="bg-white rounded-b-lg shadow-md p-5 top-0 left-60 w-full z-10"> {/* Fixed position with full width */}
-          <h2 className="text-2xl font-bold text-blue-400">Hello, Psychotherapist!</h2>
+      <div className="bg-blue-50 min-h-screen mb-10">
+        <div className="bg-white width rounded-b-lg fixed p-5 top-0 w-full z-10">
+          <h2 className="text-3xl font-bold text-blue-400">
+            Welcome, {userName ? userName : "Client"}!
+          </h2>
         </div>
 
-        {/* Main Dashboard Sections */}
-        <div className="pt-10"> {/* Add padding to prevent overlap with the fixed header */}
+        <div className="pt-[6.5rem]">
           <div className="grid grid-cols-3 gap-4 mx-10">
             {/* To Be Evaluated Section */}
-            <div className="bg-white p-4 rounded-lg shadow-md transition hover:shadow-lg">
-              <h3 className="text-lg font-semibold mb-4 text-blue-500">To be Evaluated</h3>
-              <p>Placeholder for evaluation data fetched from Appwrite.</p>
-            </div>
-
-            {/* Upcoming Sessions Section */}
-            <div className="bg-white p-4 rounded-lg shadow-md transition hover:shadow-lg">
-              <h3 className="text-lg font-semibold mb-4 text-blue-500">Upcoming Sessions</h3>
-              <p>Placeholder for upcoming sessions data fetched from Appwrite.</p>
-            </div>
-
-            {/* Missed Appointments Section */}
-            <div className="bg-white p-4 rounded-lg shadow-md transition hover:shadow-lg">
-              <h3 className="text-lg font-semibold mb-4 text-red-600">Missed Appointments</h3>
-              <p>Placeholder for missed appointments data fetched from Appwrite.</p>
-            </div>
-          </div>
-
-          {/* Availability Calendar */}
-          <div className="grid grid-cols-3 gap-4 mt-8 mx-10">
-            <div className="col-span-2 bg-white p-4 rounded-lg shadow-md transition hover:shadow-lg">
-              <h3 className="text-lg font-semibold mb-4 text-blue-500">Availability Calendar</h3>
-
-              <div className="flex justify-between mb-4">
+            <div className="bg-white p-4 rounded-lg shadow-md transition hover:shadow-lg max-h-96 overflow-y-auto">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold mb-4 text-blue-500">To be Evaluated</h3>
                 <button
-                  onClick={() => setDate(new Date(date.getFullYear(), date.getMonth() - 1, 1))}
-                  className="p-2 text-blue-500 hover:bg-blue-100 rounded transition"
-                  aria-label="Previous Month"
+                  onClick={handleViewListClick}
+                  className="bg-blue-400 rounded-full text-white px-2 py-1 hover:bg-blue-600 transition -mt-2"
                 >
-                  <FaChevronLeft />
-                </button>
-                <h4 className="font-semibold">
-                  {date.toLocaleString('default', { month: 'long' })} {date.getFullYear()}
-                </h4>
-                <button
-                  onClick={() => setDate(new Date(date.getFullYear(), date.getMonth() + 1, 1))}
-                  className="p-2 text-blue-500 hover:bg-blue-100 rounded transition"
-                  aria-label="Next Month"
-                >
-                  <FaChevronRight />
+                  View List
                 </button>
               </div>
-
-              {/* Calendar Days */}
-              <div className="grid grid-cols-7 gap-2 text-gray-500 font-semibold">
-                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, index) => (
-                  <div key={index} className="text-center font-semibold">{day}</div>
-                ))}
-              </div>
-
-              {/* Calendar Weeks */}
-              <div className="grid grid-cols-7 gap-2">
-                {currentMonthWeeks.map((weekDate, index) => {
-                  const isOutsideMonth = weekDate.getMonth() !== date.getMonth();
-                  const slotsAvailable = getAvailabilityForDate(weekDate);
-
-                  return (
-                    <button
-                      key={index}
-                      className={`p-2 text-center rounded transition
-                        ${isOutsideMonth ? 'text-gray-400' : ''}
-                        ${slotsAvailable === null ? 'bg-gray-200 cursor-not-allowed' : ''}
-                        ${slotsAvailable === 0 ? 'bg-red-200' : ''}
-                        ${slotsAvailable > 0 ? 'bg-blue-200 hover:bg-blue-300' : ''}
-                      `}
-                      disabled={slotsAvailable === null}
-                      onClick={() => {
-                        if (slotsAvailable !== null) {
-                          handleDateClick(weekDate);
-                        }
-                      }}
-                      aria-label={`Date ${weekDate.getDate()} ${slotsAvailable ? `(${slotsAvailable} slots available)` : 'No slots available'}`}
-                    >
-                      {weekDate.getDate()}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Slots Information */}
               {loading ? (
-                <p className="mt-4 animate-pulse text-blue-600">Loading availability...</p>
-              ) : slotsInfo !== null && (
-                <p className="mt-4 text-blue-400">
-                  {slotsInfo === 0
-                    ? 'No slots available for the selected date.'
-                    : `${slotsInfo} slots available for the selected date.`}
-                </p>
+                <p className="text-blue-600">Loading evaluation data...</p>
+              ) : error ? (
+                <p className="text-red-500">{error}</p>
+              ) : (
+                <ul>
+                  {evaluationData.map((doc) => (
+                    <li key={doc.$id}>
+                      <p>{doc.firstname} {doc.lastname}</p>
+                    </li>
+                  ))}
+                </ul>
               )}
             </div>
 
-            {/* Payments Status (Placeholder section) */}
-            <div className="bg-white p-4 rounded-lg shadow-md transition hover:shadow-lg">
-              <h3 className="text-lg font-semibold mb-4 text-blue-500">Payment Status</h3>
-              <p>Placeholder for payment status information</p>
+            {/* Upcoming Sessions Section */}
+            <div className="bg-white p-4 rounded-lg shadow-md transition hover:shadow-lg max-h-96 overflow-y-auto">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold mb-4 text-blue-500">Upcoming Sessions</h3>
+                <button
+                  onClick={handleViewUpcomingListClick}
+                  className="bg-blue-400 rounded-full text-white px-2 py-1 hover:bg-blue-600 transition -mt-2"
+                >
+                  View List
+                </button>
+              </div>
+              {loading ? (
+                <p className="text-blue-600">Loading upcoming session data...</p>
+              ) : error ? (
+                <p className="text-red-500">{error}</p>
+              ) : (
+                <ul>
+                  {sessionData.map((doc) => (
+                    <li key={doc.$id}>
+                      <p>{doc.client.firstname} {doc.client.lastname}</p>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
+
+            {/* Missed Appointments Section */}
+            <div className="bg-white p-4 rounded-lg shadow-md transition hover:shadow-lg max-h-96 overflow-y-auto">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold mb-4 text-blue-500">Missed Appointments</h3>
+                <button
+                  onClick={handleViewUpcomingListClick}
+                  className="bg-blue-400 rounded-full text-white px-2 py-1 hover:bg-blue-600 transition -mt-2"
+                >
+                  View List
+                </button>
+              </div>
+              {loading ? (
+                <p className="text-blue-600">Loading missed session data...</p>
+              ) : error ? (
+                <p className="text-red-500">{error}</p>
+              ) : (
+                <ul>
+                  {missedData.map((doc) => (
+                    <li key={doc.$id}>
+                      <p>{doc.client.firstname} {doc.client.lastname}</p>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        </div>
+
+          
+        <div className="grid grid-cols-3 gap-4 mt-8 mx-10">
+          {/* Availability Calendar */}
+          <div className='col-span-2 bg-white p-4 rounded-lg shadow-md transition hover:shadow-lg'>
+            <Calendar
+              currentMonth={selectedMonth}
+              nextMonth={nextMonth}
+              currentDate={today.getDate()}
+              currentYear={currentYear}
+              selectedDay={appointmentData.selectedDay}
+              setSelectedDay={(day) => setAppointmentData((prev) => ({ ...prev, selectedDay: day }))}
+              selectedMonth={appointmentData.selectedMonth}
+              setSelectedMonth={(month) => setAppointmentData((prev) => ({ ...prev, selectedMonth: month, selectedDay: null }))}
+              selectedTime={appointmentData.selectedTime}
+              setSelectedTime={(time) => setAppointmentData((prev) => ({ ...prev, selectedTime: time }))}
+              isTherapistSelected={true} 
+              selectedTherapistId={appointmentData.selectedTherapist}
+              >
+            </Calendar>
+          </div>
+
+          {/* Payments Status Section */}
+          <div className="bg-white p-4 rounded-lg shadow-md transition hover:shadow-lg">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-semibold mb-4 text-yellow-500">Pending Payments</h3>
+              <button
+                  onClick={handleViewPaymentClick}
+                  className="bg-blue-400 rounded-full text-white px-2 py-1 hover:bg-blue-600 transition -mt-2"
+                >
+                  View List
+                </button>
+            </div>
+              <ul>
+                {paymentsData.map((doc) => (
+                  <li key={doc.$id}>
+                    <p>{doc.client.firstname} {doc.client.lastname}</p>
+                  </li>
+                ))}
+              </ul>
           </div>
         </div>
       </div>
     </Layout>
-  );  
-};  
+  );
+};
 
 export default Dashboard;

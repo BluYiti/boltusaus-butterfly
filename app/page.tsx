@@ -5,6 +5,10 @@ import Link from 'next/link';
 import { motion } from "framer-motion";
 import BackToTopButton from './components/BackToTop';
 import { FaMapMarkerAlt, FaEnvelope, FaPhone, FaFacebookF, FaMap } from 'react-icons/fa';
+import Image from 'next/image';
+import termsContent from '@/constants/terms';
+import privacyContent from '@/constants/privacy';
+import TermsAndPrivacy from "./components/TermsAndPrivacy";
 
 
 const navItems = [
@@ -37,10 +41,13 @@ const bookingSteps = [
 
 const HomePage: React.FC = () => {
   const [open, setOpen] = useState<number | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [modalContentType, setModalContentType] = React.useState<'terms' | 'privacy'>('terms');
 
   const toggleOpen = (index: number) => {
     setOpen(open === index ? null : index);
   };
+<<<<<<< HEAD
   
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [contentType, setContentType] = useState<'terms' | 'privacy'>('terms');
@@ -54,21 +61,24 @@ const HomePage: React.FC = () => {
     setIsModalOpen(false);
   };
   
+=======
+
+>>>>>>> origin/jc
   const aboutRef = useRef<HTMLDivElement | null>(null);
   const [hasAnimated, setHasAnimated] = useState(false);
 
-  const handleScroll = () => {
-    if (aboutRef.current && !hasAnimated) {
-      const rect = aboutRef.current.getBoundingClientRect();
-      const isVisible = rect.top >= 0 && rect.bottom <= window.innerHeight;
-
-      if (isVisible) {
-        setHasAnimated(true); // Set to true to trigger the animation
-      }
-    }
-  };
-
   useEffect(() => {
+    const handleScroll = () => {
+      if (aboutRef.current && !hasAnimated) {
+        const rect = aboutRef.current.getBoundingClientRect();
+        const isVisible = rect.top >= 0 && rect.bottom <= window.innerHeight;
+  
+        if (isVisible) {
+          setHasAnimated(true); // Set to true to trigger the animation
+        }
+      }
+    };
+
     window.addEventListener('scroll', handleScroll);
     return () => {
       window.removeEventListener('scroll', handleScroll);
@@ -103,7 +113,7 @@ const HomePage: React.FC = () => {
         <motion.img
         src="/gifs/butterfly.gif" 
         alt="Butterfly Animation"
-        className="absolute z-20 w-[35rem] h-[35rem] 2xl:right-[14rem] 3xl:right-[22rem]" 
+        className="absolute z-20 w-[35rem] h-[35rem] sm:right-[14rem] 2xl:right-[14rem] 3xl:right-[22rem]" 
         initial={{ opacity: 0, scale: 0.5 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.6, delay: 0.5 }}
@@ -425,15 +435,22 @@ const HomePage: React.FC = () => {
         >
           <div className="flex flex-col md:flex-row md:items-center max-w-4xl mx-auto">
             <div className="md:w-2/3 px-2">
-              <h1 className="text-3xl md:text-4xl lg:text-7xl font-paintbrush text-blue-800 mb-4 md:mb-8">
+              <h1 className="text-7xl ml-24 font-paintbrush text-blue-800 mb-4 md:mb-8">
                 What is Butterfly?
               </h1>
-              <p className="text-base md:text-lg mb-8">
-                Butterfly is a psychological wellness web application of A.M. Peralta Psychological Services that offers the features: enhanced appointment system with an automated interactive SMS service, refined remote psychotherapy counseling, and a comprehensive client monitoring and management. These integrated services will allow clients and psychotherapists to book appointments and communicate remotely at any time. Butterfly aims to deliver more efficient, effective, and reliable mental healthcare digital service.
+              <p className="text-base text-center md:text-lg mb-8">
+                Butterfly is a psychological wellness web application of A.M. Peralta Psychological Services that offers the features: enhanced appointment system with an automated interactive SMS service, refined remote psychotherapy counseling, and a comprehensive client monitoring and management. These integrated services will allow clients to book appointments and communicate remotely with psychotherapists at any time even in the comfort of their homes. Butterfly aims to deliver more efficient, effective, and reliable mental healthcare digital service.
               </p>
             </div>
             <div className="md:w-1/3 flex justify-right md:justify-end md:ml-2">
-              <img src="/images/amperalta.jpg" alt="A.M. Peralta Psychological Services" className="w-48 h-48 md:w-64 md:h-64 rounded-full" />
+              <Image 
+                src="/images/amperalta.jpg" 
+                alt="A.M. Peralta Psychological Services" 
+                width={288} // 72 * 4 (for example, you can adjust width/height to suit your design)
+                height={288} 
+                className="rounded-full" 
+                priority // Optional: if it's a critical image that should be loaded first
+              />
             </div>
           </div>
         </motion.div>
@@ -447,7 +464,7 @@ const HomePage: React.FC = () => {
             How to Book a Session
           </h2>
           <p className="mb-8 text-base md:text-lg text-left max-w-2xl">
-          A.M. Peralta Psychological Services' web application is designed to help you easily book an appointment in just a few simple steps.
+          A.M. Peralta Psychological Services&apos; web application is designed to help you easily book an appointment in just a few simple steps.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="md:col-span-2">
@@ -507,7 +524,11 @@ const HomePage: React.FC = () => {
                   {faq.question}
                   <span>{open === index ? '-' : '+'}</span>
                 </button>
-                {open === index && <p className="text-base md:text-lg mt-2">{faq.answer}</p>}
+                <div
+                  className={`overflow-hidden transition-all duration-300 ease-in-out ${open === index ? 'max-h-40' : 'max-h-0'}`}
+                >
+                  <p className="text-base md:text-lg mt-2">{faq.answer}</p>
+                </div>
               </div>
             ))}
           </div>
@@ -552,6 +573,7 @@ const HomePage: React.FC = () => {
         </div>
 
 
+<<<<<<< HEAD
   <div className="text-left mt-4 ml-36 flex justify-between items-center">
   <div>
   <a href="#" onClick={(e) => { e.preventDefault(); openModal('terms'); }} className="text-sm">Terms and Conditions</a> | 
@@ -560,8 +582,43 @@ const HomePage: React.FC = () => {
 
 
   </div>
+=======
+        <div className="text-left mt-4 ml-36 flex justify-between items-center">
+          <div>
+            <button
+                type="button"
+                onClick={() => {
+                    setIsModalOpen(true);
+                    setModalContentType('terms');
+                }}
+                className="text-blue-500 hover:underline ml-1"
+            >
+                Terms and Conditions
+            </button>
+            &nbsp;|&nbsp;
+            <button
+                type="button"
+                onClick={() => {
+                    setIsModalOpen(true);
+                    setModalContentType('privacy');
+                }}
+                className="text-blue-500 hover:underline ml-1"
+            >
+                Privacy Policy
+            </button>
+          </div>
+        </div>
+>>>>>>> origin/jc
       </section>
-    </div>
+      {/* Terms and Privacy Modal */}
+      <TermsAndPrivacy
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          contentType={modalContentType}  
+          termsContent={termsContent} 
+          privacyContent={privacyContent} 
+      />
+    </div>    
   );
 };
 
@@ -611,7 +668,11 @@ const faqItems = [
   },
   {
     question: "Where is your clinic located?",
-    answer: "Our clinic is located at 33 B Apple Street Brgy. St. Joseph, San Juan, Manila.",
+    answer: "Our clinic is located at Room 304 Sam-sons Building, Lower Mabini St, Baguio, Benguet.",
+  },
+  {
+    question: "How much is your sevices?",
+    answer: "Our rate is ₱1,000 per session.",
   },
 ];
 

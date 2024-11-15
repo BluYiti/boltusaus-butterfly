@@ -41,7 +41,7 @@ const LoginPage: React.FC = () => {
             <div className='flex flex-col justify-center items-center'>
                 <Back />
                 <h1 className="absolute top-5 left-20 text-[#2081c3] text-2xl md:text-3xl font-bold">Butterfly</h1>
-                <Image src={'/images/manyfly.png'} alt={'butterfly'} width={250} height={250} className='mt-20' />
+                <Image src={'/images/adultfly.png'} alt={'butterfly'} width={250} height={250} className='mt-20' />
                 <h2 className="mt-4 text-3xl text-blue-800 font-poppins">Forgot Your Password?</h2>
                 <p className='font-poppins mt-9'>Enter your registered email to receive a verification code.</p>
                 <ForgotPasswordForm onSubmit={handleSubmit} error={error} loading={loading} />
