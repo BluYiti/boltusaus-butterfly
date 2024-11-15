@@ -8,7 +8,7 @@ import { FaMapMarkerAlt, FaEnvelope, FaPhone, FaFacebookF, FaMap } from 'react-i
 import Image from 'next/image';
 import termsContent from '@/constants/terms';
 import privacyContent from '@/constants/privacy';
-import TermsAndPrivacy from "./register/components/TermsAndPrivacy";
+import TermsAndPrivacy from "./components/TermsAndPrivacy";
 
 const navItems = [
   { label: "About Us", href: "#about" },
