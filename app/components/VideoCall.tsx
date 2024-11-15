@@ -1,47 +1,176 @@
-import React, { useRef, useEffect } from 'react';
+// ClientVideoCall.tsx and VideoCall.tsx (consolidated)
 
-// Define the VideoCall component
-const VideoCall = () => {
-  // Create refs for local and remote video elements
-  const localVideoRef = useRef<HTMLVideoElement | null>(null);
-  const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
+import React, { useEffect, useRef } from 'react';
+import { Client, Databases, ID, Query } from 'appwrite';
+
+const client = new Client();
+client
+  .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT as string)
+  .setProject(process.env.NEXT_PUBLIC_PROJECT_ID as string);
+
+const databases = new Databases(client);
+
+interface VideoCallProps {
+  callerId: string;
+  receiverId: string;
+  onEndCall: () => void;
+}
+
+const VideoCall: React.FC<VideoCallProps> = ({ callerId, receiverId, onEndCall }) => {
+  const localVideoRef = useRef<HTMLVideoElement>(null);
+  const remoteVideoRef = useRef<HTMLVideoElement>(null);
+  const peerConnection = useRef<RTCPeerConnection | null>(null);
+  const processedMessageIds = useRef<Set<string>>(new Set());
+  const isOfferCreated = useRef(false);
+
+  const setupLocalStream = async () => {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const hasVideoInput = devices.some(device => device.kind === 'videoinput');
+    const hasAudioInput = devices.some(device => device.kind === 'audioinput');
+    
+    if (!hasVideoInput && !hasAudioInput) throw new Error("No media devices found.");
+
+    return navigator.mediaDevices.getUserMedia({ video: hasVideoInput, audio: hasAudioInput });
+  };
 
   // useEffect to handle the video streams and cleanup
   useEffect(() => {
-    // Define local variables to store current video elements
-    const localVideo = localVideoRef.current;
-    const remoteVideo = remoteVideoRef.current;
+    const setupPeerConnection = async () => {
+      if (peerConnection.current || isOfferCreated.current) return;
 
-    // Simulate getting a MediaStream (you would likely get this from getUserMedia or some media API)
-    const mediaStream: MediaStream = getMediaStreamSomehow();  // You need to implement this function
+      try {
+        const localStream = await setupLocalStream();
+        if (localVideoRef.current) localVideoRef.current.srcObject = localStream;
 
-    if (localVideo) {
-      localVideo.srcObject = mediaStream; // Set the local video stream
-    }
+        peerConnection.current = new RTCPeerConnection();
+        localStream.getTracks().forEach(track => peerConnection.current?.addTrack(track, localStream));
 
-    if (remoteVideo) {
-      remoteVideo.srcObject = mediaStream; // Set the remote video stream
-    }
+        peerConnection.current.onicecandidate = event => {
+          if (event.candidate) {
+            sendSignalingMessage({
+              type: 'candidate',
+              from: callerId,
+              to: receiverId,
+              candidate: JSON.stringify(event.candidate),
+            });
+          }
+        };
 
-    // Cleanup function
-    return () => {
-      // Cleanup video streams or other resources when the component unmounts
-      if (localVideo && localVideo.srcObject) {
-        const tracks = (localVideo.srcObject as MediaStream).getTracks();
-        tracks.forEach((track) => track.stop());  // Stop each track in the stream
-      }
+        peerConnection.current.ontrack = event => {
+          if (remoteVideoRef.current) remoteVideoRef.current.srcObject = event.streams[0];
+        };
 
-      if (remoteVideo && remoteVideo.srcObject) {
-        const tracks = (remoteVideo.srcObject as MediaStream).getTracks();
-        tracks.forEach((track) => track.stop());  // Stop each track in the stream
+        console.log("Signaling State:", peerConnection.current.signalingState);
+
+
+        if (callerId !== receiverId) {
+          const offer = await peerConnection.current.createOffer();
+          await peerConnection.current.setLocalDescription(offer);
+          sendSignalingMessage({
+            type: 'offer',
+            from: callerId,
+            to: receiverId,
+            sdp: JSON.stringify(offer),
+          });
+          isOfferCreated.current = true;
+        }
+      } catch (error) {
+        console.error("Error setting up call:", error);
+        onEndCall();
       }
     };
-  }, []); // Empty dependency array, so this runs on mount/unmount
+
+    setupPeerConnection();
+
+    return () => {
+      peerConnection.current?.close();
+      [localVideoRef, remoteVideoRef].forEach(ref => {
+        (ref.current?.srcObject as MediaStream)?.getTracks().forEach(track => track.stop());
+      });
+    };
+  }, [callerId, receiverId]);
+
+  const sendSignalingMessage = async (message: any) => {
+    const signalingData = {
+      type: message.type,
+      from: callerId,
+      to: receiverId,
+      timestamp: new Date().toISOString(),
+      sdp: message.sdp,
+      candidate: message.candidate,
+    };
+
+    try {
+      await databases.createDocument(
+        "Butterfly-Database",
+        "SignalingMessages",
+        ID.unique(),
+        signalingData
+      );
+    } catch (error) {
+      console.error("Error sending signaling message:", error);
+    }
+  };
+
+  const pollForSignalingMessages = async () => {
+    try {
+      const response = await databases.listDocuments(
+        "Butterfly-Database",
+        "SignalingMessages",
+        [Query.equal("to", callerId)]
+      );
+
+      response.documents.forEach(message => {
+        if (!processedMessageIds.current.has(message.$id)) {
+          processedMessageIds.current.add(message.$id);
+          handleSignalingMessage(message);
+        }
+      });
+    } catch (error) {
+      console.error("Error polling for signaling messages:", error);
+    }
+  };
+
+  const handleSignalingMessage = async (message: any) => {
+    const { type, sdp, candidate } = message;
+    if (!peerConnection.current) return;
+
+    try {
+      if (type === 'offer' && sdp && peerConnection.current.signalingState === "stable") {
+        await peerConnection.current.setRemoteDescription(new RTCSessionDescription(JSON.parse(sdp)));
+        const answer = await peerConnection.current.createAnswer();
+        await peerConnection.current.setLocalDescription(answer);
+        sendSignalingMessage({
+          type: 'answer',
+          from: callerId,
+          to: receiverId,
+          sdp: JSON.stringify(answer),
+        });
+      } else if (type === 'answer' && sdp) {
+        await peerConnection.current.setRemoteDescription(new RTCSessionDescription(JSON.parse(sdp)));
+      } else if (type === 'candidate' && candidate) {
+        await peerConnection.current.addIceCandidate(new RTCIceCandidate(JSON.parse(candidate)));
+      }
+    } catch (error) {
+      console.error("Error handling signaling message:", error);
+    }
+  };
+
+  useEffect(() => {
+    const intervalId = setInterval(pollForSignalingMessages, 2000);
+    return () => clearInterval(intervalId);
+  }, []);
 
   return (
-    <div>
-      <video ref={localVideoRef} autoPlay muted style={{ width: '300px' }} />
-      <video ref={remoteVideoRef} autoPlay style={{ width: '300px' }} />
+    <div className="flex flex-col items-center justify-center h-full">
+      <h2 className="text-xl mb-4">Video Call</h2>
+      <div className="flex space-x-4">
+        <video ref={localVideoRef} autoPlay muted className="w-1/2 rounded-lg border" />
+        <video ref={remoteVideoRef} autoPlay className="w-1/2 rounded-lg border" />
+      </div>
+      <button onClick={onEndCall} className="mt-4 bg-red-500 text-white px-4 py-2 rounded">
+        End Call
+      </button>
     </div>
   );
 };
