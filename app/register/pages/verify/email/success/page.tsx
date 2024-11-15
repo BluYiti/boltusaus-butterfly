@@ -18,23 +18,9 @@ const VerifyPage: React.FC = () => {
 
         const verifyUser = async () => {
             if (userId && secret) {
-                try {
-                    // Log to confirm that the request is correct
-                    console.log('Making verification request for userId:', userId, 'with secret:', secret);
-                    
-                    const response = await account.updateVerification(userId, secret);
+                const response = await account.updateVerification(userId, secret);
                     console.log('Verification response:', response); // Log success response
                     setIsVerified(true);
-                } catch (error) {
-                    console.error('Verification failed:', error.response ? error.response.message : error);
-                    
-                    if (error.response && error.response.code === 401) {
-                        console.error('Invalid token or expired verification link.');
-                    }
-                    setIsVerified(false);
-                } finally {
-                    setLoading(false);
-                }
             } else {
                 console.error('Missing userId or secret in the URL.');
                 setIsVerified(false);

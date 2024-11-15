@@ -62,6 +62,7 @@ const PsychotherapistProfile: React.FC<PsychotherapistProfileProps> = ({ psychot
             className="rounded-full object-cover border-4 border-blue-500 shadow-md"
             width={144}  // 36 * 4 (as 1rem = 4px)
             height={144} // 36 * 4 (as 1rem = 4px)
+            unoptimized
           />
           {/* Psychotherapist's name under the image */}
           <h3 className="mt-4 text-2xl font-semibold text-gray-700">

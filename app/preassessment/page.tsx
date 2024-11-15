@@ -35,8 +35,8 @@ export default function PreAssessmentPage() {
   return (
     <div className="min-h-screen flex justify-center items-center bg-blue-500">
       {isReviewPage ? (
-        <div className="text-center rounded-xl p-8 shadow-lg w-full max-w-3xl">
-          <h3 className="text-xl mb-4 text-gray-800">Review Your Answers</h3>
+        <div className="text-center rounded-xl p-8 w-full max-w-3xl">
+          <h3 className="text-4xl font-extrabold mb-4 text-white">Review Your Answers</h3>
 
           <ul className="text-left mb-4 space-y-4">
             {questions.map((question, index) => (

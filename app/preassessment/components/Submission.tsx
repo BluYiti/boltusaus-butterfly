@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 interface SubmissionModalProps {
   isOpen: boolean;
@@ -16,6 +16,15 @@ const SubmissionModal: React.FC<SubmissionModalProps> = ({
   onConfirm,
 }) => {
   if (!isOpen) return null;
+  
+  const [isDisabled, setIsDisabled] = useState(false);
+
+  const handleConfirm = () => {
+    if (onConfirm) {
+      onConfirm();
+    }
+    setIsDisabled(true); // Disable the button after it’s clicked
+  };
 
   return (
     <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-50">
@@ -42,7 +51,7 @@ const SubmissionModal: React.FC<SubmissionModalProps> = ({
             </div>
             <h2 className="text-2xl font-bold text-gray-800 mb-2">Thank you for submitting!</h2>
             <p className="text-gray-600 mb-6">
-              Thank you for completing the Pre-Assessment! You will receive the results and recommendations in your email within a few hours. Please check your inbox for further instructions.
+              Thank you for completing the Pre-Assessment! You will receive the results in your dashboard within a few hours. Please patiently wait.
             </p>
             <button
               className="bg-green-500 text-white py-2 px-4 rounded-full hover:bg-green-700"
@@ -69,11 +78,12 @@ const SubmissionModal: React.FC<SubmissionModalProps> = ({
                     Cancel
                   </button>
                   <button
-                    onClick={onConfirm}
-                    className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-700"
+                    onClick={handleConfirm} // Call the handler for confirmation
+                    disabled={isDisabled} // Disable button if clicked
+                    className={`bg-green-500 text-white py-2 px-4 rounded hover:bg-green-700 ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
-                    Submit
-                  </button> 
+                    {isDisabled ? "Submitting..." : "Submit"}
+                  </button>
                 </>
               )}
 
