@@ -75,7 +75,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
         onRegister: (data) => {
             console.log('Registration successful:', data); // Now you have access to the userId
             const { userId } = data; // Extract the userId from data
-            router.push(`/register/verify/email/?user=${encodeURIComponent(userId)}`);
+            router.push(`/register/pages/verify/email?user=${encodeURIComponent(userId)}`);
         },
         setValidationError,
     }, setLoading, setButtonClicked); // Pass setLoading and setButtonClicked here
@@ -206,26 +206,6 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
         const doPasswordsMatch = password === rePassword;
         const isTermsAgreed = agreeToTerms;
         const isIdFileValid = idFile && !validateFile(idFile);
-    
-        // Log all validation results to debug
-        console.log({
-            isFirstNameValid,
-            isLastNameValid,
-            isBirthdayValid,
-            isAgeValid,
-            isSexValid,
-            isAddressValid,
-            isContactNumberValid,
-            contactNumber,
-            isEmergencyContactNameValid,
-            isEmergencyContactNumberValid,
-            emergencyContactNumber,
-            isEmailValid,
-            isPasswordValid,
-            doPasswordsMatch,
-            isTermsAgreed,
-            isIdFileValid
-        });
     
         return (
             isFirstNameValid &&
