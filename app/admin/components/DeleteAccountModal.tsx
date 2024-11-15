@@ -7,9 +7,10 @@ interface AddAccountModalProps {
   isOpen: boolean;
   onClose: () => void;
   selectedTab: string; // To know which tab is currently active
+  clientId: string;
 }
 
-const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, selectedTab }) => {
+const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, selectedTab, clientId }) => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
