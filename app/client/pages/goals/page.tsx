@@ -8,13 +8,14 @@ import { MdArrowBack, MdArrowForward } from 'react-icons/md';
 import ConfirmationModal from "@/components/ConfirmationModal";
 import { Account, Client, Databases, Permission, Query, Role } from 'appwrite';
 import { useProgressUpdate } from '@/hooks/userProgress';
+import CountdownGoal from '@/components/CountdownGoal'
 
 interface Goal {
     id: string;
     client: string;
     clientId: string;
     psychotherapist: string;
-    psychotherapistId: string; 
+    psychotherapistId: string;
     mood: 'HAPPY' | 'SAD' | 'ANXIOUS' | 'FEAR' | 'FRUSTRATED';
     activities: string;
     date: string;
@@ -25,14 +26,14 @@ interface Goal {
 
 const client = new Client();
 client
-  .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT as string)
-  .setProject(process.env.NEXT_PUBLIC_PROJECT_ID as string);
-  const databases = new Databases(client);
-  const account = new Account(client);
+    .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT as string)
+    .setProject(process.env.NEXT_PUBLIC_PROJECT_ID as string);
+const databases = new Databases(client);
+const account = new Account(client);
 const CLIENT_COLLECTION_ID = 'Client';
 
 const GoalsPage = () => {
-    const [mood, setMood] = useState<'HAPPY' | 'SAD' | 'ANXIOUS' | 'FEAR' | 'FRUSTRATED' | ''>(''); 
+    const [mood, setMood] = useState<'HAPPY' | 'SAD' | 'ANXIOUS' | 'FEAR' | 'FRUSTRATED' | ''>('');
     const [activities, setActivities] = useState('meditate');
     const [startHour, setStartHour] = useState(1);
     const [startMinute, setStartMinute] = useState(0);
@@ -49,11 +50,9 @@ const GoalsPage = () => {
     const [userName, setUserName] = useState('Client');
     const [clientId, setClientId] = useState<string | null>(null);
     const [psychotherapistId, setPsychotherapistId] = useState<string | null>(null);
-
-    // Use goals, updateProgress, fetchGoals, error, and loading from useProgressUpdate
-    const { updateProgress, fetchGoals, goals, error, loading } = useProgressUpdate();
+    const { updateProgress, fetchGoals, goals, error, loading } = useProgressUpdate();  // Use goals, updateProgress, fetchGoals, error, and loading from useProgressUpdate
     const [newGoal, setNewGoal] = useState<string>('');
-    
+
     useEffect(() => {
         // Fetch goals when the component mounts
         fetchGoals();
@@ -98,87 +97,87 @@ const GoalsPage = () => {
     }, []);
 
     // Function to fetch goals created by the authenticated user
-useEffect(() => {
-    const fetchUserGoals = async () => {
-        try {
-            // Retrieve the current user
-            const user = await account.get().catch(error => {
-                console.error("User not authenticated:", error);
-                alert("Please log in to view goals.");
-                return null;
-            });
+    useEffect(() => {
+        const fetchUserGoals = async () => {
+            try {
+                // Retrieve the current user
+                const user = await account.get().catch(error => {
+                    console.error("User not authenticated:", error);
+                    alert("Please log in to view goals.");
+                    return null;
+                });
 
-            if (!user) return;
+                if (!user) return;
 
-            // Fetch the Client document ID for the current user
-            const clientResponse = await databases.listDocuments('Butterfly-Database', 'Client', [
-                Query.equal('userid', user.$id)
-            ]);
+                // Fetch the Client document ID for the current user
+                const clientResponse = await databases.listDocuments('Butterfly-Database', 'Client', [
+                    Query.equal('userid', user.$id)
+                ]);
 
-            if (clientResponse.documents.length === 0) {
-                throw new Error("Client document not found for the current user.");
+                if (clientResponse.documents.length === 0) {
+                    throw new Error("Client document not found for the current user.");
+                }
+
+                const clientDocument = clientResponse.documents[0];
+                const clientId = clientDocument.$id;
+
+                // Fetch goals where the clientId matches the logged-in user's clientId
+                const response = await databases.listDocuments('Butterfly-Database', 'Goals', [
+                    Query.equal('clientId', clientId)
+                ]);
+
+                // Set only the goals created by this user
+                setGoals(response.documents);
+            } catch (error) {
+                console.error('Error fetching user goals:', error);
             }
+        };
 
-            const clientDocument = clientResponse.documents[0];
-            const clientId = clientDocument.$id;
-
-            // Fetch goals where the clientId matches the logged-in user's clientId
-            const response = await databases.listDocuments('Butterfly-Database', 'Goals', [
-                Query.equal('clientId', clientId)
-            ]);
-
-            // Set only the goals created by this user
-            setGoals(response.documents);
-        } catch (error) {
-            console.error('Error fetching user goals:', error);
-        }
-    };
-
-    fetchUserGoals();
-}, []);
+        fetchUserGoals();
+    }, []);
 
     const handleSave = async () => {
         if (!selectedDate) {
             alert('Please select a date');
             return;
         }
-    
+
         // Retrieve the current user
         const user = await account.get().catch(error => {
             console.error("User not authenticated:", error);
             alert("Please log in to save goals.");
             return null;
         });
-        
+
         if (!user) return;
-    
+
         // Fetch the Client document ID for the current user
         const clientResponse = await databases.listDocuments('Butterfly-Database', 'Client', [
             Query.equal('userid', user.$id)
         ]);
-        
+
         if (clientResponse.documents.length === 0) {
             throw new Error("Client document not found for the current user.");
         }
-    
+
         const clientDocument = clientResponse.documents[0];
         const clientId = clientDocument.$id;
-    
+
         // Fetch the Psychotherapist document ID associated with this client
         const psychotherapistId = clientDocument.psychotherapist.$id;
-        console.log("psychotherpistid",psychotherapistId)
-        
+        console.log("psychotherpistid", psychotherapistId)
+
         if (!psychotherapistId) {
             throw new Error("Psychotherapist data is missing for the current client.");
         }
-    
+
         // Define the goal data
         const validMood = mood.toLowerCase();
         const initialProgress = 'todo';
-    
+
         const startHour24 = startPeriod === 'PM' && startHour !== 12 ? startHour + 12 : startHour;
         const endHour24 = endPeriod === 'PM' && endHour !== 12 ? endHour + 12 : endHour;
-    
+
         const startTimeISO = new Date(
             selectedDate.getFullYear(),
             selectedDate.getMonth(),
@@ -186,7 +185,7 @@ useEffect(() => {
             startHour24,
             startMinute
         ).toISOString();
-    
+
         const endTimeISO = new Date(
             selectedDate.getFullYear(),
             selectedDate.getMonth(),
@@ -194,7 +193,7 @@ useEffect(() => {
             endHour24,
             endMinute
         ).toISOString();
-    
+
         const newGoal: Omit<Goal, 'id'> = {
             mood: validMood as Goal['mood'],
             activities,
@@ -207,7 +206,7 @@ useEffect(() => {
             psychotherapist: '',
             client: '',
         };
-    
+
         try {
             const response = await databases.createDocument('Butterfly-Database', 'Goals', 'unique()', newGoal);
             setGoals([...goals, { ...newGoal, id: response.$id }]);
@@ -216,20 +215,20 @@ useEffect(() => {
             console.error('Error saving goal:', error);
         }
     };
-    
+
 
     // Function to handle progress change and update in the database
-// Function to handle progress change and update in the database
-const handleProgressChange = async (newProgress: string, goalId: string) => {
-    if (newProgress) {
-        console.log(`Changing progress to: ${newProgress} for goal ID: ${goalId}`);
-        await updateProgress(goalId, newProgress);
-    } else {
-        console.error('No new progress value selected');
-    }
-};
+    // Function to handle progress change and update in the database
+    const handleProgressChange = async (newProgress: string, goalId: string) => {
+        if (newProgress) {
+            console.log(`Changing progress to: ${newProgress} for goal ID: ${goalId}`);
+            await updateProgress(goalId, newProgress);
+        } else {
+            console.error('No new progress value selected');
+        }
+    };
 
-    
+
     const changeMonth = (increment: number) => {
         const newDate = addMonths(new Date(currentYear, currentMonth), increment);
         setCurrentMonth(newDate.getMonth());
@@ -514,54 +513,74 @@ const handleProgressChange = async (newProgress: string, goalId: string) => {
                                 const isPastEndTime = currentTime > goalEndTime;
                                 const displayProgress = isPastEndTime ? 'missed' : goal.progress;
 
+                                const formatCountdown = (endTime) => {
+                                    const currentTime = new Date().getTime();
+                                    const timeLeft = new Date(endTime).getTime() - currentTime;
+                                
+                                    if (timeLeft <= 0) return 'Time\'s up';
+                                
+                                    const minutes = Math.floor(timeLeft / 60000);
+                                    const seconds = Math.floor((timeLeft % 60000) / 1000);
+                                
+                                    const countdownText = `${minutes} min ${seconds} sec`;
+                                
+                                    if (timeLeft < 60000) { // Less than 1 minute remaining
+                                        return <span className="text-red-500">{countdownText}</span>;
+                                    }
+                                
+                                    return countdownText;
+                                };
+
                                 return (
                                     <li
-  key={goal.$id}
-  className="p-4 bg-gray-50 rounded-lg shadow-md"
->
-  <div className="overflow-x-auto">
-    <table className="w-full text-left border-separate border-spacing-y-2">
-      <thead>
-        <tr className="text-sm text-gray-700">
-          <th className="px-4 py-2 w-[10%]">Activity</th>
-          <th className="px-4 py-2 w-[12%]">Duration (min)</th>
-          <th className="px-4 py-2 w-[15%]">Date</th>
-          <th className="px-4 py-2 w-[15%]">Start Time</th>
-          <th className="px-4 py-2 w-[15%]">End Time</th>
-          <th className="px-4 py-2 w-[12%]">Mood</th>
-          <th className="px-4 py-2 w-[15%]">Progress</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr className="bg-white">
-          <td className="px-4 py-2 w-[10%]">{goal.activities}</td>
-          <td className="px-4 py-2 w-[12%]">{goal.duration}</td>
-          <td className="px-4 py-2 [15%]">{goal.date}</td>
-          <td className="px-4 py-2 [15%]">{goal.startTime || 'N/A'}</td>
-          <td className="px-4 py-2 [15%]">{goal.endTime || 'N/A'}</td>
-          <td className="px-4 py-2 w-[15%]">{goal.mood}</td>
-          <td className="px-4 py-2 [15%]">
-            {!isPastEndTime ? (
-              <select
-                value={goal.progress}
-                onChange={(e) => handleProgressChange(e.target.value, goal.$id)}
-                className="border rounded-lg p-1 text-gray-700 focus:outline-none focus:ring-2 transition-colors duration-200"
-                disabled={isPastEndTime}
-              >
-                <option value="todo">To Do</option>
-                <option value="doing">Doing</option>
-                <option value="done">Done</option>
-              </select>
-            ) : (
-              <span className="text-red-500">Missed</span>
-            )}
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <p className="text-xs text-gray-500 mt-2">Status: {displayProgress}</p>
-  </div>
-</li>
+                                        key={goal.$id}
+                                        className="p-4 bg-gray-50 rounded-lg shadow-md"
+                                    >
+                                        <div className="overflow-x-auto">
+                                            <table className="w-full text-left border-separate border-spacing-y-2">
+                                                <thead>
+                                                    <tr className="text-sm text-gray-700">
+                                                        <th className="px-4 py-2 w-[10%]">Activity</th>
+                                                        <th className="px-4 py-2 w-[12%]">Duration (min)</th> {/* Countdown column */}
+                                                        <th className="px-4 py-2 w-[15%]">Date</th>
+                                                        <th className="px-4 py-2 w-[15%]">Start Time</th>
+                                                        <th className="px-4 py-2 w-[15%]">End Time</th>
+                                                        <th className="px-4 py-2 w-[12%]">Mood</th>
+                                                        <th className="px-4 py-2 w-[15%]">Progress</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr className="bg-white">
+                                                    <td className="px-4 py-2 w-[10%]">{goal.activities}</td>
+                                                        {/* Use CountdownGoal component for the duration column */}
+                                                <CountdownGoal goal={goal} />   
+                                                            <CountdownGoal goal={goal} />
+                                                        <td className="px-4 py-2 [15%]">{goal.date}</td>
+                                                        <td className="px-4 py-2 [15%]">{goal.startTime || 'N/A'}</td>
+                                                        <td className="px-4 py-2 [15%]">{goal.endTime || 'N/A'}</td>
+                                                        <td className="px-4 py-2 w-[15%]">{goal.mood}</td>
+                                                        <td className="px-4 py-2 [15%]">
+                                                            {!isPastEndTime ? (
+                                                                <select
+                                                                    value={goal.progress}
+                                                                    onChange={(e) => handleProgressChange(e.target.value, goal.$id)}
+                                                                    className="border rounded-lg p-1 text-gray-700 focus:outline-none focus:ring-2 transition-colors duration-200"
+                                                                    disabled={isPastEndTime}
+                                                                >
+                                                                    <option value="todo">To Do</option>
+                                                                    <option value="doing">Doing</option>
+                                                                    <option value="done">Done</option>
+                                                                </select>
+                                                            ) : (
+                                                                <span className="text-red-500">Missed</span>
+                                                            )}
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                            <p className="text-xs text-gray-500 mt-2">Status: {displayProgress}</p>
+                                        </div>
+                                    </li>
 
                                 );
                             })}

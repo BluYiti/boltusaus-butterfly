@@ -80,5 +80,6 @@ export const useProgressUpdate = () => {
         }
     };
 
+    
     return { updateProgress, fetchGoals, goals, error, loading };
 };
