@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, ReactNode } from 'react';
 
 interface RescheduleModalProps {
   onClose: () => void;
+  children?: ReactNode;  // Add children prop to handle passed content
 }
 
-const RescheduleModal: React.FC<RescheduleModalProps> = ({ onClose }) => {
+const RescheduleModal: React.FC<RescheduleModalProps> = ({ onClose, children }) => {
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -39,6 +40,9 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({ onClose }) => {
         <button onClick={onClose} className="absolute top-2 right-2 text-gray-600 hover:text-gray-900">
           X
         </button>
+
+        {/* Render children if passed */}
+        {children}
 
         {!showFinalPrompt ? (
           !showConfirmation ? (

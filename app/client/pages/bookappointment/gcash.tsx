@@ -3,11 +3,26 @@ import Modal from '@/components/Modal';
 import { account, databases } from '@/appwrite';
 import { fetchClientId, restrictSelectingTherapist, updateClientPsychotherapist, uploadReceiptImage } from '@/hooks/userService'; // Assuming you have the uploadReceiptImage function
 import SuccessModal from './successfulbooking';
+import Image from 'next/image';
 
 interface GCashPaymentProps {
   isOpen: boolean;
   onClose: () => void;
-  appointmentData: any;
+  appointmentData: AppointmentData;
+}
+
+interface Therapist {
+  $id: string;
+  name: string;
+}
+
+interface AppointmentData {
+  selectedTherapist: Therapist;
+  selectedTime: string; // Assuming it's a time string
+  selectedMode: string; // Payment method or mode of appointment (e.g., GCash)
+  selectedMonth: string;
+  selectedDay: string;
+  createdAt: string; // Timestamp when appointment was created
 }
 
 const GCashPayment: React.FC<GCashPaymentProps> = ({ isOpen, onClose, appointmentData }) => {
@@ -129,7 +144,7 @@ const GCashPayment: React.FC<GCashPaymentProps> = ({ isOpen, onClose, appointmen
     }
   };
 
-  async function addBookingData(BookingsData: any) {
+  async function addBookingData(BookingsData) {
     try {
       const response = await databases.createDocument('Butterfly-Database', 'Bookings', 'unique()', BookingsData);
       return response.$id;
@@ -139,7 +154,7 @@ const GCashPayment: React.FC<GCashPaymentProps> = ({ isOpen, onClose, appointmen
     }
   }
 
-  async function addPaymentData(PaymentData: any) {
+  async function addPaymentData(PaymentData) {
     try {
       await databases.createDocument('Butterfly-Database', 'Payment', 'unique()', PaymentData);
     } catch (error) {
@@ -157,7 +172,13 @@ const GCashPayment: React.FC<GCashPaymentProps> = ({ isOpen, onClose, appointmen
             <label className="text-2xl block mb-2 text-gray-800 text-center">Please Scan the QR Code</label>
             <label className="block mb-2 text-gray-800 text-center">Amount to be paid: ₱1,000.00</label>
 
-            <img src="/images/gcashqr.png" alt="gcashqr" className="mb-4" />
+            <Image 
+              src="/images/gcashqr.png" 
+              alt="gcashqr" 
+              width={200} 
+              height={200} 
+              className="mb-4"
+            />
 
             {/* Receipt Upload */}
             <label className="block text-gray-800 mb-2">Upload Your Receipt</label>
@@ -170,7 +191,13 @@ const GCashPayment: React.FC<GCashPaymentProps> = ({ isOpen, onClose, appointmen
             {receiptPreview && (
               <div className="mb-4">
                 <p className="text-gray-800">Receipt Preview:</p>
-                <img src={receiptPreview} alt="Receipt Preview" className="max-w-full max-h-40 object-contain" />
+                <Image 
+                  src={receiptPreview} 
+                  alt="Receipt Preview" 
+                  width={500} // Set a specific width
+                  height={200} // Set a specific height
+                  className="max-w-full max-h-40 object-contain"
+                />
               </div>
             )}
 

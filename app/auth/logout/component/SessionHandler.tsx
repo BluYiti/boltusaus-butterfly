@@ -4,7 +4,7 @@ import { account } from '@/appwrite';  // Import Appwrite Account SDK
 const SessionHandler = () => {
   
   useEffect(() => {
-    const handleBeforeUnload = async (event: BeforeUnloadEvent) => {
+    const handleBeforeUnload = async () => {
       try {
         // This is where you destroy the session when the browser window is closed
         await account.deleteSession('current');
@@ -21,7 +21,7 @@ const SessionHandler = () => {
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [account]);
+  }, []);
 
   return null;
 };

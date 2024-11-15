@@ -45,7 +45,7 @@ const LoginPage: React.FC = () => {
                     </div>
                     <div>
                         <h2 className='absolute mt-20 ml-6 text-sm'>
-                            Don't have an account?
+                            Don&apos;t have an account?
                             <button onClick={handleRegister} className='text-blue-400 underline ml-2'>Register</button>
                         </h2> 
                     </div>

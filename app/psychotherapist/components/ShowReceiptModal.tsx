@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { fetchProfileImageUrl } from '@/hooks/userService'; // Import your function
+import Image from 'next/image';
 
 interface ShowReceiptModalProps {
   isOpen: boolean;
@@ -60,11 +61,14 @@ const ShowReceiptModal: React.FC<ShowReceiptModalProps> = ({ isOpen, onClose, im
       <div className="bg-white rounded-lg shadow-lg max-w-4xl w-auto max-h-[80vh] overflow-auto">
         <div className="relative">
           {/* Display the image or a placeholder */}
-          <img
-            src={receiptImageUrl || placeholderImage} // Fallback to placeholder if image is null
-            alt="Receipt"
-            className="w-full h-auto max-h-[60vh] object-contain"
-          />
+<Image
+  src={receiptImageUrl || placeholderImage}  // Fallback to placeholder if image is null
+  alt="Receipt"
+  layout="responsive"  // This makes it responsive, you can also use 'intrinsic' or 'fixed' based on the need
+  width={600}  // Adjust the width (responsive) or use a fixed value for fixed-size images
+  height={400} // Adjust the height (keep aspect ratio)
+  className="w-full h-auto max-h-[60vh] object-contain" // Optional class styling
+/>
 
           {/* Close button */}
           <button

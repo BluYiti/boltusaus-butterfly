@@ -9,11 +9,11 @@ const RegisterPage: React.FC = () => {
     const router = useRouter ();
 
     const handleMinor = () => {
-        router.push('/register/minor');
+        router.push('/register/pages/minor');
     }
 
     const handleAdult = () => {
-        router.push('/register/adult')
+        router.push('/register/pages/adult')
     }
 
     return (

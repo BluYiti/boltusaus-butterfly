@@ -1,7 +1,7 @@
 'use client';
 import { FC, useState } from 'react';
-import Layout from '@/components/Sidebar/Layout';
-import items from '@/client/data/Links';
+import Image from 'next/image';
+
 
 interface Contact {
   id: number;
@@ -38,11 +38,13 @@ const ContactList: FC = () => {
             }`}
             onClick={() => setSelectedContact(contact.id)}
           >
-            <img
-              src={contact.imageUrl}
-              alt={contact.name}
-              className="w-12 h-12 rounded-full mr-4"
-            />
+              <Image
+                src={contact.imageUrl}
+                alt={contact.name}
+                width={48} // The width of the image (in pixels)
+                height={48} // The height of the image (in pixels)
+                className="rounded-full mr-4"
+              />
             <div className="flex-grow">
               <div className="flex justify-between items-center">
                 <span className="font-semibold">{contact.name}</span>

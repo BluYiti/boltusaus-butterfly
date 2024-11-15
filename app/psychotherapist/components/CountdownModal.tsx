@@ -1,5 +1,3 @@
-// CountdownModal.tsx
-'use client';
 import { FC, useEffect, useState } from 'react';
 
 const Countdown: FC<{ seconds: number; onComplete: () => void }> = ({ seconds, onComplete }) => {
@@ -18,7 +16,7 @@ const Countdown: FC<{ seconds: number; onComplete: () => void }> = ({ seconds, o
       });
     }, 1000);
 
-    return () => clearInterval(intervalId);
+    return () => clearInterval(intervalId); // Cleanup on component unmount
   }, [onComplete]);
 
   const formatTime = (time: number) => {
@@ -27,7 +25,11 @@ const Countdown: FC<{ seconds: number; onComplete: () => void }> = ({ seconds, o
     return `${String(mins).padStart(2, '0')} : ${String(secs).padStart(2, '0')}`;
   };
 
-  return <span className="text-5xl font-bold">{formatTime(timeLeft)}</span>;
+  return (
+    <span className="text-5xl font-bold text-black">
+      {formatTime(timeLeft)}
+    </span>
+  );
 };
 
 const CountdownModal: FC<{ isOpen: boolean; onClose: () => void; onComplete: () => void; seconds: number }> = ({
@@ -41,7 +43,7 @@ const CountdownModal: FC<{ isOpen: boolean; onClose: () => void; onComplete: () 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50">
       <div className="bg-white rounded-lg p-8 shadow-lg w-full max-w-md">
-        <h1 className="text-lg font-semibold text-center">The call will start in...</h1>
+        <h1 className="text-lg font-semibold text-center text-gray-800">The call will start in...</h1>
         <div className="flex justify-center mt-4">
           <Countdown seconds={seconds} onComplete={onComplete} />
         </div>

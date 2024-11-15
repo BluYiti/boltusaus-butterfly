@@ -1,8 +1,26 @@
-'use client'
-
 import { useEffect } from 'react';
 
-export const useFetchCities = (province: string, provinces: any[], setCities: React.Dispatch<React.SetStateAction<any[]>>, setCity: React.Dispatch<React.SetStateAction<string>>, setBarangays: React.Dispatch<React.SetStateAction<any[]>>) => {
+interface City {
+    name: string;
+    code: string;
+}
+
+interface Province {
+    name: string;
+    code: string;
+}
+
+interface Barangay {
+    name: string;
+}
+
+export const useFetchCities = (
+    province: string, 
+    provinces: Province[], 
+    setCities: React.Dispatch<React.SetStateAction<City[]>>, 
+    setCity: React.Dispatch<React.SetStateAction<string>>, 
+    setBarangays: React.Dispatch<React.SetStateAction<Barangay[]>>
+) => {
     useEffect(() => {
         const fetchCities = async () => {
             if (province) {
@@ -10,7 +28,7 @@ export const useFetchCities = (province: string, provinces: any[], setCities: Re
                 if (selectedProvince) {
                     try {
                         const response = await fetch(`https://psgc.gitlab.io/api/provinces/${selectedProvince.code}/cities-municipalities/`);
-                        const data = await response.json();
+                        const data: City[] = await response.json();  // Define the type here
                         setCities(data);
                         setCity('');
                         setBarangays([]);

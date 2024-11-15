@@ -13,11 +13,12 @@ import LoadingScreen from "@/components/LoadingScreen"; // Import LoadingScreen 
 import { fetchProfileImageUrl } from "@/hooks/userService";
 import { downloadCertificate } from "@/hooks/userService";
 import PsychotherapistProfile from '@/client/components/PsychotherapistProfile'; // Adjust the path if necessary
+import Image from 'next/image';
 
 const NewClientDashboard = () => {
   const { loading: authLoading } = useAuthCheck(['client']); // Call the useAuthCheck hook
   const [dataLoading, setDataLoading] = useState(true); // State to track if data is still loading
-  const [users, setUsers] = useState([]);
+  const [, setUsers] = useState([]);
   const [psychotherapists, setPsychotherapists] = useState([]);
   const [profileImageUrls, setProfileImageUrls] = useState({});
   const [state, setState] = useState<string | null>(null); // State to track user state
@@ -28,7 +29,7 @@ const NewClientDashboard = () => {
   
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedPsychotherapist, setSelectedPsychotherapist] = useState<null | any>(null);
+  const [selectedPsychotherapist, setSelectedPsychotherapist] = useState<null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -104,7 +105,7 @@ const NewClientDashboard = () => {
     });
   };
 
-  const handleProfileClick = (psychotherapist: any) => {
+  const handleProfileClick = (psychotherapist) => {
     setSelectedPsychotherapist(psychotherapist); // Set the selected psychotherapist
     setIsModalOpen(true); // Open the modal
   };
@@ -213,10 +214,13 @@ const NewClientDashboard = () => {
                     onClick={() => handleProfileClick(psychotherapist)} // Handle profile click
                   >
                     <div className="flex flex-col items-center bg-white border border-blue-300 p-4 rounded-3xl transform transition-transform duration-500 ease-in-out hover:scale-105 min-w-[300px]">
-                      <img
-                        src={profileImageUrls[psychotherapist.$id] || "/images/default-profile.png"}  // fallback to a default image
+                      <Image
+                        src={profileImageUrls[psychotherapist.$id] || "/images/default-profile.png"}
                         alt={`${psychotherapist.firstName} ${psychotherapist.lastName}`}
-                        className="rounded-full w-24 h-24 mb-4"
+                        className="rounded-full mb-4"
+                        width={96}  // Set width explicitly
+                        height={96} // Set height explicitly
+                        unoptimized
                       />
                       <div className="flex flex-col items-center text-center">
                         <h4 className="text-lg font-bold text-blue-500 font-roboto">
@@ -268,7 +272,7 @@ const NewClientDashboard = () => {
               </div>
               <div className="bg-blue-50 border-blue-300 p-2 rounded-lg shadow-lg transition-transform transform hover:scale-105 hover:shadow-2xl duration-300">
                   <h3 className="font-semibold text-lg mb-2">🫵 You Are Enough.</h3>
-                  <p className="text-gray-800">Your worth isn't measured by your struggles. You are enough just as you are.</p>
+                  <p className="text-gray-800">Your worth isn&apos;t measured by your struggles. You are enough just as you are.</p>
               </div>
           </div>
         </div>

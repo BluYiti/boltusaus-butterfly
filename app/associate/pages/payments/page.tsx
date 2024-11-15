@@ -1,13 +1,12 @@
-'use client';
-
 import { useState, useEffect } from "react";
 import Layout from "@/components/Sidebar/Layout";
 import items from "@/associate/data/Links";
 import PaymentModal from "@/associate/components/PaymentModal"; // Import the new modal component
 import LoadingScreen from "@/components/LoadingScreen";
 import useAuthCheck from "@/auth/page";
-import { account, databases } from "@/appwrite";
+import { databases } from "@/appwrite";
 
+// Define the PaymentHistory interface with the correct type for createdAt
 interface PaymentHistory {
   referenceNo: string;
   mode: string;
@@ -16,14 +15,14 @@ interface PaymentHistory {
   status: string;
   client: { firstname: string; lastname: string }; // Client's first and last name
   psychotherapist: { firstName: string; lastName: string }; // Psychotherapist's first and last name
-  booking: any;
+  booking: string;
   id: string; // Add a unique identifier for each payment to use as a key
   clientFirstName: string;
   clientLastName: string;
   psychoFirstName: string;
   psychoLastName: string;
   email: string;
-  createdAt: Date;
+  createdAt: Date; // Ensure this is of type Date
   declineReason: string;
   receipt: string;
 }
@@ -41,11 +40,10 @@ const ClientsPayment = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const user = await account.get();
         const response = await databases.listDocuments('Butterfly-Database', 'Payment');
 
         // Assuming each payment document has a 'client' and 'psychotherapist' object with 'firstname' and 'lastname'
-        const fetchedPayments = response.documents.map((doc: any) => ({
+        const fetchedPayments = response.documents.map((doc) => ({
           referenceNo: doc.referenceNo,
           mode: doc.booking.mode,
           channel: doc.channel,
@@ -60,10 +58,11 @@ const ClientsPayment = () => {
           psychoFirstName: doc.psychotherapist.firstName,
           psychoLastName: doc.psychotherapist.lastName,
           email: doc.client.userid.email,
-          createdAt: doc.$createdAt,
+          // Convert createdAt from string to Date
+          createdAt: new Date(doc.$createdAt), // This ensures it becomes a Date object
           declineReason: doc.declineReason,
           receipt: doc.receipt
-        }));        
+        }));
 
         setPayments(fetchedPayments); // Store the payments in the state
       } catch (error) {
@@ -131,7 +130,7 @@ const ClientsPayment = () => {
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
       <div className="bg-blue-50 min-h-screen flex flex-col">
         <div className="bg-white width rounded-b-lg fixed p-5 top-0 w-full z-10">
-          <h2 className="text-2xl font-bold text-blue-400">Client's Payment</h2>
+          <h2 className="text-2xl font-bold text-blue-400">Client&apos;s Payment</h2>
         </div>
 
         <div className="mt-24 px-5 flex-1 overflow-hidden">

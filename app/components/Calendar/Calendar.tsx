@@ -1,5 +1,5 @@
 import { databases, Query } from '@/appwrite';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
 interface CalendarProps {
@@ -17,6 +17,13 @@ interface CalendarProps {
     isTherapistSelected: boolean;
 }
 
+interface Booking {
+    day: number;
+    month: string;
+    slots: string; // This could be a time like "09:00am"
+    status: 'pending' | 'paid' | 'rescheduled' | 'happening' | 'missed' | 'disabled' | 'refunded'; // Adjust based on the actual statuses you have
+  }
+
 const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 const Calendar: React.FC<CalendarProps> = ({
@@ -33,31 +40,38 @@ const Calendar: React.FC<CalendarProps> = ({
     isTherapistSelected,
 }) => {
     const [date, setDate] = useState(new Date());
-    const [bookedSlots, setBookedSlots] = useState<any[]>([]); // To store fetched booked slots
+    const [bookedSlots, setBookedSlots] = useState<Booking[]>([]); // To store fetched booked slots
     const [isNextMonthAvailable, setIsNextMonthAvailable] = useState(false);
-    const [isFormComplete, setIsFormComplete] = useState(false);
-    const [accountRole, setAccountRole] = useState(null);
+    const [, setIsFormComplete] = useState(false);
+    const [accountRole,] = useState(null);
 
-    const today = new Date();
-    const tomorrow = new Date(today);
-    tomorrow.setDate(today.getDate() + 4);
-
-    const bookingEndDate = new Date(today);
-    bookingEndDate.setDate(today.getDate() + 12);
+    // Memoize the 'today' date object to ensure it's stable across renders
+    const today = useMemo(() => new Date(), []);
+    const tomorrow = useMemo(() => {
+        const newTomorrow = new Date(today);
+        newTomorrow.setDate(today.getDate() + 4);
+        return newTomorrow;
+    }, [today]);
+    
+    const bookingEndDate = useMemo(() => {
+        const newBookingEndDate = new Date(today);
+        newBookingEndDate.setDate(today.getDate() + 12);
+        return newBookingEndDate;
+    }, [today]);
 
     const isMonthEndingSoon = today.getDate() >= 25;
 
-    const isDateInRange = (date: Date) => {
+    const isDateInRange = React.useCallback((date: Date) => {
         return date >= tomorrow && date <= bookingEndDate && date.getDay() !== 0;
-    };
+    }, [tomorrow, bookingEndDate]);    
 
     const currentMonthIndex = new Date(`${currentMonth} 1, ${currentYear}`).getMonth();
     const nextMonthIndex = new Date(`${nextMonth} 1, ${currentYear}`).getMonth();
 
-    const monthsToDisplay = [
+    const monthsToDisplay = React.useMemo(() => [
         { name: currentMonth, days: new Date(currentYear, currentMonthIndex + 1, 0).getDate() },
         { name: nextMonth, days: new Date(currentYear, nextMonthIndex + 1, 0).getDate() },
-    ];
+    ], [currentMonth, currentYear, currentMonthIndex, nextMonth, nextMonthIndex]);
 
     const firstDayOfMonth = selectedMonth === currentMonth
         ? new Date(currentYear, currentMonthIndex, 1).getDay()
@@ -88,11 +102,20 @@ const Calendar: React.FC<CalendarProps> = ({
                     'Butterfly-Database', 'Bookings',
                     [Query.equal('psychotherapist', selectedTherapistId)] // Filter by therapistId
                 );
-                const bookedData = bookingsResponse.documents;
+                
+                // Map the raw documents to the Booking type
+                const bookedData: Booking[] = bookingsResponse.documents.map((doc) => ({
+                    day: doc.day, // assuming the document contains a 'day' field
+                    month: doc.month, // assuming the document contains a 'month' field
+                    slots: doc.slots, // assuming the document contains a 'slots' field
+                    status: doc.status, // assuming the document contains a 'status' field
+                }));
+            
+                // Update the state with the mapped booked slots
                 setBookedSlots(bookedData);
             } catch (error) {
                 console.error('Error fetching booked slots:', error);
-            }
+            }            
         };
 
         fetchBookedSlots();
@@ -124,7 +147,7 @@ const Calendar: React.FC<CalendarProps> = ({
         };
 
         checkNextMonthAvailability();
-    }, [isMonthEndingSoon, monthsToDisplay, nextMonthIndex, currentYear]);
+    }, [isDateInRange, isMonthEndingSoon, monthsToDisplay, nextMonthIndex, currentYear]);
 
     useEffect(() => {
         setIsFormComplete(!!selectedDay && !!selectedTime);

@@ -1,60 +1,82 @@
-"use client";
-import { Client, Databases, Storage } from 'appwrite';
+'use client'
+
 import Layout from "@/components/Sidebar/Layout";
 import items from "@/psychotherapist/data/Links";
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import useAuthCheck from '@/auth/page';
 import LoadingScreen from '@/components/LoadingScreen';
+import Image from 'next/image';
+import { databases, storage } from '@/appwrite';
+
+interface Resource {
+  $id: string;
+  id: number;          // Unique identifier for the resource
+  description: string; // Description of the resource
+  file: string;        // File associated with the resource (could be a path or URL)
+  createdAt: Date;     // Timestamp of when the resource was created
+  category: string;    // Category of the resource (e.g., 'video', 'document', etc.)
+  title: string;       // Title of the resource
+  image: string;       // Image associated with the resource (could be a URL or file path)
+}
+
+interface Payload {
+  image: string;
+  file: string;
+  category: string;    // Category of the resource (e.g., 'video', 'document', etc.)
+  title: string;       // Title of the resource
+  description: string; // Description of the resource
+}
 
 const ResourcesPage: React.FC = () => {
   const { loading: authLoading } = useAuthCheck(['psychotherapist']); // Call the useAuthCheck hook
-  const [resources, setResources] = useState<any[]>([]);
+  const [resources, setResources] = useState<Resource[]>([]);
   const [newCategory, setNewCategory] = useState('');
   const [newTitle, setNewTitle] = useState('');
-  const [newDuration, setNewDuration] = useState('');
   const [newDescription, setNewDescription] = useState('');
-  const [newResourceId, setNewResourceId] = useState<string | null>(null); 
+  const [, setNewResourceId] = useState<string | null>(null); 
   const [fileUrl, setFileUrl] = useState(''); 
   const [imageUrl, setImageUrl] = useState(''); 
   const [modalFileUrl, setModalFileUrl] = useState(''); 
   const [modalImageUrl, setModalImageUrl] = useState(''); 
   const [modalCategory, setModalCategory] = useState('');
   const [modalTitle, setModalTitle] = useState('');
-  const [modalDuration, setModalDuration] = useState('');
   const [modalDescription, setModalDescription] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedResourceId, setSelectedResourceId] = useState<string | null>(null); 
   const fileInputRef = useRef<HTMLInputElement | null>(null); 
   const imageInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Initialize Appwrite Client
-  const client = new Client();
-  client
-    .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT as string)
-    .setProject(process.env.NEXT_PUBLIC_PROJECT_ID as string);
-
-  const databases = new Databases(client);
-  const storage = new Storage(client);
-
   const DATABASE_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || 'Butterfly-Database';
   const COLLECTION_ID = 'Resources'; 
   const BUCKET_ID = 'Resources'; 
 
-  // Fetch resources from Appwrite database
-  const fetchResources = async () => {
-    try {
-      const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID);
-      setResources(response.documents);
-    } catch (error) {
-      console.error('Error fetching resources:', error);
-    }
-  };
+// Memoize fetchResources to avoid re-creating it on every render
+const fetchResources = useCallback(async () => {
+  try {
+    const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID);
+    const resources: Resource[] = response.documents.map((document) => ({
+      $id: document.$id,
+      id: document.id || Date.now(), // Use Date.now() as a fallback for `id` if it's missing
+      category: document.category || '', // Set default empty string if `category` is missing
+      title: document.title || '', // Set default empty string if `title` is missing
+      description: document.description || '', // Set default empty string if `description` is missing
+      file: document.file || '', // Default to empty string if `file` is missing
+      createdAt: document.createdAt ? new Date(document.createdAt) : new Date(), // Use current date if `createdAt` is missing
+      image: document.image || '', // Default to empty string if `image` is missing
+    }));
 
-  useEffect(() => {
-    fetchResources();
-  }, []);
+    setResources(resources); // Set the resources state with the mapped data
+  } catch (error) {
+    console.error('Error fetching resources:', error);
+  }
+}, [DATABASE_ID]); // Empty dependency array means it will only be created once
+
+// Now use the memoized fetchResources function inside the useEffect hook
+useEffect(() => {
+  fetchResources();
+}, [fetchResources]); // This ensures the effect runs only when fetchResources changes
 
   // Upload function for both image and file
   const uploadFile = async (file: File): Promise<string | null> => {
@@ -102,11 +124,12 @@ const ResourcesPage: React.FC = () => {
       if (!existingResource) return;
 
       // Prepare the update payload
-      const updatePayload: any = {
+      const updatePayload: Payload = {
         category: modalCategory || existingResource.category,
         title: modalTitle || existingResource.title,
-        duration: modalDuration || existingResource.duration,
         description: modalDescription || existingResource.description,
+        image: '',
+        file: ''
       };
 
       // Check if a new image has been selected
@@ -142,7 +165,7 @@ const ResourcesPage: React.FC = () => {
   };
 
   const handleCreateResource = async () => {
-    if (!newCategory.trim() || !newTitle.trim() || !newDuration.trim() || !newDescription.trim()) {
+    if (!newCategory.trim() || !newTitle.trim() || !newDescription.trim()) {
       setError('All fields must be filled.');
       return;
     }
@@ -169,8 +192,7 @@ const ResourcesPage: React.FC = () => {
         {
           id: Date.now(), 
           category: newCategory, 
-          title: newTitle, 
-          duration: newDuration, 
+          title: newTitle,  
           description: newDescription, 
           image: uploadedImageId,  // Store image ID
           file: uploadedFileId,    // Store file ID
@@ -181,7 +203,6 @@ const ResourcesPage: React.FC = () => {
       setNewResourceId(response.$id);
       setNewCategory(''); 
       setNewTitle('');
-      setNewDuration('');
       setNewDescription('');
       setSelectedFile(null); 
       setSelectedImage(null); 
@@ -201,7 +222,6 @@ const ResourcesPage: React.FC = () => {
     if (resource) {
       setModalCategory(resource.category);
       setModalTitle(resource.title);
-      setModalDuration(resource.duration);
       setModalDescription(resource.description);
     }
     setSelectedResourceId(resourceId);
@@ -276,16 +296,21 @@ if (authLoading ) {
               {resources.map((resource) => (
                 <div key={resource.$id} className="bg-white rounded-lg shadow-lg relative p-4 cursor-pointer" onClick={() => window.open(getFileUrl(resource.file), "_blank")}>
                   {resource.image ? (
-                    <img src={getFileUrl(resource.image)} alt={resource.title} className="w-full h-40 object-cover rounded-t-lg" />
+                    <Image
+                      src={getFileUrl(resource.image)}  // Ensure this returns a valid URL
+                      alt={resource.title}
+                      width={800}  // Define a width (adjust based on your needs)
+                      height={160} // Define a height (adjust based on your needs)
+                      className="w-full h-40 object-cover rounded-t-lg"
+                      unoptimized
+                    />
                   ) : (
                     <div className="w-full h-40 bg-gray-200 rounded-t-lg flex items-center justify-center">
                       <p className="text-gray-500">No image</p>
                     </div>
                   )}
-
                   <div className="p-4">
                     <h3 className="text-lg font-semibold text-gray-800">{resource.title}</h3>
-                    <p className="text-sm text-gray-500">{resource.duration}</p>
                     <p className="text-gray-600 mt-2">{resource.description}</p>
                     <div className="border-t mt-4 pt-2">
                       <p className="text-sm text-gray-500">{resource.category}</p>
@@ -314,8 +339,8 @@ if (authLoading ) {
 
           {/* Modal for Updating Resource */}
           {isModalOpen && (
-            <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
-              <div className="bg-white rounded-lg p-8 w-full max-w-md">
+            <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50 overflow-auto">
+              <div className="bg-white rounded-lg p-8 w-full max-w-md max-h-[80vh] overflow-y-auto">
                 <h3 className="text-lg font-semibold mb-4">Update Resource</h3>
 
                 <label className="block text-gray-700">Category:</label>
@@ -324,16 +349,21 @@ if (authLoading ) {
                 <label className="block text-gray-700">Title:</label>
                 <input type="text" value={modalTitle} onChange={(e) => setModalTitle(e.target.value)} className="border border-gray-300 rounded px-4 py-2 mb-4 w-full" />
 
-                <label className="block text-gray-700">Duration:</label>
-                <input type="text" value={modalDuration} onChange={(e) => setModalDuration(e.target.value)} className="border border-gray-300 rounded px-4 py-2 mb-4 w-full" />
-
                 <label className="block text-gray-700">Description:</label>
-                <textarea value={modalDescription} onChange={(e) => setModalDescription(e.target.value)} className="border border-gray-300 rounded px-4 py-2 mb-4 w-full" />
+                <textarea value={modalDescription} onChange={(e) => setModalDescription(e.target.value)} className="border border-gray-300 rounded px-4 py-2 mb-4 h-40 w-full" />
 
                 <label className="block text-gray-700">Update Cover Image:</label>
                 <input type="file" className="mb-4" ref={imageInputRef} onChange={handleModalImageChange} />
-                {modalImageUrl && <img src={modalImageUrl} alt="Preview Image" className="w-full h-40 object-cover rounded mb-4" />}
-
+                {modalImageUrl && (
+                  <Image
+                    src={modalImageUrl}
+                    alt="Preview Image"
+                    width={800}  // Replace with your desired width in pixels
+                    height={320} // Replace with your desired height in pixels
+                    className="w-full h-40 object-cover rounded mb-4"
+                    unoptimized
+                  />
+                )}
                 <label className="block text-gray-700">Update File:</label>
                 <input type="file" className="mb-4" ref={fileInputRef} onChange={handleModalFileChange} />
                 {modalFileUrl && <p>File uploaded successfully.</p>}
@@ -348,8 +378,8 @@ if (authLoading ) {
 
           {/* Modal for Creating a Resource */}
           {isCreateModalOpen && (
-            <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
-              <div className="bg-white rounded-lg p-8 w-full max-w-md">
+            <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50 overflow-auto">
+              <div className="bg-white rounded-lg p-8 w-full max-w-md max-h-[80vh] overflow-y-auto">
                 <h3 className="text-lg font-semibold mb-4">Add a Resource Card</h3>
 
                 <label className="block text-gray-700">Category:</label>
@@ -358,16 +388,21 @@ if (authLoading ) {
                 <label className="block text-gray-700">Title:</label>
                 <input type="text" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} placeholder="Enter or add new title" className="border border-gray-300 rounded px-4 py-2 mb-4 w-full" />
 
-                <label className="block text-gray-700">Duration:</label>
-                <input type="text" value={newDuration} onChange={(e) => setNewDuration(e.target.value)} placeholder="Enter duration (e.g., 5 mins)" className="border border-gray-300 rounded px-4 py-2 mb-4 w-full" />
-
                 <label className="block text-gray-700">Description:</label>
-                <textarea value={newDescription} onChange={(e) => setNewDescription(e.target.value)} placeholder="Enter description" className="border border-gray-300 rounded px-4 py-2 mb-4 w-full" />
+                <textarea value={newDescription} onChange={(e) => setNewDescription(e.target.value)} placeholder="Enter description" className="border border-gray-300 rounded px-4 py-2 mb-4 h-40 w-full" />
 
                 <label className="block text-gray-700">Upload Cover Image:</label>
                 <input type="file" ref={imageInputRef} className="mb-4" onChange={handleImageChange} />
-                {imageUrl && <img src={imageUrl} alt="Preview Image" className="w-full h-40 object-cover rounded mb-4" />}
-
+                {imageUrl && (
+                  <Image
+                    src={imageUrl}
+                    alt="Preview Image"
+                    width={800} // specify the width
+                    height={320} // specify the height
+                    className="object-cover rounded mb-4"
+                    unoptimized
+                  />
+                )}
                 <label className="block text-gray-700">Upload File:</label>
                 <input type="file" ref={fileInputRef} className="mb-4" onChange={handleFileChange} />
                 {fileUrl && <p>File uploaded successfully.</p>}

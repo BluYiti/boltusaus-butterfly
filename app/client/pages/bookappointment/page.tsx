@@ -12,6 +12,7 @@ import ChoosePaymentModal from "./choosepayment";
 import CashPayment from "./cash";
 import CreditCardPayment from "./creditcard";
 import GCashPayment from "./gcash";
+import Image from 'next/image';
 
 const AppointmentBooking = () => {
   const { loading: authLoading } = useAuthCheck(['client']);
@@ -36,17 +37,15 @@ const AppointmentBooking = () => {
 
   const [loading, setLoading] = useState(true);
   const [clientsPsycho, setClientsPsycho] = useState(null);
-  const [payments, setPayments] = useState<any[]>([]); // State to store all payments
   const [paymentStatus, setPaymentStatus] = useState(null);
   const [declineReason, setDeclineReason] = useState(null);
   const [psychotherapists, setPsychotherapists] = useState([]);
-  const [selectedTherapistId, setSelectedTherapistId] = useState<Number | null>(null); // Start with null
+  const [, setSelectedTherapistId] = useState<number | null>(null); // Start with null
   const [profileImageUrls, setProfileImageUrls] = useState({});
   const [showPrompt, setShowPrompt] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string | null>(null);
 
-  const handleOpenModal = () => setIsModalOpen(true);
   const handleCloseModal = () => setIsModalOpen(false);
 
   const handleBookAppointment = () => {
@@ -94,23 +93,23 @@ const AppointmentBooking = () => {
     }
   };
 
-  // Define a mapping from month name to number (0-based index)
-  const monthMap: { [key: string]: number } = {
-    January: 0,
-    February: 1,
-    March: 2,
-    April: 3,
-    May: 4,
-    June: 5,
-    July: 6,
-    August: 7,
-    September: 8,
-    October: 9,
-    November: 10,
-    December: 11
-  };
-
+  
   useEffect(() => {
+    // Define a mapping from month name to number (0-based index)
+    const monthMap: { [key: string]: number } = {
+      January: 0,
+      February: 1,
+      March: 2,
+      April: 3,
+      May: 4,
+      June: 5,
+      July: 6,
+      August: 7,
+      September: 8,
+      October: 9,
+      November: 10,
+      December: 11
+    };
     const fetchData = async () => {
       try {
         const user = await account.get();
@@ -244,7 +243,7 @@ const AppointmentBooking = () => {
     };
   
     fetchData(); 
-  }, []);
+  }, [currentYear]);
   
   const isFormComplete = appointmentData.selectedDay !== null && appointmentData.selectedTime && appointmentData.selectedTherapist;
 
@@ -283,7 +282,7 @@ const AppointmentBooking = () => {
                   Your appointment has been declined. Please contact your psychotherapist for any questions about your appointment being declined via the communication tab.
                 </p>
                 <p className="text-lg text-gray-600 mt-5">The reason for your appointment decline:</p>
-                <p className="text-lg text-gray-600">"{declineReason}"</p>
+                <p className="text-lg text-gray-600">&quot;{declineReason}&quot;</p>
               </>
             )}
           </div>
@@ -308,10 +307,13 @@ const AppointmentBooking = () => {
                     {!clientsPsycho ? (
                       psychotherapists.map((therapist) => (
                         <div key={therapist.$id} className="flex items-center space-x-4">
-                          <img
+                          <Image
                             src={profileImageUrls[therapist.$id] || "/images/default-profile.png"}
                             alt={`${therapist.firstName} ${therapist.lastName}`}
-                            className="rounded-full w-16 h-16"
+                            width={64}   // Equivalent to w-16 (16 * 4)
+                            height={64}  // Equivalent to h-16 (16 * 4)
+                            className="rounded-full"
+                            unoptimized
                           />
                           <div>
                             <h3 className="text-lg font-bold">{therapist.firstName} {therapist.lastName}</h3>
@@ -336,10 +338,13 @@ const AppointmentBooking = () => {
                       ))
                     ) : (
                       <div className="flex items-center space-x-4">
-                        <img
+                        <Image
                           src={clientsPsycho && clientsPsycho.$id ? profileImageUrls[clientsPsycho.$id] : "/images/default-profile.png"}
                           alt={`${clientsPsycho ? clientsPsycho.firstName : "No Therapist"} ${clientsPsycho ? clientsPsycho.lastName : ""}`}
-                          className="rounded-full w-16 h-16"
+                          width={64}   // Equivalent to 16 * 4
+                          height={64}  // Equivalent to 16 * 4
+                          className="rounded-full"
+                          unoptimized
                         />
                         <div>
                           <h3 className="text-lg font-bold">

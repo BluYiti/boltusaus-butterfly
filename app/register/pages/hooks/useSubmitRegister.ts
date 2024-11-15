@@ -1,31 +1,8 @@
 'use client';
 
-import { account, databases, createJWT, ID, storage } from '@/appwrite';
+import { account, databases, createJWT, storage, ID } from '@/appwrite';
 import React from 'react';
-
-interface FormData {
-    firstName: string;
-    lastName: string;
-    birthday: string;
-    sex: string;
-    password: string;
-    rePassword: string;
-    agreeToTerms: boolean;
-    age: number | null;
-    street: string;
-    barangay: string;
-    city: string;
-    province: string;
-    country: string;
-    contactNumber: string;
-    emergencyContactName: string;
-    emergencyContactNumber: string;
-    idFile: File | null;
-    email: string;
-    userId?: string; // Add userId to track user creation
-    onRegister: (data: FormData) => void;
-    setValidationError: (error: string | null) => void;
-}
+import { FormData } from '@/register/pages/components/RegisterFormProps';
 
 const validateName = (name: string, fieldName: string) => {
     if (!name.trim()) return `${fieldName} is required.`;
@@ -76,7 +53,6 @@ const handleSubmit = async (
         validateName(formData.lastName, 'Last Name'),
         formData.birthday ? null : 'Birthday is required.',
         formData.sex ? null : 'Sex is required.',
-        formData.age !== null && formData.age < 18 ? 'You must be at least 18 years old to register.' : null,
         validateEmail(formData.email),
         formData.password.length < 8 ? 'Password must be at least 8 characters long.' : null,
         formData.rePassword.length < 8 ? 'Re-enter Password must be at least 8 characters long.' : null,
@@ -94,15 +70,22 @@ const handleSubmit = async (
         !formData.idFile ? 'Please upload your ID file.' : null,
     ];
 
-    const firstError = validations.find((error) => error !== null);
+    const firstError = validations.find(error => error !== null);
     if (firstError) {
-      formData.setValidationError(firstError);
-      setLoading(false); // Reset loading state on validation error
-      setButtonClicked(false); // Reset button clicked state
-      return;
+        formData.setValidationError(firstError);
+        return;
     }
 
     try {
+        const currentSession = await account.getSession('current');
+        if (currentSession) {
+            // 2. Delete the current active session
+            await account.deleteSession(currentSession.$id);
+            console.log(`Session ${currentSession.$id} deleted.`);
+        } else {
+            console.log('No active session found.');
+        }
+
         const fullName = `${formData.firstName} ${formData.lastName}`;
         const address = `${formData.street}, ${formData.barangay}, ${formData.city}, ${formData.province}, ${formData.country}`;
 
@@ -173,17 +156,20 @@ const handleSubmit = async (
         // Redirect or perform further actions after successful login and JWT creation
         formData.onRegister({ ...accountData, userId: accountId });
 
-    } catch (error: any) {
+    } catch (error) {
         console.error('Error during registration:', error);
         let errorMessage;
-    
-        // Customize error message for 409 Conflict
+
+        // Handle specific errors
         if (error.code === 409) {
             errorMessage = 'Duplicate User detected.';
             await account.deleteSessions();
+        } else if (error.message.includes('Network Error')) {
+            errorMessage = 'Network error. Please check your internet connection.';
+        } else if (error.code === 500) {
+            errorMessage = 'Server error. Please try again later.';
         } else {
             errorMessage = error.message || 'An error occurred during registration.';
-            await account.deleteSessions();
         }
     
         formData.setValidationError(errorMessage);

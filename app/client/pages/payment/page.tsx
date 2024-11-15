@@ -15,7 +15,7 @@ interface Payment {
   status: string;
   client: { firstname: string; lastname: string }; // Client's first and last name
   psychotherapist: { firstName: string; lastName: string }; // Psychotherapist's first and last name
-  booking: any;
+  booking: string;
   id: string; // Add a unique identifier for each payment to use as a key
   clientFirstName: string;
   clientLastName: string;
@@ -43,7 +43,7 @@ const PaymentsPage: React.FC = () => {
         console.log(response);
 
         // Assuming each payment document has a 'client' and 'psychotherapist' object with 'firstname' and 'lastname'
-        const fetchedPayments = response.documents.map((doc: any) => ({
+        const fetchedPayments = response.documents.map((doc) => ({
           referenceNo: doc.referenceNo,
           mode: doc.booking.mode,
           channel: doc.channel,

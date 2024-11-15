@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { databases, storage } from "@/appwrite"; // Make sure to initialize the Appwrite storage service
 import Image from "next/image";
-import { Models, Query } from 'appwrite';
+import { Models } from 'appwrite';
 import { useRouter } from "next/navigation";
 
 interface ReferredClientProfileModalProps {
@@ -138,15 +138,17 @@ const ReferredClientProfileModal: React.FC<ReferredClientProfileModalProps> = ({
             <>
               <div className=" flex space-x-12 items-center">
                 <div className="flex-shrink-0 text-center">
-                  <img
-                    src={clientData.profilePictureUrl || '/default-profile.jpg'}
+                  <Image
+                    src={clientData.profilePictureUrl || '/default-profile.jpg'} // Fallback to default profile image
                     alt="Profile"
-                    className="w-48 h-48 rounded-full object-cover mx-auto"
+                    width={192}  // Width of the image (48 * 4 for higher resolution)
+                    height={192} // Height of the image (48 * 4 for higher resolution)
+                    className="rounded-full object-cover mx-auto"
                     onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.onerror = null;
-                      target.src = '/default-profile.jpg';
+                      const target = e.target as HTMLImageElement; // Cast e.target to HTMLImageElement
+                      target.src = '/default-profile.jpg'; // Handle fallback logic
                     }}
+                    priority // Use priority if this image is important for initial load
                   />
                   <h2 className="mt-4 text-2xl font-bold text-gray-800">
                     {clientData.firstname} {clientData.lastname}

@@ -130,7 +130,7 @@ const Clients = () => {
     };
 
     fetchClientsAndAccounts();
-  }, [databases]);
+  }, []);
 
   const filteredClients = () => {
     let searchFiltered = clients.filter(client =>

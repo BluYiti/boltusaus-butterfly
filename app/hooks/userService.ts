@@ -59,7 +59,7 @@ export const uploadProfilePicture = async (fileId: string, file: File): Promise<
 export const uploadProfilePictureCollection = async (userId: string, photoId: string, collection: string): Promise<string | null> => {
     try {
         // Create a new file in the "Images" bucket with a unique ID for the user
-        const result = await databases.updateDocument(
+        await databases.updateDocument(
             'Butterfly-Database', // databaseId
             collection, // collectionId
             userId, // documentId

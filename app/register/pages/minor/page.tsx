@@ -3,7 +3,7 @@
 import React from 'react';
 import Back from '@/components/Back';
 import Image from 'next/image';
-import MinorRegisterForm from '../components/MinorRegisterForm';
+import RegisterForm from '@/register/pages/components/RegisterForm';
 
 const RegisterPage: React.FC = () => {
     return (
@@ -20,12 +20,9 @@ const RegisterPage: React.FC = () => {
             />
             <div className="flex justify-end items-end mt-10">
                 <div className="ml-[45rem]">
-                    <MinorRegisterForm 
-                        onRegister={function (): void {
-                            throw new Error('Function not implemented.');
-                        } } 
+                    <RegisterForm 
+                        isAdult={false}
                         error={null} 
-                        loading={false} 
                     />
                 </div>
             </div>

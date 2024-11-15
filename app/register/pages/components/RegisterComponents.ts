@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react';
+import { Country, Region, City, Province, Barangay } from '@/register/pages/components/RegisterFormProps'
 
 const useRegisterForm = () => {
     const [firstName, setFirstName] = useState<string>('');
@@ -27,6 +28,7 @@ const useRegisterForm = () => {
         lowercase: false,
     });
     const [rePassword, setRePassword] = useState<string>('');
+    const [passwordsMatch, setPasswordsMatch] = useState(true);
     const [isPasswordValid, setIsPasswordValid] = useState(false);
     const [agreeToTerms, setAgreeToTerms] = useState<boolean>(false);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -41,6 +43,7 @@ const useRegisterForm = () => {
     const [barangays, setBarangays] = useState<Barangay[]>([]);
     const [buttonClicked, setButtonClicked] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [modalContentType, setModalContentType] = useState<'terms' | 'privacy'>('terms');
 
     return {
         firstName, setFirstName,
@@ -61,6 +64,7 @@ const useRegisterForm = () => {
         password, setPassword,
         passwordCriteria, setPasswordCriteria,
         rePassword, setRePassword,
+        passwordsMatch, setPasswordsMatch,
         isPasswordValid, setIsPasswordValid,
         agreeToTerms, setAgreeToTerms,
         isModalOpen, setIsModalOpen,
@@ -74,40 +78,9 @@ const useRegisterForm = () => {
         cities, setCities,
         barangays, setBarangays,
         buttonClicked, setButtonClicked,
-        loading, setLoading
+        loading, setLoading,
+        modalContentType, setModalContentType
     };
 };
 
 export default useRegisterForm;
-
-export interface Country {
-    name: {
-        common: string;
-    };
-    flags: {
-        png: string;
-    };
-}
-
-export interface Region {
-    code: string;
-    name: string;
-}
-
-export interface Province {
-    code: string;
-    name: string;
-    region: string;
-}
-
-export interface City {
-    code: string;
-    name: string;
-    province: string;
-}
-
-export interface Barangay {
-    code: string;
-    name: string;
-    city: string; // Assuming there’s a city code to filter by
-}

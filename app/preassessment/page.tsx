@@ -21,7 +21,6 @@ export default function PreAssessmentPage() {
     modalMessage, // The message to display in the modal
     modalType, // The type of modal (confirmation, error, success)
     closeModal, // Close modal handler
-    isAllAnswered,
   } = useAssessment(questions || []);
   
   const [isSubmitting, setIsSubmitting] = useState(false);

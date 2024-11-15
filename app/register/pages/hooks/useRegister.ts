@@ -21,7 +21,7 @@ export const useRegister = () => {
             try {
                 activeSession = await account.getSession('current');
                 console.log('Active session found:', activeSession);
-            } catch (err: any) {
+            } catch (err) {
                 console.log('No active session found, proceeding with registration.');
             }
 
@@ -52,7 +52,7 @@ export const useRegister = () => {
 
             // Redirect to the pre-assessment page
             router.push('/preassessment');
-        } catch (err: any) {
+        } catch (err) {
             console.error('Error during registration:', err);
             setError(`Registration failed: ${err.message}`);
 
@@ -73,7 +73,7 @@ export const useRegister = () => {
                     }
             
                     console.log('User successfully deleted');
-                } catch (deleteError: any) {
+                } catch (deleteError) {
                     console.error('Failed to delete user during rollback:', deleteError);
                 }
             }

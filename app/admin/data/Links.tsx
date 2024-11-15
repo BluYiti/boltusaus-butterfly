@@ -1,5 +1,5 @@
 import { IconType } from "react-icons";
-import { FiBarChart2, FiUser, FiLock, FiClipboard, FiList } from "react-icons/fi";
+import { FiUser, FiList } from "react-icons/fi";
 
 const items: { href: string; label: string; icon: IconType }[] = [
   { href: "/admin/pages/account", label: "Account", icon: () => <FiUser /> },

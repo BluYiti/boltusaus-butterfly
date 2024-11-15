@@ -1,278 +1,342 @@
 'use client';
 import { FC, useState, useRef, useEffect } from 'react';
-import { FaSearch, FaTimes } from 'react-icons/fa';
 import Layout from '@/components/Sidebar/Layout';
 import items from '@/client/data/Links';
+import { Client, Databases, Account, Query, ID } from 'appwrite';
 import CallNotification from '@/components/CallNotification';
+import ClientVideoCall from '@/components/ClientVideoCall';
 
 // Interface Definitions
-interface Contact {
-  id: number;
+interface Psychotherapist {
+  id: string;
   name: string;
-  lastMessage: string;
   imageUrl: string;
-  time: string;
-  isSession: boolean;
 }
 
 interface Message {
-  id: number;
+  id: string;
   text: string;
   sender: string;
   time: string;
 }
 
-// Call State
 interface Call {
   isActive: boolean;
-  caller: Contact | null;
+  caller: Psychotherapist | null;
 }
 
-// Static Data
-const contacts: Contact[] = [
-  {
-    id: 1,
-    name: 'Mrs. Angelica Peralta',
-    lastMessage: '',
-    imageUrl: '/images/denzel.jpg',
-    time: '9:00 AM',
-    isSession: true,
-  },
-];
+// Set up Appwrite Client
+const client = new Client();
+const databases = new Databases(client);
+const account = new Account(client);
 
-const chatMessages: { [key: number]: Message[] } = {
-  1: [],
-};
+client
+  .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT as string)
+  .setProject(process.env.NEXT_PUBLIC_PROJECT_ID as string);
 
-// Contact List Component
-const ContactList: FC<{ onContactClick: (id: number) => void; selectedContact: number | null }> = ({
-  onContactClick,
-  selectedContact,
-}) => {
-  const [searchTerm, setSearchTerm] = useState('');
-
-  const handleClearSearch = () => setSearchTerm('');
-
-  const filteredContacts = contacts.filter(contact =>
-    contact.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  return (
-    <div className="w-1/4 bg-gray-200 p-4 border-r border-gray-200">
-      <h1 className="text-xl font-bold text-gray-800">Chats</h1>
-      <div className="relative flex items-center bg-gray-100 p-2 rounded-full mb-4">
-        <FaSearch className="text-gray-400 ml-2" />
-        <input
-          type="text"
-          value={searchTerm}
-          onChange={e => setSearchTerm(e.target.value)}
-          placeholder="Search"
-          className="flex-grow bg-transparent p-2 outline-none text-sm"
-        />
-        {searchTerm && (
-          <button onClick={handleClearSearch} className="absolute right-2 text-gray-500 hover:text-gray-700">
-            <FaTimes />
-          </button>
-        )}
-      </div>
-
-      {filteredContacts.length === 0 ? (
-        <div className="text-center text-gray-500">
-          <p>No contacts found</p>
-        </div>
-      ) : (
-        <div className="space-y-2">
-          {filteredContacts.map(contact => (
-            <div
-              key={contact.id}
-              className={`flex items-center p-3 rounded-lg cursor-pointer transition ${
-                selectedContact === contact.id ? 'bg-gray-300' : 'hover:bg-gray-100'
-              }`}
-              onClick={() => onContactClick(contact.id)}
-            >
-              <img
-                src={contact.imageUrl}
-                alt={contact.name}
-                className="w-12 h-12 rounded-full mr-4"
-              />
-              <div className="flex-grow">
-                <div className="flex justify-between items-center">
-                  <span className="font-semibold">{contact.name}</span>
-                  <span className="text-xs text-gray-500">{contact.time}</span>
-                </div>
-                <p className={`text-sm ${contact.isSession ? 'text-blue-500' : 'text-gray-500'}`}>
-                  {contact.lastMessage}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
-
-// Chat Box Component
-  // Chat Box Component
-const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSendMessage: (text: string) => void }> = ({
-  selectedContact,
-  messages,
-  onSendMessage,
-}) => {
+const ChatPage: FC = () => {
+  const [psychotherapist, setPsychotherapist] = useState<Psychotherapist | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [messageInput, setMessageInput] = useState('');
-  const messagesEndRef = useRef<HTMLDivElement>(null); // Ref for scrolling
+  const [call, setCall] = useState<Call>({ isActive: false, caller: null });
+  const [isVideoCallActive, setIsVideoCallActive] = useState(false);
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [clientDocumentId, setClientDocumentId] = useState<string | null>(null);
+  const [notificationDocumentId, setNotificationDocumentId] = useState<string | null>(null); // To store Call-Notification ID
+  const [isPollingActive, setIsPollingActive] = useState(true);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const handleSendMessage = () => {
-    if (messageInput.trim()) {
-      onSendMessage(messageInput);
-      setMessageInput('');
+  // Fetching the Psychotherapist and Conversation ID
+  useEffect(() => {
+    const fetchPsychotherapist = async () => {
+      try {
+        const user = await account.get();
+
+        const clientResponse = await databases.listDocuments(
+          'Butterfly-Database',
+          'Client',
+          [Query.equal('userid', user.$id)]
+        );
+
+        if (clientResponse.documents.length > 0) {
+          const clientData = clientResponse.documents[0];
+          setClientDocumentId(clientData.$id);
+
+          if (clientData.psychotherapist) {
+            const psychotherapistId = clientData.psychotherapist.$id || clientData.psychotherapist;
+
+            if (psychotherapistId) {
+              const psychotherapistResponse = await databases.getDocument(
+                'Butterfly-Database',
+                'Psychotherapist',
+                psychotherapistId
+              );
+
+              setPsychotherapist({
+                id: psychotherapistResponse.$id,
+                name: `${psychotherapistResponse.firstName || 'Unknown'} ${psychotherapistResponse.lastName || 'Name'}`,
+                imageUrl: psychotherapistResponse.imageUrl || '/default-avatar.jpg',
+              });
+
+              const conversationResponse = await databases.listDocuments(
+                'Butterfly-Database',
+                'Conversation',
+                [Query.equal('clientId', clientData.$id), Query.equal('psychotherapistId', psychotherapistId)]
+              );
+
+              if (conversationResponse.documents.length > 0) {
+                setConversationId(conversationResponse.documents[0].$id);
+              } else {
+                const newConversation = await databases.createDocument(
+                  'Butterfly-Database',
+                  'Conversation',
+                  ID.unique(),
+                  {
+                    clientId: clientData.$id,
+                    psychotherapistId: psychotherapistId,
+                    startDate: new Date().toISOString(),
+                    endDate: null,
+                  }
+                );
+                setConversationId(newConversation.$id);
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching psychotherapist:', error);
+      }
+    };
+
+    fetchPsychotherapist();
+  }, []);
+
+  // Function to handle sending a message
+  const handleSendMessage = async () => {
+    if (messageInput.trim() && psychotherapist && conversationId) {
+      try {
+        const user = await account.get();
+        const clientResponse = await databases.listDocuments(
+          'Butterfly-Database',
+          'Client',
+          [Query.equal('userid', user.$id)]
+        );
+
+        if (clientResponse.documents.length === 0) {
+          console.error('Client not found.');
+          return;
+        }
+
+        const clientDocumentId = clientResponse.documents[0].$id;
+
+        const newMessage = {
+          senderId: clientDocumentId,
+          receiverId: psychotherapist.id,
+          content: messageInput,
+          dateTime: new Date().toISOString(),
+          status: 'sent',
+          conversationId: conversationId,
+        };
+
+        const response = await databases.createDocument(
+          'Butterfly-Database',
+          'Messages',
+          ID.unique(),
+          newMessage
+        );
+
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            id: response.$id,
+            text: newMessage.content,
+            sender: 'client',
+            time: new Date(newMessage.dateTime).toLocaleTimeString([], {
+              hour: '2-digit',
+              minute: '2-digit',
+            }),
+          },
+        ]);
+
+        setMessageInput('');
+      } catch (error) {
+        console.error('Error sending message:', error);
+      }
     }
   };
 
+  // Polling for messages in the conversation
+  useEffect(() => {
+    let fetchInterval: NodeJS.Timeout | null = null;
+
+    const fetchMessages = async () => {
+      if (!conversationId || !psychotherapist) return;
+
+      try {
+        const response = await databases.listDocuments(
+          'Butterfly-Database',
+          'Messages',
+          [Query.equal('conversationId', conversationId), Query.orderAsc('dateTime')]
+        );
+
+        const messageData = response.documents.map((msg: any) => ({
+          id: msg.$id,
+          text: msg.content,
+          sender: msg.senderId === psychotherapist.id ? 'psychotherapist' : 'client',
+          time: new Date(msg.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        }));
+
+        setMessages(messageData);
+      } catch (error) {
+        console.error('Error fetching messages:', error);
+      }
+    };
+
+    if (conversationId && psychotherapist) {
+      fetchMessages();
+      fetchInterval = setInterval(fetchMessages, 3000);
+    }
+
+    return () => {
+      if (fetchInterval) {
+        clearInterval(fetchInterval);
+      }
+    };
+  }, [conversationId, psychotherapist?.id]);
+
+  // Polling for Call Notification
+  useEffect(() => {
+    const pollForCallNotifications = async () => {
+      if (!clientDocumentId || !isPollingActive) return;
+
+      try {
+        const response = await databases.listDocuments(
+          'Butterfly-Database',
+          'Call-Notification',
+          [Query.equal('receiverId', clientDocumentId), Query.equal('isActive', true)]
+        );
+
+        if (response.documents.length > 0) {
+          const notification = response.documents[0];
+          if (notification.callerId === psychotherapist?.id) {
+            setCall({ isActive: true, caller: psychotherapist });
+            setNotificationDocumentId(notification.$id); // Capture Call-Notification ID for updating
+          }
+        } else {
+          setCall({ isActive: false, caller: null });
+        }
+      } catch (error) {
+        console.error("Error polling for call notifications:", error);
+      }
+    };
+
+    const interval = setInterval(pollForCallNotifications, 3000);
+    return () => clearInterval(interval);
+  }, [clientDocumentId, psychotherapist, isPollingActive]);
+
+  // Function to accept the call
+  const handleAcceptCall = async () => {
+    if (isVideoCallActive) return;
+    setIsVideoCallActive(true);
+    setCall({ isActive: false, caller: null });
+    setIsPollingActive(false);
+
+    if (notificationDocumentId) { // Use notificationDocumentId to update the correct Call-Notification document
+      try {
+        await databases.updateDocument(
+          'Butterfly-Database',
+          'Call-Notification',
+          notificationDocumentId,
+          { isActive: false }
+        );
+      } catch (error) {
+        console.error('Error updating call notification:', error);
+      }
+    }
+  };
+
+  // Scroll to the bottom of the messages
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   useEffect(() => {
-    scrollToBottom(); // Scroll when messages change
+    scrollToBottom();
   }, [messages]);
-
-  if (!selectedContact) {
-    return (
-      <div className="w-3/4 p-6 flex items-center justify-center">
-        <p>Select a contact to start chatting</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="w-3/4 p-6 flex flex-col justify-between">
-      <div className="flex items-center mb-4 justify-between">
-        <div className="flex items-center">
-          <img
-            src={selectedContact.imageUrl}
-            alt={selectedContact.name}
-            className="w-12 h-12 rounded-full mr-4"
-          />
-          <h2 className="text-xl font-bold">{selectedContact.name}</h2>
-        </div>
-      </div>
-
-      <div className="flex-grow overflow-y-auto space-y-4">
-        {messages.map(message => (
-          <div key={message.id} className={`flex ${message.sender === 'client' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-xs p-4 rounded-lg shadow ${message.sender === 'client' ? 'bg-blue-100' : 'bg-gray-100'}`}>
-              <p>{message.text}</p>
-              <span className="block text-xs text-gray-400">{message.time}</span>
-            </div>
-          </div>
-        ))}
-        <div ref={messagesEndRef} /> {/* Empty div to act as scroll target */}
-      </div>
-
-      <div className="flex items-center mt-4 border-t pt-4">
-        <input
-          type="text"
-          value={messageInput}
-          onChange={e => setMessageInput(e.target.value)}
-          onKeyDown={e => {
-            if (e.key === 'Enter') {
-              handleSendMessage();
-              setMessageInput(''); // Clear input after sending
-            }
-          }}
-          placeholder="Type a message..."
-          className="flex-grow p-2 border border-gray-300 rounded-full"
-        />
-
-        <button
-          onClick={handleSendMessage}
-          className="ml-2 bg-blue-400 text-white px-4 py-2 rounded-full hover:bg-blue-500"
-        >
-          Send
-        </button>
-      </div>
-    </div>
-  );
-};
-
-
-// Main Chat Page Component
-const ChatPage: FC = () => {
-  const [selectedContactId, setSelectedContactId] = useState<number | null>(null);
-  const [messagesByContact, setMessagesByContact] = useState(chatMessages);
-  const [call, setCall] = useState<Call>({ isActive: false, caller: null });
-  const [isVideoCallActive, setIsVideoCallActive] = useState(false);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-
-  const selectedContact = contacts.find(contact => contact.id === selectedContactId) || null;
-  const messages = selectedContact ? messagesByContact[selectedContactId] || [] : [];
-
-  const handleSendMessage = (text: string) => {
-    if (selectedContactId === null) return;
-
-    const newMessage: Message = {
-      id: messages.length + 1,
-      text,
-      sender: 'client',
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    };
-
-    setMessagesByContact(prevMessages => ({
-      ...prevMessages,
-      [selectedContactId]: [...(prevMessages[selectedContactId] || []), newMessage],
-    }));
-  };
-
-  const handleIncomingCall = (caller: Contact) => {
-    setCall({ isActive: true, caller });
-  };
-
-  const handleAcceptCall = () => {
-    setCall({ isActive: false, caller: null }); // Hide call notification
-    setIsVideoCallActive(true); // Start video call
-  };
-
-  useEffect(() => {
-    if (isVideoCallActive && videoRef.current) {
-      const startVideoCall = async () => {
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-          videoRef.current.srcObject = stream;
-        } catch (err) {
-          console.error('Error accessing media devices.', err);
-        }
-      };
-      startVideoCall();
-      return () => {
-        if (videoRef.current && videoRef.current.srcObject) {
-          (videoRef.current.srcObject as MediaStream).getTracks().forEach(track => track.stop());
-        }
-      };
-    }
-  }, [isVideoCallActive]);
 
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
       <div className="text-black min-h-screen flex">
-        {!isVideoCallActive ? (
-          <div className="flex-grow flex flex-col justify-between">
-            <div className="flex h-screen">
-              <ContactList onContactClick={setSelectedContactId} selectedContact={selectedContactId} />
-              <ChatBox selectedContact={selectedContact} messages={messages} onSendMessage={handleSendMessage} />
-            </div>
-          </div>
-        ) : (
-          <div className="relative w-full h-screen border-8 border-gray-500"> {/* Full-size video call area */}
-            <video ref={videoRef} className="rounded-lg w-full h-full object-cover" autoPlay></video>
-          </div>
-        )}
+        <div className="flex-grow flex flex-col justify-between">
+          <div className="flex h-screen">
+            {psychotherapist ? (
+              <div className="w-full p-6 flex flex-col justify-between">
+                <div className="flex items-center mb-4 justify-between">
+                  <div className="flex items-center">
+                    <img
+                      src={psychotherapist.imageUrl}
+                      alt={psychotherapist.name}
+                      className="w-12 h-12 rounded-full mr-4"
+                    />
+                    <h2 className="text-xl font-bold">{psychotherapist.name}</h2>
+                  </div>
+                </div>
 
-        {/* Call Notification */}
+                <div className="flex-grow overflow-y-auto space-y-4">
+                  {messages.map((message) => (
+                    <div key={message.id} className={`flex ${message.sender === 'client' ? 'justify-end' : 'justify-start'}`}>
+                      <div className={`max-w-xs p-4 rounded-lg shadow ${message.sender === 'client' ? 'bg-blue-100' : 'bg-gray-100'}`}>
+                        <p>{message.text}</p>
+                        <span className="block text-xs text-gray-400">{message.time}</span>
+                      </div>
+                    </div>
+                  ))}
+                  <div ref={messagesEndRef} />
+                </div>
+
+                <div className="flex items-center mt-4 border-t pt-4">
+                  <input
+                    type="text"
+                    value={messageInput}
+                    onChange={(e) => setMessageInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        handleSendMessage();
+                      }
+                    }}
+                    placeholder="Type a message..."
+                    className="flex-grow p-2 border border-gray-300 rounded-full"
+                  />
+                  <button
+                    onClick={handleSendMessage}
+                    className="ml-2 bg-blue-400 text-white px-4 py-2 rounded-full hover:bg-blue-500"
+                  >
+                    Send
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="w-full p-6 flex items-center justify-center">
+                <p>Loading your psychotherapist...</p>
+              </div>
+            )}
+          </div>
+        </div>
+
         {call.isActive && (
-          <CallNotification
-            caller={call.caller}
-            onAccept={handleAcceptCall}
+          <CallNotification 
+            caller={call.caller} 
+            onAccept={handleAcceptCall} 
+          />
+        )}
+        {isVideoCallActive && psychotherapist && clientDocumentId && (
+          <ClientVideoCall 
+            callerId={psychotherapist.id} 
+            receiverId={clientDocumentId} 
+            onEndCall={() => {
+              setIsVideoCallActive(false);
+              setIsPollingActive(true); // Resume polling after call ends
+            }} 
           />
         )}
       </div>
