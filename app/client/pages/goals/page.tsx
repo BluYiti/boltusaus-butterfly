@@ -515,28 +515,53 @@ const handleProgressChange = async (newProgress: string, goalId: string) => {
                                 const displayProgress = isPastEndTime ? 'missed' : goal.progress;
 
                                 return (
-                                    <li key={goal.$id} className="p-4 bg-gray-50 rounded-lg shadow-md flex justify-between items-center">
-                                    <div>
-                                        <p className="text-sm">
-                                            {goal.activities} for {goal.duration} minutes on {goal.date} (Mood: {goal.mood})
-                                        </p>
-                                        <p className="text-xs text-gray-500">Status: {displayProgress}</p>
-                                    </div>
-                                    {!isPastEndTime ? (
-                                        <select
-                                            value={goal.progress}
-                                            onChange={(e) => handleProgressChange(e.target.value, goal.$id)}
-                                            className="border rounded-lg p-2 text-gray-700 focus:outline-none focus:ring-2 transition-colors duration-200"
-                                            disabled={isPastEndTime}
-                                        >
-                                            <option value="todo">To Do</option>
-                                            <option value="doing">Doing</option>
-                                            <option value="done">Done</option>
-                                        </select>
-                                    ) : (
-                                        <span className="text-red-500">Missed</span>
-                                    )}
-                                </li>
+                                    <li
+  key={goal.$id}
+  className="p-4 bg-gray-50 rounded-lg shadow-md"
+>
+  <div className="overflow-x-auto">
+    <table className="w-full text-left border-separate border-spacing-y-2">
+      <thead>
+        <tr className="text-sm text-gray-700">
+          <th className="px-4 py-2">Activity</th>
+          <th className="px-4 py-2">Duration (min)</th>
+          <th className="px-4 py-2">Date</th>
+          <th className="px-4 py-2">Start Time</th>
+          <th className="px-4 py-2">End Time</th>
+          <th className="px-4 py-2">Mood</th>
+          <th className="px-4 py-2">Progress</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr className="bg-white">
+          <td className="px-4 py-2">{goal.activities}</td>
+          <td className="px-4 py-2">{goal.duration}</td>
+          <td className="px-4 py-2">{goal.date}</td>
+          <td className="px-4 py-2">{goal.startTime || 'N/A'}</td>
+          <td className="px-4 py-2">{goal.endTime || 'N/A'}</td>
+          <td className="px-4 py-2">{goal.mood}</td>
+          <td className="px-4 py-2">
+            {!isPastEndTime ? (
+              <select
+                value={goal.progress}
+                onChange={(e) => handleProgressChange(e.target.value, goal.$id)}
+                className="border rounded-lg p-1 text-gray-700 focus:outline-none focus:ring-2 transition-colors duration-200"
+                disabled={isPastEndTime}
+              >
+                <option value="todo">To Do</option>
+                <option value="doing">Doing</option>
+                <option value="done">Done</option>
+              </select>
+            ) : (
+              <span className="text-red-500">Missed</span>
+            )}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p className="text-xs text-gray-500 mt-2">Status: {displayProgress}</p>
+  </div>
+</li>
 
                                 );
                             })}
