@@ -523,24 +523,24 @@ const handleProgressChange = async (newProgress: string, goalId: string) => {
     <table className="w-full text-left border-separate border-spacing-y-2">
       <thead>
         <tr className="text-sm text-gray-700">
-          <th className="px-4 py-2">Activity</th>
-          <th className="px-4 py-2">Duration (min)</th>
-          <th className="px-4 py-2">Date</th>
-          <th className="px-4 py-2">Start Time</th>
-          <th className="px-4 py-2">End Time</th>
-          <th className="px-4 py-2">Mood</th>
-          <th className="px-4 py-2">Progress</th>
+          <th className="px-4 py-2 w-[10%]">Activity</th>
+          <th className="px-4 py-2 w-[12%]">Duration (min)</th>
+          <th className="px-4 py-2 w-[15%]">Date</th>
+          <th className="px-4 py-2 w-[15%]">Start Time</th>
+          <th className="px-4 py-2 w-[15%]">End Time</th>
+          <th className="px-4 py-2 w-[12%]">Mood</th>
+          <th className="px-4 py-2 w-[15%]">Progress</th>
         </tr>
       </thead>
       <tbody>
         <tr className="bg-white">
-          <td className="px-4 py-2">{goal.activities}</td>
-          <td className="px-4 py-2">{goal.duration}</td>
-          <td className="px-4 py-2">{goal.date}</td>
-          <td className="px-4 py-2">{goal.startTime || 'N/A'}</td>
-          <td className="px-4 py-2">{goal.endTime || 'N/A'}</td>
-          <td className="px-4 py-2">{goal.mood}</td>
-          <td className="px-4 py-2">
+          <td className="px-4 py-2 w-[10%]">{goal.activities}</td>
+          <td className="px-4 py-2 w-[12%]">{goal.duration}</td>
+          <td className="px-4 py-2 [15%]">{goal.date}</td>
+          <td className="px-4 py-2 [15%]">{goal.startTime || 'N/A'}</td>
+          <td className="px-4 py-2 [15%]">{goal.endTime || 'N/A'}</td>
+          <td className="px-4 py-2 w-[15%]">{goal.mood}</td>
+          <td className="px-4 py-2 [15%]">
             {!isPastEndTime ? (
               <select
                 value={goal.progress}
