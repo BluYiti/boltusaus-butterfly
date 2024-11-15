@@ -45,8 +45,6 @@ const handleSubmit = async (
     setLoading(true); // Set loading to true when submit starts
     setButtonClicked(true); // Show the button as clicked
 
-    console.log('Email being used for registration:', formData.email);
-
     // Validate fields
     const validations = [
         validateName(formData.firstName, 'First Name'),
@@ -77,59 +75,58 @@ const handleSubmit = async (
     }
 
     try {
-        const currentSession = await account.getSession('current');
+        // Check if the user is authenticated before checking session
+        const currentSession = await account.getSession('current').catch(error => {
+            console.log('No active session found or user is not authenticated');
+            return null; // Skip if no session is found
+        });
+    
         if (currentSession) {
-            // 2. Delete the current active session
             await account.deleteSession(currentSession.$id);
             console.log(`Session ${currentSession.$id} deleted.`);
         } else {
             console.log('No active session found.');
         }
-
+    
         const fullName = `${formData.firstName} ${formData.lastName}`;
         const address = `${formData.street}, ${formData.barangay}, ${formData.city}, ${formData.province}, ${formData.country}`;
-
+    
         // Create the user
         const userResponse = await account.create(ID.unique(), formData.email, formData.password, fullName);
         const accountId = userResponse.$id;
-
+    
         // Log in the user immediately after creating the account
         await account.createEmailPasswordSession(formData.email, formData.password);
         console.log('User logged in successfully.');
-
-        // Generate JWT after account creation
-        const jwtToken: any = await createJWT();
+    
+        const jwtToken = await createJWT();
         console.log('JWT created:', jwtToken);
-
+    
         // Store JWT in an HTTP-only cookie
         document.cookie = `jwtToken=${jwtToken}; Secure; HttpOnly; SameSite=Strict`;
         console.log('JWT stored');
-
-        // Upload the ID file to Appwrite   
+    
+        // Upload the ID file to Appwrite
         const bucketId = 'Images'; // Replace with your Appwrite bucket ID
         const fileUpload = await storage.createFile(bucketId, ID.unique(), formData.idFile);
-
-        // Retrieve the file ID after uploading
         const fileId = fileUpload.$id;
-
+    
+        // Create account data and client data
         const accountData = {
             ...formData,
             userId: accountId,
-            fullName: `${formData.firstName} ${formData.lastName}`,
-            username: `${formData.firstName} ${formData.lastName}`,
+            fullName,
+            username: fullName,
             role: 'client',
         };
-
-        // Create the user in the "Accounts" collection
+    
         await databases.createDocument('Butterfly-Database', 'Accounts', accountId, {
             username: accountData.username,
             email: formData.email,
             role: accountData.role,
         });
-
         console.log('Accounts Collection document added');
-
-        // Create the user in the "Client" collection
+    
         const clientData = {
             userid: accountId,
             firstname: formData.firstName,
@@ -149,21 +146,19 @@ const handleSubmit = async (
             status: null,
             allowTherapistChange: true
         };
-
+    
         await databases.createDocument('Butterfly-Database', 'Client', 'unique()', clientData);
         console.log('Client Collection document added');
-
+    
         // Redirect or perform further actions after successful login and JWT creation
         formData.onRegister({ ...accountData, userId: accountId });
-
+    
     } catch (error) {
         console.error('Error during registration:', error);
         let errorMessage;
-
-        // Handle specific errors
+    
         if (error.code === 409) {
-            errorMessage = 'Duplicate User detected.';
-            await account.deleteSessions();
+            errorMessage = 'Email is already in use';
         } else if (error.message.includes('Network Error')) {
             errorMessage = 'Network error. Please check your internet connection.';
         } else if (error.code === 500) {
@@ -173,11 +168,12 @@ const handleSubmit = async (
         }
     
         formData.setValidationError(errorMessage);
-
+    
         // Reset loading and button clicked states when an error occurs
         setLoading(false);
         setButtonClicked(false);
     }
+    
 };
 
 
