@@ -4,8 +4,9 @@ import { useState } from 'react';
 import Back from '@/components/Back';
 import Image from 'next/image';
 import ForgotPasswordForm from '../components/ForgotForm';
+import { account } from '@/appwrite';
 
-const LoginPage: React.FC = () => {
+const ForgotPassword: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
 
@@ -13,27 +14,14 @@ const LoginPage: React.FC = () => {
         setLoading(true);
         setError(null);
         try {
-            // Replace with your API call to request a password reset
-            await fakeApiCall(email);
-            alert('Reset link sent!'); // Handle success (e.g., show success message)
+            // Make a call to Appwrite's account service to send password reset email
+            await account.createRecovery(email, `${window.location.origin}/reset-password`); // Reset password URL
+            alert('Password reset link sent to your email!');
         } catch (err) {
-            setError('Failed to send reset link. Please try again.'); // Handle error
+            setError('Failed to send reset link. Please try again.');
         } finally {
             setLoading(false);
         }
-    };
-
-    // Simulate API call for demonstration purposes
-    const fakeApiCall = (email: string) => {
-        return new Promise((resolve, reject) => {
-            setTimeout(() => {
-                if (email === 'test@example.com') {
-                    resolve('Success');
-                } else {
-                    reject(new Error('Invalid email'));
-                }
-            }, 2000);
-        });
     };
 
     return (
@@ -52,4 +40,4 @@ const LoginPage: React.FC = () => {
     );
 };
 
-export default LoginPage;
+export default ForgotPassword;

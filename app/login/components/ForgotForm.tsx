@@ -11,18 +11,34 @@ interface ForgotPasswordFormProps {
 
 const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onSubmit, error, loading }) => {
     const [email, setEmail] = useState<string>('');
+    const [emailError, setEmailError] = useState<string | null>(null);
 
-    
-
+    // Handle form submit
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+
+        // Simple email validation
+        if (!validateEmail(email)) {
+            setEmailError('Please enter a valid email address.');
+            return;
+        }
+
+        setEmailError(null); // Clear email error
         onSubmit(email);
+    };
+
+    // Simple email validation function
+    const validateEmail = (email: string): boolean => {
+        const regex = /^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/;
+        return regex.test(email);
     };
 
     return (
         <div>
             <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
                 {error && <div className="text-red-500 text-sm">{error}</div>}
+                {emailError && <div className="text-red-500 text-sm">{emailError}</div>} {/* Show email error */}
+
                 <div className="relative mt-8">
                     <label htmlFor="email" className="absolute -top-3 left-2 bg-white px-1 text-[#38b6ff]">
                         Email
@@ -42,13 +58,18 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onSubmit, error
                         <FaEnvelope />
                     </div>
                 </div>
+
                 <div>
                     <button
                         type="submit"
                         className="btn-submit absolute mt-3 ml-6 text-lg rounded-xl bg-[#38b6ff] w-52 py-2 text-white"
                         disabled={loading}
                     >
-                        {loading ? 'Sending...' : 'Request Reset Link'}
+                        {loading ? (
+                            <span className="animate-spin">⏳</span> // You can add a spinner here if you like
+                        ) : (
+                            'Request Reset Link'
+                        )}
                     </button>
                 </div>
             </form>

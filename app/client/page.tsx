@@ -85,8 +85,6 @@ const NewClientDashboard = () => {
     downloadCertificate(documentId, userName);
   };
 
-  const visibleSlides = 2;
-
   // Function to go to the next slide
   const handleNext = () => {
     setCurrentIndex((prevIndex) => {
@@ -115,6 +113,20 @@ const NewClientDashboard = () => {
     setSelectedPsychotherapist(null); // Reset selected psychotherapist
   };
 
+  // Handle click on indicator dot
+  const handleIndicatorClick = (index) => {
+    const newIndex = index * visibleSlides; // Jump to the corresponding slide set
+    setCurrentIndex(newIndex);
+  };
+
+  const visibleSlides = 2;  // Or whatever number of slides you want visible at a time
+
+  // Adjust this to prevent overflow when there are fewer than 3 psychotherapists
+  const psychotherapistsToShow = psychotherapists.length < visibleSlides ? psychotherapists.length : visibleSlides;
+
+  // Calculate the transform based on the number of psychotherapists
+  const transformPercentage = (currentIndex / psychotherapistsToShow) * 100;
+
   if (authLoading || dataLoading) {
     return <LoadingScreen />; // Show the loading screen while the auth check or data loading is in progress
   }
@@ -134,7 +146,7 @@ const NewClientDashboard = () => {
 
       <div className="flex justify-between items-start space-x-4 px-8 ">
         {/* Left side - Pre-assessment and Psychotherapists Section */}
-        <div className="flex-1 bg-white p-6 rounded-lg shadow-lg mb-6 mt-8 h-[27rem] w-[56%]">
+        <div className="flex-1 bg-white p-6 rounded-lg shadow-lg mb-6 mt-8 h-[27rem] w-[50%]">
           {/* Conditionally render based on client state */}
           {state === "new" && (
             <Link href="/preassessment">
@@ -163,11 +175,11 @@ const NewClientDashboard = () => {
                   className="bg-gray-300 text-gray-600 font-bold mb-4 py-2 px-4 rounded cursor-not-allowed"
                   disabled
                 >
-                  Pre-assessment Done!
+                  Pre-Assessment Done!
                 </button>
                 <p className="ml-2 bg-[#2563EB] text-white mb-4 py-2 px-4 rounded">
-                    Please wait for the confirmation via SMS, it might take 1-2 days! Thank You!
-                  </p>
+                  Please wait for the confirmation here in your dashboard, it might take 1-2 days! Thank You!
+                </p>
               </div>
             </>
           )}
@@ -202,16 +214,18 @@ const NewClientDashboard = () => {
               <div
                 className="flex transition-transform duration-500 ease-in-out"
                 style={{
-                  transform: `translateX(-${(currentIndex / psychotherapists.length) * 100}%)`,
-                  width: `${(psychotherapists.length / visibleSlides) * 100}%`,
+                  transform: `translateX(-${transformPercentage}%)`,
+                  width: `${(psychotherapistsToShow / psychotherapists.length) * 100}%`,
                 }}
-                
               >
                 {psychotherapists.map((psychotherapist, index) => (
                   <div
                     key={index}
-                    className="flex-shrink-0 flex items-center justify-center p-4 w-[33%]"
+                    className="flex-shrink-0 flex items-center justify-center p-4 w-[50%]"
                     onClick={() => handleProfileClick(psychotherapist)} // Handle profile click
+                    role="button"
+                    tabIndex={0} // Allow keyboard focus for clicking
+                    aria-label={`View profile of ${psychotherapist.firstName} ${psychotherapist.lastName}`}
                   >
                     <div className="flex flex-col items-center bg-white border border-blue-300 p-4 rounded-3xl transform transition-transform duration-500 ease-in-out hover:scale-105 min-w-[300px]">
                       <Image
@@ -221,6 +235,7 @@ const NewClientDashboard = () => {
                         width={96}  // Set width explicitly
                         height={96} // Set height explicitly
                         unoptimized
+                        style={{ objectFit: 'cover' }} // Ensure images are cropped nicely
                       />
                       <div className="flex flex-col items-center text-center">
                         <h4 className="text-lg font-bold text-blue-500 font-roboto">
@@ -231,8 +246,7 @@ const NewClientDashboard = () => {
                         </p>
                         <h3 className="text-gray-600 font-lora">
                           {psychotherapist.position
-                            ? psychotherapist.position.charAt(0).toUpperCase() +
-                              psychotherapist.position.slice(1)
+                            ? psychotherapist.position.charAt(0).toUpperCase() + psychotherapist.position.slice(1)
                             : 'Position not specified'}
                         </h3>
                       </div>
@@ -245,15 +259,31 @@ const NewClientDashboard = () => {
               <button
                 className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-[#2563EB] text-white p-2 rounded-full"
                 onClick={handlePrevious}
+                disabled={currentIndex === 0}  // Disable button when at the first slide
+                aria-label="Previous psychotherapist"
               >
                 &nbsp;&lt;&nbsp;
               </button>
               <button
                 className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-[#2563EB] text-white p-2 rounded-full"
                 onClick={handleNext}
+                disabled={currentIndex === psychotherapists.length - psychotherapistsToShow}  // Disable button when at the last slide
+                aria-label="Next psychotherapist"
               >
                 &nbsp;&gt;&nbsp;
               </button>
+            </div>
+
+            {/* Carousel Indicators */}
+            <div className="flex justify-center">
+              {psychotherapists.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleIndicatorClick(index)} // Handle indicator click
+                  className={`ml-2 w-2.5 h-2.5 rounded-full bg-blue-500 ${currentIndex === index * visibleSlides ? 'bg-opacity-75' : 'bg-opacity-50'}`}
+                  aria-label={`Go to slide ${index + 1}`}
+                ></button>
+              ))}
             </div>
           </div>
         </div>
