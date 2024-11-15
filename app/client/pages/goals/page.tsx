@@ -554,7 +554,6 @@ const GoalsPage = () => {
                                                     <td className="px-4 py-2 w-[10%]">{goal.activities}</td>
                                                         {/* Use CountdownGoal component for the duration column */}
                                                 <CountdownGoal goal={goal} />   
-                                                            <CountdownGoal goal={goal} />
                                                         <td className="px-4 py-2 [15%]">{goal.date}</td>
                                                         <td className="px-4 py-2 [15%]">{goal.startTime || 'N/A'}</td>
                                                         <td className="px-4 py-2 [15%]">{goal.endTime || 'N/A'}</td>
