@@ -26,6 +26,7 @@ const CountdownGoal = ({ goal }) => {
     }, [goal.endTime]);
 
     return <td className="px-4 py-2 w-[12%]">{countdown}</td>;
+
 };
 
 // Default export

@@ -1,7 +1,7 @@
 "use client"; // Add this at the top to mark it as a Client Component
 
 import React, { useState, useEffect } from 'react';
-import { format, startOfMonth, endOfMonth, addMonths, addDays, isBefore, isAfter } from 'date-fns';
+import { format, startOfMonth, endOfMonth, addMonths, addDays, isBefore, isAfter, formatDate } from 'date-fns';
 import Layout from '@/components/Sidebar/Layout';
 import items from '@/client/data/Links';
 import { MdArrowBack, MdArrowForward } from 'react-icons/md';
@@ -216,381 +216,392 @@ const GoalsPage = () => {
         }
     };
 
-
-    // Function to handle progress change and update in the database
-    // Function to handle progress change and update in the database
-    const handleProgressChange = async (newProgress: string, goalId: string) => {
-        if (newProgress) {
-            console.log(`Changing progress to: ${newProgress} for goal ID: ${goalId}`);
-            await updateProgress(goalId, newProgress);
-        } else {
-            console.error('No new progress value selected');
-        }
-    };
-
-
-    const changeMonth = (increment: number) => {
-        const newDate = addMonths(new Date(currentYear, currentMonth), increment);
-        setCurrentMonth(newDate.getMonth());
-        setCurrentYear(newDate.getFullYear());
-    };
-
-    const firstDayOfMonth = startOfMonth(new Date(currentYear, currentMonth));
-    const lastDayOfMonth = endOfMonth(new Date(currentYear, currentMonth));
-    const daysInMonth = Array.from({ length: lastDayOfMonth.getDate() }, (_, i) => i + 1);
-    const leadingBlankDays = firstDayOfMonth.getDay();
-    const totalDays = [...Array(leadingBlankDays).fill(null), ...daysInMonth];
-
-    const handleDateClick = (day: number | null) => {
-        if (day) {
-            const clickedDate = new Date(currentYear, currentMonth, day);
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-
-            if (isBefore(clickedDate, today)) {
-                alert("You cannot select a past date.");
-                return;
+        // Function to handle progress change and update in the database
+        // Function to handle progress change and update in the database
+        const handleProgressChange = async (newProgress: string, goalId: string) => {
+            if (newProgress) {
+                console.log(`Changing progress to: ${newProgress} for goal ID: ${goalId}`);
+                await updateProgress(goalId, newProgress);
+            } else {
+                console.error('No new progress value selected');
             }
-            if (isAfter(clickedDate, oneWeekAhead)) {
-                alert("You cannot select a date more than one week in the future.");
-                return;
+        };
+
+
+        const changeMonth = (increment: number) => {
+            const newDate = addMonths(new Date(currentYear, currentMonth), increment);
+            setCurrentMonth(newDate.getMonth());
+            setCurrentYear(newDate.getFullYear());
+        };
+
+        const firstDayOfMonth = startOfMonth(new Date(currentYear, currentMonth));
+        const lastDayOfMonth = endOfMonth(new Date(currentYear, currentMonth));
+        const daysInMonth = Array.from({ length: lastDayOfMonth.getDate() }, (_, i) => i + 1);
+        const leadingBlankDays = firstDayOfMonth.getDay();
+        const totalDays = [...Array(leadingBlankDays).fill(null), ...daysInMonth];
+
+        const handleDateClick = (day: number | null) => {
+            if (day) {
+                const clickedDate = new Date(currentYear, currentMonth, day);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                if (isBefore(clickedDate, today)) {
+                    alert("You cannot select a past date.");
+                    return;
+                }
+                if (isAfter(clickedDate, oneWeekAhead)) {
+                    alert("You cannot select a date more than one week in the future.");
+                    return;
+                }
+
+                setSelectedDate(clickedDate);
+            }
+        };
+
+        const handleStartHourChange = (newStartHour) => {
+            setStartHour(newStartHour);
+            updateEndTime(newStartHour, startPeriod);
+        };
+
+        const handleStartPeriodChange = (newStartPeriod) => {
+            setStartPeriod(newStartPeriod);
+            updateEndTime(startHour, newStartPeriod);
+        };
+
+        const updateEndTime = (newStartHour, newStartPeriod) => {
+            let endHourValue = parseInt(newStartHour) + 1;
+            let endPeriodValue = newStartPeriod;
+
+            if (endHourValue > 12) {
+                endHourValue = 1;
+                endPeriodValue = newStartPeriod === "AM" ? "PM" : "AM";
             }
 
-            setSelectedDate(clickedDate);
-        }
-    };
+            setEndHour(endHourValue);
+            setEndPeriod(endPeriodValue);
+        };
 
-    const handleStartHourChange = (newStartHour) => {
-        setStartHour(newStartHour);
-        updateEndTime(newStartHour, startPeriod);
-    };
+        const formatDate = (date: string) => {
+            const parsedDate = new Date(date);
+            
+            const year = parsedDate.getFullYear();
+            const month = String(parsedDate.getMonth() + 1).padStart(2, '0'); // Get month (0-indexed, add 1)
+            const day = String(parsedDate.getDate()).padStart(2, '0'); // Get day (always 2 digits)
+            
+            // Return the formatted date in 'YYYY-MM-DD' format
+            return `${year}-${month}-${day}`;
+        };
 
-    const handleStartPeriodChange = (newStartPeriod) => {
-        setStartPeriod(newStartPeriod);
-        updateEndTime(startHour, newStartPeriod);
-    };
 
-    const updateEndTime = (newStartHour, newStartPeriod) => {
-        let endHourValue = parseInt(newStartHour) + 1;
-        let endPeriodValue = newStartPeriod;
+        return (
+            <Layout sidebarTitle="Butterfly" sidebarItems={items}>
+                <div className="flex-grow p-8 bg-gradient-to-br from-blue-50 to-blue-100">
+                    <div className="bg-white shadow-lg rounded-xl p-8 mb-10 border border-blue-200">
+                        <h2 className="text-4xl font-bold text-blue-500 mb-4">Hello, {userName}!</h2>
+                        <p className="text-gray-600 text-lg">Set and track your personal goals with ease.</p>
+                    </div>
+                    <div className="flex space-x-8">
+                        <div className="flex-1 bg-white shadow-lg rounded-xl p-6 border border-gray-200">
+                            <div className="flex justify-between items-center mb-6">
+                                <button
+                                    onClick={() => changeMonth(-1)}
+                                    className={`text-gray-400 hover:text-blue-500 hover:scale-105 transition-transform duration-300 ${currentYear === new Date().getFullYear() && currentMonth === new Date().getMonth() ? 'cursor-not-allowed opacity-50' : ''}`}
+                                    disabled={currentYear === new Date().getFullYear() && currentMonth === new Date().getMonth()}
+                                >
+                                    <MdArrowBack size={24} />
+                                </button>
+                                <h2 className="text-2xl font-semibold text-blue-400">{format(new Date(currentYear, currentMonth), 'MMMM yyyy')}</h2>
+                                <button
+                                    onClick={() => changeMonth(1)}
+                                    className={`text-gray-800 hover:text-blue-500 hover:scale-105 transition-transform duration-300 ${isAfter(new Date(currentYear, currentMonth), oneWeekAhead) ? 'cursor-not-allowed opacity-50' : ''}`}
+                                    disabled={isAfter(new Date(currentYear, currentMonth), oneWeekAhead)}
+                                >
+                                    <MdArrowForward size={24} />
+                                </button>
+                            </div>
+                            <div className="grid grid-cols-7 gap-3 mt-2">
+                                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+                                    <div key={day} className="font-semibold text-center text-gray-600">{day}</div>
+                                ))}
+                                {totalDays.map((day, index) => {
+                                    const dayDate = day ? new Date(currentYear, currentMonth, day) : null;
+                                    const today = new Date();
+                                    today.setHours(0, 0, 0, 0);
 
-        if (endHourValue > 12) {
-            endHourValue = 1;
-            endPeriodValue = newStartPeriod === "AM" ? "PM" : "AM";
-        }
+                                    const isPast = dayDate && isBefore(dayDate, today) && dayDate.getTime() !== today.getTime();
+                                    const isTooFar = dayDate && isAfter(dayDate, oneWeekAhead);
+                                    const isSelected = selectedDate && selectedDate.getDate() === day;
 
-        setEndHour(endHourValue);
-        setEndPeriod(endPeriodValue);
-    };
-
-    return (
-        <Layout sidebarTitle="Butterfly" sidebarItems={items}>
-            <div className="flex-grow p-8 bg-gradient-to-br from-blue-50 to-blue-100">
-                <div className="bg-white shadow-lg rounded-xl p-8 mb-10 border border-blue-200">
-                    <h2 className="text-4xl font-bold text-blue-500 mb-4">Hello, {userName}!</h2>
-                    <p className="text-gray-600 text-lg">Set and track your personal goals with ease.</p>
-                </div>
-                <div className="flex space-x-8">
-                    <div className="flex-1 bg-white shadow-lg rounded-xl p-6 border border-gray-200">
-                        <div className="flex justify-between items-center mb-6">
-                            <button
-                                onClick={() => changeMonth(-1)}
-                                className={`text-gray-400 hover:text-blue-500 hover:scale-105 transition-transform duration-300 ${currentYear === new Date().getFullYear() && currentMonth === new Date().getMonth() ? 'cursor-not-allowed opacity-50' : ''}`}
-                                disabled={currentYear === new Date().getFullYear() && currentMonth === new Date().getMonth()}
-                            >
-                                <MdArrowBack size={24} />
-                            </button>
-                            <h2 className="text-2xl font-semibold text-blue-400">{format(new Date(currentYear, currentMonth), 'MMMM yyyy')}</h2>
-                            <button
-                                onClick={() => changeMonth(1)}
-                                className={`text-gray-800 hover:text-blue-500 hover:scale-105 transition-transform duration-300 ${isAfter(new Date(currentYear, currentMonth), oneWeekAhead) ? 'cursor-not-allowed opacity-50' : ''}`}
-                                disabled={isAfter(new Date(currentYear, currentMonth), oneWeekAhead)}
-                            >
-                                <MdArrowForward size={24} />
-                            </button>
-                        </div>
-                        <div className="grid grid-cols-7 gap-3 mt-2">
-                            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-                                <div key={day} className="font-semibold text-center text-gray-600">{day}</div>
-                            ))}
-                            {totalDays.map((day, index) => {
-                                const dayDate = day ? new Date(currentYear, currentMonth, day) : null;
-                                const today = new Date();
-                                today.setHours(0, 0, 0, 0);
-
-                                const isPast = dayDate && isBefore(dayDate, today) && dayDate.getTime() !== today.getTime();
-                                const isTooFar = dayDate && isAfter(dayDate, oneWeekAhead);
-                                const isSelected = selectedDate && selectedDate.getDate() === day;
-
-                                return (
-                                    <div
-                                        key={index}
-                                        onClick={() => !isPast && !isTooFar && handleDateClick(day)}
-                                        className={`h-16 flex items-center justify-center border rounded-lg transition-colors duration-300
+                                    return (
+                                        <div
+                                            key={index}
+                                            onClick={() => !isPast && !isTooFar && handleDateClick(day)}
+                                            className={`h-16 flex items-center justify-center border rounded-lg transition-colors duration-300
                                         ${day ? '' : ''} 
                                         ${isSelected ? 'bg-blue-400 text-white' : 'bg-gray-100'} 
                                         ${!isSelected && !isPast && !isTooFar ? 'hover:bg-blue-500 hover:text-white' : ''} 
                                         ${isPast || isTooFar ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
+                                        >
+                                            {day}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        {/* Activity Section */}
+                        <div className="flex-1 bg-white shadow-lg rounded-xl p-6 border border-gray-200">
+                            <h3 className="text-lg font-semibold text-blue-400">Activity</h3>
+                            <select
+                                value={activities}
+                                onChange={(e) => setActivities(e.target.value)}
+                                className="border rounded-lg p-2 mt-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-300"
+                            >
+                                <option value="meditate">Meditate</option>
+                                <option value="exercise">Exercise</option>
+                                <option value="read">Read</option>
+                                <option value="music">Music</option>
+                                <option value="stroll">Stroll</option>
+                                <option value="pet">Pet time</option>
+                                <option value="arts">Arts</option>
+                            </select>
+
+                            {/* Start Time Selection */}
+                            <div className="mt-4">
+                                <label className="block font-semibold text-gray-700">Start Time:</label>
+                                <div className="flex space-x-2">
+                                    <select
+                                        value={startHour}
+                                        onChange={(e) => handleStartHourChange(e.target.value)}
+                                        className="border rounded-lg p-2 mt-1 w-full focus:outline-none focus:ring-2 focus:ring-blue-300"
                                     >
-                                        {day}
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
+                                        {[...Array(12).keys()].map((hour) => (
+                                            <option key={hour + 1} value={hour + 1}>
+                                                {hour + 1}
+                                            </option>
+                                        ))}
+                                    </select>
 
-                    {/* Activity Section */}
-                    <div className="flex-1 bg-white shadow-lg rounded-xl p-6 border border-gray-200">
-                        <h3 className="text-lg font-semibold text-blue-400">Activity</h3>
-                        <select
-                            value={activities}
-                            onChange={(e) => setActivities(e.target.value)}
-                            className="border rounded-lg p-2 mt-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-300"
-                        >
-                            <option value="meditate">Meditate</option>
-                            <option value="exercise">Exercise</option>
-                            <option value="read">Read</option>
-                            <option value="music">Music</option>
-                            <option value="stroll">Stroll</option>
-                            <option value="pet">Pet time</option>
-                            <option value="arts">Arts</option>
-                        </select>
+                                    <select
+                                        value={startMinute}
+                                        onChange={(e) => setStartMinute(Number(e.target.value))}
+                                        className="border rounded-lg p-2 mt-1 w-full focus:outline-none focus:ring-2 focus:ring-blue-300"
+                                    >
+                                        {[0, 10, 15, 20, 30, 40, 45, 50, 55].map((minute) => (
+                                            <option key={minute} value={minute}>
+                                                {minute < 10 ? `0${minute}` : minute}
+                                            </option>
+                                        ))}
+                                    </select>
 
-                        {/* Start Time Selection */}
-                        <div className="mt-4">
-                            <label className="block font-semibold text-gray-700">Start Time:</label>
-                            <div className="flex space-x-2">
-                                <select
-                                    value={startHour}
-                                    onChange={(e) => handleStartHourChange(e.target.value)}
-                                    className="border rounded-lg p-2 mt-1 w-full focus:outline-none focus:ring-2 focus:ring-blue-300"
-                                >
-                                    {[...Array(12).keys()].map((hour) => (
-                                        <option key={hour + 1} value={hour + 1}>
-                                            {hour + 1}
-                                        </option>
-                                    ))}
-                                </select>
-
-                                <select
-                                    value={startMinute}
-                                    onChange={(e) => setStartMinute(Number(e.target.value))}
-                                    className="border rounded-lg p-2 mt-1 w-full focus:outline-none focus:ring-2 focus:ring-blue-300"
-                                >
-                                    {[0, 10, 15, 20, 30, 40, 45, 50, 55].map((minute) => (
-                                        <option key={minute} value={minute}>
-                                            {minute < 10 ? `0${minute}` : minute}
-                                        </option>
-                                    ))}
-                                </select>
-
-                                <select
-                                    value={startPeriod}
-                                    onChange={(e) => handleStartPeriodChange(e.target.value)}
-                                    className="border rounded-lg p-2 mt-1 w-full focus:outline-none focus:ring-2 focus:ring-blue-300"
-                                >
-                                    <option value="AM">AM</option>
-                                    <option value="PM">PM</option>
-                                </select>
+                                    <select
+                                        value={startPeriod}
+                                        onChange={(e) => handleStartPeriodChange(e.target.value)}
+                                        className="border rounded-lg p-2 mt-1 w-full focus:outline-none focus:ring-2 focus:ring-blue-300"
+                                    >
+                                        <option value="AM">AM</option>
+                                        <option value="PM">PM</option>
+                                    </select>
+                                </div>
                             </div>
-                        </div>
 
-                        {/* End Time Selection */}
-                        <div className="mt-4">
-                            <label className="block font-semibold text-gray-700">End Time:</label>
-                            <div className="flex space-x-2">
-                                <select
-                                    value={endHour}
-                                    className="border rounded-lg p-2 mt-1 w-full focus:outline-none focus:ring-2 focus:ring-blue-300"
-                                    disabled={true}
-                                >
-                                    <option value={endHour}>{endHour}</option>
-                                </select>
+                            {/* End Time Selection */}
+                            <div className="mt-4">
+                                <label className="block font-semibold text-gray-700">End Time:</label>
+                                <div className="flex space-x-2">
+                                    <select
+                                        value={endHour}
+                                        className="border rounded-lg p-2 mt-1 w-full focus:outline-none focus:ring-2 focus:ring-blue-300"
+                                        disabled={true}
+                                    >
+                                        <option value={endHour}>{endHour}</option>
+                                    </select>
 
-                                <select
-                                    value={endMinute}
-                                    onChange={(e) => setEndMinute(Number(e.target.value))}
-                                    className="border rounded-lg p-2 mt-1 w-full focus:outline-none focus:ring-2 focus:ring-blue-300"
-                                >
-                                    {[0, 10, 15, 20, 30, 40, 45, 50, 55].map((minute) => (
-                                        <option key={minute} value={minute}>
-                                            {minute < 10 ? `0${minute}` : minute}
-                                        </option>
-                                    ))}
-                                </select>
+                                    <select
+                                        value={endMinute}
+                                        onChange={(e) => setEndMinute(Number(e.target.value))}
+                                        className="border rounded-lg p-2 mt-1 w-full focus:outline-none focus:ring-2 focus:ring-blue-300"
+                                    >
+                                        {[0, 10, 15, 20, 30, 40, 45, 50, 55].map((minute) => (
+                                            <option key={minute} value={minute}>
+                                                {minute < 10 ? `0${minute}` : minute}
+                                            </option>
+                                        ))}
+                                    </select>
 
-                                <select
-                                    value={endPeriod}
-                                    className="border rounded-lg p-2 mt-1 w-full focus:outline-none focus:ring-2 focus:ring-blue-300"
-                                    disabled={true}
-                                >
-                                    <option value={endPeriod}>{endPeriod}</option>
-                                </select>
+                                    <select
+                                        value={endPeriod}
+                                        className="border rounded-lg p-2 mt-1 w-full focus:outline-none focus:ring-2 focus:ring-blue-300"
+                                        disabled={true}
+                                    >
+                                        <option value={endPeriod}>{endPeriod}</option>
+                                    </select>
+                                </div>
                             </div>
+
                         </div>
 
-                    </div>
+                        {/* Mood Tracker Section */}
+                        <div className="flex-1 bg-white shadow-lg rounded-xl p-6 border border-gray-200">
+                            <h3 className="font-semibold text-blue-400">Mood Tracker</h3>
+                            <div className="grid grid-cols-2 gap-3 mt-4">
+                                {[
+                                    { label: 'HAPPY', emoji: '😊' },
+                                    { label: 'SAD', emoji: '😢' },
+                                    { label: 'ANXIOUS', emoji: '😰' },
+                                    { label: 'FEAR', emoji: '😨' },
+                                    { label: 'FRUSTRATED', emoji: '😠' }
+                                ].map((moodOption) => {
+                                    const moodColors = {
+                                        HAPPY: 'bg-yellow-200 hover:bg-yellow-400 hover:text-white',
+                                        SAD: 'bg-blue-200 hover:bg-blue-400 hover:text-white',
+                                        ANXIOUS: 'bg-orange-200 hover:bg-orange-400 hover:text-white',
+                                        FEAR: 'bg-red-200 hover:bg-red-400 hover:text-white',
+                                        FRUSTRATED: 'bg-purple-200 hover:bg-purple-400 hover:text-white',
+                                    };
 
-                    {/* Mood Tracker Section */}
-                    <div className="flex-1 bg-white shadow-lg rounded-xl p-6 border border-gray-200">
-                        <h3 className="font-semibold text-blue-400">Mood Tracker</h3>
-                        <div className="grid grid-cols-2 gap-3 mt-4">
-                            {[
-                                { label: 'HAPPY', emoji: '😊' },
-                                { label: 'SAD', emoji: '😢' },
-                                { label: 'ANXIOUS', emoji: '😰' },
-                                { label: 'FEAR', emoji: '😨' },
-                                { label: 'FRUSTRATED', emoji: '😠' }
-                            ].map((moodOption) => {
-                                const moodColors = {
-                                    HAPPY: 'bg-yellow-200 hover:bg-yellow-400 hover:text-white',
-                                    SAD: 'bg-blue-200 hover:bg-blue-400 hover:text-white',
-                                    ANXIOUS: 'bg-orange-200 hover:bg-orange-400 hover:text-white',
-                                    FEAR: 'bg-red-200 hover:bg-red-400 hover:text-white',
-                                    FRUSTRATED: 'bg-purple-200 hover:bg-purple-400 hover:text-white',
-                                };
+                                    const selectedMoodColors = {
+                                        HAPPY: 'bg-yellow-500 text-white',
+                                        SAD: 'bg-blue-500 text-white',
+                                        ANXIOUS: 'bg-orange-500 text-white',
+                                        FEAR: 'bg-red-500 text-white',
+                                        FRUSTRATED: 'bg-purple-500 text-white',
+                                    };
 
-                                const selectedMoodColors = {
-                                    HAPPY: 'bg-yellow-500 text-white',
-                                    SAD: 'bg-blue-500 text-white',
-                                    ANXIOUS: 'bg-orange-500 text-white',
-                                    FEAR: 'bg-red-500 text-white',
-                                    FRUSTRATED: 'bg-purple-500 text-white',
-                                };
-
-                                return (
-                                    <button
-                                        key={moodOption.label}
-                                        onClick={() => setMood(moodOption.label)}
-                                        className={`py-2 px-4 rounded-lg mt-2 transition-colors duration-300 shadow-md 
+                                    return (
+                                        <button
+                                            key={moodOption.label}
+                                            onClick={() => setMood(moodOption.label)}
+                                            className={`py-2 px-4 rounded-lg mt-2 transition-colors duration-300 shadow-md 
                                             ${mood === moodOption.label ? selectedMoodColors[moodOption.label] : 'bg-gray-200 text-gray-600'}`}
-                                        style={{ opacity: mood === moodOption.label ? 1 : 0.6 }}
-                                    >
-                                        {moodOption.emoji} {moodOption.label}
-                                    </button>
-                                );
-                            })}
+                                            style={{ opacity: mood === moodOption.label ? 1 : 0.6 }}
+                                        >
+                                            {moodOption.emoji} {moodOption.label}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                            <button
+                                onClick={() => setMood('')}
+                                className="mt-6 bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition-colors duration-300 shadow-md"
+                            >
+                                Cancel Mood Selection
+                            </button>
                         </div>
+                    </div>
+
+                    {/* Save Button and Modal */}
+                    <div className="flex justify-end mt-8">
                         <button
-                            onClick={() => setMood('')}
-                            className="mt-6 bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition-colors duration-300 shadow-md"
+                            onClick={() => setShowConfirmationModal(true)}
+                            className="bg-blue-400 text-white py-2 px-6 rounded-lg hover:bg-blue-500 transition-colors duration-300 shadow-lg"
                         >
-                            Cancel Mood Selection
+                            Save Goal
                         </button>
                     </div>
-                </div>
 
-                {/* Save Button and Modal */}
-                <div className="flex justify-end mt-8">
-                    <button
-                        onClick={() => setShowConfirmationModal(true)}
-                        className="bg-blue-400 text-white py-2 px-6 rounded-lg hover:bg-blue-500 transition-colors duration-300 shadow-lg"
-                    >
-                        Save Goal
-                    </button>
-                </div>
+                    {/* Confirmation Modal */}
+                    <ConfirmationModal
+                        showModal={showConfirmationModal}
+                        setShowModal={setShowConfirmationModal}
+                        selectedDate={selectedDate}
+                        title="Are you sure?"
+                        message="Do you want to save this goal for"
+                        confirmLabel="Yes, Save"
+                        cancelLabel="Cancel"
+                        onConfirm={handleSave}
+                    />
 
-                {/* Confirmation Modal */}
-                <ConfirmationModal
-                    showModal={showConfirmationModal}
-                    setShowModal={setShowConfirmationModal}
-                    selectedDate={selectedDate}
-                    title="Are you sure?"
-                    message="Do you want to save this goal for"
-                    confirmLabel="Yes, Save"
-                    cancelLabel="Cancel"
-                    onConfirm={handleSave}
-                />
-
-                {/* Logged Goals Section */}
-                <div className="mt-12 bg-white shadow-lg rounded-xl p-6 border border-gray-200">
-                    <h3 className="text-lg font-semibold text-blue-400">Logged Goals</h3>
-                    {goals.length > 0 ? (
-                        <ul className="mt-4 space-y-3">
-                            {goals.map((goal) => {
-                                const currentTime = new Date().getTime();
-                                const goalEndTime = new Date(goal.endTime).getTime();
-                                const isPastEndTime = currentTime > goalEndTime;
-                                const displayProgress = isPastEndTime ? 'missed' : goal.progress;
-
-                                const formatCountdown = (endTime) => {
+                    {/* Logged Goals Section */}
+                    <div className="mt-12 bg-white shadow-lg rounded-xl p-6 border border-gray-200">
+                        <h3 className="text-lg font-semibold text-blue-400">Logged Goals</h3>
+                        {goals.length > 0 ? (
+                            <ul className="mt-4 space-y-3">
+                                {goals.map((goal) => {
                                     const currentTime = new Date().getTime();
-                                    const timeLeft = new Date(endTime).getTime() - currentTime;
-                                
-                                    if (timeLeft <= 0) return 'Time\'s up';
-                                
-                                    const minutes = Math.floor(timeLeft / 60000);
-                                    const seconds = Math.floor((timeLeft % 60000) / 1000);
-                                
-                                    const countdownText = `${minutes} min ${seconds} sec`;
-                                
-                                    if (timeLeft < 60000) { // Less than 1 minute remaining
-                                        return <span className="text-red-500">{countdownText}</span>;
-                                    }
-                                
-                                    return countdownText;
-                                };
+                                    const goalEndTime = new Date(goal.endTime).getTime();
+                                    const isPastEndTime = currentTime > goalEndTime;
+                                    const displayProgress = isPastEndTime ? 'missed' : goal.progress;
 
-                                return (
-                                    <li
-                                        key={goal.$id}
-                                        className="p-4 bg-gray-50 rounded-lg shadow-md"
-                                    >
-                                        <div className="overflow-x-auto">
-                                            <table className="w-full text-left border-separate border-spacing-y-2">
-                                                <thead>
-                                                    <tr className="text-sm text-gray-700">
-                                                        <th className="px-4 py-2 w-[10%]">Activity</th>
-                                                        <th className="px-4 py-2 w-[12%]">Duration (min)</th> {/* Countdown column */}
-                                                        <th className="px-4 py-2 w-[15%]">Date</th>
-                                                        <th className="px-4 py-2 w-[15%]">Start Time</th>
-                                                        <th className="px-4 py-2 w-[15%]">End Time</th>
-                                                        <th className="px-4 py-2 w-[12%]">Mood</th>
-                                                        <th className="px-4 py-2 w-[15%]">Progress</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <tr className="bg-white">
-                                                    <td className="px-4 py-2 w-[10%]">{goal.activities}</td>
-                                                        {/* Use CountdownGoal component for the duration column */}
-                                                <CountdownGoal goal={goal} />   
-                                                        <td className="px-4 py-2 [15%]">{goal.date}</td>
-                                                        <td className="px-4 py-2 [15%]">{goal.startTime || 'N/A'}</td>
-                                                        <td className="px-4 py-2 [15%]">{goal.endTime || 'N/A'}</td>
-                                                        <td className="px-4 py-2 w-[15%]">{goal.mood}</td>
-                                                        <td className="px-4 py-2 [15%]">
-                                                            {!isPastEndTime ? (
-                                                                <select
-                                                                    value={goal.progress}
-                                                                    onChange={(e) => handleProgressChange(e.target.value, goal.$id)}
-                                                                    className="border rounded-lg p-1 text-gray-700 focus:outline-none focus:ring-2 transition-colors duration-200"
-                                                                    disabled={isPastEndTime}
-                                                                >
-                                                                    <option value="todo">To Do</option>
-                                                                    <option value="doing">Doing</option>
-                                                                    <option value="done">Done</option>
-                                                                </select>
-                                                            ) : (
-                                                                <span className="text-red-500">Missed</span>
-                                                            )}
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                            <p className="text-xs text-gray-500 mt-2">Status: {displayProgress}</p>
-                                        </div>
-                                    </li>
+                                    const formatCountdown = (endTime) => {
+                                        const currentTime = new Date().getTime();
+                                        const timeLeft = new Date(endTime).getTime() - currentTime;
 
-                                );
-                            })}
-                        </ul>
-                    ) : (
-                        <p className="mt-2 text-gray-600">No goals logged yet.</p>
-                    )}
+                                        if (timeLeft <= 0) return 'Time\'s up';
+
+                                        const minutes = Math.floor(timeLeft / 60000);
+                                        const seconds = Math.floor((timeLeft % 60000) / 1000);
+
+                                        const countdownText = `${minutes} min ${seconds} sec`;
+
+                                        if (timeLeft < 60000) { // Less than 1 minute remaining
+                                            return <span className="text-red-500">{countdownText}</span>;
+                                        }
+
+                                        return countdownText;
+                                    };
+
+                                    return (
+                                        <li
+                                            key={goal.$id}
+                                            className="p-4 bg-gray-50 rounded-lg shadow-md"
+                                        >
+                                            <div className="overflow-x-auto">
+                                                <table className="w-full text-left border-separate border-spacing-y-2">
+                                                    <thead>
+                                                        <tr className="text-sm text-gray-700">
+                                                            <th className="px-4 py-2 w-[10%]">Activity</th>
+                                                            <th className="px-4 py-2 w-[12%]">Duration (min)</th> {/* Countdown column */}
+                                                            <th className="px-4 py-2 w-[15%]">Date</th>
+                                                            <th className="px-4 py-2 w-[15%]">Start Time</th>
+                                                            <th className="px-4 py-2 w-[15%]">End Time</th>
+                                                            <th className="px-4 py-2 w-[12%]">Mood</th>
+                                                            <th className="px-4 py-2 w-[15%]">Progress</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr className="bg-white">
+                                                            <td className="px-4 py-2 w-[10%]">{goal.activities}</td>
+                                                            {/* Use CountdownGoal component for the duration column */}
+                                                            <CountdownGoal goal={goal} />
+                                                            <td className="px-4 py-2 [15%]">{formatDate(goal.endTime)} {/* Format the date without time */}</td>
+                                                            <td className="px-4 py-2 [15%]">{goal.startTime || 'N/A'}</td>
+                                                            <td className="px-4 py-2 [15%]">{goal.endTime || 'N/A'}</td>
+                                                            <td className="px-4 py-2 w-[15%]">{goal.mood}</td>
+                                                            <td className="px-4 py-2 [15%]">
+                                                                {!isPastEndTime ? (
+                                                                    <select
+                                                                        value={goal.progress}
+                                                                        onChange={(e) => handleProgressChange(e.target.value, goal.$id)}
+                                                                        className="border rounded-lg p-1 text-gray-700 focus:outline-none focus:ring-2 transition-colors duration-200"
+                                                                        disabled={isPastEndTime}
+                                                                    >
+                                                                        <option value="todo">To Do</option>
+                                                                        <option value="doing">Doing</option>
+                                                                        <option value="done">Done</option>
+                                                                    </select>
+                                                                ) : (
+                                                                    <span className="text-red-500">Missed</span>
+                                                                )}
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                                <p className="text-xs text-gray-500 mt-2">Status: {displayProgress}</p>
+                                            </div>
+                                        </li>
+
+                                    );
+                                })}
+                            </ul>
+                        ) : (
+                            <p className="mt-2 text-gray-600">No goals logged yet.</p>
+                        )}
+                    </div>
                 </div>
-            </div>
-        </Layout>
-    );
-};
+            </Layout>
+        );
+    };
 
-export default GoalsPage;
+    export default GoalsPage;
