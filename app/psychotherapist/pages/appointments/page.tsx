@@ -202,7 +202,7 @@ const Appointments = () => {
       </div>
 
       {/* Modals */}
-      <TakeNotesModal isOpen={isTakeNotesModalOpen} clientName={selectedClient} onClose={() => setIsTakeNotesModalOpen(false)} />
+      <TakeNotesModal isOpen={isTakeNotesModalOpen} onClose={() => setIsTakeNotesModalOpen(false)} />
       <CountdownModal
         isOpen={isCountdownModalOpen}
         onClose={() => setIsCountdownModalOpen(false)}

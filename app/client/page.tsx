@@ -190,7 +190,7 @@ const NewClientDashboard = () => {
                         width={96}
                         height={96}
                         unoptimized
-                        onError={(e) => e.target.src = "/images/default-profile.png"}
+                        onError={() => "/images/default-profile.png"}
                       />
                       <div className="text-center">
                         <h4 className="text-lg font-bold text-blue-500 font-roboto">
