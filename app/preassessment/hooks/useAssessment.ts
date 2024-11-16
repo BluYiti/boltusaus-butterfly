@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Question } from '@/preassessment/data/questions';
-import { databases, account, ID, Query, client } from '@/appwrite';
+import { databases, account, ID, Query } from '@/appwrite';
 import { useRouter } from 'next/navigation';
 
 const DATABASE_ID = 'Butterfly-Database';
@@ -40,7 +40,6 @@ export const useAssessment = (questions: Question[] = []) => {
           // Assuming you want the first match
           const clientDocument = client.documents[0];
           setClientID(clientDocument.$id);
-          console.log('This is the Client ID', setClientID)
         } else {
           console.log('No client document found for this user.');
         }

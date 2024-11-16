@@ -2,10 +2,10 @@
 
 import React, { useState } from 'react';
 import { FaEnvelope, FaEye, FaEyeSlash } from 'react-icons/fa';
-import ErrorModal from '@/components/ErrorModal'; // Make sure this path is correct
+import ErrorModal from '@/components/ErrorModal';
 
 interface LoginFormProps {
-    onLogin: (email: string, password: string) => void;
+    onLogin: (email: string, password: string, rememberMe: boolean) => void;
     error: string | null;
     loading: boolean;
 }
@@ -14,13 +14,14 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin, error, loading }) => {
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     const [showPassword, setShowPassword] = useState(false);
+    const [rememberMe, setRememberMe] = useState(false);
     const [showErrorModal, setShowErrorModal] = useState<boolean>(false);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onLogin(email, password);
+        onLogin(email, password, rememberMe);
     };
-    
+
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
     };
@@ -80,7 +81,11 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin, error, loading }) => {
                 </div>
                 <div>
                     <label className="text-sm absolute top-[10.5rem] text-gray-500">
-                        <input type="checkbox"/>
+                        <input
+                            type="checkbox"
+                            checked={rememberMe}
+                            onChange={(e) => setRememberMe(e.target.checked)}
+                        />
                         &nbsp;Remember Me
                     </label>
                 </div>

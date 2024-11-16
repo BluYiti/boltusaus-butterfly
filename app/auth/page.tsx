@@ -7,7 +7,7 @@ import LoadingScreen from "@/components/LoadingScreen"; // Import the LoadingScr
 
 const VALID_ROLES = ["admin", "client", "psychotherapist", "associate"]; // Define allowed roles
 
-const useAuthCheck = (allowedRoles: any) => {
+const useAuthCheck = (allowedRoles) => {
   const [loading, setLoading] = useState(true); // Loading state for authentication check
   const router = useRouter(); // Router to handle redirects
 

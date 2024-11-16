@@ -3,8 +3,15 @@
 import React from 'react';
 import Layout from '@/components/Sidebar/Layout';
 import items from '@/client/data/Links';
+import useAuthCheck from '@/auth/page';
+import LoadingScreen from '@/components/LoadingScreen';
 
 const HotlinePage = () => {
+    const { loading: authLoading } = useAuthCheck(['client']); // Call the useAuthCheck hook
+
+    if (authLoading ) {
+        return <LoadingScreen />; // Show the loading screen while the auth check or data loading is in progress
+    }
     return (
         <Layout sidebarTitle="Butterfly" sidebarItems={items}>
             <div 

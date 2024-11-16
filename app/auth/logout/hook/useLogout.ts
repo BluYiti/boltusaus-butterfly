@@ -12,7 +12,7 @@ export const useLogout = () => {
         try {
             await account.deleteSession('current');
             router.push('/login');
-        } catch (err: any) {
+        } catch (err) {
             console.error('Error during logout:', err);
             // Check if err.message exists; otherwise, provide a fallback
             const message = err.message || 'An unexpected error occurred.';

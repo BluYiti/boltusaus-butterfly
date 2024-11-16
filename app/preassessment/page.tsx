@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Question from '@/preassessment/components/Question';
 import NavigationButtons from '@/preassessment/components/NavigationButtons';
 import { useAssessment } from '@/preassessment/hooks/useAssessment';
@@ -21,16 +21,27 @@ export default function PreAssessmentPage() {
     modalMessage, // The message to display in the modal
     modalType, // The type of modal (confirmation, error, success)
     closeModal, // Close modal handler
-    isAllAnswered,
   } = useAssessment(questions || []);
+  
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isReviewPage = currentQuestionIndex === questions.length;
+
+  const handleBackButton = () => {
+    setIsSubmitting(false);
+    handleBack();
+  }
+
+  const handleSubmit = () => {
+    setIsSubmitting(true);
+    handleFormSubmit(); // Proceed with the existing form submission logic
+  };
 
   return (
     <div className="min-h-screen flex justify-center items-center bg-blue-500">
       {isReviewPage ? (
-        <div className="text-center rounded-xl p-8 shadow-lg w-full max-w-3xl">
-          <h3 className="text-xl mb-4 text-gray-800">Review Your Answers</h3>
+        <div className="text-center rounded-xl p-8 w-full max-w-3xl">
+          <h3 className="text-4xl font-extrabold mb-4 text-white">Review Your Answers</h3>
 
           <ul className="text-left mb-4 space-y-4">
             {questions.map((question, index) => (
@@ -55,15 +66,16 @@ export default function PreAssessmentPage() {
           <div className="flex justify-between gap-4 mt-6">
             <button
               className="flex-1 bg-blue-400 text-white py-2 px-4 rounded-md hover:bg-blue-800"
-              onClick={handleBack}
+              onClick={handleBackButton}
             >
               Back
             </button>
             <button
               className="flex-1 bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-700"
-              onClick={handleFormSubmit} // Opens the confirmation modal
+              onClick={handleSubmit} // Now this triggers the submission logic
+              disabled={isSubmitting} // Disable the button while submitting
             >
-              Submit
+              {isSubmitting ? "Submitting..." : "Submit"}
             </button>
           </div>
         </div>

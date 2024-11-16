@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 // TakeNotesModal Component
-const TakeNotesModal = ({ isOpen, onClose }) => {
+const TakeNotesModal = ({isOpen, onClose }) => {
   const [notes, setNotes] = useState('');
 
   const handleSave = () => {
