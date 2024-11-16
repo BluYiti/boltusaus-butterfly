@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { databases } from "@/appwrite";
 import Image from 'next/image';
 import { Models } from 'appwrite';
+import { fetchProfileImageUrl } from "@/hooks/userService";
 
 interface ClientProfileModalProps {
   clientId: string;
@@ -23,10 +24,14 @@ const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpe
   const fetchClientData = async (id: string) => {
     try {
       const clientData = await databases.getDocument('Butterfly-Database', 'Client', id);
-      const url = await fetchProfileImageUrl(therapist.profilepic);
+
+      const profileImages = {};
+      const url = await fetchProfileImageUrl(clientData.profilepic);
       if (url) {
-        profileImages[therapist.$id] = url;
+        profileImages[clientData.$id] = url;
       }
+      setProfileImageUrls(profileImages);
+      console.log(url);
       return clientData;
     } catch (err: unknown) {
       console.error("Error fetching client data:", err);
@@ -121,7 +126,7 @@ const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpe
               <div className="flex space-x-12 items-center">
                 <div className="flex-shrink-0 text-center">
                   <Image
-                    src={clientData.profilePictureUrl || '/images/default-profile.png'}
+                    src={profileImageUrls[clientId] || '/images/default-profile.png'}
                     alt="Profile"
                     width={192} // Equivalent to 48 * 4 for a consistent image size
                     height={192} // Equivalent to 48 * 4 for a consistent image size
