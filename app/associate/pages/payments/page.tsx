@@ -1,3 +1,5 @@
+'use client'
+
 import { useState, useEffect } from "react";
 import Layout from "@/components/Sidebar/Layout";
 import items from "@/associate/data/Links";
