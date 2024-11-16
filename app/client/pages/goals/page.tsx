@@ -13,7 +13,7 @@ import useAuthCheck from '@/auth/page';
 
 interface Goal {
     duration: ReactNode;
-    $id: any;
+    $id: string;
     id: string;
     client: string;
     clientId: string;
@@ -49,8 +49,6 @@ const GoalsPage = () => {
     const [userName, setUserName] = useState('Client');
     const [, setClientId] = useState<string | null>(null);
     const [, setPsychotherapistId] = useState<string | null>(null);
-    const [, setShowModal] = useState(false);
-    const [userName, setUserName] = useState('Client'); // Default to "Client" before fetching real name
 
     const oneWeekAhead = addDays(new Date(), 7);
 

@@ -37,7 +37,7 @@ const Account = () => {
     };
 
     fetchUsers();
-  }, []);
+  }, [setUsers]);
 
   const handleTabChange = (tab: SetStateAction<string>) => {
     setSelectedTab(tab);

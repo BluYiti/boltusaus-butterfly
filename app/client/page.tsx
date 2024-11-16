@@ -25,7 +25,6 @@ const NewClientDashboard = () => {
   const [status, setStatus] = useState<string | null>(null); // State to track user status
   const [cert, setCert] = useState<string | null>(null); // State to track user certificate
   const [userName, setUserName] = useState<string | null>(null); // State to track user name
-  const [currentIndex, setCurrentIndex] = useState(0);
   
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -85,24 +84,6 @@ const NewClientDashboard = () => {
     downloadCertificate(documentId, userName);
   };
 
-  // Function to go to the next slide
-  const handleNext = () => {
-    setCurrentIndex((prevIndex) => {
-      const nextIndex = prevIndex + visibleSlides;
-      return nextIndex >= psychotherapists.length ? 0 : nextIndex;
-    });
-  };
-
-  // Function to go to the previous slide
-  const handlePrevious = () => {
-    setCurrentIndex((prevIndex) => {
-      const prevIndexAdjusted = prevIndex - visibleSlides;
-      return prevIndexAdjusted < 0
-        ? psychotherapists.length - (psychotherapists.length % visibleSlides || visibleSlides)
-        : prevIndexAdjusted;
-    });
-  };
-
   const handleProfileClick = (psychotherapist) => {
     setSelectedPsychotherapist(psychotherapist); // Set the selected psychotherapist
     setIsModalOpen(true); // Open the modal
@@ -112,20 +93,6 @@ const NewClientDashboard = () => {
     setIsModalOpen(false); // Close the modal
     setSelectedPsychotherapist(null); // Reset selected psychotherapist
   };
-
-  // Handle click on indicator dot
-  const handleIndicatorClick = (index) => {
-    const newIndex = index * visibleSlides; // Jump to the corresponding slide set
-    setCurrentIndex(newIndex);
-  };
-
-  const visibleSlides = 2;  // Or whatever number of slides you want visible at a time
-
-  // Adjust this to prevent overflow when there are fewer than 3 psychotherapists
-  const psychotherapistsToShow = psychotherapists.length < visibleSlides ? psychotherapists.length : visibleSlides;
-
-  // Calculate the transform based on the number of psychotherapists
-  const transformPercentage = (currentIndex / psychotherapistsToShow) * 100;
 
   if (authLoading || dataLoading) {
     return <LoadingScreen />; // Show the loading screen while the auth check or data loading is in progress
@@ -178,7 +145,7 @@ const NewClientDashboard = () => {
                   Pre-Assessment Done!
                 </button>
                 <p className="ml-2 bg-[#2563EB] text-white mb-4 py-2 px-4 rounded">
-                  Please wait for the confirmation here in your dashboard, it might take 1-2 days! Thank You!
+                  Please wait for the confirmation here in your dashboard, it might take 1-2 days! Thank You for your patience!
                 </p>
               </div>
             </>
@@ -206,38 +173,28 @@ const NewClientDashboard = () => {
 
           {/* Psychotherapists Section */}
           <div>
-            <h3 className="text-2xl font-bold text-blue-500 text-left mb-2 font-lora">
+            <h3 className="text-2xl font-bold text-blue-500 text-left font-lora">
               Meet our caring psychotherapists, here to guide your healing!
             </h3>
             <div className="relative overflow-hidden">
-              {/* Container for carousel */}
-              <div
-                className="flex transition-transform duration-500 ease-in-out"
-                style={{
-                  transform: `translateX(-${transformPercentage}%)`,
-                  width: `${(psychotherapistsToShow / psychotherapists.length) * 100}%`,
-                }}
-              >
+              {/* Scrollable psychotherapist cards container */}
+              <div className="flex overflow-x-auto p-4 space-x-4">
                 {psychotherapists.map((psychotherapist, index) => (
                   <div
                     key={index}
-                    className="flex-shrink-0 flex items-center justify-center p-4 w-[50%]"
+                    className="flex-shrink-0 flex items-center justify-center w-[300px] p-4"
                     onClick={() => handleProfileClick(psychotherapist)} // Handle profile click
-                    role="button"
-                    tabIndex={0} // Allow keyboard focus for clicking
-                    aria-label={`View profile of ${psychotherapist.firstName} ${psychotherapist.lastName}`}
                   >
-                    <div className="flex flex-col items-center bg-white border border-blue-300 p-4 rounded-3xl transform transition-transform duration-500 ease-in-out hover:scale-105 min-w-[300px]">
+                    <div className="flex flex-col items-center bg-white border border-blue-300 rounded-3xl p-3 min-w-[300px] transform transition-transform duration-500 ease-in-out hover:scale-105">
                       <Image
-                        src={profileImageUrls[psychotherapist.$id] || "/images/default-profile.png"}
-                        alt={`${psychotherapist.firstName} ${psychotherapist.lastName}`}
+                         src={profileImageUrls[psychotherapist.$id] || "/images/default-profile.png"}
+                         alt={`${psychotherapist.firstName} ${psychotherapist.lastName}`}
                         className="rounded-full mb-4"
                         width={96}  // Set width explicitly
                         height={96} // Set height explicitly
                         unoptimized
-                        style={{ objectFit: 'cover' }} // Ensure images are cropped nicely
                       />
-                      <div className="flex flex-col items-center text-center">
+                      <div className="text-center">
                         <h4 className="text-lg font-bold text-blue-500 font-roboto">
                           {psychotherapist.firstName} {psychotherapist.lastName}
                         </h4>
@@ -246,44 +203,14 @@ const NewClientDashboard = () => {
                         </p>
                         <h3 className="text-gray-600 font-lora">
                           {psychotherapist.position
-                            ? psychotherapist.position.charAt(0).toUpperCase() + psychotherapist.position.slice(1)
-                            : 'Position not specified'}
+                            ? `${psychotherapist.position.charAt(0).toUpperCase()}${psychotherapist.position.slice(1)}`
+                            : "Position not specified"}
                         </h3>
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
-
-              {/* Navigation Buttons */}
-              <button
-                className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-[#2563EB] text-white p-2 rounded-full"
-                onClick={handlePrevious}
-                disabled={currentIndex === 0}  // Disable button when at the first slide
-                aria-label="Previous psychotherapist"
-              >
-                &nbsp;&lt;&nbsp;
-              </button>
-              <button
-                className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-[#2563EB] text-white p-2 rounded-full"
-                onClick={handleNext}
-                disabled={currentIndex === psychotherapists.length - psychotherapistsToShow}  // Disable button when at the last slide
-                aria-label="Next psychotherapist"
-              >
-                &nbsp;&gt;&nbsp;
-              </button>
-            </div>
-
-            {/* Carousel Indicators */}
-            <div className="flex justify-center">
-              {psychotherapists.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleIndicatorClick(index)} // Handle indicator click
-                  className={`ml-2 w-2.5 h-2.5 rounded-full bg-blue-500 ${currentIndex === index * visibleSlides ? 'bg-opacity-75' : 'bg-opacity-50'}`}
-                  aria-label={`Go to slide ${index + 1}`}
-                ></button>
-              ))}
             </div>
           </div>
         </div>

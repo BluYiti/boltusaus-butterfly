@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { account, databases, ID } from '@/appwrite';
+import { databases } from '@/appwrite';
 import { Query } from 'appwrite';
 import SuccessModal from './SuccessfulMessage';
 
@@ -20,6 +20,7 @@ const EditAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, sel
   const [error, setError] = useState<string | null>(null);
   const [documentId, setDocumentId] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [isModalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchClient = async () => {
@@ -73,6 +74,9 @@ const EditAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, sel
         } else {
           setError('No client data found.');
         }
+        {isModalOpen && (
+          <SuccessModal selectedTab={selectedTab} message={"edited"} onClose={() => setModalOpen(false)} />
+        )}
       } catch (err) {
         console.error('Error fetching client:', err);
         setError('Failed to fetch client data.');
@@ -82,7 +86,7 @@ const EditAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, sel
     };
   
     fetchClient();
-  }, [clientId, selectedTab]); // Re-run whenever clientId or selectedTab changes
+  }, [clientId, selectedTab, isModalOpen]); // Re-run whenever clientId or selectedTab changes
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

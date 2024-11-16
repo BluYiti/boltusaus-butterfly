@@ -15,9 +15,16 @@ const SubmissionModal: React.FC<SubmissionModalProps> = ({
   onClose,
   onConfirm,
 }) => {
+  const [isDisabled, setIsDisabled] = useState(false);
   if (!isOpen) return null;
   
-  const [isDisabled, setIsDisabled] = useState(false);
+
+  const handleClose = () => {
+    if(onClose){
+      onClose();
+    }
+    setIsDisabled(false);
+  }
 
   const handleConfirm = () => {
     if (onConfirm) {
@@ -72,7 +79,7 @@ const SubmissionModal: React.FC<SubmissionModalProps> = ({
               {modalType === 'confirmation' && (
                 <>
                   <button
-                    onClick={onClose}
+                    onClick={handleClose}
                     className="bg-gray-400 text-white py-2 px-4 rounded hover:bg-gray-300"
                   >
                     Cancel

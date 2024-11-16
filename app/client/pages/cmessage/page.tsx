@@ -5,6 +5,7 @@ import items from '@/client/data/Links';
 import { Client, Databases, Account, Query, ID } from 'appwrite';
 import CallNotification from '@/components/CallNotification';
 import ClientVideoCall from '@/components/ClientVideoCall';
+import Image from 'next/image';
 
 // Interface Definitions
 interface Psychotherapist {
@@ -179,7 +180,7 @@ const ChatPage: FC = () => {
           [Query.equal('conversationId', conversationId), Query.orderAsc('dateTime')]
         );
 
-        const messageData = response.documents.map((msg: any) => ({
+        const messageData = response.documents.map((msg) => ({
           id: msg.$id,
           text: msg.content,
           sender: msg.senderId === psychotherapist.id ? 'psychotherapist' : 'client',
@@ -202,7 +203,7 @@ const ChatPage: FC = () => {
         clearInterval(fetchInterval);
       }
     };
-  }, [conversationId, psychotherapist?.id]);
+  }, [psychotherapist, conversationId, psychotherapist?.id]);
 
   // Polling for Call Notification
   useEffect(() => {
@@ -273,10 +274,13 @@ const ChatPage: FC = () => {
               <div className="w-full p-6 flex flex-col justify-between">
                 <div className="flex items-center mb-4 justify-between">
                   <div className="flex items-center">
-                    <img
+                    <Image
                       src={psychotherapist.imageUrl}
                       alt={psychotherapist.name}
+                      width={48} // Replace with appropriate width
+                      height={48} // Replace with appropriate height
                       className="w-12 h-12 rounded-full mr-4"
+                      unoptimized
                     />
                     <h2 className="text-xl font-bold">{psychotherapist.name}</h2>
                   </div>

@@ -27,6 +27,11 @@ export default function PreAssessmentPage() {
 
   const isReviewPage = currentQuestionIndex === questions.length;
 
+  const handleBackButton = () => {
+    setIsSubmitting(false);
+    handleBack();
+  }
+
   const handleSubmit = () => {
     setIsSubmitting(true);
     handleFormSubmit(); // Proceed with the existing form submission logic
@@ -61,7 +66,7 @@ export default function PreAssessmentPage() {
           <div className="flex justify-between gap-4 mt-6">
             <button
               className="flex-1 bg-blue-400 text-white py-2 px-4 rounded-md hover:bg-blue-800"
-              onClick={handleBack}
+              onClick={handleBackButton}
             >
               Back
             </button>

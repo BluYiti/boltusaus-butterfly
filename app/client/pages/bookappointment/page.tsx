@@ -13,6 +13,7 @@ import CashPayment from "./cash";
 import CreditCardPayment from "./creditcard";
 import GCashPayment from "./gcash";
 import Image from 'next/image';
+import { useRouter } from "next/navigation";
 
 const AppointmentBooking = () => {
   const { loading: authLoading } = useAuthCheck(['client']);
@@ -20,6 +21,7 @@ const AppointmentBooking = () => {
   const currentYear = today.getFullYear();
   const selectedMonth = today.toLocaleString('default', { month: 'long' });
   const nextMonth = new Date(today.setMonth(today.getMonth() + 1)).toLocaleString('default', { month: 'long' });
+  const router = useRouter();
 
   const [appointmentData, setAppointmentData] = useState({
     selectedMonth,
@@ -93,23 +95,16 @@ const AppointmentBooking = () => {
     }
   };
 
+  const handleReschedule = () => {
+    router.push('./bookappointment/reschedule');
+  }
   
   useEffect(() => {
-    // Define a mapping from month name to number (0-based index)
     const monthMap: { [key: string]: number } = {
-      January: 0,
-      February: 1,
-      March: 2,
-      April: 3,
-      May: 4,
-      June: 5,
-      July: 6,
-      August: 7,
-      September: 8,
-      October: 9,
-      November: 10,
-      December: 11
+      January: 0, February: 1, March: 2, April: 3, May: 4, June: 5,
+      July: 6, August: 7, September: 8, October: 9, November: 10, December: 11
     };
+    
     const fetchData = async () => {
       try {
         const user = await account.get();
@@ -259,7 +254,7 @@ const AppointmentBooking = () => {
           <div className="bg-white p-8 rounded-lg shadow-lg text-center max-w-lg mx-auto">
             {paymentStatus === "pending" ? (
               <>
-                <h1 className="text-3xl font-bold text-blue-400 mb-4">Appointment Confirmation</h1>
+                <h2 className="text-3xl font-bold text-blue-400 mb-4">Appointment Confirmation</h2>
                 <p className="text-xl text-gray-600">
                   You will receive a confirmation notification for your appointment in <strong>1-2 days</strong>. If you have any questions in the meantime, feel free to reach out to your therapist via the communication tab.
                 </p>
@@ -268,16 +263,32 @@ const AppointmentBooking = () => {
               </>
             ) : paymentStatus === "paid" ? (
               <>
-                <h1 className="text-3xl font-bold text-green-400 mb-4">Appointment Confirmed</h1>
+                <h2 className="text-3xl font-bold text-green-400 mb-4">Appointment Confirmed</h2>
                 <p className="text-xl text-gray-600">
                   Your appointment has been confirmed. Please wait for the scheduled date to arrive, and feel free to contact your psychotherapist with any questions about your upcoming appointment via the communication tab.
                 </p>
                 <p className="text-lg text-gray-600 mt-5">Your payment status is {paymentStatus}.</p>
                 <p className="text-lg text-gray-600 mt-2">{appointmentData.bookingMessage}</p>
               </>
+            ) : paymentStatus === "rescheduled" ? (
+              <>
+                <h2 className="text-3xl font-bold text-red-400 mb-4">Payment Rescheduled</h2>
+                <p className="text-xl text-gray-600">
+                  Your appointment has been rescheduled. Please feel free to contact your psychotherapist for any questions about your rescheduling via the communication tab.
+                </p>
+                <p className="text-lg text-gray-600 mt-5">Your payment status is {paymentStatus}.</p>
+                <p className="text-lg text-gray-600 mt-5">Reason for rescheduling: {declineReason}.</p>
+                <p className="text-lg text-gray-600 mt-2">{appointmentData.bookingMessage}</p>
+                  <button 
+                    className="px-6 py-3 bg-gradient-to-r from-blue-300 to-blue-400 text-white rounded-lg text-lg font-semibold shadow-lg transform transition-all hover:scale-105 hover:shadow-2xl active:scale-100 mt-2"
+                    onClick={handleReschedule}
+                  >
+                  Click me to reschedule appointment
+                </button>
+              </>
             ) : (
               <>
-                <h1 className="text-3xl font-bold text-red-400 mb-4">Payment Declined</h1>
+                <h2 className="text-3xl font-bold text-red-400 mb-4">Payment Declined</h2>
                 <p className="text-xl text-gray-600">
                   Your appointment has been declined. Please contact your psychotherapist for any questions about your appointment being declined via the communication tab.
                 </p>

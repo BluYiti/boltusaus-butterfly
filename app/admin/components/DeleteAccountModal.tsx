@@ -1,16 +1,16 @@
 import { useState } from 'react';
-import { account, databases, ID } from '@/appwrite';
+import { databases } from '@/appwrite';
 import { Query } from 'appwrite';
 import SuccessModal from './SuccessfulMessage';
 
-interface AddAccountModalProps {
+interface DeleteAccountModalProps {
   isOpen: boolean;
   onClose: () => void;
-  selectedTab: string; // To know which tab is currently active
+  selectedTab: string;
   clientId: string;
 }
 
-const DeleteAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, selectedTab, clientId }) => {
+const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({ isOpen, onClose, selectedTab, clientId }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setModalOpen] = useState(false);
@@ -21,78 +21,66 @@ const DeleteAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, s
   const handleSubmit = async () => {
     setError(null);
     setLoading(true);
-  
+
     try {
-      // Step 1: Delete the account in the Appwrite auth system
-      await account.deleteIdentity(clientId);
-  
-      // Step 3: Delete the document in the correct collection (Psychotherapist/Associate/Client)
       const userAttribute = selectedTab === 'Client' ? 'userid' : 'userId';
-  
+
+      // Find the document to delete from the selectedTab collection
       const documentToDelete = await databases.listDocuments('Butterfly-Database', selectedTab, [
         Query.equal(userAttribute, clientId)
       ]);
-  
+
       if (documentToDelete.total > 0) {
         const documentId = documentToDelete.documents[0].$id;
-  
-        // Delete the document from the respective collection
-        await databases.deleteDocument('Butterfly-Database', selectedTab, documentId);
 
-        const documentToDeletePreAss = await databases.listDocuments('Butterfly-Database', 'Pre-Assessment', [
-          Query.equal('client', clientId)
-        ]);
+        // If the selected tab is "Client", delete associated documents from other collections first
+        if (selectedTab === "Client") {
+          // Delete associated documents in other collections
+          await deleteAssociatedDocuments(clientId);
 
-        await databases.deleteDocument('Butterfly-Database', 'Pre-Assessment', documentToDeletePreAss.documents[0].$id);
-
-        const documentToDeletePayments = await databases.listDocuments('Butterfly-Database', 'Payment', [
-          Query.equal('client', clientId)
-        ]);
-
-        for (const document of documentToDeletePayments.documents) {
-          try {
-            // Delete each document by its $id
-            await databases.deleteDocument('Butterfly-Database', 'Payment', document.$id);
-            console.log(`Document with ID ${document.$id} deleted successfully.`);
-          } catch (error) {
-            console.error(`Failed to delete document with ID ${document.$id}:`, error);
-          }
+          // Now delete the document from the selectedTab collection
+          await databases.deleteDocument('Butterfly-Database', selectedTab, documentId);
+        } else {
+          // If not "Client", simply delete the document from the selectedTab
+          await databases.deleteDocument('Butterfly-Database', selectedTab, documentId);
         }
 
-        const documentToDeleteBookings = await databases.listDocuments('Butterfly-Database', 'Bookings', [
-          Query.equal('client', clientId)
-        ]);
+        // Delete the document from the Accounts collection using the clientId
+        await databases.deleteDocument('Butterfly-Database', 'Accounts', clientId);
 
-        for (const document of documentToDeleteBookings.documents) {
-          try {
-            // Delete each document by its $id
-            await databases.deleteDocument('Butterfly-Database', 'Bookings', document.$id);
-            console.log(`Document with ID ${document.$id} deleted successfully.`);
-          } catch (error) {
-            console.error(`Failed to delete document with ID ${document.$id}:`, error);
-          }
-        }
+        // Show success modal
+        setModalOpen(true);
       } else {
-        throw new Error('Document not found in the collection');
+        throw new Error('Document not found in the selected collection');
       }
 
-      const accountDocuments = await databases.listDocuments('Butterfly-Database', 'Accounts', [
-        Query.equal('userId', clientId)
-      ]);
-  
-      if (accountDocuments.total > 0) {
-        const accountDocumentId = accountDocuments.documents[0].$id;
-        await databases.deleteDocument('Butterfly-Database', 'Accounts', accountDocumentId);
-      }
-  
-      // Show success modal (optional)
-      setModalOpen(true);
-      setConfirmationText(''); // Reset confirmation text
-  
     } catch (err) {
       setError(err.message || 'Failed to delete account');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Helper function to delete associated documents for 'Client'
+  const deleteAssociatedDocuments = async (clientId: string) => {
+    try {
+      await Promise.all([
+        deleteFromCollection('Pre-Assessment', 'userID', clientId),
+        deleteFromCollection('Payment', 'client', clientId),
+        deleteFromCollection('Bookings', 'client', clientId)
+      ]);
+    } catch (error) {
+      console.log('Error deleting associated documents:', error);
+    }
+  };
+
+  // Helper function to delete from a specific collection
+  const deleteFromCollection = async (collection: string, attribute: string, clientId: string) => {
+    const docs = await databases.listDocuments('Butterfly-Database', collection, [
+      Query.equal(attribute, clientId)
+    ]);
+    if (docs.total > 0) {
+      await Promise.all(docs.documents.map(doc => databases.deleteDocument('Butterfly-Database', collection, doc.$id)));
     }
   };
 
@@ -111,7 +99,7 @@ const DeleteAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, s
           <form onSubmit={(e) => { e.preventDefault() }}>
             <div className="mb-4">
               <label htmlFor="confirmationInput" className="block text-sm font-medium text-gray-700">
-                Type "DELETE" to confirm:
+                Type &quot;DELETE&quot; to confirm:
               </label>
               <input
                 type="text"
@@ -143,6 +131,15 @@ const DeleteAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, s
           </form>
         </div>
       </div>
+
+      {/* Success Modal */}
+      {isModalOpen && (
+        <SuccessModal
+          selectedTab={selectedTab}
+          message={"deleted"}
+          onClose={() => setModalOpen(false)}
+        />
+      )}
     </>
   );
 };

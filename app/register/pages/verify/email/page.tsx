@@ -75,7 +75,7 @@ const RegisterPage: React.FC = () => {
                             )}
                         </p>
                         <p className="text-sm text-[#333] mt-4">
-                            If you didn't request this email, you can safely ignore it
+                            If you didn&apos;t request this email, you can safely ignore it
                         </p>
                     </div>
                 </div>

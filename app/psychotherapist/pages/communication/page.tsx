@@ -5,9 +5,10 @@ import { FaVideo, FaSearch } from 'react-icons/fa';
 import Layout from '@/components/Sidebar/Layout';
 import VideoCall from '@/components/VideoCall';
 import items from '@/psychotherapist/data/Links';
-import { Client, Databases, Account, Query, Storage, ID } from 'appwrite';
+import { Query, ID } from 'appwrite';
 import Image from 'next/image';
 import Link from 'next/link';
+import { account, databases, storage } from '@/appwrite';
 
 // Define interfaces
 interface Contact {
@@ -25,21 +26,6 @@ interface Message {
   sender: string;
   time: string;
 }
-
-interface Conversation {
-  id: string;
-  clientId: string;
-  psychotherapistId: string;
-}
-
-const client = new Client();
-client
-  .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT as string)
-  .setProject(process.env.NEXT_PUBLIC_PROJECT_ID as string);
-
-const databases = new Databases(client);
-const account = new Account(client);
-const storage = new Storage(client);
 
 // Contact List component
 const ContactList: FC<{ onContactClick: (id: string) => void; selectedContact: string | null; contacts: Contact[] }> = ({ onContactClick, selectedContact, contacts }) => {
@@ -88,7 +74,7 @@ const ContactList: FC<{ onContactClick: (id: string) => void; selectedContact: s
 };
 
 // Chat Box component
-const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSendMessage: (text: string) => void; onStartCall: () => void }> = ({ selectedContact, messages, onSendMessage, onStartCall }) => {
+const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSendMessage: (text: string) => void; onStartCall: () => void }> = ({ selectedContact, messages, onSendMessage }) => {
   const [messageInput, setMessageInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -182,7 +168,7 @@ const Communication: FC = () => {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversationId, setConversationId] = useState<string | null>(null);
-  const [loggedInUser, setLoggedInUser] = useState<any>(null);
+  const [, setLoggedInUser] = useState<string | null>(null);
   const [psychotherapistDocumentId, setPsychotherapistDocumentId] = useState<string | null>(null); // Store psychotherapist document ID
   const [isVideoCallActive, setIsVideoCallActive] = useState(false);
 
@@ -253,7 +239,7 @@ const Communication: FC = () => {
           [Query.equal('psychotherapist', psychotherapistDocumentId)]
         );
 
-        const clientDataPromises = clientResponse.documents.map(async (doc: any) => {
+        const clientDataPromises = clientResponse.documents.map(async (doc) => {
           let profilePicUrl = '/default-avatar.jpg';
           if (doc.idFile) {
             const imagePreview = storage.getFilePreview('Images', doc.idFile);

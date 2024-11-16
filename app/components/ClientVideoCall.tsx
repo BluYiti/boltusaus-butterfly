@@ -1,6 +1,6 @@
 // ClientVideoCall.tsx
 
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import SimplePeer from 'simple-peer';
 import { Client, Databases, ID, Query } from 'appwrite';
 
@@ -23,7 +23,7 @@ const ClientVideoCall: React.FC<ClientVideoCallProps> = ({ callerId, receiverId,
   const peerRef = useRef<SimplePeer.Instance | null>(null);
   const processedMessageIds = useRef<Set<string>>(new Set());
   const isOfferCreated = useRef(false); 
-  let signalingInterval: any = null;
+  let signalingInterval = null;
 
   const setupLocalStream = async () => {
     const devices = await navigator.mediaDevices.enumerateDevices();
@@ -40,7 +40,7 @@ const ClientVideoCall: React.FC<ClientVideoCallProps> = ({ callerId, receiverId,
     });
   };
 
-  useEffect(() => {
+  useRef(() => {
     if (!callerId) {
       console.error("Caller ID is undefined. Ensure it is passed as a prop.");
       return;
@@ -107,9 +107,9 @@ const ClientVideoCall: React.FC<ClientVideoCallProps> = ({ callerId, receiverId,
       signalingInterval = null;
       isOfferCreated.current = false;
     };
-  }, [callerId, receiverId]);
+  }, []);
 
-  const sendSignalingMessage = async (message: any) => {
+  const sendSignalingMessage = async (message) => {
     try {
       if (!message.from) {
         console.error("The 'from' field is empty. Check that callerId is correctly passed.");
@@ -159,7 +159,7 @@ const ClientVideoCall: React.FC<ClientVideoCallProps> = ({ callerId, receiverId,
     }
   };
 
-  const handleSignalingMessage = (message: any) => {
+  const handleSignalingMessage = (message) => {
     if (!peerRef.current) return;
 
     try {
