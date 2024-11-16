@@ -10,7 +10,7 @@ import LoadingScreen from "@/components/LoadingScreen";
 import Image from 'next/image';
 
 interface UserProfile {
-  $id: string;
+  id: string;
   address?: string;
   birthdate?: string;
   phonenum?: string;
@@ -37,45 +37,45 @@ const ProfilePage: React.FC = () => {
         const user = await account.get();
         setName(user.name); // Set the user's name from Appwrite auth
         setEmail(user.email); // Set the user's email from Appwrite auth
-  
+
         // Fetch user profile data from the database using userId field
-        const response = await databases.listDocuments(
-          "Butterfly-Database", // Database ID
-          "Client",             // Collection ID
-          [Query.equal('userid', user.$id)] // Filter to find the document where userId matches user.$id
-        );
-  
+        const response = await databases.listDocuments("Butterfly-Database", "Client", [
+          Query.equal('userid', user.$id)
+        ]);
+
+        setClientId(response.documents[0].$id);
+
+        // Fetch profile images for each psychotherapist
+        const profileImages = {};
+        const url = await fetchProfileImageUrl(response.documents[0].profilepic);
+        if (url) {
+          profileImages[user.$id] = url;
+        }
+        setProfileImageUrls(profileImages);
+
+        
+
+        console.log(response.documents[0].$id);
+
         if (response.documents.length > 0) {
-          const document = response.documents[0];
-          setClientId(document.$id); // Update clientId
-          setUserData(document); // Set user profile data in state
-  
-          // Fetch profile images
-          const profileImages = {};
-          const url = await fetchProfileImageUrl(document.profilepic);
-          if (url) {
-            profileImages[user.$id] = url;
-          }
-          setProfileImageUrls(profileImages);
+          // If document is found, set it in the state
+          setUserData(response.documents[0]);
         } else {
           console.error("No profile document found for this user.");
         }
+
+
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
     }
-  
+
     fetchUserData();
-  }, []); // Remove userData from the dependency array
-  
-  useEffect(() => {
-    console.log("Client ID updated:", clientId); // Log clientId whenever it updates
-  }, [clientId]);
-  
+  }, [setClientId]);
   
   if (authLoading ) {
     return <LoadingScreen />; // Show the loading screen while the auth check or data loading is in progress
-}
+  }
 
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>

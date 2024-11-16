@@ -6,23 +6,22 @@ import { useRouter } from "next/navigation";
 
 const VerifyPage: React.FC = () => {
     const router = useRouter();
-    const [, setIsVerified] = useState<boolean | null>(null);
 
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const userId = urlParams.get('userId');
         const secret = decodeURIComponent(urlParams.get('secret') || ''); // Decode the secret if necessary
-
         console.log('Decoded userId:', userId, 'secret:', secret); // Log to check the values
-
         const verifyUser = async () => {
-            const response = await account.updateVerification(userId, secret);
-            console.log('Verification response:', response); // Log success response
-            setIsVerified(true);
+            try {
+                const response = await account.updateVerification(userId, secret);
+                console.log('Verification response:', response); // Log success response
+            } catch (error) {
+                console.error('Verification failed:', error); // Log the error for debugging
+            }
         };
-
         verifyUser();
-    }, [router]);
+    }, [router]);    
 
     const handleLoginRedirect = () => {
         router.push('/login');
