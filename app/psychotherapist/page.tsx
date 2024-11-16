@@ -178,13 +178,16 @@ const Dashboard: React.FC = () => {
     try {
       const user = await account.get();
       const psychoId = await fetchPsychoId(user.$id);
-    
-      const response = await databases.listDocuments('Butterfly-Database', 'Payment', [
-        Query.equal('psychotherapist', psychoId),
-        Query.equal('status', "Pending")
+      
+      // Step 1: Get documents by psychotherapist
+      const psychotherapistResponse = await databases.listDocuments('Butterfly-Database', 'Payment', [
+        Query.equal('psychotherapist', psychoId)
       ]);
-    
-      const payments: Payment[] = response.documents.map((doc) => ({
+      
+      // Step 2: Filter the documents by status
+      const pendingPayments = psychotherapistResponse.documents.filter(document => document.status === 'pending');
+      
+      const payments: Payment[] = pendingPayments.map((doc) => ({
         $id: doc.$id,
         client: {
           firstname: doc.client.firstname,
@@ -193,7 +196,7 @@ const Dashboard: React.FC = () => {
         psychotherapist: doc.psychotherapist,
         status: doc.status,
       }));
-    
+      
       setPaymentsData(payments);
     } catch (error) {
       setError('Failed to fetch payments');
@@ -201,6 +204,7 @@ const Dashboard: React.FC = () => {
       setLoadingPayments(false); // Set loading state to false after data is fetched
     }
   };
+  
 
   useEffect(() => {
     const fetchData = async () => {
