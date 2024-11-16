@@ -57,7 +57,7 @@ const NewClientDashboard = () => {
         const therapistResponse = await databases.listDocuments('Butterfly-Database', 'Psychotherapist');
         setPsychotherapists(therapistResponse.documents);
 
-        // Fetch profile images for each psychotherapist
+        // Fetch profile images for client
         const profileImages = {};
         for (const therapist of therapistResponse.documents) {
           if (therapist.profilepic) {

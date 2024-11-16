@@ -27,8 +27,8 @@ const ProfilePage: React.FC = () => {
   const [name, setName] = useState<string>(''); // Placeholder for the user's name
   const [userData, setUserData] = useState<UserProfile>(null); // State to store user profile data
   const [profileImageUrls, setProfileImageUrls] = useState({});
+  const [clientId, setClientId] = useState<string>(''); // State to store user's email from Appwrite auth
   const [email, setEmail] = useState<string>(''); // State to store user's email from Appwrite auth
-
 
   useEffect(() => {
     async function fetchUserData() {
@@ -37,42 +37,41 @@ const ProfilePage: React.FC = () => {
         const user = await account.get();
         setName(user.name); // Set the user's name from Appwrite auth
         setEmail(user.email); // Set the user's email from Appwrite auth
-
+  
         // Fetch user profile data from the database using userId field
         const response = await databases.listDocuments(
           "Butterfly-Database", // Database ID
           "Client",             // Collection ID
           [Query.equal('userid', user.$id)] // Filter to find the document where userId matches user.$id
         );
-
+  
         if (response.documents.length > 0) {
-          // If document is found, set it in the state
-          setUserData(response.documents[0]);
+          const document = response.documents[0];
+          setClientId(document.$id); // Update clientId
+          setUserData(document); // Set user profile data in state
+  
+          // Fetch profile images
+          const profileImages = {};
+          const url = await fetchProfileImageUrl(document.profilepic);
+          if (url) {
+            profileImages[user.$id] = url;
+          }
+          setProfileImageUrls(profileImages);
         } else {
           console.error("No profile document found for this user.");
         }
-
-        // Fetch profile images for each psychotherapist
-        const profileImages: { [key: string]: string } = {};
-        if (userData) {
-          for (const client of userData) {
-            if (client.profilepic) {
-              const url = await fetchProfileImageUrl(client.profilepic);
-              if (url) {
-                profileImages[user.$id] = url;
-              }
-            }
-          }
-        }
-
-        setProfileImageUrls(profileImages);
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
     }
-
+  
     fetchUserData();
-  }, [userData]);
+  }, []); // Remove userData from the dependency array
+  
+  useEffect(() => {
+    console.log("Client ID updated:", clientId); // Log clientId whenever it updates
+  }, [clientId]);
+  
   
   if (authLoading ) {
     return <LoadingScreen />; // Show the loading screen while the auth check or data loading is in progress
@@ -94,11 +93,12 @@ const ProfilePage: React.FC = () => {
             {/* Profile Picture and Name */}
             <div className="relative flex flex-col items-center text-center mb-10">
               <Image
-                src={profileImageUrls[userData?.$id] || "/images/default-profile.png"} // Updated profile picture path
+                src={profileImageUrls[clientId] || "/images/default-profile.png"} // Updated profile picture path
                 alt="Profile"
                 className="rounded-full w-40 h-40 object-cover bg-gray-200 shadow-lg border-4 border-white"
                 width={160}  // Specify width in pixels
                 height={160} // Specify height in pixels
+                unoptimized
               />
               <h2 className="mt-6 text-2xl font-semibold text-gray-900">{name || 'Loading...'}</h2>
             </div>
