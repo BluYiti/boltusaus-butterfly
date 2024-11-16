@@ -13,7 +13,6 @@ interface UploadProfileProps {
 const UploadProfile: React.FC<UploadProfileProps> = ({
   isModalOpen,
   setIsModalOpen,
-  handleFileChange,
 }) => {
   const user = account.get();
   const [image, setImage] = useState<File | null>(null);

@@ -10,10 +10,10 @@ interface AppointmentData {
     $id: string;
   };
   selectedTime: string; // Can be more specific depending on what 'selectedTime' is
-  createdAt: string; // Or Date if it's a Date object
+  createdAt: string | Date; // Or Date if it's a Date object
   selectedMode: string;
-  selectedMonth: number;
-  selectedDay: number;
+  selectedMonth: string;
+  selectedDay: string;
 }
 
 interface CashPaymentProps {
