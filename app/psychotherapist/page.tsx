@@ -355,6 +355,10 @@ const Dashboard: React.FC = () => {
               selectedTherapistId={appointmentData.selectedTherapist}
               >
             </Calendar>
+            <div className='justify-end'>
+              <button className='bg-red-700 text-white py-2 px-4 rounded-lg mt-4'>Disable Slot</button>
+              <button className='bg-red-700 text-white py-2 px-4 rounded-lg mt-4'>Disable Day</button>
+            </div>
           </div>
 
           {/* Payments Status Section */}

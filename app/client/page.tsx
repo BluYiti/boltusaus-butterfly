@@ -172,34 +172,32 @@ const NewClientDashboard = () => {
           )}
 
           {/* Psychotherapists Section */}
-          <div>
-            <h3 className="text-2xl font-bold text-blue-500 text-left font-lora">
-              Meet our caring psychotherapists, here to guide your healing!
-            </h3>
             <div className="relative overflow-hidden">
-              {/* Scrollable psychotherapist cards container */}
-              <div className="flex overflow-x-auto p-4 space-x-4">
+              <div className="flex overflow-x-auto p-4 space-x-4 scrollbar-thin scrollbar-thumb-blue-300">
                 {psychotherapists.map((psychotherapist, index) => (
                   <div
                     key={index}
                     className="flex-shrink-0 flex items-center justify-center w-[300px] p-4"
-                    onClick={() => handleProfileClick(psychotherapist)} // Handle profile click
+                    onClick={() => handleProfileClick(psychotherapist)}
+                    tabIndex={0} // Makes it focusable
+                    aria-label={`View profile of ${psychotherapist.firstName} ${psychotherapist.lastName}`}
                   >
-                    <div className="flex flex-col items-center bg-white border border-blue-300 rounded-3xl p-3 min-w-[300px] transform transition-transform duration-500 ease-in-out hover:scale-105">
+                    <div className="flex flex-col items-center bg-white border border-blue-300 rounded-3xl p-3 min-w-[300px] transform transition-transform duration-500 ease-in-out hover:scale-105 shadow-lg">
                       <Image
-                         src={profileImageUrls[psychotherapist.$id] || "/images/default-profile.png"}
-                         alt={`${psychotherapist.firstName} ${psychotherapist.lastName}`}
+                        src={profileImageUrls[psychotherapist.$id] || "/images/default-profile.png"}
+                        alt={`${psychotherapist.firstName || "N/A"} ${psychotherapist.lastName || "N/A"}`}
                         className="rounded-full mb-4"
-                        width={96}  // Set width explicitly
-                        height={96} // Set height explicitly
+                        width={96}
+                        height={96}
                         unoptimized
+                        onError={(e) => e.target.src = "/images/default-profile.png"}
                       />
                       <div className="text-center">
                         <h4 className="text-lg font-bold text-blue-500 font-roboto">
-                          {psychotherapist.firstName} {psychotherapist.lastName}
+                          {psychotherapist.firstName || "First Name"} {psychotherapist.lastName || "Last Name"}
                         </h4>
                         <p className="text-sm text-gray-600 font-lora">
-                          {psychotherapist.specialties}
+                          {psychotherapist.specialties || "Specialties not specified"}
                         </p>
                         <h3 className="text-gray-600 font-lora">
                           {psychotherapist.position
@@ -212,7 +210,6 @@ const NewClientDashboard = () => {
                 ))}
               </div>
             </div>
-          </div>
         </div>
 
         {/* Right side - A Daily Reminder Section */}
