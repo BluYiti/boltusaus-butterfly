@@ -11,6 +11,7 @@ interface ClientProfileModalProps {
 
 const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpen, onClose }) => {
   const [clientData, setClientData] = useState<Models.Document | null>(null);
+  const [profileImageUrls, setProfileImageUrls] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
@@ -22,6 +23,10 @@ const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpe
   const fetchClientData = async (id: string) => {
     try {
       const clientData = await databases.getDocument('Butterfly-Database', 'Client', id);
+      const url = await fetchProfileImageUrl(therapist.profilepic);
+      if (url) {
+        profileImages[therapist.$id] = url;
+      }
       return clientData;
     } catch (err: unknown) {
       console.error("Error fetching client data:", err);
@@ -116,16 +121,12 @@ const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpe
               <div className="flex space-x-12 items-center">
                 <div className="flex-shrink-0 text-center">
                   <Image
-                    src={clientData.profilePictureUrl || '/default-profile.jpg'}
+                    src={clientData.profilePictureUrl || '/images/default-profile.png'}
                     alt="Profile"
                     width={192} // Equivalent to 48 * 4 for a consistent image size
                     height={192} // Equivalent to 48 * 4 for a consistent image size
                     className="rounded-full object-cover mx-auto"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.onerror = null;
-                      target.src = '/default-profile.jpg';
-                    }}
+                    unoptimized
                   />
                   <h2 className="mt-4 text-2xl font-bold text-gray-800">
                     {clientData.firstname} {clientData.lastname}
