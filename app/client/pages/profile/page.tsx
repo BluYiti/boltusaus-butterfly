@@ -11,14 +11,14 @@ import Image from 'next/image';
 
 interface UserProfile {
   id: string;
-  address?: string;
-  birthdate?: string;
-  phonenum?: string;
-  sex?: string;
-  age?: number;
-  emergencyContactName?: string;
-  emergencyContact?: string;
-  profilepic?: string; // Assuming the profile image is represented as a string
+  address: string;
+  birthdate: string;
+  phonenum: string;
+  sex: string;
+  age: number;
+  emergencyContactName: string;
+  emergencyContact: string;
+  profilepic: string; // Assuming the profile image is represented as a string
 }
 
 const ProfilePage: React.FC = () => {
@@ -35,43 +35,50 @@ const ProfilePage: React.FC = () => {
       try {
         // Fetch authenticated user data from Appwrite account
         const user = await account.get();
-        setName(user.name); // Set the user's name from Appwrite auth
-        setEmail(user.email); // Set the user's email from Appwrite auth
-
-        // Fetch user profile data from the database using userId field
+        setName(user.name); 
+        setEmail(user.email); 
+  
+        // Fetch user profile data from the database
         const response = await databases.listDocuments("Butterfly-Database", "Client", [
-          Query.equal('userid', user.$id)
+          Query.equal('userid', user.$id),
         ]);
-
-        setClientId(response.documents[0].$id);
-
-        // Fetch profile images for each psychotherapist
-        const profileImages = {};
-        const url = await fetchProfileImageUrl(response.documents[0].profilepic);
-        if (url) {
-          profileImages[user.$id] = url;
-        }
-        setProfileImageUrls(profileImages);
-
-        
-
-        console.log(response.documents[0].$id);
-
+  
         if (response.documents.length > 0) {
-          // If document is found, set it in the state
-          setUserData(response.documents[0]);
+          const document = response.documents[0];
+  
+          // Map document to UserProfile
+          const userProfile: UserProfile = {
+            id: document.$id,
+            address: document.address,
+            birthdate: document.birthdate,
+            phonenum: document.phonenum,
+            sex: document.sex,
+            age: document.age,
+            emergencyContactName: document.emergencyContactName,
+            emergencyContact: document.emergencyContact,
+            profilepic: document.profilepic,
+          };
+  
+          setUserData(userProfile);
+          setClientId(document.$id); // Ensure clientId matches the document.$id
+  
+          // Fetch profile image URL
+          const url = await fetchProfileImageUrl(document.profilepic);
+          setProfileImageUrls((prev) => ({
+            ...prev,
+            [document.$id]: url, // Use document.$id as the key
+          }));
         } else {
           console.error("No profile document found for this user.");
         }
-
-
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
     }
-
+  
     fetchUserData();
-  }, [setClientId]);
+  }, []);
+  
   
   if (authLoading ) {
     return <LoadingScreen />; // Show the loading screen while the auth check or data loading is in progress
