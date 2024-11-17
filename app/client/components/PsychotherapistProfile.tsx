@@ -42,8 +42,8 @@ const PsychotherapistProfile: React.FC<PsychotherapistProfileProps> = ({ psychot
   }, [psychotherapist.profilepic]); // Dependency array makes sure this runs when the psychotherapist changes
 
   return (
-    <div className="fixed inset-0 bg-gray-700 bg-opacity-70 flex justify-center items-center z-50">
-      <div className="bg-white rounded-lg shadow-lg p-8 w-[90%] sm:w-[80%] md:w-[60%] lg:w-[50%] max-w-2xl overflow-auto">
+    <div className="fixed inset-0 flex justify-center items-center z-50 overflow-auto bg-black bg-opacity-50">
+      <div className="bg-white rounded-lg shadow-lg p-8 w-[90%] sm:w-[80%] md:w-[60%] lg:w-[50%] max-w-2xl max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex justify-between items-center">
           <button 
@@ -53,34 +53,33 @@ const PsychotherapistProfile: React.FC<PsychotherapistProfileProps> = ({ psychot
             &times;
           </button>
         </div>
-
+  
         {/* Profile Image and Info */}
         <div className="flex flex-col justify-center items-center mb-2">
           <Image
-            src={profileImageUrl || "/images/default-profile.png"}  // Fallback to default image
+            src={profileImageUrl || "/images/default-profile.png"}
             alt={`${psychotherapist.firstName} ${psychotherapist.lastName}`}
             className="rounded-full object-cover border-4 border-blue-500 shadow-md"
-            width={144}  // 36 * 4 (as 1rem = 4px)
-            height={144} // 36 * 4 (as 1rem = 4px)
+            width={144}
+            height={144}
             unoptimized
           />
-          {/* Psychotherapist's name under the image */}
           <h3 className="mt-4 text-2xl font-semibold text-gray-700">
             {psychotherapist.firstName} {psychotherapist.lastName}
           </h3>
         </div>
-
+  
         {/* Specialties & Position */}
         <div className="text-center mb-4">
-            <div className="bg-green-100 p-2 rounded-full inline-block mt-1">
+          <div className="bg-green-100 p-2 rounded-full inline-block mt-1">
             <p className="text-sm text-green-700">
-            <strong>Position:</strong> {psychotherapist.position ? `${psychotherapist.position.charAt(0).toUpperCase() + psychotherapist.position.slice(1)}` : 'Not specified'}
+              <strong>Position:</strong> {psychotherapist.position ? `${psychotherapist.position.charAt(0).toUpperCase() + psychotherapist.position.slice(1)}` : 'Not specified'}
             </p>
-            </div>
+          </div>
           <p className="text-lg font-medium text-gray-700">Specialties</p>
           <p className="text-sm text-gray-600">{psychotherapist.specialties}</p>
         </div>
-
+  
         {/* Description - Always show title */}
         <div className="mt-6">
           <h4 className="text-xl font-semibold text-blue-400">Description</h4>
@@ -90,7 +89,7 @@ const PsychotherapistProfile: React.FC<PsychotherapistProfileProps> = ({ psychot
             <p className="text-gray-500">No description provided.</p>
           )}
         </div>
-
+  
         {/* Background - Always show title */}
         <div className="mt-6">
           <h4 className="text-xl font-semibold text-blue-400">Background</h4>
@@ -100,7 +99,7 @@ const PsychotherapistProfile: React.FC<PsychotherapistProfileProps> = ({ psychot
             <p className="text-gray-500">No background information provided.</p>
           )}
         </div>
-
+  
         {/* Phone Number - Always show title */}
         <div className="mt-6">
           <h4 className="text-xl font-semibold text-blue-400">Phone Number</h4>
