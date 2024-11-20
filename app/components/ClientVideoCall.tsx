@@ -1,6 +1,6 @@
-// ClientVideoCall.tsx
+'use client'
 
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import SimplePeer from 'simple-peer';
 import { Client, Databases, ID, Query } from 'appwrite';
 
@@ -40,7 +40,8 @@ const ClientVideoCall: React.FC<ClientVideoCallProps> = ({ callerId, receiverId,
     });
   };
 
-  useRef(() => {
+  // Replace the incorrect useRef call with useEffect
+  useEffect(() => {
     if (!callerId) {
       console.error("Caller ID is undefined. Ensure it is passed as a prop.");
       return;
@@ -69,18 +70,18 @@ const ClientVideoCall: React.FC<ClientVideoCallProps> = ({ callerId, receiverId,
             signalData: JSON.stringify(data),
           });
         });
-        
+
         peerRef.current.on('connect', () => {
           console.log("Peer connection established!");
         });
-        
+
         peerRef.current.on('error', err => {
           console.error("Peer connection error:", err);
         });
-        
+
         peerRef.current.on('close', () => {
           console.log("Peer connection closed.");
-        });        
+        });
 
         peerRef.current.on('stream', remoteStream => {
           if (remoteVideoRef.current) remoteVideoRef.current.srcObject = remoteStream;
@@ -107,7 +108,7 @@ const ClientVideoCall: React.FC<ClientVideoCallProps> = ({ callerId, receiverId,
       signalingInterval = null;
       isOfferCreated.current = false;
     };
-  }, []);
+  }, []); // Change useRef to useEffect
 
   const sendSignalingMessage = async (message) => {
     try {

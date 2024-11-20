@@ -34,7 +34,7 @@ interface AccountType {
 }
 
 const Clients = () => {
-  const { loading: authLoading } = useAuthCheck(['psychotherapist']); // Call the useAuthCheck hook
+  const authLoading = useAuthCheck(['psychotherapist']); // Call the useAuthCheck hook
   const [activeTab, setActiveTab] = useState("Current");
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");

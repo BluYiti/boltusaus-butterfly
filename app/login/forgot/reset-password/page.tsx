@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Back from '@/components/Back';
 import { account } from '@/appwrite';
@@ -37,13 +37,7 @@ const ResetPasswordPage: React.FC = () => {
         const lowercase = /[a-z]/.test(password);
 
         // Update password criteria state
-        setPasswordCriteria({
-            length,
-            number,
-            specialChar,
-            uppercase,
-            lowercase,
-        });
+        setPasswordCriteria({length, number, specialChar, uppercase, lowercase,});
 
         // Check if the password meets all criteria
         setIsPasswordValid(length && number && specialChar && uppercase && lowercase);
@@ -191,15 +185,14 @@ const ResetPasswordPage: React.FC = () => {
                     </div>
                 </form>
             </div>
-
-            {/* Background Image on the Right */}
-            <div className="absolute right-0 w-14 h-screen bg-cover bg-no-repeat" style={{ backgroundImage: `url('/images/rightblock.png')` }}></div>
-
-            <footer className='text-gray-600 text-xs text-center absolute bottom-4 w-full'>
-                © Butterfly 2024
-            </footer>
         </div>
     );
 };
 
-export default ResetPasswordPage;
+const PageWithSuspense: React.FC = () => (
+    <Suspense fallback={<div>Loading...</div>}>
+        <ResetPasswordPage />
+    </Suspense>
+);
+
+export default PageWithSuspense;

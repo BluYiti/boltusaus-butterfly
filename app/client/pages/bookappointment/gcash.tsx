@@ -22,7 +22,7 @@ interface AppointmentData {
   selectedMode: string; // Payment method or mode of appointment (e.g., GCash)
   selectedMonth: string;
   selectedDay: string;
-  createdAt: string | Date; // Timestamp when appointment was created
+  createdAt: string ; // Timestamp when appointment was created
 }
 
 const GCashPayment: React.FC<GCashPaymentProps> = ({ isOpen, onClose, appointmentData }) => {

@@ -23,7 +23,7 @@ interface UserProfile {
 
 const ProfilePage: React.FC = () => {
   
-  const { loading: authLoading } = useAuthCheck(['client']); // Call the useAuthCheck hook
+  const authLoading = useAuthCheck(['client']); // Call the useAuthCheck hook
   const [name, setName] = useState<string>(''); // Placeholder for the user's name
   const [userData, setUserData] = useState<UserProfile>(null); // State to store user profile data
   const [profileImageUrls, setProfileImageUrls] = useState({});

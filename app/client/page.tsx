@@ -16,7 +16,7 @@ import PsychotherapistProfile from '@/client/components/PsychotherapistProfile';
 import Image from 'next/image';
 
 const NewClientDashboard = () => {
-  const { loading: authLoading } = useAuthCheck(['client']); // Call the useAuthCheck hook
+  const authLoading = useAuthCheck(['client']); // Call the useAuthCheck hook
   const [dataLoading, setDataLoading] = useState(true); // State to track if data is still loading
   const [, setUsers] = useState([]);
   const [psychotherapists, setPsychotherapists] = useState([]);

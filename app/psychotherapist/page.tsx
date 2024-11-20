@@ -40,7 +40,7 @@ type Payment = {
 
 const Dashboard: React.FC = () => {
   HappeningAppointment();
-  const { loading: authLoading } = useAuthCheck(['psychotherapist']);
+  const authLoading = useAuthCheck(['psychotherapist']);
   const [userName, setUserName] = useState<string | null>(null);
   const [evaluationData, setEvaluationData] = useState<Client[]>([]);
   const [missedData, setMissedData] = useState<Booking[]>([]);

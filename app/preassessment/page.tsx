@@ -7,8 +7,11 @@ import { useAssessment } from '@/preassessment/hooks/useAssessment';
 import { questions } from '@/preassessment/data/questions';
 import BubbleAnimation from '@/components/BubbleAnimation';
 import SubmissionModal from '@/preassessment/components/Submission';
+import useAuthCheck from '@/auth/page';
+import LoadingScreen from '@/components/LoadingScreen';
 
 export default function PreAssessmentPage() {
+  const authLoading = useAuthCheck(['client']); // Call the useAuthCheck hook
   const {
     currentQuestionIndex,
     answers,
@@ -36,6 +39,8 @@ export default function PreAssessmentPage() {
     setIsSubmitting(true);
     handleFormSubmit(); // Proceed with the existing form submission logic
   };
+
+  if (authLoading) return <LoadingScreen />;
 
   return (
     <div className="min-h-screen flex justify-center items-center bg-blue-500">

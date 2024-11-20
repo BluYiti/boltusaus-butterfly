@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { account, databases } from "@/appwrite"; // Import Appwrite account and database instances
 import { useRouter } from "next/navigation";
-import LoadingScreen from "@/components/LoadingScreen"; // Import the LoadingScreen component
 
 const VALID_ROLES = ["admin", "client", "psychotherapist", "associate"]; // Define allowed roles
 
@@ -59,7 +58,7 @@ const useAuthCheck = (allowedRoles) => {
     }
   }, [allowedRoles, router]);
 
-  return { loading, LoadingScreen }; // Return loading state and LoadingScreen component
+  return loading; // Return loading state and LoadingScreen component
 };
 
 export default useAuthCheck;

@@ -7,7 +7,7 @@ import useAuthCheck from '@/auth/page';
 import LoadingScreen from '@/components/LoadingScreen';
 
 const HotlinePage = () => {
-    const { loading: authLoading } = useAuthCheck(['psychotherapist']); // Call the useAuthCheck hook
+    const authLoading = useAuthCheck(['psychotherapist']); // Call the useAuthCheck hook
 
     if (authLoading ) {
         return <LoadingScreen />; // Show the loading screen while the auth check or data loading is in progress

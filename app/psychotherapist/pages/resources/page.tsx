@@ -29,7 +29,7 @@ interface Payload {
 }
 
 const ResourcesPage: React.FC = () => {
-  const { loading: authLoading } = useAuthCheck(['psychotherapist']); // Call the useAuthCheck hook
+  const authLoading = useAuthCheck(['psychotherapist']); // Call the useAuthCheck hook
   const [resources, setResources] = useState<Resource[]>([]);
   const [newCategory, setNewCategory] = useState('');
   const [newTitle, setNewTitle] = useState('');

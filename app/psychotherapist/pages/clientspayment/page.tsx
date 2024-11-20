@@ -42,7 +42,7 @@ interface Payment {
 }
 
 const ClientsPayment = () => {
-  const { loading: authLoading } = useAuthCheck(['psychotherapist']);
+  const authLoading = useAuthCheck(['psychotherapist']);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("Pending");
   const [searchTerm, setSearchTerm] = useState("");

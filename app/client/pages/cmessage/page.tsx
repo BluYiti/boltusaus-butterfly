@@ -6,6 +6,8 @@ import { Client, Databases, Account, Query, ID } from 'appwrite';
 import CallNotification from '@/components/CallNotification';
 import ClientVideoCall from '@/components/ClientVideoCall';
 import Image from 'next/image';
+import LoadingScreen from '@/components/LoadingScreen';
+import useAuthCheck from '@/auth/page';
 
 // Interface Definitions
 interface Psychotherapist {
@@ -36,6 +38,7 @@ client
   .setProject(process.env.NEXT_PUBLIC_PROJECT_ID as string);
 
 const ChatPage: FC = () => {
+  const authLoading = useAuthCheck(['client']);
   const [psychotherapist, setPsychotherapist] = useState<Psychotherapist | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [messageInput, setMessageInput] = useState('');
@@ -264,6 +267,8 @@ const ChatPage: FC = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  if (authLoading) return <LoadingScreen />;
 
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>

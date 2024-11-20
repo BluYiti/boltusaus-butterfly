@@ -12,7 +12,7 @@ import Image from 'next/image';
 import { useRouter } from "next/navigation";
 
 const RescheduleBooking = () => {
-  const { loading: authLoading } = useAuthCheck(['client']);
+  const authLoading = useAuthCheck(['client']);
   const today = new Date();
   const currentYear = today.getFullYear();
   const selectedMonth = today.toLocaleString('default', { month: 'long' });

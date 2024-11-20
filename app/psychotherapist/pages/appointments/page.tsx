@@ -24,7 +24,7 @@ interface Booking {
 
 const Appointments = () => {
   HappeningAppointment();
-  const { loading: authLoading } = useAuthCheck(['psychotherapist']); // Call the useAuthCheck hook
+  const authLoading = useAuthCheck(['psychotherapist']); // Call the useAuthCheck hook
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isTakeNotesModalOpen, setIsTakeNotesModalOpen] = useState(false);
