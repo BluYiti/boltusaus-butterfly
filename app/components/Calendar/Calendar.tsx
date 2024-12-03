@@ -13,8 +13,8 @@ interface CalendarProps {
     setSelectedMonth: (month: string) => void;
     selectedTime: string | null;
     setSelectedTime: (time: string | null) => void;
-    selectedTherapistId: string | null;
     isTherapistSelected: boolean;
+    selectedTherapistId: string | null;
 }
 
 interface Booking {
@@ -22,7 +22,7 @@ interface Booking {
     month: string;
     slots: string; // This could be a time like "09:00am"
     status: 'pending' | 'paid' | 'rescheduled' | 'happening' | 'missed' | 'disabled' | 'refunded'; // Adjust based on the actual statuses you have
-  }
+}
 
 const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 

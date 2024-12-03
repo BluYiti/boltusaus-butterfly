@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Question from '@/preassessment/components/Question';
 import NavigationButtons from '@/preassessment/components/NavigationButtons';
 import { useAssessment } from '@/preassessment/hooks/useAssessment';
@@ -9,9 +9,12 @@ import BubbleAnimation from '@/components/BubbleAnimation';
 import SubmissionModal from '@/preassessment/components/Submission';
 import useAuthCheck from '@/auth/page';
 import LoadingScreen from '@/components/LoadingScreen';
+import { account } from '@/appwrite';
+import { fetchClientId, hasPreAssessment } from '@/hooks/userService';
 
 export default function PreAssessmentPage() {
   const authLoading = useAuthCheck(['client']); // Call the useAuthCheck hook
+  const [dataLoading, setDataLoading] = useState(true); // State to track if data is still loading
   const {
     currentQuestionIndex,
     answers,
@@ -30,6 +33,29 @@ export default function PreAssessmentPage() {
 
   const isReviewPage = currentQuestionIndex === questions.length;
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const user = await account.get(); // Get user information
+        const hasPreAssessmentResult = hasPreAssessment(await fetchClientId(user.$id))
+        if(hasPreAssessmentResult){
+          window.location.replace("/client");
+          setDataLoading(true); // Set dataLoading to false when all data is fetched
+        }else{
+          setDataLoading(false); // Set dataLoading to false when all data is fetched
+          return
+        }
+
+      } catch (error) {
+        console.error("Error fetching data: ", error);
+      } finally {
+        
+      }
+    };
+
+    fetchData();
+  }, []); // Empty dependency array to run once on component mount
+
   const handleBackButton = () => {
     setIsSubmitting(false);
     handleBack();
@@ -40,7 +66,7 @@ export default function PreAssessmentPage() {
     handleFormSubmit(); // Proceed with the existing form submission logic
   };
 
-  if (authLoading) return <LoadingScreen />;
+  if (authLoading || dataLoading) return <LoadingScreen />;
 
   return (
     <div className="min-h-screen flex justify-center items-center bg-blue-500">

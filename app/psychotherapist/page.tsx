@@ -47,6 +47,7 @@ const Dashboard: React.FC = () => {
   const [sessionData, setSessionData] = useState<Booking[]>([]);
   const [paymentsData, setPaymentsData] = useState<Payment[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [psychoId, setPsychoId] = useState<string | null>(null);
   
   const [loading, setLoading] = useState<boolean>(true);  // General loading state
   const [loadingUpcomingSessions, setLoadingUpcomingSessions] = useState<boolean>(true); // Track loading state for upcoming sessions
@@ -204,7 +205,6 @@ const Dashboard: React.FC = () => {
       setLoadingPayments(false); // Set loading state to false after data is fetched
     }
   };
-  
 
   useEffect(() => {
     const fetchData = async () => {
@@ -212,6 +212,7 @@ const Dashboard: React.FC = () => {
         const user = await account.get();
         setUserName(user.name); 
         const psychoId = await fetchPsychoId(user.$id);
+        setPsychoId(psychoId);
         
         setAppointmentData((prevData) => ({
           ...prevData,
@@ -355,8 +356,8 @@ const Dashboard: React.FC = () => {
               setSelectedMonth={(month) => setAppointmentData((prev) => ({ ...prev, selectedMonth: month, selectedDay: null }))}
               selectedTime={appointmentData.selectedTime}
               setSelectedTime={(time) => setAppointmentData((prev) => ({ ...prev, selectedTime: time }))}
+              selectedTherapistId={psychoId}
               isTherapistSelected={true} 
-              selectedTherapistId={appointmentData.selectedTherapist}
               >
             </Calendar>
           </div>

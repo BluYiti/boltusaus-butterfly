@@ -94,9 +94,7 @@ const NewClientDashboard = () => {
     setSelectedPsychotherapist(null); // Reset selected psychotherapist
   };
 
-  if (authLoading || dataLoading) {
-    return <LoadingScreen />; // Show the loading screen while the auth check or data loading is in progress
-  }
+  if (authLoading || dataLoading) return <LoadingScreen />; // Show the loading screen while the auth check or data loading is in progress
 
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
