@@ -215,90 +215,92 @@ const Communication: FC = () => {
     }
   };
 
-    useEffect(() => {
-      const fetchPsychotherapistData = async () => {
-        try {
-          const loggedInUser = await account.get();
-          const userId = loggedInUser.$id;
+  useEffect(() => {
+    const fetchPsychotherapistData = async () => {
+      try {
+        const loggedInUser = await account.get();
+        const userId = loggedInUser.$id;
 
-          const psychotherapistResponse = await databases.listDocuments(
-            'Butterfly-Database',
-            'Psychotherapist',
-            [Query.equal('userId', userId)]
-          );
+        const psychotherapistResponse = await databases.listDocuments(
+          'Butterfly-Database',
+          'Psychotherapist',
+          [Query.equal('userId', userId)]
+        );
 
-          if (psychotherapistResponse.documents.length === 0) {
-            throw new Error('No psychotherapist found for the logged-in user');
+        if (psychotherapistResponse.documents.length === 0) {
+          throw new Error('No psychotherapist found for the logged-in user');
+        }
+
+        const psychotherapistDocumentId = psychotherapistResponse.documents[0].$id;
+        setPsychotherapistDocumentId(psychotherapistDocumentId); // Store psychotherapist document ID
+        console.log("Psychotherapist Document ID:", psychotherapistDocumentId);
+
+        const clientResponse = await databases.listDocuments(
+          'Butterfly-Database',
+          'Client',
+          [Query.equal('psychotherapist', psychotherapistDocumentId)]
+        );
+
+        const clientDataPromises = clientResponse.documents.map(async (doc) => {
+          let profilePicUrl = '/default-avatar.jpg';
+          if (doc.profilepic) {
+            const imagePreview = storage.getFilePreview('Images', doc.profilepic);
+            profilePicUrl = imagePreview;
+          }else{
+            profilePicUrl = '/images/default-profile.png';
           }
 
-          const psychotherapistDocumentId = psychotherapistResponse.documents[0].$id;
-          setPsychotherapistDocumentId(psychotherapistDocumentId); // Store psychotherapist document ID
-          console.log("Psychotherapist Document ID:", psychotherapistDocumentId);
-
-          const clientResponse = await databases.listDocuments(
+          const conversationResponse = await databases.listDocuments(
             'Butterfly-Database',
-            'Client',
-            [Query.equal('psychotherapist', psychotherapistDocumentId)]
+            'Conversation',
+            [
+              Query.equal('clientId', doc.$id),
+              Query.equal('psychotherapistId', psychotherapistDocumentId),
+            ]
           );
 
-          const clientDataPromises = clientResponse.documents.map(async (doc) => {
-            let profilePicUrl = '/default-avatar.jpg';
-            if (doc.idFile) {
-              const imagePreview = storage.getFilePreview('Images', doc.idFile);
-              profilePicUrl = imagePreview;
-            }
+          let lastMessage = 'No messages yet';
+          let lastMessageTime = '';
 
-            const conversationResponse = await databases.listDocuments(
+          if (conversationResponse.documents.length > 0) {
+            const conversationId = conversationResponse.documents[0].$id;
+
+            const messageResponse = await databases.listDocuments(
               'Butterfly-Database',
-              'Conversation',
+              'Messages',
               [
-                Query.equal('clientId', doc.$id),
-                Query.equal('psychotherapistId', psychotherapistDocumentId),
+                Query.equal('conversationId', conversationId),
+                Query.orderDesc('dateTime'),
+                Query.limit(1),
               ]
             );
 
-            let lastMessage = 'No messages yet';
-            let lastMessageTime = '';
-
-            if (conversationResponse.documents.length > 0) {
-              const conversationId = conversationResponse.documents[0].$id;
-
-              const messageResponse = await databases.listDocuments(
-                'Butterfly-Database',
-                'Messages',
-                [
-                  Query.equal('conversationId', conversationId),
-                  Query.orderDesc('dateTime'),
-                  Query.limit(1),
-                ]
-              );
-
-              if (messageResponse.documents.length > 0) {
-                const latestMessage = messageResponse.documents[0];
-                lastMessage = `${latestMessage.senderId === userId ? 'You' : doc.firstname}: ${latestMessage.content}`;
-                lastMessageTime = new Date(latestMessage.dateTime).toLocaleTimeString();
-              }
+            if (messageResponse.documents.length > 0) {
+              const latestMessage = messageResponse.documents[0];
+              lastMessage = `${latestMessage.senderId === userId ? 'You' : doc.firstname}: ${latestMessage.content}`;
+              lastMessageTime = new Date(latestMessage.dateTime).toLocaleTimeString();
             }
+          }
 
-            return {
-              id: doc.$id,
-              name: `${doc.firstname} ${doc.lastname}`,
-              lastMessage: lastMessage,
-              imageUrl: profilePicUrl,
-              time: lastMessageTime || new Date().toLocaleTimeString(),
-              isSession: false
-            };
-          });
+          return {
+            id: doc.$id,
+            name: `${doc.firstname} ${doc.lastname}`,
+            lastMessage: lastMessage,
+            imageUrl: profilePicUrl,
+            time: lastMessageTime || new Date().toLocaleTimeString(),
+            isSession: false
+          };
+        });
 
-          const clientData = await Promise.all(clientDataPromises);
-          setContacts(clientData);
-        } catch (error) {
-          console.error('Failed to fetch data:', error);
-        }
-      };
+        const clientData = await Promise.all(clientDataPromises);
+        setContacts(clientData);
+      } catch (error) {
+        console.error('Failed to fetch data:', error);
+      }
+    };
 
-      fetchPsychotherapistData();
-    }, []);
+    fetchPsychotherapistData();
+  }, []);
 
   const fetchOrCreateConversation = async (contactId: string): Promise<string | null> => {
     try {
