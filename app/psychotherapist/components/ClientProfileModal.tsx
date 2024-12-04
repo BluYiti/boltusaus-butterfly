@@ -92,7 +92,6 @@ const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpe
       }
     }
   };
-  
 
   const handleViewDetails = (details: string) => {
     setSelectedReportDetails(details);

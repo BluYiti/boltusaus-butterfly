@@ -128,7 +128,6 @@ const Clients = () => {
           }
         }
         setProfileImageUrls(profileImages);
-
         
         // Extract the query parameter from the URL
         const url = new URL(window.location.href);
@@ -187,7 +186,6 @@ const Clients = () => {
         return stateFilteredClients;
     }
   };
-  
 
   const renderClientList = () => {
     if (loading) {
@@ -204,14 +202,14 @@ const Clients = () => {
           <div key={index} className="flex items-center justify-between p-4 bg-white shadow rounded-lg">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 rounded-full bg-gray-200">
-                      <Image
-                         src={profileImageUrls[client.id] || "/images/default-profile.png"}
-                         alt={`${client.firstname} ${client.lastname}`}
-                        className="rounded-full mb-4"
-                        width={96}  // Set width explicitly
-                        height={96} // Set height explicitly
-                        unoptimized
-                      />
+                <Image
+                    src={profileImageUrls[client.id] || "/images/default-profile.png"}
+                    alt={`${client.firstname} ${client.lastname}`}
+                  className="rounded-full mb-4"
+                  width={96}  // Set width explicitly
+                  height={96} // Set height explicitly
+                  unoptimized
+                />
               </div>
               <div>
                 <h4 className="font-semibold flex items-center">
