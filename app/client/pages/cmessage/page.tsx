@@ -8,6 +8,7 @@ import ClientVideoCall from '@/components/ClientVideoCall';
 import Image from 'next/image';
 import LoadingScreen from '@/components/LoadingScreen';
 import useAuthCheck from '@/auth/page';
+import { fetchProfileImageUrl } from '@/hooks/userService';
 
 // Interface Definitions
 interface Psychotherapist {
@@ -71,16 +72,15 @@ const ChatPage: FC = () => {
             const psychotherapistId = clientData.psychotherapist.$id || clientData.psychotherapist;
   
             if (psychotherapistId) {
-              const psychotherapistResponse = await databases.getDocument(
-                'Butterfly-Database',
-                'Psychotherapist',
-                psychotherapistId
-              );
+              const psychotherapistResponse = await databases.getDocument('Butterfly-Database', 'Psychotherapist', psychotherapistId);
+              console.log(psychotherapistResponse)
+
+              const url = await fetchProfileImageUrl(psychotherapistResponse.profilepic);
   
               setPsychotherapist({
                 id: psychotherapistResponse.$id,
                 name: `${psychotherapistResponse.firstName || 'Unknown'} ${psychotherapistResponse.lastName || 'Name'}`,
-                imageUrl: psychotherapistResponse.imageUrl || '/default-avatar.jpg',
+                imageUrl: url || '/images/default-profile.png',
               });
   
               const conversationResponse = await databases.listDocuments(
