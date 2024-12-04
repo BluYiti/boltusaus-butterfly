@@ -40,6 +40,7 @@ client
 const ChatPage: FC = () => {
   const authLoading = useAuthCheck(['client']);
   const [psychotherapist, setPsychotherapist] = useState<Psychotherapist | null>(null);
+  const [isPsychotherapistMissing, setIsPsychotherapistMissing] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [messageInput, setMessageInput] = useState('');
   const [call, setCall] = useState<Call>({ isActive: false, caller: null });
@@ -55,39 +56,39 @@ const ChatPage: FC = () => {
     const fetchPsychotherapist = async () => {
       try {
         const user = await account.get();
-
+  
         const clientResponse = await databases.listDocuments(
           'Butterfly-Database',
           'Client',
           [Query.equal('userid', user.$id)]
         );
-
+  
         if (clientResponse.documents.length > 0) {
           const clientData = clientResponse.documents[0];
           setClientDocumentId(clientData.$id);
-
+  
           if (clientData.psychotherapist) {
             const psychotherapistId = clientData.psychotherapist.$id || clientData.psychotherapist;
-
+  
             if (psychotherapistId) {
               const psychotherapistResponse = await databases.getDocument(
                 'Butterfly-Database',
                 'Psychotherapist',
                 psychotherapistId
               );
-
+  
               setPsychotherapist({
                 id: psychotherapistResponse.$id,
                 name: `${psychotherapistResponse.firstName || 'Unknown'} ${psychotherapistResponse.lastName || 'Name'}`,
                 imageUrl: psychotherapistResponse.imageUrl || '/default-avatar.jpg',
               });
-
+  
               const conversationResponse = await databases.listDocuments(
                 'Butterfly-Database',
                 'Conversation',
                 [Query.equal('clientId', clientData.$id), Query.equal('psychotherapistId', psychotherapistId)]
               );
-
+  
               if (conversationResponse.documents.length > 0) {
                 setConversationId(conversationResponse.documents[0].$id);
               } else {
@@ -105,13 +106,16 @@ const ChatPage: FC = () => {
                 setConversationId(newConversation.$id);
               }
             }
+          } else {
+            // If no psychotherapist is assigned, set isPsychotherapistMissing to true
+            setIsPsychotherapistMissing(true);
           }
         }
       } catch (error) {
         console.error('Error fetching psychotherapist:', error);
       }
     };
-
+  
     fetchPsychotherapist();
   }, []);
 
@@ -323,6 +327,10 @@ const ChatPage: FC = () => {
                     Send
                   </button>
                 </div>
+              </div>
+            ) : isPsychotherapistMissing ? (
+              <div className="w-full p-6 flex items-center justify-center">
+                <p className="text-6xl text-blue-400 font-paintbrush">Book Your First Session to talk to your chosen Psychotherapist!</p>
               </div>
             ) : (
               <div className="w-full p-6 flex items-center justify-center">
