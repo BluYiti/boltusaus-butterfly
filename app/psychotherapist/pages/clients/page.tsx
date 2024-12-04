@@ -54,16 +54,16 @@ const Clients = () => {
       setLoading(true);
       try {
         const user = await account.get();
-        const psychoId = fetchPsychoId(user.$id)
-
+        const psychoId = fetchPsychoId(user.$id);
+  
         const clientResponse = await databases.listDocuments('Butterfly-Database', 'Client', [
-          Query.equal('psychotherapist', await psychoId)
+          Query.equal('psychotherapist', await psychoId),
         ]);
-
+  
         const combinedClients = clientResponse.documents.map((clientDoc) => {
           const email = clientDoc.userid.email;
           const username = clientDoc.userid.username;
-
+  
           return {
             id: clientDoc.$id,
             clientid: clientDoc.clientid,
@@ -79,22 +79,21 @@ const Clients = () => {
             profilepic: clientDoc.profilepic,
             emergencyContact: clientDoc.emergencyContact,
             status: clientDoc.status,
-            email: email || "No email available",
-            username: username || "",
+            email: email || 'No email available',
+            username: username || '',
           };
         });
-
+  
         setClients(combinedClients);
-        console.log(combinedClients);
-
+  
         const clientEvaluate = await databases.listDocuments('Butterfly-Database', 'Client', [
-          Query.equal('state', 'evaluate')
-        ])
-
+          Query.equal('state', 'evaluate'),
+        ]);
+  
         const combinedEvaluateClients = clientEvaluate.documents.map((clientDoc) => {
           const email = clientDoc.userid.email;
           const username = clientDoc.userid.username;
-
+  
           return {
             id: clientDoc.$id,
             clientid: clientDoc.clientid,
@@ -110,15 +109,17 @@ const Clients = () => {
             profilepic: clientDoc.profilepic,
             emergencyContact: clientDoc.emergencyContact,
             status: clientDoc.status,
-            email: email || "No email available",
-            username: username || "",
+            email: email || 'No email available',
+            username: username || '',
           };
         });
-
+  
         setEvaluateClients(combinedEvaluateClients);
-
-        // Fetch profile images for each psychotherapist
+  
+        // Fetch profile images for each client, including evaluated clients
         const profileImages = {};
+  
+        // Fetch profile images for the "current" clients
         for (const client of clientResponse.documents) {
           if (client.profilepic) {
             const url = await fetchProfileImageUrl(client.profilepic);
@@ -127,12 +128,23 @@ const Clients = () => {
             }
           }
         }
+  
+        // Fetch profile images for the "to be evaluated" clients
+        for (const client of clientEvaluate.documents) {
+          if (client.profilepic) {
+            const url = await fetchProfileImageUrl(client.profilepic);
+            if (url) {
+              profileImages[client.$id] = url;
+            }
+          }
+        }
+  
         setProfileImageUrls(profileImages);
-        
+  
         // Extract the query parameter from the URL
         const url = new URL(window.location.href);
-        const tab = url.searchParams.get("tab");
-        
+        const tab = url.searchParams.get('tab');
+  
         if (tab) {
           setActiveTab(tab); // Set active tab based on the query parameter
         }
@@ -142,9 +154,9 @@ const Clients = () => {
         setLoading(false);
       }
     };
-
+  
     fetchClientsAndAccounts();
-  }, []);
+  }, []);  
 
   const filteredClients = () => {
     let searchFiltered = clients.filter(client =>

@@ -34,8 +34,6 @@ const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpe
   const fetchClientData = async (id: string) => {
     try {
       const clientData = await databases.getDocument('Butterfly-Database', 'Client', id);
-      console.log(clientData)
-
       const profileImages = {};
       const url = await fetchProfileImageUrl(clientData.profilepic);
       if (url) {
