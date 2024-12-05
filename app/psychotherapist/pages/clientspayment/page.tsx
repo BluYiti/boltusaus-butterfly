@@ -7,7 +7,8 @@ import PaymentModal from "@/psychotherapist/components/PaymentModal"; // Import 
 import LoadingScreen from "@/components/LoadingScreen";
 import useAuthCheck from "@/auth/page";
 import { account, databases, Query } from "@/appwrite";
-import { fetchPsychoId } from "@/hooks/userService";
+import { fetchProfileImageUrl, fetchPsychoId } from "@/hooks/userService"; // Your existing function
+import Image from 'next/image';
 
 interface Payment {
   $id: string;
@@ -21,6 +22,7 @@ interface Payment {
     userid: string;
     firstname: string;
     lastname: string;
+    profilepic: string | null;
   };
   psychotherapist: {
     firstName: string;
@@ -33,6 +35,7 @@ interface Payment {
   id: string;
   clientFirstName: string;
   clientLastName: string;
+  clientProfilePic: string;
   psychoFirstName: string;
   psychoLastName: string;
   email: string;
@@ -49,6 +52,7 @@ const ClientsPayment = () => {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [, setShowModal] = useState(false); // State for modal visibility
   const [selectedClient, setSelectedClient] = useState(null); // State for selected client's payment details
+  const [profileImageUrls, setProfileImageUrls] = useState<{ [key: string]: string }>({});
 
   // Fetch payment data
   useEffect(() => {
@@ -56,17 +60,16 @@ const ClientsPayment = () => {
       try {
         const user = await account.get();
         const psychoId = await fetchPsychoId(user.$id);
-  
+
         const response = await databases.listDocuments('Butterfly-Database', 'Payment', [
           Query.equal('psychotherapist', psychoId),
         ]);
-  
+
         // Map fetched data to match Payment type
         const fetchedPayments: Payment[] = response.documents.map((doc) => {
-          // Ensure fields match the expected type and structure
-          const client = doc.client || {}; // Fallback to an empty object if doc.client is null or undefined
+          const client = doc.client || {};  // Fallback to an empty object if doc.client is null or undefined
           const psychotherapist = doc.psychotherapist || {}; // Similarly, handle psychotherapist
-        
+
           return {
             referenceNo: doc.referenceNo,
             mode: doc.booking.mode,  // Accessing `mode` from `booking`
@@ -79,6 +82,7 @@ const ClientsPayment = () => {
             id: doc.$id,
             clientFirstName: client.firstname || "",  // Fallback to empty string if firstname is missing
             clientLastName: client.lastname || "",    // Fallback to empty string if lastname is missing
+            clientProfilePic: client.profilepic || "",
             psychoFirstName: psychotherapist.firstName || "",  // Fallback to empty string if missing
             psychoLastName: psychotherapist.lastName || "",    // Fallback to empty string if missing
             email: client.userid?.email || "",  // Safely access the email with optional chaining
@@ -89,27 +93,37 @@ const ClientsPayment = () => {
             $createdAt: doc.$createdAt, // Include createdAt field
           };
         });
-        
 
         setPayments(fetchedPayments);
 
-        // Set the active tab from URL query params if available
-        const url = new URL(window.location.href);
-        const tab = url.searchParams.get("tab");
-        if (tab) {
-          setActiveTab(tab);
+        // Fetch profile images for each client
+        const profileImages: { [key: string]: string } = {};
+
+        for (const doc of response.documents) {
+          const client = doc.client || {};  // Ensure client is always an object
+          const clientProfilePic = client.profilepic;
+
+          if (clientProfilePic) {
+            const url = await fetchProfileImageUrl(clientProfilePic);  // Fetch the image URL using your function
+            if (url) {
+              profileImages[doc.$id] = url;  // Store the URL in the state
+            }
+          }
         }
+
+        setProfileImageUrls(profileImages);  // Update state with all profile images
+
       } catch (error) {
         console.error("Error fetching data: ", error);
       } finally {
         setLoading(false);
       }
     };
-  
-    fetchData();
-  }, []);
 
-  const openModal = (client) => {
+    fetchData();
+  }, []); // Empty dependency array ensures the effect runs only once
+
+  const openModal = (client: Payment) => {
     setSelectedClient(client);
     setShowModal(true);
   };
@@ -128,7 +142,16 @@ const ClientsPayment = () => {
             className="flex items-center justify-between p-4 bg-white shadow rounded-lg"
           >
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-full bg-gray-200"></div>
+              <div className="w-10 h-10 rounded-full bg-gray-200">
+                <Image
+                  src={profileImageUrls[client.id] || "/images/default-profile.png"}
+                  alt={`${client.clientFirstName} ${client.clientLastName}`}
+                  className="rounded-full mb-4"
+                  width={96}  // Set width explicitly
+                  height={96} // Set height explicitly
+                  unoptimized
+                />
+              </div>
               <div>
                 <h4 className="font-semibold">{client.clientFirstName}</h4>
                 <p className="text-sm text-gray-500">{client.email}</p>
