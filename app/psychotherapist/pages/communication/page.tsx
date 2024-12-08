@@ -1,13 +1,12 @@
 'use client';
 
-import { FC, useState, useEffect, useRef } from 'react';
+import { FC, useState, useEffect, useRef, useCallback } from 'react';
 import { FaVideo, FaSearch } from 'react-icons/fa';
 import Layout from '@/components/Sidebar/Layout';
 import VideoCall from '@/components/VideoCall';
 import items from '@/psychotherapist/data/Links';
 import { Query, ID } from 'appwrite';
 import Image from 'next/image';
-import Link from 'next/link';
 import { account, databases, storage } from '@/appwrite';
 import useAuthCheck from '@/auth/page';
 import LoadingScreen from '@/components/LoadingScreen';
@@ -76,7 +75,7 @@ const ContactList: FC<{ onContactClick: (id: string) => void; selectedContact: s
 };
 
 // Chat Box component
-const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSendMessage: (text: string) => void; onStartCall: () => void }> = ({ selectedContact, messages, onSendMessage }) => {
+const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSendMessage: (text: string) => void; onStartCall: () => void }> = ({selectedContact, messages, onSendMessage, onStartCall,}) => {
   const [messageInput, setMessageInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -85,6 +84,10 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSend
       onSendMessage(messageInput);
       setMessageInput('');
     }
+  };
+
+  const handleStartCall = () => {
+    onStartCall();
   };
 
   const scrollToBottom = () => {
@@ -105,28 +108,37 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSend
 
   return (
     <div className="w-3/4 p-6 flex flex-col justify-between">
-      <div className="flex items-center mb-4 justify-between">
-      <div className="flex items-center">
-        <Image
-          src={selectedContact.imageUrl}
-          alt={selectedContact.name}
-          width={48}  // 12 * 4 = 48px for the width
-          height={48} // 12 * 4 = 48px for the height
-          className="rounded-full mr-4"
-        />
-        <h2 className="text-xl font-bold">{selectedContact.name}</h2>
-      </div>
+      <div className="flex items-center justify-between">
+        {/* Contact Details */}
+        <div className="flex items-center">
+          <Image
+            src={selectedContact.imageUrl}
+            alt={selectedContact.name}
+            width={48} // Width in pixels
+            height={48} // Height in pixels
+            className="rounded-full mr-4"
+          />
+          <h2 className="text-xl font-bold">{selectedContact.name}</h2>
+        </div>
+
         {/* Video Call Icon */}
-        <Link href='/psychotherapist/pages/vcountdown'>
-          <button className="p-2 bg-blue-500 text-white rounded-full">
-            <FaVideo />
-          </button>
-        </Link>
+        <button
+          onClick={handleStartCall} // Use the onStartCall prop here
+          className="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
+          aria-label="Start Video Call"
+        >
+          <FaVideo />
+        </button>
       </div>
 
       <div className="flex-grow overflow-y-auto space-y-4">
         {messages.map((message) => (
-          <div key={message.id} className={`group relative ${message.sender === 'psychotherapist' ? 'justify-end' : 'justify-start'} flex`}>
+          <div
+            key={message.id}
+            className={`group relative ${
+              message.sender === 'psychotherapist' ? 'justify-end' : 'justify-start'
+            } flex`}
+          >
             <div
               className={`max-w-xs p-4 rounded-lg shadow ${
                 message.sender === 'psychotherapist' ? 'bg-blue-100' : 'bg-gray-100'
@@ -163,6 +175,7 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSend
     </div>
   );
 };
+
 
 // Main Communication Page component with Layout
 const Communication: FC = () => {
@@ -302,24 +315,25 @@ const Communication: FC = () => {
     fetchPsychotherapistData();
   }, []);
 
-  const fetchOrCreateConversation = async (contactId: string): Promise<string | null> => {
-    try {
+  const fetchOrCreateConversation = useCallback(
+    async (contactId: string): Promise<string | null> => {
       if (!psychotherapistDocumentId) return null;
-
-      const response = await databases.listDocuments(
-        'Butterfly-Database',
-        'Conversation',
-        [
-          Query.equal('clientId', contactId),
-          Query.equal('psychotherapistId', psychotherapistDocumentId)
-        ]
-      );
-
-      if (response.documents.length > 0) {
-        const existingConversation = response.documents[0];
-        setConversationId(existingConversation.$id);
-        return existingConversation.$id;
-      } else {
+      try {
+        const response = await databases.listDocuments(
+          'Butterfly-Database',
+          'Conversation',
+          [
+            Query.equal('clientId', contactId),
+            Query.equal('psychotherapistId', psychotherapistDocumentId),
+          ]
+        );
+  
+        if (response.documents.length > 0) {
+          const existingConversation = response.documents[0];
+          setConversationId(existingConversation.$id);
+          return existingConversation.$id;
+        }
+  
         const newConversation = await databases.createDocument(
           'Butterfly-Database',
           'Conversation',
@@ -328,17 +342,17 @@ const Communication: FC = () => {
             clientId: contactId,
             psychotherapistId: psychotherapistDocumentId,
             startDate: new Date().toISOString(),
-            endDate: null,
           }
         );
         setConversationId(newConversation.$id);
         return newConversation.$id;
+      } catch (error) {
+        console.error('Error in fetchOrCreateConversation:', error);
+        return null;
       }
-    } catch (error) {
-      console.error('Error in fetchOrCreateConversation:', error);
-      return null;
-    }
-  };
+    },
+    [psychotherapistDocumentId]
+  );  
 
   const handleSendMessage = async (text: string) => {
     if (!selectedContactId) return;
