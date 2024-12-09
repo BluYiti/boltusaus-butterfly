@@ -142,8 +142,6 @@ const Dashboard: React.FC = () => {
         [Query.equal('status', 'missed')]
       );
   
-      console.log('missedResponse.documents:', missedResponse.documents);
-  
       // Map through the documents to construct the missed sessions with client names
       const missedSessionsWithClientNames: Booking[] = missedResponse.documents.map((booking) => {
         return {
@@ -164,9 +162,6 @@ const Dashboard: React.FC = () => {
           mode: booking.mode,
         };
       });
-      
-  
-      console.log('missedSessionsWithClientNames:', missedSessionsWithClientNames);
   
       // Set the missed data to state
       setMissedData(missedSessionsWithClientNames);
