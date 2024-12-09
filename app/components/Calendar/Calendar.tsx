@@ -13,8 +13,8 @@ interface CalendarProps {
     setSelectedMonth: (month: string) => void;
     selectedTime: string | null;
     setSelectedTime: (time: string | null) => void;
-    selectedTherapistId: string | null;
     isTherapistSelected: boolean;
+    selectedTherapistId: string | null;
 }
 
 interface Booking {
@@ -22,7 +22,7 @@ interface Booking {
     month: string;
     slots: string; // This could be a time like "09:00am"
     status: 'pending' | 'paid' | 'rescheduled' | 'happening' | 'missed' | 'disabled' | 'refunded'; // Adjust based on the actual statuses you have
-  }
+}
 
 const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
@@ -96,27 +96,27 @@ const Calendar: React.FC<CalendarProps> = ({
     useEffect(() => {
         const fetchBookedSlots = async () => {
             if (!selectedTherapistId) return;
-
+        
             try {
                 const bookingsResponse = await databases.listDocuments(
                     'Butterfly-Database', 'Bookings',
                     [Query.equal('psychotherapist', selectedTherapistId)] // Filter by therapistId
                 );
-                
-                // Map the raw documents to the Booking type
+        
                 const bookedData: Booking[] = bookingsResponse.documents.map((doc) => ({
                     day: doc.day, // assuming the document contains a 'day' field
                     month: doc.month, // assuming the document contains a 'month' field
                     slots: doc.slots, // assuming the document contains a 'slots' field
                     status: doc.status, // assuming the document contains a 'status' field
                 }));
-            
-                // Update the state with the mapped booked slots
+                
+                console.log("Booked slots:", bookedData); // Log the booked slots
                 setBookedSlots(bookedData);
             } catch (error) {
                 console.error('Error fetching booked slots:', error);
             }            
         };
+        
 
         fetchBookedSlots();
     }, [selectedTherapistId]); // Re-run when therapistId changes
@@ -155,9 +155,13 @@ const Calendar: React.FC<CalendarProps> = ({
 
     const isSlotBooked = (day: number, time: string) => {
         return bookedSlots.some(
-            (slot) => slot.day === day && slot.month === selectedMonth && slot.slots === time && (slot.status === 'pending' || slot.status === 'paid')
+            (slot) => 
+                slot.day === day && 
+                slot.month.toLowerCase() === selectedMonth.toLowerCase() &&  // Ensure month comparison is case-insensitive
+                slot.slots === time && 
+                (slot.status === 'pending' || slot.status === 'paid' || slot.status === 'rescheduled' || slot.status === 'disabled')  // Add 'rescheduled' to consider those as booked too
         );
-    };
+    };    
 
     const isDayFullyBooked = (day: number) => {
         const times = ["09:00am", "10:00am", "11:00am", "01:00pm", "02:00pm", "03:00pm", "04:00pm"];

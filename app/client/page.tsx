@@ -16,7 +16,7 @@ import PsychotherapistProfile from '@/client/components/PsychotherapistProfile';
 import Image from 'next/image';
 
 const NewClientDashboard = () => {
-  const { loading: authLoading } = useAuthCheck(['client']); // Call the useAuthCheck hook
+  const authLoading = useAuthCheck(['client']); // Call the useAuthCheck hook
   const [dataLoading, setDataLoading] = useState(true); // State to track if data is still loading
   const [, setUsers] = useState([]);
   const [psychotherapists, setPsychotherapists] = useState([]);
@@ -25,7 +25,6 @@ const NewClientDashboard = () => {
   const [status, setStatus] = useState<string | null>(null); // State to track user status
   const [cert, setCert] = useState<string | null>(null); // State to track user certificate
   const [userName, setUserName] = useState<string | null>(null); // State to track user name
-  const [currentIndex, setCurrentIndex] = useState(0);
   
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -58,7 +57,7 @@ const NewClientDashboard = () => {
         const therapistResponse = await databases.listDocuments('Butterfly-Database', 'Psychotherapist');
         setPsychotherapists(therapistResponse.documents);
 
-        // Fetch profile images for each psychotherapist
+        // Fetch profile images for client
         const profileImages = {};
         for (const therapist of therapistResponse.documents) {
           if (therapist.profilepic) {
@@ -85,26 +84,6 @@ const NewClientDashboard = () => {
     downloadCertificate(documentId, userName);
   };
 
-  const visibleSlides = 2;
-
-  // Function to go to the next slide
-  const handleNext = () => {
-    setCurrentIndex((prevIndex) => {
-      const nextIndex = prevIndex + visibleSlides;
-      return nextIndex >= psychotherapists.length ? 0 : nextIndex;
-    });
-  };
-
-  // Function to go to the previous slide
-  const handlePrevious = () => {
-    setCurrentIndex((prevIndex) => {
-      const prevIndexAdjusted = prevIndex - visibleSlides;
-      return prevIndexAdjusted < 0
-        ? psychotherapists.length - (psychotherapists.length % visibleSlides || visibleSlides)
-        : prevIndexAdjusted;
-    });
-  };
-
   const handleProfileClick = (psychotherapist) => {
     setSelectedPsychotherapist(psychotherapist); // Set the selected psychotherapist
     setIsModalOpen(true); // Open the modal
@@ -115,9 +94,7 @@ const NewClientDashboard = () => {
     setSelectedPsychotherapist(null); // Reset selected psychotherapist
   };
 
-  if (authLoading || dataLoading) {
-    return <LoadingScreen />; // Show the loading screen while the auth check or data loading is in progress
-  }
+  if (authLoading || dataLoading) return <LoadingScreen />; // Show the loading screen while the auth check or data loading is in progress
 
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
@@ -134,7 +111,7 @@ const NewClientDashboard = () => {
 
       <div className="flex justify-between items-start space-x-4 px-8 ">
         {/* Left side - Pre-assessment and Psychotherapists Section */}
-        <div className="flex-1 bg-white p-6 rounded-lg shadow-lg mb-6 mt-8 h-[27rem] w-[56%]">
+        <div className="flex-1 bg-white p-6 rounded-lg shadow-lg mb-6 mt-8 h-[27rem] w-[50%]">
           {/* Conditionally render based on client state */}
           {state === "new" && (
             <Link href="/preassessment">
@@ -160,14 +137,14 @@ const NewClientDashboard = () => {
             <>
               <div className="relative group flex"> {/* Wrapper for hover effect */}
                 <button
-                  className="bg-gray-300 text-gray-600 font-bold mb-4 py-2 px-4 rounded cursor-not-allowed"
+                  className="bg-gray-300 text-green-500 font-bold mb-4 py-2 px-4 rounded cursor-not-allowed"
                   disabled
                 >
-                  Pre-assessment Done!
+                  Preassessment Done!
                 </button>
                 <p className="ml-2 bg-[#2563EB] text-white mb-4 py-2 px-4 rounded">
-                    Please wait for the confirmation via SMS, it might take 1-2 days! Thank You!
-                  </p>
+                  Please wait for the confirmation here in your dashboard, it might take 1-2 days! Thank You for your patience!
+                </p>
               </div>
             </>
           )}
@@ -193,69 +170,44 @@ const NewClientDashboard = () => {
           )}
 
           {/* Psychotherapists Section */}
-          <div>
-            <h3 className="text-2xl font-bold text-blue-500 text-left mb-2 font-lora">
-              Meet our caring psychotherapists, here to guide your healing!
-            </h3>
             <div className="relative overflow-hidden">
-              {/* Container for carousel */}
-              <div
-                className="flex transition-transform duration-500 ease-in-out"
-                style={{
-                  transform: `translateX(-${(currentIndex / psychotherapists.length) * 100}%)`,
-                  width: `${(psychotherapists.length / visibleSlides) * 100}%`,
-                }}
-                
-              >
+              <div className="flex overflow-x-auto p-4 space-x-4 scrollbar-thin scrollbar-thumb-blue-300">
                 {psychotherapists.map((psychotherapist, index) => (
                   <div
                     key={index}
-                    className="flex-shrink-0 flex items-center justify-center p-4 w-[33%]"
-                    onClick={() => handleProfileClick(psychotherapist)} // Handle profile click
+                    className="flex-shrink-0 flex items-center justify-center w-[300px] p-4"
+                    onClick={() => handleProfileClick(psychotherapist)}
+                    tabIndex={0} // Makes it focusable
+                    aria-label={`View profile of ${psychotherapist.firstName} ${psychotherapist.lastName}`}
                   >
-                    <div className="flex flex-col items-center bg-white border border-blue-300 p-4 rounded-3xl transform transition-transform duration-500 ease-in-out hover:scale-105 min-w-[300px]">
+                    <div className="flex flex-col items-center bg-white border border-blue-300 rounded-3xl p-3 min-w-[300px] transform transition-transform duration-500 ease-in-out hover:scale-105 shadow-lg">
                       <Image
                         src={profileImageUrls[psychotherapist.$id] || "/images/default-profile.png"}
-                        alt={`${psychotherapist.firstName} ${psychotherapist.lastName}`}
+                        alt={`${psychotherapist.firstName || "N/A"} ${psychotherapist.lastName || "N/A"}`}
                         className="rounded-full mb-4"
-                        width={96}  // Set width explicitly
-                        height={96} // Set height explicitly
+                        width={96}
+                        height={96}
                         unoptimized
+                        onError={() => "/images/default-profile.png"}
                       />
-                      <div className="flex flex-col items-center text-center">
+                      <div className="text-center">
                         <h4 className="text-lg font-bold text-blue-500 font-roboto">
-                          {psychotherapist.firstName} {psychotherapist.lastName}
+                          {psychotherapist.firstName || "First Name"} {psychotherapist.lastName || "Last Name"}
                         </h4>
                         <p className="text-sm text-gray-600 font-lora">
-                          {psychotherapist.specialties}
+                          {psychotherapist.specialties || "Specialties not specified"}
                         </p>
                         <h3 className="text-gray-600 font-lora">
                           {psychotherapist.position
-                            ? psychotherapist.position.charAt(0).toUpperCase() +
-                              psychotherapist.position.slice(1)
-                            : 'Position not specified'}
+                            ? `${psychotherapist.position.charAt(0).toUpperCase()}${psychotherapist.position.slice(1)}`
+                            : "Position not specified"}
                         </h3>
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
-
-              {/* Navigation Buttons */}
-              <button
-                className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-[#2563EB] text-white p-2 rounded-full"
-                onClick={handlePrevious}
-              >
-                &nbsp;&lt;&nbsp;
-              </button>
-              <button
-                className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-[#2563EB] text-white p-2 rounded-full"
-                onClick={handleNext}
-              >
-                &nbsp;&gt;&nbsp;
-              </button>
             </div>
-          </div>
         </div>
 
         {/* Right side - A Daily Reminder Section */}

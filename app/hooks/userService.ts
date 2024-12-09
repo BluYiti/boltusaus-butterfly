@@ -228,3 +228,17 @@ export const fetchReceiptImage = async (receiptId: string): Promise<string | nul
     }
 };
 
+// Check if the client has a pre-assessment
+export const hasPreAssessment = async (userId: string): Promise<boolean> => {
+    try {
+        const response = await databases.listDocuments('Butterfly-Database', 'Pre-Assessment', [
+            Query.equal('userId', userId),
+        ]);
+
+        // If any documents are returned, the pre-assessment exists
+        return response.documents.length > 0;
+    } catch (error) {
+        console.error('Error checking for pre-assessment:', error);
+        return false; // Return false in case of an error
+    }
+};

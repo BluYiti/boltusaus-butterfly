@@ -13,7 +13,7 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, sele
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('+63');
+  const [phoneNumber, setPhoneNumber] = useState('63');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,9 +30,10 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, sele
   };
 
   const validatePhoneNumber = (phone: string) => {
-    const phoneRegex = /^\+63\d{10}$/;
+    const phoneRegex = /^63\d{10}$/;
     return phoneRegex.test(phone);
   };
+  
 
   const handleAdminValidation = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,7 +91,7 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, sele
     }
 
     if (!validatePhoneNumber(phoneNumber)) {
-      setError('Phone number must start with +63 and be exactly 10 digits after +63.');
+      setError('Phone number must start with 63 and be exactly 10 digits after 63.');
       return;
     }
 
@@ -140,7 +141,7 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, sele
   return (
     <>
       {/* Main Add Account Modal */}
-      <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="fixed inset-0 flex items-center justify-center bg-gray-700 bg-opacity-70">
         <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
           <h2 className="text-xl font-semibold mb-4">Add Account</h2>
 
@@ -157,7 +158,7 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, sele
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 required
-                className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
+                className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-black"
               />
             </div>
 
@@ -171,7 +172,7 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, sele
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
                 required
-                className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
+                className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-black"
               />
             </div>
 
@@ -185,7 +186,7 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, sele
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
+                className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-black"
               />
             </div>
 
@@ -199,11 +200,11 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, sele
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
                 required
-                maxLength={13}
-                className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
-                placeholder="+63"
+                maxLength={12}
+                className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-black"
+                placeholder="63"
               />
-              <small className="text-xs text-gray-500">Format: +63 followed by 10 digits</small>
+              <small className="text-xs text-black">Format: 63 followed by 10 digits</small>
             </div>
 
             <div>
@@ -216,7 +217,7 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, sele
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
+                className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-black"
               />
             </div>
 
@@ -242,7 +243,7 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, sele
 
       {/* Admin Credentials Modal */}
       {isAdminModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-700 bg-opacity-70">
           <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
             <h2 className="text-xl font-semibold mb-4">Admin Authentication</h2>
 
@@ -259,7 +260,7 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, sele
                   value={adminEmail}
                   onChange={(e) => setAdminEmail(e.target.value)}
                   required
-                  className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
+                  className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-black"
                 />
               </div>
 
@@ -273,7 +274,7 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, sele
                   value={adminPassword}
                   onChange={(e) => setAdminPassword(e.target.value)}
                   required
-                  className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
+                  className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-black"
                 />
               </div>
 

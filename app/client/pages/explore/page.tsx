@@ -6,6 +6,8 @@ import items from "@/client/data/Links";
 import Image from 'next/image';
 import { Query } from "appwrite";
 import { account, databases, storage } from "@/appwrite";
+import LoadingScreen from "@/components/LoadingScreen";
+import useAuthCheck from "@/auth/page";
 
 // Define the item and category types
 interface Item {
@@ -36,6 +38,7 @@ interface Category {
 }
 
 const App = () => {
+  const authLoading = useAuthCheck(['client']);
   const [categories, setCategories] = useState<Category[]>([]); // State to hold fetched resources
   const [userName, setUserName] = useState("User"); // State to hold the user's name
   const [profilePicture, setProfilePicture] = useState<string | null>(null); // State to hold the user's profile picture URL
@@ -51,50 +54,34 @@ const App = () => {
     const fetchResources = async () => {
       try {
         const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID);
-        const resources = response.documents;
+        const resources = response.documents as unknown as Resource[]; // Cast documents to Resource[]
 
-        // Transform the fetched resources to fit the current design structure
-        const transformedCategories = resources.reduce((acc: Category[], resource: Resource) => {
-          // Find the category corresponding to the current resource
+        // Transform resources safely in reduce
+        const transformedCategories = resources.reduce((acc: Category[], resource) => {
           const category = acc.find(cat => cat.title === resource.category);
-        
-          // Dynamically generate file and image URLs from their IDs in the Resources bucket
-          const fileUrl = storage.getFileView(RESOURCE_BUCKET_ID, resource.file); // Get the file view URL from Appwrite
-          const imageUrl = storage.getFileView(RESOURCE_BUCKET_ID, resource.image); // Get the image view URL from Appwrite
+          const fileUrl = storage.getFileView(RESOURCE_BUCKET_ID, resource.file);
+          const imageUrl = storage.getFileView(RESOURCE_BUCKET_ID, resource.image);
         
           if (category) {
-            // If the category exists, add the resource to it
             category.items.push({
-              id: resource.id,
-              duration: resource.duration,
-              description: resource.description,
-              file: fileUrl, // Use generated file URL
-              createdAt: resource.createdAt,
-              category: resource.category,
-              title: resource.title,
-              image: imageUrl, // Use generated image URL
+              ...resource, // Spread properties from resource
+              file: fileUrl,
+              image: imageUrl,
             });
           } else {
-            // If the category doesn't exist, create a new category and add the resource to it
             acc.push({
               title: resource.category,
-              items: [
-                {
-                  id: resource.id,
-                  duration: resource.duration,
-                  description: resource.description,
-                  file: fileUrl, // Use generated file URL
-                  createdAt: resource.createdAt,
-                  category: resource.category,
-                  title: resource.title,
-                  image: imageUrl, // Use generated image URL
-                },
-              ],
+              items: [{
+                ...resource,
+                file: fileUrl,
+                image: imageUrl,
+              }],
             });
           }
         
-          return acc; // Return the accumulator
-        }, [] as Category[]); // Specify the initial type of the accumulator (Category[])
+          return acc;
+        }, [] as Category[]);
+        
         
         
 
@@ -139,6 +126,8 @@ const App = () => {
   const handleCardClick = (fileUrl: string) => {
     window.open(fileUrl, "_blank"); // Open the file in a new tab
   };
+
+  if (authLoading) return <LoadingScreen />;
 
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>

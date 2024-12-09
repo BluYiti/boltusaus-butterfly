@@ -1,17 +1,19 @@
 "use client"; // Add this at the top to mark it as a Client Component
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, ReactNode } from 'react';
 import { format, startOfMonth, endOfMonth, addMonths, addDays, isBefore, isAfter } from 'date-fns';
 import Layout from '@/components/Sidebar/Layout';
 import items from '@/client/data/Links';
 import { MdArrowBack, MdArrowForward } from 'react-icons/md';
 import ConfirmationModal from "@/components/ConfirmationModal";
-import { Account, Client, Databases, Permission, Query, Role } from 'appwrite';
+import { Query } from 'appwrite';
 import { databases, account } from '@/appwrite'; // Import Appwrite client configuration and account API
 import LoadingScreen from '@/components/LoadingScreen';
 import useAuthCheck from '@/auth/page';
 
 interface Goal {
+    duration: ReactNode;
+    $id: string;
     id: string;
     client: string;
     clientId: string;
@@ -25,18 +27,12 @@ interface Goal {
     progress: 'todo' | 'doing' | 'done' | 'missed';
 }
 
-const client = new Client();
-client
-  .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT as string)
-  .setProject(process.env.NEXT_PUBLIC_PROJECT_ID as string);
-  const databases = new Databases(client);
-  const account = new Account(client);
 const CLIENT_COLLECTION_ID = 'Client';
 
 const GoalsPage = () => {
-    const { loading: authLoading } = useAuthCheck(['client']); // Call the useAuthCheck hook
+    const authLoading = useAuthCheck(['client']); // Call the useAuthCheck hook
     const [goals, setGoals] = useState<Goal[]>([]);
-    const [mood, setMood] = useState<'HAPPY' | 'SAD' | 'ANXIOUS' | 'FEAR' | 'FRUSTRATED' | ''>(''); 
+    const [mood, setMood] = useState<"" | "HAPPY" | "SAD" | "ANXIOUS" | "FEAR" | "FRUSTRATED">("");
     const [activities, setActivities] = useState('meditate');
     const [startHour, setStartHour] = useState(1);
     const [startMinute, setStartMinute] = useState(0);
@@ -44,18 +40,15 @@ const GoalsPage = () => {
     const [endHour, setEndHour] = useState(2);
     const [endMinute, setEndMinute] = useState(0);
     const [endPeriod, setEndPeriod] = useState('AM');
-    const [reminderTime, ] = useState(0);
     const [goalReminder, setGoalReminder] = useState(false);
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
     const [showConfirmationModal, setShowConfirmationModal] = useState(false);
-    const [showModal, setShowModal] = useState(false);
-    const [userName, setUserName] = useState('Client');
-    const [clientId, setClientId] = useState<string | null>(null);
-    const [psychotherapistId, setPsychotherapistId] = useState<string | null>(null);
     const [, setShowModal] = useState(false);
-    const [userName, setUserName] = useState('Client'); // Default to "Client" before fetching real name
+    const [userName, setUserName] = useState('Client');
+    const [, setClientId] = useState<string | null>(null);
+    const [, setPsychotherapistId] = useState<string | null>(null);
 
     const oneWeekAhead = addDays(new Date(), 7);
 
@@ -96,44 +89,57 @@ const GoalsPage = () => {
     }, []);
 
     // Function to fetch goals created by the authenticated user
-useEffect(() => {
-    const fetchUserGoals = async () => {
-        try {
-            // Retrieve the current user
-            const user = await account.get().catch(error => {
-                console.error("User not authenticated:", error);
-                alert("Please log in to view goals.");
-                return null;
-            });
-
-            if (!user) return;
-
-            // Fetch the Client document ID for the current user
-            const clientResponse = await databases.listDocuments('Butterfly-Database', 'Client', [
-                Query.equal('userid', user.$id)
-            ]);
-
-            if (clientResponse.documents.length === 0) {
-                throw new Error("Client document not found for the current user.");
+    useEffect(() => {
+        const fetchUserGoals = async () => {
+            try {
+                const user = await account.get().catch(error => {
+                    console.error("User not authenticated:", error);
+                    alert("Please log in to view goals.");
+                    return null;
+                });
+    
+                if (!user) return;
+    
+                const clientResponse = await databases.listDocuments('Butterfly-Database', 'Client', [
+                    Query.equal('userid', user.$id)
+                ]);
+    
+                if (clientResponse.documents.length === 0) {
+                    throw new Error("Client document not found for the current user.");
+                }
+    
+                const clientDocument = clientResponse.documents[0];
+                const clientId = clientDocument.$id;
+    
+                const response = await databases.listDocuments('Butterfly-Database', 'Goals', [
+                    Query.equal('clientId', clientId)
+                ]);
+    
+                // Map the response to an array of Goal objects
+                const goals: Goal[] = response.documents.map(doc => ({
+                    duration: doc.duration,
+                    $id: doc.$id,
+                    id: doc.id,
+                    client: doc.client,
+                    clientId: doc.clientId,
+                    psychotherapist: doc.psychotherapist,
+                    psychotherapistId: doc.psychotherapistId,
+                    mood: doc.mood,
+                    activities: doc.activities,
+                    date: doc.date,
+                    startTime: doc.startTime,
+                    endTime: doc.endTime,
+                    progress: doc.progress,
+                }));
+    
+                setGoals(goals);
+            } catch (error) {
+                console.error('Error fetching user goals:', error);
             }
-
-            const clientDocument = clientResponse.documents[0];
-            const clientId = clientDocument.$id;
-
-            // Fetch goals where the clientId matches the logged-in user's clientId
-            const response = await databases.listDocuments('Butterfly-Database', 'Goals', [
-                Query.equal('clientId', clientId)
-            ]);
-
-            // Set only the goals created by this user
-            setGoals(response.documents);
-        } catch (error) {
-            console.error('Error fetching user goals:', error);
-        }
-    };
-
-    fetchUserGoals();
-}, []);
+        };
+    
+        fetchUserGoals();
+    }, []);    
 
     const handleSave = async () => {
         if (!selectedDate) {
@@ -204,6 +210,8 @@ useEffect(() => {
             psychotherapistId: psychotherapistId,
             psychotherapist: '',
             client: '',
+            duration: undefined,
+            $id: undefined
         };
     
         try {
@@ -485,7 +493,7 @@ const handleProgressChange = async (newProgress: Goal['progress'], goalId: strin
                                 return (
                                     <button
                                         key={moodOption.label}
-                                        onClick={() => setMood(moodOption.label)}
+                                        onClick={() => setMood(moodOption.label as "HAPPY" | "SAD" | "ANXIOUS" | "FEAR" | "FRUSTRATED")}
                                         className={`py-2 px-4 rounded-lg mt-2 transition-colors duration-300 shadow-md 
                                             ${mood === moodOption.label ? selectedMoodColors[moodOption.label] : 'bg-gray-200 text-gray-600'}`}
                                         style={{ opacity: mood === moodOption.label ? 1 : 0.6 }}

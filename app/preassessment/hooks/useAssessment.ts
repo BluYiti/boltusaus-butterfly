@@ -40,7 +40,6 @@ export const useAssessment = (questions: Question[] = []) => {
           // Assuming you want the first match
           const clientDocument = client.documents[0];
           setClientID(clientDocument.$id);
-          console.log('This is the Client ID', setClientID)
         } else {
           console.log('No client document found for this user.');
         }

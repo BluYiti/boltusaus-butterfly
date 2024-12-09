@@ -8,7 +8,7 @@ import { account, databases, storage } from '@/appwrite'; // Import Appwrite SDK
 import { fetchClientId } from "@/hooks/userService";
 
 const SettingsPage = () => {
-  const { loading: authLoading } = useAuthCheck(['client']);
+  const authLoading = useAuthCheck(['client']);
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);

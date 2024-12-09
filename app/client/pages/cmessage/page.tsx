@@ -5,6 +5,10 @@ import items from '@/client/data/Links';
 import { Client, Databases, Account, Query, ID } from 'appwrite';
 import CallNotification from '@/components/CallNotification';
 import ClientVideoCall from '@/components/ClientVideoCall';
+import Image from 'next/image';
+import LoadingScreen from '@/components/LoadingScreen';
+import useAuthCheck from '@/auth/page';
+import { fetchProfileImageUrl } from '@/hooks/userService';
 
 // Interface Definitions
 interface Psychotherapist {
@@ -35,7 +39,9 @@ client
   .setProject(process.env.NEXT_PUBLIC_PROJECT_ID as string);
 
 const ChatPage: FC = () => {
+  const authLoading = useAuthCheck(['client']);
   const [psychotherapist, setPsychotherapist] = useState<Psychotherapist | null>(null);
+  const [isPsychotherapistMissing, setIsPsychotherapistMissing] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [messageInput, setMessageInput] = useState('');
   const [call, setCall] = useState<Call>({ isActive: false, caller: null });
@@ -51,39 +57,38 @@ const ChatPage: FC = () => {
     const fetchPsychotherapist = async () => {
       try {
         const user = await account.get();
-
+  
         const clientResponse = await databases.listDocuments(
           'Butterfly-Database',
           'Client',
           [Query.equal('userid', user.$id)]
         );
-
+  
         if (clientResponse.documents.length > 0) {
           const clientData = clientResponse.documents[0];
           setClientDocumentId(clientData.$id);
-
+  
           if (clientData.psychotherapist) {
             const psychotherapistId = clientData.psychotherapist.$id || clientData.psychotherapist;
-
+  
             if (psychotherapistId) {
-              const psychotherapistResponse = await databases.getDocument(
-                'Butterfly-Database',
-                'Psychotherapist',
-                psychotherapistId
-              );
+              const psychotherapistResponse = await databases.getDocument('Butterfly-Database', 'Psychotherapist', psychotherapistId);
+              console.log(psychotherapistResponse)
 
+              const url = await fetchProfileImageUrl(psychotherapistResponse.profilepic);
+  
               setPsychotherapist({
                 id: psychotherapistResponse.$id,
                 name: `${psychotherapistResponse.firstName || 'Unknown'} ${psychotherapistResponse.lastName || 'Name'}`,
-                imageUrl: psychotherapistResponse.imageUrl || '/default-avatar.jpg',
+                imageUrl: url || '/images/default-profile.png',
               });
-
+  
               const conversationResponse = await databases.listDocuments(
                 'Butterfly-Database',
                 'Conversation',
                 [Query.equal('clientId', clientData.$id), Query.equal('psychotherapistId', psychotherapistId)]
               );
-
+  
               if (conversationResponse.documents.length > 0) {
                 setConversationId(conversationResponse.documents[0].$id);
               } else {
@@ -101,13 +106,16 @@ const ChatPage: FC = () => {
                 setConversationId(newConversation.$id);
               }
             }
+          } else {
+            // If no psychotherapist is assigned, set isPsychotherapistMissing to true
+            setIsPsychotherapistMissing(true);
           }
         }
       } catch (error) {
         console.error('Error fetching psychotherapist:', error);
       }
     };
-
+  
     fetchPsychotherapist();
   }, []);
 
@@ -179,7 +187,7 @@ const ChatPage: FC = () => {
           [Query.equal('conversationId', conversationId), Query.orderAsc('dateTime')]
         );
 
-        const messageData = response.documents.map((msg: any) => ({
+        const messageData = response.documents.map((msg) => ({
           id: msg.$id,
           text: msg.content,
           sender: msg.senderId === psychotherapist.id ? 'psychotherapist' : 'client',
@@ -202,7 +210,7 @@ const ChatPage: FC = () => {
         clearInterval(fetchInterval);
       }
     };
-  }, [conversationId, psychotherapist?.id]);
+  }, [psychotherapist, conversationId, psychotherapist?.id]);
 
   // Polling for Call Notification
   useEffect(() => {
@@ -264,6 +272,8 @@ const ChatPage: FC = () => {
     scrollToBottom();
   }, [messages]);
 
+  if (authLoading) return <LoadingScreen />;
+
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
       <div className="text-black min-h-screen flex">
@@ -273,10 +283,13 @@ const ChatPage: FC = () => {
               <div className="w-full p-6 flex flex-col justify-between">
                 <div className="flex items-center mb-4 justify-between">
                   <div className="flex items-center">
-                    <img
+                    <Image
                       src={psychotherapist.imageUrl}
                       alt={psychotherapist.name}
+                      width={48} // Replace with appropriate width
+                      height={48} // Replace with appropriate height
                       className="w-12 h-12 rounded-full mr-4"
+                      unoptimized
                     />
                     <h2 className="text-xl font-bold">{psychotherapist.name}</h2>
                   </div>
@@ -314,6 +327,10 @@ const ChatPage: FC = () => {
                     Send
                   </button>
                 </div>
+              </div>
+            ) : isPsychotherapistMissing ? (
+              <div className="w-full p-6 flex items-center justify-center">
+                <p className="text-6xl text-blue-400 font-paintbrush">Book Your First Session to talk to your chosen Psychotherapist!</p>
               </div>
             ) : (
               <div className="w-full p-6 flex items-center justify-center">
