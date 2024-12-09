@@ -133,46 +133,51 @@ const Dashboard: React.FC = () => {
   };
 
   const fetchMissedSessions = async () => {
-    setLoadingMissedSessions(true); // Set loading state for missed sessions
+    setLoadingMissedSessions(true); // Start loading
     try {
+      // Fetch missed sessions
       const missedResponse = await databases.listDocuments(
         'Butterfly-Database',
         'Bookings',
         [Query.equal('status', 'missed')]
       );
-    
-      const missedClientIds = missedResponse.documents
-        .map((booking) => booking.clientId)
-        .filter((id) => id);
-    
-      const missedClientPromises = missedClientIds.map((clientId) => {
-        if (!clientId) return Promise.resolve(null);
-        return databases.getDocument('Butterfly-Database', 'Client', clientId);
-      });
-    
-      const missedClientData = await Promise.all(missedClientPromises);
-      const validMissedClientData = missedClientData.filter((client) => client !== null);
-    
+  
+      console.log('missedResponse.documents:', missedResponse.documents);
+  
+      // Map through the documents to construct the missed sessions with client names
       const missedSessionsWithClientNames: Booking[] = missedResponse.documents.map((booking) => {
-        const client = validMissedClientData.find((client) => client.$id === booking.clientId);
         return {
           $id: booking.$id,
-          clientId: booking.clientId,
+          clientId: booking.clientId || 'N/A', // Add clientId
           status: booking.status,
           client: {
-            firstname: client.firstname || 'Unknown',
-            lastname: client.lastname || 'Unknown',
+            firstname: booking.client?.firstname || 'Unknown',
+            lastname: booking.client?.lastname || 'Unknown',
           },
+          psychotherapist: {
+            firstname: booking.psychotherapist?.firstName || 'Unknown',
+            lastname: booking.psychotherapist?.lastName || 'Unknown',
+          },
+          slots: booking.slots,
+          day: booking.day,
+          month: booking.month,
+          mode: booking.mode,
         };
       });
-    
+      
+  
+      console.log('missedSessionsWithClientNames:', missedSessionsWithClientNames);
+  
+      // Set the missed data to state
       setMissedData(missedSessionsWithClientNames);
     } catch (error) {
+      console.error('Error fetching missed sessions:', error);
       setError('Failed to fetch missed sessions');
     } finally {
-      setLoadingMissedSessions(false); // Set loading state to false after data is fetched
+      setLoadingMissedSessions(false); // Stop loading
     }
   };
+  
 
   const fetchPayments = async () => {
     setLoadingPayments(true); // Set loading state for payments
@@ -340,7 +345,6 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
         </div>
-
           
         <div className="grid grid-cols-3 gap-4 mt-8 mx-10">
           {/* Availability Calendar */}
