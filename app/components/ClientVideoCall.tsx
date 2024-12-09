@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import React, { useEffect, useRef } from 'react';
 import SimplePeer from 'simple-peer';
@@ -40,7 +40,6 @@ const ClientVideoCall: React.FC<ClientVideoCallProps> = ({ callerId, receiverId,
     });
   };
 
-  // Replace the incorrect useRef call with useEffect
   useEffect(() => {
     if (!callerId) {
       console.error("Caller ID is undefined. Ensure it is passed as a prop.");
@@ -62,7 +61,7 @@ const ClientVideoCall: React.FC<ClientVideoCallProps> = ({ callerId, receiverId,
         });
 
         peerRef.current.on('signal', data => {
-          console.log("Signaling data:", data);
+          console.log("Signaling data:", data); // Debug log
           sendSignalingMessage({
             type: isCaller ? 'offer' : 'answer',
             from: callerId,
@@ -72,7 +71,7 @@ const ClientVideoCall: React.FC<ClientVideoCallProps> = ({ callerId, receiverId,
         });
 
         peerRef.current.on('connect', () => {
-          console.log("Peer connection established!");
+          console.log("Peer connection established!"); // Debug log
         });
 
         peerRef.current.on('error', err => {
@@ -80,11 +79,12 @@ const ClientVideoCall: React.FC<ClientVideoCallProps> = ({ callerId, receiverId,
         });
 
         peerRef.current.on('close', () => {
-          console.log("Peer connection closed.");
+          console.log("Peer connection closed."); // Debug log
         });
 
         peerRef.current.on('stream', remoteStream => {
           if (remoteVideoRef.current) remoteVideoRef.current.srcObject = remoteStream;
+          console.log("Received remote stream:", remoteStream); // Debug log
         });
 
         signalingInterval = setInterval(pollForSignalingMessages, 2000);
@@ -117,25 +117,27 @@ const ClientVideoCall: React.FC<ClientVideoCallProps> = ({ callerId, receiverId,
         return;
       }
 
+      // Prepare the signaling data object
       const signalingData = {
-        type: message.type,
-        from: message.from,
-        to: message.to,
-        timestamp: new Date().toISOString(),
-        sdp: message.signalData ? JSON.parse(message.signalData).sdp : undefined,
-        candidate: message.candidate || (message.signalData ? JSON.parse(message.signalData).candidate : undefined),
+        type: message.type,           // 'offer', 'answer', 'candidate'
+        from: message.from,           // sender's ID
+        to: message.to,               // receiver's ID
+        timestamp: new Date().toISOString(),  // Current timestamp
+        sdp: message.sdp,             // SDP (Session Description Protocol)
+        candidate: message.candidate, // ICE Candidate (if applicable)
       };
 
-      console.log("Signaling message prepared:", signalingData);
+      console.log("Sending signaling message:", signalingData); // Debug log
 
+      // Send the signaling data to Appwrite
       await databases.createDocument(
-        "Butterfly-Database",
-        "SignalingMessages",
-        ID.unique(),
-        signalingData
+        "Butterfly-Database",   // Your database name
+        "SignalingMessages",    // Your collection name
+        ID.unique(),            // Unique document ID for each signaling message
+        signalingData           // The actual signaling data
       );
 
-      console.log("Signaling message sent to Appwrite:", signalingData);
+      console.log("Signaling message sent to Appwrite:", signalingData); // Debug log
     } catch (error) {
       console.error("Error sending signaling message:", error);
     }
@@ -164,8 +166,12 @@ const ClientVideoCall: React.FC<ClientVideoCallProps> = ({ callerId, receiverId,
     if (!peerRef.current) return;
 
     try {
-      const parsedData = JSON.parse(message.signalData);
-      peerRef.current.signal(parsedData);
+      const parsedData = message.signalData ? JSON.parse(message.signalData) : null;
+      if (parsedData) {
+        peerRef.current.signal(parsedData);
+      } else {
+        console.error("Invalid signalData received:", message);
+      }
     } catch (error) {
       console.error("Error handling signaling message:", error);
     }
@@ -173,14 +179,10 @@ const ClientVideoCall: React.FC<ClientVideoCallProps> = ({ callerId, receiverId,
 
   return (
     <div className="flex flex-col items-center justify-center h-full">
-      <h2 className="text-xl mb-4">Video Call</h2>
-      <div className="flex space-x-4">
-        <video ref={localVideoRef} autoPlay muted className="w-1/2 rounded-lg border" />
+      <div className="flex space-x-4 mt-4">
+        <video ref={localVideoRef} autoPlay className="w-1/2 rounded-lg border" />
         <video ref={remoteVideoRef} autoPlay className="w-1/2 rounded-lg border" />
       </div>
-      <button onClick={onEndCall} className="mt-4 bg-red-500 text-white px-4 py-2 rounded">
-        End Call
-      </button>
     </div>
   );
 };

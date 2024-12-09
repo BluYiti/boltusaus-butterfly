@@ -90,6 +90,10 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSend
     onStartCall();
   };
 
+  const handleGoogleMeet = () => {
+    window.open('https://meet.google.com/landing', '_blank');
+  }
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -108,7 +112,7 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSend
 
   return (
     <div className="w-3/4 p-6 flex flex-col justify-between">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-6">
         {/* Contact Details */}
         <div className="flex items-center">
           <Image
@@ -121,14 +125,32 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSend
           <h2 className="text-xl font-bold">{selectedContact.name}</h2>
         </div>
 
-        {/* Video Call Icon */}
-        <button
-          onClick={handleStartCall} // Use the onStartCall prop here
-          className="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
-          aria-label="Start Video Call"
-        >
-          <FaVideo />
-        </button>
+        {/* Buttons for Google Meet and Video Call */}
+        <div className="flex items-center space-x-4">
+          {/* Google Meet Icon */}
+          <button
+            onClick={handleGoogleMeet} // Use the onStartCall prop here
+            className="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
+            aria-label="Start Video Call"
+          >
+            <Image
+              src="/images/meet-logo.png"
+              alt={selectedContact.name}
+              width={30} // Width in pixels
+              height={30} // Height in pixels
+              className="rounded-full"
+            />
+          </button>
+
+          {/* Video Call Icon */}
+          <button
+            onClick={handleStartCall} // Use the onStartCall prop here
+            className="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
+            aria-label="Start Video Call"
+          >
+            <FaVideo className="w-7 h-7" />
+          </button>
+        </div>
       </div>
 
       <div className="flex-grow overflow-y-auto space-y-4">
@@ -175,7 +197,6 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSend
     </div>
   );
 };
-
 
 // Main Communication Page component with Layout
 const Communication: FC = () => {
@@ -246,7 +267,6 @@ const Communication: FC = () => {
 
         const psychotherapistDocumentId = psychotherapistResponse.documents[0].$id;
         setPsychotherapistDocumentId(psychotherapistDocumentId); // Store psychotherapist document ID
-        console.log("Psychotherapist Document ID:", psychotherapistDocumentId);
 
         const clientResponse = await databases.listDocuments(
           'Butterfly-Database',
