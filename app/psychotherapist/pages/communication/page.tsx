@@ -143,13 +143,13 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSend
           </button>
 
           {/* Video Call Icon */}
-          <button
+          {/* <button
             onClick={handleStartCall} // Use the onStartCall prop here
             className="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
             aria-label="Start Video Call"
           >
             <FaVideo className="w-7 h-7" />
-          </button>
+          </button> */}
         </div>
       </div>
 
