@@ -232,7 +232,8 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
                 {error && <div className="text-red-600 text-lg font-bold">{error}</div>}
                 {validationError && <div className="text-red-600 text-lg font-bold">{validationError}</div>}
 
-                <div className="rounded-md shadow-sm space-y-2">
+                {/* Two-Column Layout */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* First Name */}
                     <div>
                         <label htmlFor="firstName" className="block text-[#38b6ff] mb-1">First Name</label>
@@ -307,123 +308,131 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
                     {/* Address */}
                     <div className="mt-4">
                         <label className="block text-[#38b6ff] mb-2">Address</label>
-                        <div className="ml-4">
-                            {/* Country Dropdown */}
-                            <div className="mb-4">
-                                <label className="block text-[#38b6ff] mb-2">Country</label>
-                                <select
-                                    className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
-                                    value="Philippines" // Directly set the value to "Philippines"
-                                    onChange={() => {}} // No need to update state since it's fixed to "Philippines"
-                                    disabled // Option to prevent any changes (if the dropdown is meant to be fixed)
-                                >
-                                    <option value="Philippines">Philippines</option> {/* Only "Philippines" option */}
-                                </select>
-                            </div>
-
-                            {/* Region Dropdown */}
-                            <div className='mb-4'>
-                                <label className="block text-[#38b6ff] mb-2">Region</label>
-                                <select
-                                    className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
-                                    value={region}
-                                    required
-                                    onChange={(e) => {
-                                        setCountry("Philippines");
-                                        const selectedRegion = regions.find(r => r.name === e.target.value);
-                                        setRegion(e.target.value);
-                                        setSelectedRegionCode(selectedRegion?.code ?? null); // Use nullish coalescing to handle undefined
-                                        setProvince(''); // Reset province when region changes
-                                        setCity(''); // Reset city when region changes
-                                        setBarangay(''); // Reset barangay when region changes
-                                        setProvinces([]); // Clear provinces
-                                        setCities([]); // Clear cities
-                                        setBarangays([]); // Clear barangays
-                                    }}
-                                >
-                                    <option value="">Select Region</option>
-                                    {regions
-                                        .sort((a, b) => a.name.localeCompare(b.name))
-                                        .map((region) => (
-                                            <option key={region.code} value={region.name}>
-                                                {region.name}
-                                            </option>
-                                        ))}
-                                </select>
-                            </div>
-
-                            {/* Province Dropdown */}
-                            <div className="mb-4">
-                                <label className="block text-[#38b6ff] mb-2">Province</label>
-                                <select
-                                    className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
-                                    value={province}
-                                    required
-                                    onChange={(e) => {
-                                        setProvince(e.target.value);
-                                        setCity(''); // Reset city when province changes
-                                        setBarangays([]); // Clear barangays when province changes
-                                    }}
-                                >
-                                    <option value="">Select Province</option>
-                                    {provinces
-                                        .sort((a, b) => a.name.localeCompare(b.name))
-                                        .map((province) => (
-                                            <option key={province.code} value={province.name}>
-                                                {province.name}
-                                            </option>
-                                        ))}
-                                </select>
-                            </div>
-
-                            {/* City Dropdown */}
-                            <div className="mb-4">
-                                <label className="block text-[#38b6ff] mb-2">City</label>
-                                <select
-                                    className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
-                                    value={city}
-                                    required
-                                    onChange={(e) => setCity(e.target.value)}
-                                >
-                                    <option value="">Select City</option>
-                                    {cities
-                                        .sort((a, b) => a.name.localeCompare(b.name))
-                                        .map((city) => (
-                                            <option key={city.code} value={city.name}>
-                                                {city.name}
-                                            </option>
-                                        ))}
-                                </select>
-                            </div>
-
-                            {/* Barangay Dropdown */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 ml-4">
+                            {/* Left Column */}
                             <div>
-                                <label className="block text-[#38b6ff] mb-2">Barangay</label>
-                                <select
-                                    className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
-                                    value={barangay}
-                                    required
-                                    onChange={(e) => setBarangay(e.target.value)}
-                                >
-                                    <option value="">Select Barangay</option>
-                                    {barangays
-                                        .sort((b1, b2) => b1.name.localeCompare(b2.name))
-                                        .map((b) => (
-                                            <option key={b.code} value={b.name}>{b.name}</option>
-                                        ))}
-                                </select>
+                                {/* Country Dropdown */}
+                                <div className="mb-4">
+                                    <label className="block text-[#38b6ff] mb-2">Country</label>
+                                    <select
+                                        className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
+                                        value="Philippines"
+                                        onChange={() => {}}
+                                        disabled
+                                    >
+                                        <option value="Philippines">Philippines</option>
+                                    </select>
+                                </div>
+
+                                {/* Region Dropdown */}
+                                <div className="mb-4">
+                                    <label className="block text-[#38b6ff] mb-2">Region</label>
+                                    <select
+                                        className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
+                                        value={region}
+                                        required
+                                        onChange={(e) => {
+                                            setCountry("Philippines");
+                                            const selectedRegion = regions.find((r) => r.name === e.target.value);
+                                            setRegion(e.target.value);
+                                            setSelectedRegionCode(selectedRegion?.code ?? null);
+                                            setProvince('');
+                                            setCity('');
+                                            setBarangay('');
+                                            setProvinces([]);
+                                            setCities([]);
+                                            setBarangays([]);
+                                        }}
+                                    >
+                                        <option value="">Select Region</option>
+                                        {regions
+                                            .sort((a, b) => a.name.localeCompare(b.name))
+                                            .map((region) => (
+                                                <option key={region.code} value={region.name}>
+                                                    {region.name}
+                                                </option>
+                                            ))}
+                                    </select>
+                                </div>
+
+                                {/* Province Dropdown */}
+                                <div className="mb-4">
+                                    <label className="block text-[#38b6ff] mb-2">Province</label>
+                                    <select
+                                        className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
+                                        value={province}
+                                        required
+                                        onChange={(e) => {
+                                            setProvince(e.target.value);
+                                            setCity('');
+                                            setBarangays([]);
+                                        }}
+                                    >
+                                        <option value="">Select Province</option>
+                                        {provinces
+                                            .sort((a, b) => a.name.localeCompare(b.name))
+                                            .map((province) => (
+                                                <option key={province.code} value={province.name}>
+                                                    {province.name}
+                                                </option>
+                                            ))}
+                                    </select>
+                                </div>
                             </div>
 
-                            {/* Street Input */}
-                            <div className="mb-4">
-                                <label className="block text-[#38b6ff] mb-2">Street</label>
-                                <input
-                                    className="border border-[#38b6ff] rounded-xl pl-3 pr-3 py-2 w-full text-gray-500"
-                                    value={street}
-                                    onChange={(e) => setStreet(e.target.value)}
-                                    placeholder="Enter your street"
-                                    required
-                                />
+                            {/* Right Column */}
+                            <div>
+                                {/* City Dropdown */}
+                                <div className="mb-4">
+                                    <label className="block text-[#38b6ff] mb-2">City</label>
+                                    <select
+                                        className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
+                                        value={city}
+                                        required
+                                        onChange={(e) => setCity(e.target.value)}
+                                    >
+                                        <option value="">Select City</option>
+                                        {cities
+                                            .sort((a, b) => a.name.localeCompare(b.name))
+                                            .map((city) => (
+                                                <option key={city.code} value={city.name}>
+                                                    {city.name}
+                                                </option>
+                                            ))}
+                                    </select>
+                                </div>
+
+                                {/* Barangay Dropdown */}
+                                <div className="mb-4">
+                                    <label className="block text-[#38b6ff] mb-2">Barangay</label>
+                                    <select
+                                        className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
+                                        value={barangay}
+                                        required
+                                        onChange={(e) => setBarangay(e.target.value)}
+                                    >
+                                        <option value="">Select Barangay</option>
+                                        {barangays
+                                            .sort((b1, b2) => b1.name.localeCompare(b2.name))
+                                            .map((b) => (
+                                                <option key={b.code} value={b.name}>
+                                                    {b.name}
+                                                </option>
+                                            ))}
+                                    </select>
+                                </div>
+
+                                {/* Street Input */}
+                                <div className="mb-4">
+                                    <label className="block text-[#38b6ff] mb-2">Street</label>
+                                    <input
+                                        className="border border-[#38b6ff] rounded-xl pl-3 pr-3 py-2 w-full text-gray-500"
+                                        value={street}
+                                        onChange={(e) => setStreet(e.target.value)}
+                                        placeholder="Enter your street"
+                                        required
+                                    />
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -544,110 +553,110 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
                         </p>
                     </div>
 
-                    {/* Password */}
-                    <div className="relative">
-                        <label htmlFor="password" className="block text-[#38b6ff] mb-1">Password</label>
-                        <input
-                        id="password"
-                        type="password"
-                        value={password}
-                        onChange={handlePasswordChange}
-                        placeholder="********"
-                        className={`border rounded-xl pl-3 pr-10 py-2 w-full text-gray-500 ${isPasswordValid ? 'border-green-500' : 'border-red-500'}`}
-                        />
-                        <div className="mt-2">
-                        <p className={`text-sm ${passwordCriteria.length ? 'text-green-500' : 'text-red-500'}`}>
-                            - At least 8 characters
-                        </p>
-                        <p className={`text-sm ${passwordCriteria.number ? 'text-green-500' : 'text-red-500'}`}>
-                            - At least 1 number
-                        </p>
-                        <p className={`text-sm ${passwordCriteria.specialChar ? 'text-green-500' : 'text-red-500'}`}>
-                            - At least 1 special character (@, $, !, %, *, ?, &)
-                        </p>
-                        <p className={`text-sm ${passwordCriteria.uppercase ? 'text-green-500' : 'text-red-500'}`}>
-                            - At least 1 uppercase letter
-                        </p>
-                        <p className={`text-sm ${passwordCriteria.lowercase ? 'text-green-500' : 'text-red-500'}`}>
-                            - At least 1 lowercase letter
-                        </p>
-                        </div>
-                    </div>
-
-                    {/* Confirm Password */}
-                    <div className="mb-4">
-                        <label htmlFor="rePassword" className="block text-[#38b6ff] mb-2">Confirm Password</label>
-                        <input
-                        id="rePassword"
-                        type="password"
-                        required
-                        placeholder="Confirm Password"
-                        value={rePassword}
-                        onChange={handleRePasswordChange}
-                        className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
-                        />
-                        {/* Visual indicator for password match */}
-                        <div className="mt-2 text-sm">
-                        {rePassword && (
-                            <p className={`text-${passwordsMatch ? 'green' : 'red'}-500`}>
-                            {passwordsMatch ? 'Passwords match!' : 'Passwords do not match.'}
-                            </p>
-                        )}
-                        </div>
-                    </div>
-
-                    {/* Agree to Terms and Conditions */}
-                    <div className="mb-4">
-                        <input
-                            type="checkbox"
-                            checked={agreeToTerms}
-                            onChange={() => setAgreeToTerms(!agreeToTerms)}
-                            required
-                        />
-                        <label htmlFor="terms" className="text-gray-500 text-xs">
-                            &nbsp;I agree to the
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setIsModalOpen(true);
-                                    setModalContentType('terms');
-                                }}
-                                className="text-blue-500 hover:underline ml-1"
-                            >
-                                Terms and Conditions
-                            </button>
-                            &nbsp;and the
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setIsModalOpen(true);
-                                    setModalContentType('privacy');
-                                }}
-                                className="text-blue-500 hover:underline ml-1"
-                            >
-                                Privacy Policy
-                            </button>.
-                        </label>
-                    </div>
-
-                    {/* Submit Button */}
-                    <div className="mt-8">
-                        <div className="mt-8">
-                            <button
-                                type="submit"
-                                disabled={loading || !isFormValid()} // Disable the button if form is invalid
-                                aria-label="Submit registration form"
-                                aria-disabled={loading || !isFormValid()}
-                                className={`bg-gradient-to-r from-[#38b6ff] to-[#4982ae] text-white font-bold py-2 px-4 rounded-xl transition-all duration-300 ease-in-out shadow-lg transform hover:scale-105 hover:shadow-xl ${!isFormValid() ? 'opacity-50 cursor-not-allowed' : ''} ${buttonClicked ? 'bg-green-500' : ''}`}
-                            >
-                                {loading ? 'Registering...' : 'Register'}
-                            </button>
-                        </div>
-                    </div>
-                    
-                    {error && <div className="text-red-600 text-lg font-bold">{error}</div>}
-                    {validationError && <div className="text-red-600 text-lg font-bold">{validationError}</div>}
                 </div>
+                {/* Password */}
+                <div className="relative">
+                    <label htmlFor="password" className="block text-[#38b6ff] mb-1">Password</label>
+                    <input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={handlePasswordChange}
+                    placeholder="********"
+                    className={`border rounded-xl pl-3 pr-10 py-2 w-full text-gray-500 ${isPasswordValid ? 'border-green-500' : 'border-red-500'}`}
+                    />
+                    <div className="mt-2">
+                    <p className={`text-sm ${passwordCriteria.length ? 'text-green-500' : 'text-red-500'}`}>
+                        - At least 8 characters
+                    </p>
+                    <p className={`text-sm ${passwordCriteria.number ? 'text-green-500' : 'text-red-500'}`}>
+                        - At least 1 number
+                    </p>
+                    <p className={`text-sm ${passwordCriteria.specialChar ? 'text-green-500' : 'text-red-500'}`}>
+                        - At least 1 special character (@, $, !, %, *, ?, &)
+                    </p>
+                    <p className={`text-sm ${passwordCriteria.uppercase ? 'text-green-500' : 'text-red-500'}`}>
+                        - At least 1 uppercase letter
+                    </p>
+                    <p className={`text-sm ${passwordCriteria.lowercase ? 'text-green-500' : 'text-red-500'}`}>
+                        - At least 1 lowercase letter
+                    </p>
+                    </div>
+                </div>
+
+                {/* Confirm Password */}
+                <div className="mb-4">
+                    <label htmlFor="rePassword" className="block text-[#38b6ff] mb-2">Confirm Password</label>
+                    <input
+                    id="rePassword"
+                    type="password"
+                    required
+                    placeholder="Confirm Password"
+                    value={rePassword}
+                    onChange={handleRePasswordChange}
+                    className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
+                    />
+                    {/* Visual indicator for password match */}
+                    <div className="mt-2 text-sm">
+                    {rePassword && (
+                        <p className={`text-${passwordsMatch ? 'green' : 'red'}-500`}>
+                        {passwordsMatch ? 'Passwords match!' : 'Passwords do not match.'}
+                        </p>
+                    )}
+                    </div>
+                </div>
+
+                {/* Agree to Terms and Conditions */}
+                <div className="mb-4">
+                    <input
+                        type="checkbox"
+                        checked={agreeToTerms}
+                        onChange={() => setAgreeToTerms(!agreeToTerms)}
+                        required
+                    />
+                    <label htmlFor="terms" className="text-gray-500 text-xs">
+                        &nbsp;I agree to the
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setIsModalOpen(true);
+                                setModalContentType('terms');
+                            }}
+                            className="text-blue-500 hover:underline ml-1"
+                        >
+                            Terms and Conditions
+                        </button>
+                        &nbsp;and the
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setIsModalOpen(true);
+                                setModalContentType('privacy');
+                            }}
+                            className="text-blue-500 hover:underline ml-1"
+                        >
+                            Privacy Policy
+                        </button>.
+                    </label>
+                </div>
+
+                {/* Submit Button */}
+                <div className="mt-8">
+                    <div className="mt-8">
+                        <button
+                            type="submit"
+                            disabled={loading || !isFormValid()} // Disable the button if form is invalid
+                            aria-label="Submit registration form"
+                            aria-disabled={loading || !isFormValid()}
+                            className={`bg-gradient-to-r from-[#38b6ff] to-[#4982ae] text-white font-bold py-2 px-4 rounded-xl transition-all duration-300 ease-in-out shadow-lg transform hover:scale-105 hover:shadow-xl ${!isFormValid() ? 'opacity-50 cursor-not-allowed' : ''} ${buttonClicked ? 'bg-green-500' : ''}`}
+                        >
+                            {loading ? 'Registering...' : 'Register'}
+                        </button>
+                    </div>
+                </div>
+                
+                {error && <div className="text-red-600 text-lg font-bold">{error}</div>}
+                {validationError && <div className="text-red-600 text-lg font-bold">{validationError}</div>}
             </form>
 
             {/* Terms and Privacy Modal */}
