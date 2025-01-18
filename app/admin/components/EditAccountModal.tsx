@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { account, databases, ID } from '@/appwrite';
+import { useEffect, useState } from 'react';
+import { databases } from '@/appwrite';
 import { Query } from 'appwrite';
 import SuccessModal from './SuccessfulMessage';
 
@@ -7,146 +7,187 @@ interface AddAccountModalProps {
   isOpen: boolean;
   onClose: () => void;
   selectedTab: string; // To know which tab is currently active
+  clientId: string;
 }
 
-const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, selectedTab }) => {
+const EditAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, selectedTab, clientId }) => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('+63');
-  const [password, setPassword] = useState('');
+  const [phonenum, setPhoneNum] = useState('63');
   const [loading, setLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
-  const [adminEmail, setAdminEmail] = useState('');
-  const [adminPassword, setAdminPassword] = useState('');
-  const [adminError, setAdminError] = useState<string | null>(null);
-  const [isAdminValidating, setIsAdminValidating] = useState(false);
+  const [documentId, setDocumentId] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isModalOpen, setModalOpen] = useState(false);
 
-  const validateEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-
-  const validatePhoneNumber = (phone: string) => {
-    const phoneRegex = /^\+63\d{10}$/;
-    return phoneRegex.test(phone);
-  };
-
-  const handleAdminValidation = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setAdminError(null);
-    setIsAdminValidating(true);
+  useEffect(() => {
+    const fetchClient = async () => {
+      if (!clientId) return; // Exit if no clientId is provided
+      setLoading(true); // Start loading
+      setError(null); // Reset any previous errors
   
-    try {
-      // Query the Accounts collection for the provided email
-      const response = await databases.listDocuments('Butterfly-Database', 'Accounts', [
-        Query.equal('email', adminEmail)
-      ]);
-
-      // Check if the email exists
-      if (response.documents.length === 0) {
-        throw new Error('Admin email not found');
+      try {
+        // Map selectedTab to the corresponding database collection, query field, and field mappings
+        const collectionMap = {
+          Psychotherapist: {
+            collection: "Psychotherapist",
+            queryField: "userId",
+            fieldMap: { firstName: "firstName", lastName: "lastName", emailField: "userId.email" },
+          },
+          Associate: {
+            collection: "Associate",
+            queryField: "userId",
+            fieldMap: { firstName: "firstName", lastName: "lastName", emailField: "userId.email" },
+          },
+          Client: {
+            collection: "Client",
+            queryField: "userid",
+            fieldMap: { firstName: "firstname", lastName: "lastname", emailField: "userid.email" },
+          },
+        };
+  
+        const config = collectionMap[selectedTab];
+        if (!config) {
+          setError('Invalid tab selected.');
+          return;
+        }
+  
+        const { collection, queryField, fieldMap } = config;
+  
+        const response = await databases.listDocuments('Butterfly-Database', collection, [
+          Query.equal(queryField, clientId),
+        ]);
+  
+        if (response?.documents?.length > 0) {
+          const client = response.documents[0];
+          setDocumentId(client.$id);
+  
+          // Dynamically map fields based on the current tab
+          setFirstName(client[fieldMap.firstName] || '');
+          setLastName(client[fieldMap.lastName] || '');
+          // Access the email dynamically based on the field mapping
+          const email = fieldMap.emailField.split('.').reduce((acc, key) => acc?.[key], client);
+          setEmail(email || '');
+          setPhoneNum(client.phonenum || '63');
+        } else {
+          setError('No client data found.');
+        }
+        {isModalOpen && (
+          <SuccessModal selectedTab={selectedTab} message={"edited"} onClose={() => setModalOpen(false)} />
+        )}
+      } catch (err) {
+        console.error('Error fetching client:', err);
+        setError('Failed to fetch client data.');
+      } finally {
+        setLoading(false); // Stop loading
       }
-
-      // Log out any existing session
-      await account.deleteSession('current');
-      console.log('Logged out admin');
-
-      // Call handleSubmit to proceed with account creation or any other logic
-      await handleSubmit();
-
-      // Log the admin back in using their credentials (assuming you have adminEmail and password available)
-      const loginResponse = await account.createEmailPasswordSession(adminEmail, adminPassword);
-      console.log('Logged in admin');
-
-      {isModalOpen && (
-        <SuccessModal selectedTab={selectedTab} message={"edited"} onClose={() => setModalOpen(false)} />
-      )}
-      if (!loginResponse) {
-        throw new Error('Failed to log in the admin');
-      }
-
-      setIsAdminModalOpen(false);
-      onClose();
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setAdminError(err.message || 'Invalid admin credentials');
-      } else {
-        setAdminError('An unexpected error occurred');
-      }
-    } finally {
-      setIsAdminValidating(false);
-    }
-  };  
-
-  const handleSubmit = async () => {
+    };
+  
+    fetchClient();
+  }, [clientId, selectedTab, isModalOpen]); // Re-run whenever clientId or selectedTab changes
+  
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
     setError(null);
-    // Check if the email and phone number are valid
+    setSuccessMessage(null); // Reset any previous success message
+    
+    // Validate email format
     if (!validateEmail(email)) {
       setError('Invalid email format.');
+      setIsSubmitting(false);
       return;
     }
-
-    if (!validatePhoneNumber(phoneNumber)) {
-      setError('Phone number must start with +63 and be exactly 10 digits after +63.');
+  
+    // Validate phone number format
+    if (!validatePhoneNumber(phonenum)) {
+      setError('Phone number must start with 63 and be exactly 10 digits after 63.');
+      setIsSubmitting(false);
       return;
     }
-
-    setLoading(true);
+  
     try {
-      const name = `${firstName} ${lastName}`;
-
-      // Create the account in appwrite
-      const userResponse = await account.create(ID.unique(), email, password, name);
-      const accountId = userResponse.$id;
-      console.log('Account created successfully');
-
-      // Log in the user immediately after creating the account
-      await account.createEmailPasswordSession(email, password);
-      console.log('User logged in successfully.');
-
-      // Create the user in the "Accounts" collection
-      await databases.createDocument('Butterfly-Database', 'Accounts', accountId, {
-        username: name,
-        email: email,
-        role: selectedTab.toLowerCase(),
-      });
-      console.log('Accounts Collection document added');
-
-      // Create the user in the selected tab collection
-      await databases.createDocument('Butterfly-Database', selectedTab, ID.unique(), {
-        userId: accountId,
-        firstName: firstName,
-        lastName: lastName,
-        phonenum: phoneNumber
-      });
-
-      console.log(selectedTab, ' Collection document added');
-
-      // Log out the user
-      await account.deleteSession('current'); // 'current' refers to the active session
-      console.log('User logged out successfully.');
+      // Map selectedTab to the corresponding database collection and field names
+      const collectionMap = {
+        Psychotherapist: {
+          collection: "Psychotherapist",
+          fieldMap: { firstName: "firstName", lastName: "lastName", email: "userId.email" },
+        },
+        Associate: {
+          collection: "Associate",
+          fieldMap: { firstName: "firstName", lastName: "lastName", email: "userId.email" },
+        },
+        Client: {
+          collection: "Client",
+          fieldMap: { firstName: "firstname", lastName: "lastname", email: "userid.email" },
+        },
+      };
+  
+      const config = collectionMap[selectedTab];
+      if (!config) {
+        setError('Invalid tab selected.');
+        setIsSubmitting(false);
+        return;
+      }
+  
+      const { collection, fieldMap } = config;
+  
+      // Prepare the updated data
+      const updatedData: Record<string, string> = {
+        [fieldMap.firstName]: firstName,
+        [fieldMap.lastName]: lastName,
+        phonenum: phonenum,
+      };
+  
+      console.log(collection)
+      console.log(clientId)
+      console.log(updatedData)
+  
+      // Update the document using Appwrite
+      const response = await databases.updateDocument(
+        'Butterfly-Database',    // Database ID
+        collection,              // Collection name
+        documentId,              // Document ID (assumed clientId is the document ID)
+        updatedData              // Data to update
+      );
+  
+      // Update the state with the response data
+      setFirstName(response[fieldMap.firstName] || '');
+      setLastName(response[fieldMap.lastName] || '');
+      setEmail(email);  // Email is directly updated, not part of response by default
+      setPhoneNum(response.phonenum || '63');
+  
+      // Set success message
+      setSuccessMessage('Account updated successfully!');
+  
+      setIsSubmitting(false);  // Stop submitting status
     } catch (err) {
-      setError(err.message || 'Failed to create account');
+      console.error('Error updating client:', err);
+      setError(err.message || 'Failed to update account');
+      setIsSubmitting(false);
     } finally {
       setLoading(false);
     }
   };
 
+  const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+  const validatePhoneNumber = (phone: string) => /^63\d{10}$/.test(phone);
+
   if (!isOpen) return null;
-
+  
   return (
-    <>
-      {/* Main Add Account Modal */}
-      <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-        <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
-          <h2 className="text-xl font-semibold mb-4">Add Account</h2>
+    <div className="fixed inset-0 flex items-center justify-center bg-gray-700 bg-opacity-70">
+      <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
+        <h2 className="text-xl font-semibold mb-4">Edit Account</h2>
 
-          {error && <p className="text-red-500">{error}</p>}
+        {loading && <p className="text-blue-500">Loading client data...</p>}
 
-          <form onSubmit={(e) => { e.preventDefault(); setIsAdminModalOpen(true); }} className="space-y-4">
+        {!loading && !error && (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {error && <p className="text-red-500">{error}</p>}
             <div>
               <label htmlFor="firstName" className="block text-sm font-medium">
                 First Name
@@ -157,7 +198,7 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, sele
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 required
-                className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
+                className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-black"
               />
             </div>
 
@@ -171,7 +212,7 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, sele
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
                 required
-                className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
+                className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-black"
               />
             </div>
 
@@ -185,39 +226,25 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, sele
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
+                className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-black"
               />
             </div>
 
             <div>
-              <label htmlFor="phoneNumber" className="block text-sm font-medium">
+              <label htmlFor="phonenum" className="block text-sm font-medium">
                 Phone Number
               </label>
               <input
                 type="tel"
-                id="phoneNumber"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
+                id="phonenum"
+                value={phonenum}
+                onChange={(e) => setPhoneNum(e.target.value)}
                 required
-                maxLength={13}
-                className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
-                placeholder="+63"
+                maxLength={12}
+                className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-black"
+                placeholder="63"
               />
-              <small className="text-xs text-gray-500">Format: +63 followed by 10 digits</small>
-            </div>
-
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium">
-                Password
-              </label>
-              <input
-                type="password"
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
-              />
+              <small className="text-xs text-black">Format: 63 followed by 10 digits</small>
             </div>
 
             <div className="flex justify-end space-x-2">
@@ -230,75 +257,24 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, sele
               </button>
               <button
                 type="submit"
-                disabled={loading}
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-blue-300"
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                disabled={isSubmitting}
               >
-                {loading ? 'Adding...' : 'Next'}
+                {isSubmitting ? "Saving..." : "Save"}
               </button>
             </div>
           </form>
-        </div>
+        )}
       </div>
 
-      {/* Admin Credentials Modal */}
-      {isAdminModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
-            <h2 className="text-xl font-semibold mb-4">Admin Authentication</h2>
-
-            {adminError && <p className="text-red-500">{adminError}</p>}
-
-            <form onSubmit={handleAdminValidation} className="space-y-4">
-              <div>
-                <label htmlFor="adminEmail" className="block text-sm font-medium">
-                  Admin Email
-                </label>
-                <input
-                  type="email"
-                  id="adminEmail"
-                  value={adminEmail}
-                  onChange={(e) => setAdminEmail(e.target.value)}
-                  required
-                  className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="adminPassword" className="block text-sm font-medium">
-                  Admin Password
-                </label>
-                <input
-                  type="password"
-                  id="adminPassword"
-                  value={adminPassword}
-                  onChange={(e) => setAdminPassword(e.target.value)}
-                  required
-                  className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
-                />
-              </div>
-
-              <div className="flex justify-end space-x-2">
-                <button
-                  type="button"
-                  onClick={() => setIsAdminModalOpen(false)}
-                  className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isAdminValidating}
-                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-blue-300"
-                >
-                  {isAdminValidating ? 'Validating...' : 'Submit'}
-                </button>
-              </div>
-            </form>
-          </div>
+      {/* Success Message */}
+      {successMessage && (
+        <div className="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-green-500 text-white text-center px-6 py-3 rounded-lg shadow-lg">
+          <p className="font-medium">{successMessage}</p>
         </div>
       )}
-    </>
+    </div>
   );
 };
 
-export default AddAccountModal;
+export default EditAccountModal;

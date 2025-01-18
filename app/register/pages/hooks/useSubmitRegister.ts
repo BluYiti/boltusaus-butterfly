@@ -76,7 +76,7 @@ const handleSubmit = async (
 
     try {
         // Check if the user is authenticated before checking session
-        const currentSession = await account.getSession('current').catch(error => {
+        const currentSession = await account.getSession('current').catch(() => {
             console.log('No active session found or user is not authenticated');
             return null; // Skip if no session is found
         });

@@ -18,12 +18,12 @@ const Question: React.FC<QuestionProps> = ({ text, options, currentAnswer, handl
         {options.map((option) => (
           <button
             key={option.value}
-            className={`w-full py-3 px-5 rounded-lg mb-3 transition-colors ease-in-out flex justify-between items-center
+            className={`w-full py-3 px-5 rounded-lg mb-3 transition-colors ease-in-out flex items-center space-x-4
               ${currentAnswer === option.value ? 'bg-blue-500 text-white' : 'bg-white text-blue-900 hover:bg-blue-900 hover:text-white'} 
               focus:outline-none focus:ring-2 focus:ring-blue-500 active:bg-blue-600`}
             onClick={() => handleSelectOption(option.value)}
           >
-            {option.label}
+            <div className="flex-1 text-left">{option.label}</div>
             <span className="font-bold bg-blue-300 text-teal-800 rounded-md py-1 px-3">
               {option.value}
             </span>
@@ -31,7 +31,7 @@ const Question: React.FC<QuestionProps> = ({ text, options, currentAnswer, handl
         ))}
       </div>
     </div>
-  );
+  );  
 };
 
 export default Question;

@@ -8,7 +8,7 @@ import LoadingScreen from "@/components/LoadingScreen";
 
 const AppointmentBooking = () => {
   
-  const { loading: authLoading } = useAuthCheck(['client']); // Call the useAuthCheck hook
+  const authLoading = useAuthCheck(['client']); // Call the useAuthCheck hook
   const [modalOpen, setModalOpen] = useState(true); // State to control the modal
  
   useEffect(() => {

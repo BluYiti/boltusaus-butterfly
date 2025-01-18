@@ -1,3 +1,5 @@
+'use client'
+
 import { useState, useEffect } from "react";
 import Layout from "@/components/Sidebar/Layout";
 import items from "@/associate/data/Links";
@@ -28,7 +30,7 @@ interface PaymentHistory {
 }
 
 const ClientsPayment = () => {
-  const { loading: authLoading } = useAuthCheck(['associate']);
+  const authLoading = useAuthCheck(['associate']);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all"); // Add state for the status filter

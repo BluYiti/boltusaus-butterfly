@@ -24,7 +24,7 @@ interface Booking {
 
 const Appointments = () => {
   HappeningAppointment();
-  const { loading: authLoading } = useAuthCheck(['psychotherapist']); // Call the useAuthCheck hook
+  const authLoading = useAuthCheck(['psychotherapist']); // Call the useAuthCheck hook
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isTakeNotesModalOpen, setIsTakeNotesModalOpen] = useState(false);
@@ -202,7 +202,7 @@ const Appointments = () => {
       </div>
 
       {/* Modals */}
-      <TakeNotesModal isOpen={isTakeNotesModalOpen} clientName={selectedClient} onClose={() => setIsTakeNotesModalOpen(false)} />
+      <TakeNotesModal isOpen={isTakeNotesModalOpen} onClose={() => setIsTakeNotesModalOpen(false)} />
       <CountdownModal
         isOpen={isCountdownModalOpen}
         onClose={() => setIsCountdownModalOpen(false)}

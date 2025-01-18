@@ -61,15 +61,15 @@ const ShowReceiptModal: React.FC<ShowReceiptModalProps> = ({ isOpen, onClose, im
       <div className="bg-white rounded-lg shadow-lg max-w-4xl w-auto max-h-[80vh] overflow-auto">
         <div className="relative">
           {/* Display the image or a placeholder */}
-<Image
-  src={receiptImageUrl || placeholderImage}  // Fallback to placeholder if image is null
-  alt="Receipt"
-  layout="responsive"  // This makes it responsive, you can also use 'intrinsic' or 'fixed' based on the need
-  width={600}  // Adjust the width (responsive) or use a fixed value for fixed-size images
-  height={400} // Adjust the height (keep aspect ratio)
-  className="w-full h-auto max-h-[60vh] object-contain" // Optional class styling
-/>
-
+          <Image
+            src={receiptImageUrl || placeholderImage}  // Fallback to placeholder if image is null
+            alt="Receipt"
+            layout="responsive"  // This makes it responsive, you can also use 'intrinsic' or 'fixed' based on the need
+            width={600}  // Adjust the width (responsive) or use a fixed value for fixed-size images
+            height={400} // Adjust the height (keep aspect ratio)
+            className="w-full h-auto max-h-[60vh] object-contain" // Optional class styling
+            unoptimized
+          />
           {/* Close button */}
           <button
             className="absolute top-2 right-2 w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-blue-700 transition-all duration-200 transform hover:scale-105 active:scale-95"

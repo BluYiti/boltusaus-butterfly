@@ -10,10 +10,10 @@ interface AppointmentData {
     $id: string;
   };
   selectedTime: string; // Can be more specific depending on what 'selectedTime' is
-  createdAt: string; // Or Date if it's a Date object
+  createdAt: string ; // Or Date if it's a Date object
   selectedMode: string;
-  selectedMonth: number;
-  selectedDay: number;
+  selectedMonth: string;
+  selectedDay: string;
 }
 
 interface CashPaymentProps {
@@ -91,13 +91,13 @@ const CashPayment: React.FC<CashPaymentProps> = ({ isOpen, onClose, appointmentD
   async function addBookingData(BookingsData: {
     client: string;
     psychotherapist: string;
-    slots: string; // Change to correct type if necessary
+    slots: string;
     status: string;
-    createdAt: string; // Or Date if it's a Date object
+    createdAt: string | Date;  // Allow both string and Date
     mode: string;
-    month: number;
-    day: number;
-  }) {
+    month: string;
+    day: string;
+  })   {
     try {
       const response = await databases.createDocument('Butterfly-Database', 'Bookings', 'unique()', BookingsData);
       console.log("Created Bookings Data", response);

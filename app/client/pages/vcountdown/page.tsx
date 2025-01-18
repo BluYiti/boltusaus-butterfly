@@ -37,14 +37,14 @@ const Countdown: FC<{ seconds: number; onComplete: () => void }> = ({ seconds, o
 const Page: FC = () => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const router = useRouter(); // Initialize useRouter
-  const { loading: authLoading } = useAuthCheck(['client']); // Call the useAuthCheck hook
-
-  if (authLoading ) {
-      return <LoadingScreen />; // Show the loading screen while the auth check or data loading is in progress
-  }
+  const authLoading = useAuthCheck(['client']); // Call the useAuthCheck hook
   
   function handleCountdownComplete(): void {
     router.push('/client/pages/cmessage')
+  }
+
+  if (authLoading ) {
+    return <LoadingScreen />; // Show the loading screen while the auth check or data loading is in progress
   }
 
   return (

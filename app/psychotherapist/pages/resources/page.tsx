@@ -29,7 +29,7 @@ interface Payload {
 }
 
 const ResourcesPage: React.FC = () => {
-  const { loading: authLoading } = useAuthCheck(['psychotherapist']); // Call the useAuthCheck hook
+  const authLoading = useAuthCheck(['psychotherapist']); // Call the useAuthCheck hook
   const [resources, setResources] = useState<Resource[]>([]);
   const [newCategory, setNewCategory] = useState('');
   const [newTitle, setNewTitle] = useState('');
@@ -49,7 +49,7 @@ const ResourcesPage: React.FC = () => {
   const [selectedResourceId, setSelectedResourceId] = useState<string | null>(null); 
   const fileInputRef = useRef<HTMLInputElement | null>(null); 
   const imageInputRef = useRef<HTMLInputElement | null>(null);
-  const [loading, setLoading] = useState(false);  // State for Create operation
+  const [loading, ] = useState(false);  // State for Create operation
   const [isCreating, setIsCreating] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
