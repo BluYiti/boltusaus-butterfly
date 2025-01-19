@@ -134,7 +134,7 @@ const PaymentModal = ({ onClose, client }) => {
         <p><strong>Amount:</strong> ₱{client.amount.toFixed(2)}</p>
         <p><strong>Status:</strong> {client.status}</p>
         {/* Format the date */}
-        <p><strong>Transaction Date and Time:</strong> {formatDate(client.createdAt)}</p>
+        <p><strong>Submission Date and Time:</strong> {formatDate(client.createdAt)}</p>
         <p className="text-gray-800">
           <strong>Receipt:</strong>
           <button 
