@@ -127,7 +127,6 @@ const PaymentModal = ({ onClose, client }) => {
 
         {/* Payment details */}
         <p><strong>Appointment ID:</strong> {client.id}</p>
-        <p><strong>Reference No:</strong> {client.referenceNo}</p>
         <p><strong>Channel:</strong> {client.channel}</p>
         <p><strong>Client Name:</strong> {client.clientFirstName} {client.clientLastName}</p>
         <p><strong>Email:</strong> {client.email}</p>
