@@ -227,15 +227,16 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
 
     return (
         <div className="w-full p-8">
-            <h2 className="text-center text-6xl text-[#4982ae] font-paintbrush">Register</h2>
             <form className="mt-8 space-y-4" onSubmit={handleFormSubmit}>
                 {error && <div className="text-red-600 text-lg font-bold">{error}</div>}
                 {validationError && <div className="text-red-600 text-lg font-bold">{validationError}</div>}
 
-                <div className="rounded-md shadow-sm space-y-2">
+                <div className="rounded-md shadow-sm">
+                {/* Two-Column Layout */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 gap-y-0">
                     {/* First Name */}
                     <div>
-                        <label htmlFor="firstName" className="block text-[#38b6ff] mb-1">First Name</label>
+                        <label htmlFor="firstName" className="block text-[#38b6ff]">First Name</label>
                         <input
                             id="firstName"
                             type="text"
@@ -249,7 +250,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
 
                     {/* Last Name */}
                     <div>
-                        <label htmlFor="lastName" className="block text-[#38b6ff] mb-1">Last Name</label>
+                        <label htmlFor="lastName" className="block text-[#38b6ff]">Last Name</label>
                         <input
                             id="lastName"
                             type="text"
@@ -264,7 +265,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
                     {/* Birthday and Age */}
                     <div className="flex space-x-2">
                         <div className="flex-1">
-                            <label htmlFor="birthday" className="block text-[#38b6ff] mb-1">Birthday</label>
+                            <label htmlFor="birthday" className="block text-[#38b6ff]">Birthday</label>
                             <input
                                 id="birthday"
                                 type="date"
@@ -277,7 +278,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
                             />
                         </div>
                         <div className="flex-none w-1/3">
-                            <label className="block text-[#38b6ff] mb-1">Age</label>
+                            <label className="block text-[#38b6ff]">Age</label>
                             <input
                                 type="text"
                                 value={age !== null ? age : ''}
@@ -288,8 +289,8 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
                     </div>
 
                     {/* Sex Dropdown */}
-                    <div className="mb-4">
-                        <label className="block text-[#38b6ff] mb-2">Sex</label>
+                    <div>
+                        <label className="block text-[#38b6ff]">Sex</label>
                         <select
                             className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
                             value={sex}
@@ -304,134 +305,128 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
                         </select>
                     </div>
 
-                    {/* Address */}
-                    <div className="mt-4">
-                        <label className="block text-[#38b6ff] mb-2">Address</label>
-                        <div className="ml-4">
-                            {/* Country Dropdown */}
-                            <div className="mb-4">
-                                <label className="block text-[#38b6ff] mb-2">Country</label>
-                                <select
-                                    className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
-                                    value="Philippines" // Directly set the value to "Philippines"
-                                    onChange={() => {}} // No need to update state since it's fixed to "Philippines"
-                                    disabled // Option to prevent any changes (if the dropdown is meant to be fixed)
-                                >
-                                    <option value="Philippines">Philippines</option> {/* Only "Philippines" option */}
-                                </select>
-                            </div>
+                    {/* Country Dropdown */}
+                    <div>
+                        <label className="block text-[#38b6ff]">Country</label>
+                        <select
+                            className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
+                            value="Philippines" // Directly set the value to "Philippines"
+                            onChange={() => {}} // No need to update state since it's fixed to "Philippines"
+                            disabled // Option to prevent any changes (if the dropdown is meant to be fixed)
+                        >
+                            <option value="Philippines">Philippines</option> {/* Only "Philippines" option */}
+                        </select>
+                    </div>
 
-                            {/* Region Dropdown */}
-                            <div className='mb-4'>
-                                <label className="block text-[#38b6ff] mb-2">Region</label>
-                                <select
-                                    className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
-                                    value={region}
-                                    required
-                                    onChange={(e) => {
-                                        setCountry("Philippines");
-                                        const selectedRegion = regions.find(r => r.name === e.target.value);
-                                        setRegion(e.target.value);
-                                        setSelectedRegionCode(selectedRegion?.code ?? null); // Use nullish coalescing to handle undefined
-                                        setProvince(''); // Reset province when region changes
-                                        setCity(''); // Reset city when region changes
-                                        setBarangay(''); // Reset barangay when region changes
-                                        setProvinces([]); // Clear provinces
-                                        setCities([]); // Clear cities
-                                        setBarangays([]); // Clear barangays
-                                    }}
-                                >
-                                    <option value="">Select Region</option>
-                                    {regions
-                                        .sort((a, b) => a.name.localeCompare(b.name))
-                                        .map((region) => (
-                                            <option key={region.code} value={region.name}>
-                                                {region.name}
-                                            </option>
-                                        ))}
-                                </select>
-                            </div>
+                    {/* Region Dropdown */}
+                    <div className='mb-4'>
+                        <label className="block text-[#38b6ff]">Region</label>
+                        <select
+                            className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
+                            value={region}
+                            required
+                            onChange={(e) => {
+                                setCountry("Philippines");
+                                const selectedRegion = regions.find(r => r.name === e.target.value);
+                                setRegion(e.target.value);
+                                setSelectedRegionCode(selectedRegion?.code ?? null); // Use nullish coalescing to handle undefined
+                                setProvince(''); // Reset province when region changes
+                                setCity(''); // Reset city when region changes
+                                setBarangay(''); // Reset barangay when region changes
+                                setProvinces([]); // Clear provinces
+                                setCities([]); // Clear cities
+                                setBarangays([]); // Clear barangays
+                            }}
+                        >
+                            <option value="">Select Region</option>
+                            {regions
+                                .sort((a, b) => a.name.localeCompare(b.name))
+                                .map((region) => (
+                                    <option key={region.code} value={region.name}>
+                                        {region.name}
+                                    </option>
+                                ))}
+                        </select>
+                    </div>
 
-                            {/* Province Dropdown */}
-                            <div className="mb-4">
-                                <label className="block text-[#38b6ff] mb-2">Province</label>
-                                <select
-                                    className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
-                                    value={province}
-                                    required
-                                    onChange={(e) => {
-                                        setProvince(e.target.value);
-                                        setCity(''); // Reset city when province changes
-                                        setBarangays([]); // Clear barangays when province changes
-                                    }}
-                                >
-                                    <option value="">Select Province</option>
-                                    {provinces
-                                        .sort((a, b) => a.name.localeCompare(b.name))
-                                        .map((province) => (
-                                            <option key={province.code} value={province.name}>
-                                                {province.name}
-                                            </option>
-                                        ))}
-                                </select>
-                            </div>
+                    {/* Province Dropdown */}
+                    <div>
+                        <label className="block text-[#38b6ff]">Province</label>
+                        <select
+                            className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
+                            value={province}
+                            required
+                            onChange={(e) => {
+                                setProvince(e.target.value);
+                                setCity(''); // Reset city when province changes
+                                setBarangays([]); // Clear barangays when province changes
+                            }}
+                        >
+                            <option value="">Select Province</option>
+                            {provinces
+                                .sort((a, b) => a.name.localeCompare(b.name))
+                                .map((province) => (
+                                    <option key={province.code} value={province.name}>
+                                        {province.name}
+                                    </option>
+                                ))}
+                        </select>
+                    </div>
 
-                            {/* City Dropdown */}
-                            <div className="mb-4">
-                                <label className="block text-[#38b6ff] mb-2">City</label>
-                                <select
-                                    className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
-                                    value={city}
-                                    required
-                                    onChange={(e) => setCity(e.target.value)}
-                                >
-                                    <option value="">Select City</option>
-                                    {cities
-                                        .sort((a, b) => a.name.localeCompare(b.name))
-                                        .map((city) => (
-                                            <option key={city.code} value={city.name}>
-                                                {city.name}
-                                            </option>
-                                        ))}
-                                </select>
-                            </div>
+                    {/* City Dropdown */}
+                    <div>
+                        <label className="block text-[#38b6ff]">City</label>
+                        <select
+                            className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
+                            value={city}
+                            required
+                            onChange={(e) => setCity(e.target.value)}
+                        >
+                            <option value="">Select City</option>
+                            {cities
+                                .sort((a, b) => a.name.localeCompare(b.name))
+                                .map((city) => (
+                                    <option key={city.code} value={city.name}>
+                                        {city.name}
+                                    </option>
+                                ))}
+                        </select>
+                    </div>
 
-                            {/* Barangay Dropdown */}
-                            <div>
-                                <label className="block text-[#38b6ff] mb-2">Barangay</label>
-                                <select
-                                    className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
-                                    value={barangay}
-                                    required
-                                    onChange={(e) => setBarangay(e.target.value)}
-                                >
-                                    <option value="">Select Barangay</option>
-                                    {barangays
-                                        .sort((b1, b2) => b1.name.localeCompare(b2.name))
-                                        .map((b) => (
-                                            <option key={b.code} value={b.name}>{b.name}</option>
-                                        ))}
-                                </select>
-                            </div>
+                    {/* Barangay Dropdown */}
+                    <div>
+                        <label className="block text-[#38b6ff]">Barangay</label>
+                        <select
+                            className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
+                            value={barangay}
+                            required
+                            onChange={(e) => setBarangay(e.target.value)}
+                        >
+                            <option value="">Select Barangay</option>
+                            {barangays
+                                .sort((b1, b2) => b1.name.localeCompare(b2.name))
+                                .map((b) => (
+                                    <option key={b.code} value={b.name}>{b.name}</option>
+                                ))}
+                        </select>
+                    </div>
 
-                            {/* Street Input */}
-                            <div className="mb-4">
-                                <label className="block text-[#38b6ff] mb-2">Street</label>
-                                <input
-                                    className="border border-[#38b6ff] rounded-xl pl-3 pr-3 py-2 w-full text-gray-500"
-                                    value={street}
-                                    onChange={(e) => setStreet(e.target.value)}
-                                    placeholder="Enter your street"
-                                    required
-                                />
-                            </div>
-                        </div>
+                    {/* Street Input */}
+                    <div className="mb-4">
+                        <label className="block text-[#38b6ff]">Street</label>
+                        <input
+                            className="border border-[#38b6ff] rounded-xl pl-3 pr-3 py-2 w-full text-gray-500"
+                            value={street}
+                            onChange={(e) => setStreet(e.target.value)}
+                            placeholder="Enter your street"
+                            required
+                        />
                     </div>
 
                     {/* Contact Number */}
                     <div className="mb-4">
                         <div className="flex items-center">
-                            <label htmlFor="contactNumber" className="block text-[#38b6ff]">Contact Number</label>
+                            <label htmlFor="contactNumber" className="block text-[#38b6ff]">Contact Number of Minor</label>
                             <p className="text-xs text-red-500 ml-2">*No zero at the start</p> {/* Add message here */}
                         </div>
                         <input
@@ -475,7 +470,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
                     {/* Emergency Contact Number */}
                     <div>
                         <div className="flex items-center">
-                            <label htmlFor="contactNumber" className="block text-[#38b6ff]">Contact Number</label>
+                            <label htmlFor="contactNumber" className="block text-[#38b6ff]">Emergency Contact Number</label>
                             <p className="text-xs text-red-500 ml-2">*No zero at the start</p> {/* Add message here */}
                         </div>
                         <input
@@ -500,7 +495,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
 
                     {/* Upload ID */}
                     <div>
-                        <label htmlFor="idFile" className="block text-[#38b6ff] mb-1">
+                        <label htmlFor="idFile" className="block text-[#38b6ff]">
                         {isAdult ? "Upload ID" : "Upload ID of Guardian"}
                         </label>
                         <input
@@ -523,7 +518,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
 
                     {/* Email */}
                     <div>
-                        <label htmlFor="email" className="block text-[#38b6ff] mb-1">Email</label>
+                        <label htmlFor="email" className="block text-[#38b6ff]">Email</label>
                         <input
                             id="email"
                             type="email"
@@ -542,37 +537,40 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
 
                     {/* Password */}
                     <div className="relative">
-                        <label htmlFor="password" className="block text-[#38b6ff] mb-1">Password</label>
+                        <label htmlFor="password" className="block text-[#38b6ff]">Password</label>
                         <input
-                        id="password"
-                        type="password"
-                        value={password}
-                        onChange={handlePasswordChange}
-                        placeholder="********"
-                        className={`border rounded-xl pl-3 pr-10 py-2 w-full text-gray-500 ${isPasswordValid ? 'border-green-500' : 'border-red-500'}`}
+                            id="password"
+                            type="password"
+                            value={password}
+                            onChange={handlePasswordChange}
+                            placeholder="********"
+                            className={`border rounded-xl pl-3 pr-10 py-2 w-full text-gray-500 ${isPasswordValid ? 'border-green-500' : 'border-red-500'}`}
                         />
-                        <div className="mt-2">
-                        <p className={`text-sm ${passwordCriteria.length ? 'text-green-500' : 'text-red-500'}`}>
-                            - At least 8 characters
-                        </p>
-                        <p className={`text-sm ${passwordCriteria.number ? 'text-green-500' : 'text-red-500'}`}>
-                            - At least 1 number
-                        </p>
-                        <p className={`text-sm ${passwordCriteria.specialChar ? 'text-green-500' : 'text-red-500'}`}>
-                            - At least 1 special character (@, $, !, %, *, ?, &)
-                        </p>
-                        <p className={`text-sm ${passwordCriteria.uppercase ? 'text-green-500' : 'text-red-500'}`}>
-                            - At least 1 uppercase letter
-                        </p>
-                        <p className={`text-sm ${passwordCriteria.lowercase ? 'text-green-500' : 'text-red-500'}`}>
-                            - At least 1 lowercase letter
-                        </p>
-                        </div>
+                        {/* Password requirements */}
+                        {!isPasswordValid && (
+                            <div className="absolute left-0 top-full mt-2 bg-white bg-opacity-50 border rounded-xl w-full p-2 text-sm text-gray-500">
+                                <p className={`text-sm ${passwordCriteria.length ? 'text-green-500' : 'text-red-500'}`}>
+                                    - At least 8 characters
+                                </p>
+                                <p className={`text-sm ${passwordCriteria.number ? 'text-green-500' : 'text-red-500'}`}>
+                                    - At least 1 number
+                                </p>
+                                <p className={`text-sm ${passwordCriteria.specialChar ? 'text-green-500' : 'text-red-500'}`}>
+                                    - At least 1 special character (@, $, !, %, *, ?, &)
+                                </p>
+                                <p className={`text-sm ${passwordCriteria.uppercase ? 'text-green-500' : 'text-red-500'}`}>
+                                    - At least 1 uppercase letter
+                                </p>
+                                <p className={`text-sm ${passwordCriteria.lowercase ? 'text-green-500' : 'text-red-500'}`}>
+                                    - At least 1 lowercase letter
+                                </p>
+                            </div>
+                        )}
                     </div>
 
                     {/* Confirm Password */}
                     <div className="mb-4">
-                        <label htmlFor="rePassword" className="block text-[#38b6ff] mb-2">Confirm Password</label>
+                        <label htmlFor="rePassword" className="block text-[#38b6ff]">Confirm Password</label>
                         <input
                         id="rePassword"
                         type="password"
@@ -643,6 +641,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
                     
                     {error && <div className="text-red-600 text-lg font-bold">{error}</div>}
                     {validationError && <div className="text-red-600 text-lg font-bold">{validationError}</div>}
+                </div>
                 </div>
             </form>
 

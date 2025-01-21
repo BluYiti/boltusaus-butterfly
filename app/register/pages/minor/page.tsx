@@ -13,13 +13,13 @@ const RegisterPage: React.FC = () => {
             <Image 
                 src={"/images/minorfly.png"} 
                 alt='butterfly' 
-                width={600} 
-                height={600} 
+                width={500} 
+                height={500} 
                 priority // Set priority for LCP
-                className="fixed object-contain max-w-full h-auto 3xl:left-48 3xl:top-52 sm:left-28 sm:top-32" // Maintain aspect ratio
+                className="fixed object-contain max-w-full h-auto 3xl:left-48 3xl:top-52 sm:left-20 sm:top-40" // Maintain aspect ratio
             />
-            <div className="flex justify-end items-end mt-10">
-                <div className="ml-[45rem]">
+            <div className="flex justify-end items-end">
+                <div className="ml-[39rem]">
                     <RegisterForm 
                         isAdult={false}
                         error={null} 
