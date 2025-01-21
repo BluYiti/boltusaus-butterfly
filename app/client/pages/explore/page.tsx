@@ -3,11 +3,15 @@ import React, { useEffect, useState } from "react";
 import { FaUser } from "react-icons/fa";
 import Layout from "@/components/Sidebar/Layout";
 import items from "@/client/data/Links";
-import { Client, Databases, Account, Storage, Query } from "appwrite";
+import Image from 'next/image';
+import { Query } from "appwrite";
+import { account, databases, storage } from "@/appwrite";
+import LoadingScreen from "@/components/LoadingScreen";
+import useAuthCheck from "@/auth/page";
 
 // Define the item and category types
 interface Item {
-  id: number;
+  id: string;
   duration: string;
   description: string;
   file: string; // This will be the file URL to navigate to
@@ -17,25 +21,27 @@ interface Item {
   image: string; // This is the cover image URL
 }
 
+interface Resource {
+  id: string;
+  duration: string;
+  description: string;
+  file: string; // The file ID from the Appwrite storage
+  createdAt: string;
+  category: string;
+  title: string;
+  image: string; // The image ID from Appwrite storage
+}
+
 interface Category {
   title: string;
   items: Item[];
 }
 
 const App = () => {
+  const authLoading = useAuthCheck(['client']);
   const [categories, setCategories] = useState<Category[]>([]); // State to hold fetched resources
   const [userName, setUserName] = useState("User"); // State to hold the user's name
   const [profilePicture, setProfilePicture] = useState<string | null>(null); // State to hold the user's profile picture URL
-
-  // Initialize Appwrite Client
-  const client = new Client();
-  client
-    .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT as string)
-    .setProject(process.env.NEXT_PUBLIC_PROJECT_ID as string);
-
-  const databases = new Databases(client);
-  const account = new Account(client); // Appwrite Account service for user authentication
-  const storage = new Storage(client);
 
   const DATABASE_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || "Butterfly-Database";
   const COLLECTION_ID = "Resources"; 
@@ -48,47 +54,36 @@ const App = () => {
     const fetchResources = async () => {
       try {
         const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID);
-        const resources = response.documents;
+        const resources = response.documents as unknown as Resource[]; // Cast documents to Resource[]
 
-        // Transform the fetched resources to fit the current design structure
-        const transformedCategories = resources.reduce((acc: Category[], resource: any) => {
+        // Transform resources safely in reduce
+        const transformedCategories = resources.reduce((acc: Category[], resource) => {
           const category = acc.find(cat => cat.title === resource.category);
-
-          // Dynamically generate file and image URLs from their IDs in the Resources bucket
-          const fileUrl = storage.getFileView(RESOURCE_BUCKET_ID, resource.file); // Get the file view URL from Appwrite
-          const imageUrl = storage.getFileView(RESOURCE_BUCKET_ID, resource.image); // Get the image view URL from Appwrite
-
+          const fileUrl = storage.getFileView(RESOURCE_BUCKET_ID, resource.file);
+          const imageUrl = storage.getFileView(RESOURCE_BUCKET_ID, resource.image);
+        
           if (category) {
             category.items.push({
-              id: resource.id,
-              duration: resource.duration,
-              description: resource.description,
-              file: fileUrl, // Use generated file URL
-              createdAt: resource.createdAt,
-              category: resource.category,
-              title: resource.title,
-              image: imageUrl, // Use generated image URL
+              ...resource, // Spread properties from resource
+              file: fileUrl,
+              image: imageUrl,
             });
           } else {
             acc.push({
               title: resource.category,
-              items: [
-                {
-                  id: resource.id,
-                  duration: resource.duration,
-                  description: resource.description,
-                  file: fileUrl, // Use generated file URL
-                  createdAt: resource.createdAt,
-                  category: resource.category,
-                  title: resource.title,
-                  image: imageUrl, // Use generated image URL
-                },
-              ],
+              items: [{
+                ...resource,
+                file: fileUrl,
+                image: imageUrl,
+              }],
             });
           }
-
+        
           return acc;
-        }, []);
+        }, [] as Category[]);
+        
+        
+        
 
         setCategories(transformedCategories);
       } catch (error) {
@@ -125,12 +120,14 @@ const App = () => {
 
     fetchResources();
     fetchUserProfile(); // Fetch user name and profile picture
-  }, []);
+  }, [DATABASE_ID]);
 
   // Function to handle card click and redirect to file URL
   const handleCardClick = (fileUrl: string) => {
     window.open(fileUrl, "_blank"); // Open the file in a new tab
   };
+
+  if (authLoading) return <LoadingScreen />;
 
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
@@ -142,10 +139,13 @@ const App = () => {
             <div className="flex items-center space-x-3">
               {/* Display profile picture if available, otherwise fall back to icon */}
               {profilePicture ? (
-                <img
+                <Image
                   src={profilePicture}
                   alt="User Profile"
                   className="w-8 h-8 rounded-full"
+                  width={32}  // Adjust width for the profile image
+                  height={32} // Adjust height accordingly
+                  priority  // Optional: Helps with fast loading of important images
                 />
               ) : (
                 <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white">
@@ -175,10 +175,13 @@ const App = () => {
                       >
                         {/* Display image or fallback */}
                         {item.image ? (
-                          <img
+                          <Image
                             src={item.image}
                             alt={item.title}
                             className="w-full h-40 object-cover rounded-t-lg"
+                            width={500}  // You can adjust the width as needed
+                            height={160} // Adjust the height accordingly
+                            priority  // Optional: Add this if it's important for LCP (helps with above-the-fold images)
                           />
                         ) : (
                           <div className="w-full h-40 bg-gray-200 rounded-t-lg flex items-center justify-center">

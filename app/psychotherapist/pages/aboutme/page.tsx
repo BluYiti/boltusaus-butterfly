@@ -3,15 +3,23 @@
 import { useState, useEffect, ChangeEvent } from 'react';
 import Layout from "@/components/Sidebar/Layout";
 import items from "@/psychotherapist/data/Links";
-import { PencilIcon, SaveIcon } from '@heroicons/react/solid';
+import { PencilIcon } from '@heroicons/react/solid';
 import { account, databases } from '@/appwrite';
-import { fetchProfileImageUrl, fetchPsychoId, uploadProfilePicture } from '@/hooks/userService';
+import { fetchProfileImageUrl, fetchPsychoId } from '@/hooks/userService';
 import LoadingScreen from '@/components/LoadingScreen';
 import UploadProfile from '@/psychotherapist/components/UploadProfile'; // Import UploadProfile modal
 import useAuthCheck from '@/auth/page';
+import Image from 'next/image';
+
+interface UpdateData {
+  description?: string;
+  phonenum?: string;
+  background?: string;
+  specialties?: string;
+}
 
 const AboutMe = () => {
-  const { loading: authLoading } = useAuthCheck(['psychotherapist']);
+  const authLoading = useAuthCheck(['psychotherapist']);
   const [loading, setLoading] = useState(true);
   const [description, setDescription] = useState("");
   const [professionalBackground, setProfessionalBackground] = useState("");
@@ -37,7 +45,7 @@ const AboutMe = () => {
   });
 
   const [isModalOpen, setIsModalOpen] = useState(false); // Modal state
-  const [selectedFile, setSelectedFile] = useState<File | null>(null); // Selected profile file state
+  const [, setSelectedFile] = useState<File | null>(null); // Selected profile file state
 
   // Fetch the user's information from Appwrite
   const fetchData = async () => {
@@ -136,7 +144,7 @@ const AboutMe = () => {
       const psychoId = await fetchPsychoId(user.$id);
   
       // Prepare the data to update
-      const updateData: any = {};
+      const updateData: UpdateData = {};
       switch (field) {
         case 'description':
           updateData.description = description;
@@ -204,10 +212,13 @@ const AboutMe = () => {
               <div className="flex flex-col items-center mb-6">
                 <div className="w-24 h-24 rounded-full bg-blue-500 mb-4">
                   {profileImageUrl ? (
-                    <img
+                    <Image
                       src={profileImageUrl} // Use the resolved image URL here
                       alt="Profile Preview"
                       className="w-full h-full object-cover rounded-full"
+                      width={100}  // Specify the width of the image (adjust as needed)
+                      height={100} // Specify the height of the image (adjust as needed)
+                      unoptimized
                     />
                   ) : (
                     <span className="text-white text-xl">No Image</span> // Fallback in case there is no image

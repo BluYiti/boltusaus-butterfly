@@ -1,13 +1,25 @@
 import React, { useState } from 'react';
 import Modal from '@/components/Modal';
 import { account, databases } from '@/appwrite';
-import { fetchClientId, fetchClientPsycho, restrictSelectingTherapist, updateClientPsychotherapist } from '@/hooks/userService';
+import { fetchClientId, restrictSelectingTherapist, updateClientPsychotherapist } from '@/hooks/userService';
 import SuccessModal from './successfulbooking';
+
+// Define the type for appointment data
+interface AppointmentData {
+  selectedTherapist: {
+    $id: string;
+  };
+  selectedTime: string; // Can be more specific depending on what 'selectedTime' is
+  createdAt: string ; // Or Date if it's a Date object
+  selectedMode: string;
+  selectedMonth: string;
+  selectedDay: string;
+}
 
 interface CashPaymentProps {
   isOpen: boolean;
   onClose: () => void;
-  appointmentData: any;
+  appointmentData: AppointmentData;
 }
 
 const CashPayment: React.FC<CashPaymentProps> = ({ isOpen, onClose, appointmentData }) => {
@@ -18,26 +30,24 @@ const CashPayment: React.FC<CashPaymentProps> = ({ isOpen, onClose, appointmentD
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Reset the error if validation passes
     setError('');
     setIsSubmitting(true);
-  
+
     try {
       // Fetch user data
       const user = await account.get();
       const clientId = await fetchClientId(user.$id);
       const response = await databases.getDocument('Butterfly-Database', 'Client', clientId);
       let psychoId = response.psychotherapist;
-  
-      // Check if psychoId is null or empty
+
+      // If psychoId is null or empty, use the selected psychotherapist's ID
       if (!psychoId) {
-        // If psychoId is null or empty, use the selected psychotherapist's ID
         psychoId = appointmentData.selectedTherapist.$id;
         updateClientPsychotherapist(clientId, psychoId);
       }
-  
+
       restrictSelectingTherapist(clientId);
-  
+
       const BookingsData = {
         client: clientId,
         psychotherapist: appointmentData.selectedTherapist.$id,
@@ -48,10 +58,10 @@ const CashPayment: React.FC<CashPaymentProps> = ({ isOpen, onClose, appointmentD
         month: appointmentData.selectedMonth,
         day: appointmentData.selectedDay
       };
-  
-      // Get the document ID of the newly created booking
-      const bookingId = await addBookingData(BookingsData); 
-  
+
+      // Create the booking and get its ID
+      const bookingId = await addBookingData(BookingsData);
+
       const PaymentData = {
         referenceNo: null,
         channel: "cash",
@@ -61,14 +71,14 @@ const CashPayment: React.FC<CashPaymentProps> = ({ isOpen, onClose, appointmentD
         psychotherapist: appointmentData.selectedTherapist.$id,
         booking: bookingId,  // Set the booking document ID
       };
-  
+
+      // Add payment data
       await addPaymentData(PaymentData);
 
       setShowSuccess(true); // Show success modal
-      console.log("showing success modal");
 
-      setTimeout(function() {
-          window.location.reload();
+      setTimeout(() => {
+        window.location.reload();
       }, 5000);
     } catch (err) {
       console.error('Submission failed:', err);
@@ -76,24 +86,43 @@ const CashPayment: React.FC<CashPaymentProps> = ({ isOpen, onClose, appointmentD
       setIsSubmitting(false);
     }
   };
-  
-  async function addBookingData(BookingsData: { client: string; psychotherapist: string; slots: any; status: any; createdAt: any; mode: any; month: any; day: any; }) {
+
+  // Function to add booking data
+  async function addBookingData(BookingsData: {
+    client: string;
+    psychotherapist: string;
+    slots: string;
+    status: string;
+    createdAt: string | Date;  // Allow both string and Date
+    mode: string;
+    month: string;
+    day: string;
+  })   {
     try {
       const response = await databases.createDocument('Butterfly-Database', 'Bookings', 'unique()', BookingsData);
       console.log("Created Bookings Data", response);
       return response.$id; // Return the document ID
     } catch (error) {
-      console.error(error); // Log the error for debugging
-      throw error; // Rethrow the error to handle it in the calling function
+      console.error(error);
+      throw error;
     }
   }
-  
-  async function addPaymentData(PaymentData: { referenceNo: string; channel: string; amount: number; status: string; client: string; psychotherapist: string; }) {
+
+  // Function to add payment data
+  async function addPaymentData(PaymentData: {
+    referenceNo: string | null;
+    channel: string;
+    amount: number;
+    status: string;
+    client: string;
+    psychotherapist: string;
+    booking: string;
+  }) {
     try {
       await databases.createDocument('Butterfly-Database', 'Payment', 'unique()', PaymentData);
       console.log('Created Payment Data');
     } catch (error) {
-      console.error(error); // Log the error for debugging
+      console.error(error);
     }
   }
 
@@ -104,10 +133,10 @@ const CashPayment: React.FC<CashPaymentProps> = ({ isOpen, onClose, appointmentD
         <p className="text-gray-600">You have selected Cash as your payment method.</p>
         <div className="mt-6 bg-gray-100 p-4 rounded-lg w-full max-w-sm">
           <form onSubmit={handleSubmit}>
-            <label className="text-2xl block mb-2 text-gray-800 text-center">Please Scan the QR Code</label>
+            <label className="text-2xl block mb-2 text-gray-800 text-center">Please Pay at the Clinic</label>
 
             {/* Reference Number Input */}
-            <label htmlFor="referenceNumber" className="block text-red-700 mb-2">NOTE: Please pay before the day of the booked appointment</label>
+            <label htmlFor="referenceNumber" className="block text-red-700 mb-2">NOTE: To secure your appointment, kindly ensure payment is made 2-3 days in advance. If payment is not received, your appointment will be canceled.</label>
 
             {/* Display error if exists */}
             {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
@@ -128,7 +157,7 @@ const CashPayment: React.FC<CashPaymentProps> = ({ isOpen, onClose, appointmentD
 
             <button
               type="submit"
-              className={`w-full p-2 bg-green-500 text-white rounded-lg ${isSubmitting && !paymentAcknowledged ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`w-full p-2 bg-green-500 text-white rounded-lg ${isSubmitting && !paymentAcknowledged ? 'bg-green-200 opacity-50 cursor-not-allowed' : ''}`}
               disabled={isSubmitting || !paymentAcknowledged}
             >
               {isSubmitting ? 'Processing...' : 'Next'}

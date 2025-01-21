@@ -9,11 +9,11 @@ const RegisterPage: React.FC = () => {
     const router = useRouter ();
 
     const handleMinor = () => {
-        router.push('/register/minor');
+        router.push('/register/pages/minor');
     }
 
     const handleAdult = () => {
-        router.push('/register/adult')
+        router.push('/register/pages/adult')
     }
 
     return (
@@ -23,7 +23,7 @@ const RegisterPage: React.FC = () => {
 
             {/* Register heading centered vertically */}
             <h2 className='font-paintbrush absolute text-8xl text-[#2b4369] mb-96'>
-                Registering for
+                Register Page
             </h2>
             
             <div className='flex flex-col items-center mt-24'> {/* Add margin to push below the Register heading */}
@@ -32,17 +32,13 @@ const RegisterPage: React.FC = () => {
                     <button onClick={handleMinor} className="transform transition-transform duration-300 hover:scale-125">
                         <Image src={'/images/minor.png'} alt='minor2' width={225} height={225} /><br />
                         <h2 className='font-poppins'>Ages 17 and below</h2>
+                        <h2 className='font-poppins text-blue-400 text-6xl'>Parent</h2>
                     </button>
                     <button onClick={handleAdult} className="transform transition-transform duration-300 hover:scale-125">
                         <Image src={'/images/adult.png'} alt='adult' width={225} height={225} /><br />
                         <h2 className='font-poppins'>Ages 18 and above</h2>
+                        <h2 className='font-poppins text-blue-400 text-6xl'>Adult</h2>
                     </button>
-                </div>
-                
-                {/* Flex container for headings */}
-                <div className="flex justify-center space-x-80 mt-12"> {/* Space for symmetrical alignment */}
-                    <h2 className='font-poppins text-blue-400 text-6xl'>Minor</h2>
-                    <h2 className='font-poppins text-blue-400 text-6xl'>Adult</h2>
                 </div>
             </div>
         </div>

@@ -4,36 +4,32 @@ import { useState } from 'react';
 import Back from '@/components/Back';
 import Image from 'next/image';
 import ForgotPasswordForm from '../components/ForgotForm';
+import { account } from '@/appwrite';
 
-const LoginPage: React.FC = () => {
+const ForgotPassword: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
 
     const handleSubmit = async (email: string) => {
         setLoading(true);
         setError(null);
+
         try {
-            // Replace with your API call to request a password reset
-            await fakeApiCall(email);
-            alert('Reset link sent!'); // Handle success (e.g., show success message)
-        } catch (err) {
-            setError('Failed to send reset link. Please try again.'); // Handle error
+            // Attempt to send the password reset email using Appwrite
+            await account.createRecovery(email, `${window.location.origin}/login/forgot/reset-password`);
+            alert('Password reset link sent to your email!');
+        } catch (err: any) {
+            // If error is caused by account not existing, show specific message
+            if (err.code === 404) {
+                setError('No account found with this email address.');
+            } else if (err.code === 500) {
+                setError('A server error occurred. Please try again later');
+            } else {
+                setError('Failed to send reset link. Please try again.');
+            }
         } finally {
             setLoading(false);
         }
-    };
-
-    // Simulate API call for demonstration purposes
-    const fakeApiCall = (email: string) => {
-        return new Promise((resolve, reject) => {
-            setTimeout(() => {
-                if (email === 'test@example.com') {
-                    resolve('Success');
-                } else {
-                    reject(new Error('Invalid email'));
-                }
-            }, 2000);
-        });
     };
 
     return (
@@ -52,4 +48,4 @@ const LoginPage: React.FC = () => {
     );
 };
 
-export default LoginPage;
+export default ForgotPassword;

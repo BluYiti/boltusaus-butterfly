@@ -7,37 +7,54 @@ import PaymentModal from "@/psychotherapist/components/PaymentModal"; // Import 
 import LoadingScreen from "@/components/LoadingScreen";
 import useAuthCheck from "@/auth/page";
 import { account, databases, Query } from "@/appwrite";
-import { fetchPsychoId } from "@/hooks/userService";
+import { fetchProfileImageUrl, fetchPsychoId } from "@/hooks/userService"; // Your existing function
+import Image from 'next/image';
 
 interface Payment {
+  $id: string;
+  $createdAt: string;
   referenceNo: string;
   mode: string;
   channel: string;
   amount: number;
   status: string;
-  client: { firstname: string; lastname: string }; // Client's first and last name
-  psychotherapist: { firstName: string; lastName: string }; // Psychotherapist's first and last name
-  booking: any;
-  id: string; // Add a unique identifier for each payment to use as a key
+  client: {
+    userid: string;
+    firstname: string;
+    lastname: string;
+    profilepic: string | null;
+  };
+  psychotherapist: {
+    firstName: string;
+    lastName: string;
+  };
+  booking: {
+    mode: string;
+    date: string;
+  };
+  id: string;
   clientFirstName: string;
   clientLastName: string;
+  clientProfilePic: string;
   psychoFirstName: string;
   psychoLastName: string;
   email: string;
   createdAt: Date;
   declineReason: string;
+  receipt: string;
 }
 
 const ClientsPayment = () => {
-  const { loading: authLoading } = useAuthCheck(['psychotherapist']);
+  const authLoading = useAuthCheck(['psychotherapist']);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("Pending");
   const [searchTerm, setSearchTerm] = useState("");
   const [payments, setPayments] = useState<Payment[]>([]);
-  const [showModal, setShowModal] = useState(false); // State for modal visibility
+  const [, setShowModal] = useState(false); // State for modal visibility
   const [selectedClient, setSelectedClient] = useState(null); // State for selected client's payment details
+  const [profileImageUrls, setProfileImageUrls] = useState<{ [key: string]: string }>({});
 
-  // Mock data for clients
+  // Fetch payment data
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -45,50 +62,68 @@ const ClientsPayment = () => {
         const psychoId = await fetchPsychoId(user.$id);
 
         const response = await databases.listDocuments('Butterfly-Database', 'Payment', [
-          Query.equal('psychotherapist', psychoId), // Adjust based on your schema
+          Query.equal('psychotherapist', psychoId),
         ]);
-        console.log(response);
 
-        // Assuming each payment document has a 'client' and 'psychotherapist' object with 'firstname' and 'lastname'
-        const fetchedPayments = response.documents.map((doc: any) => ({
-          referenceNo: doc.referenceNo,
-          mode: doc.booking.mode,
-          channel: doc.channel,
-          amount: doc.amount,
-          status: doc.status,
-          client: doc.client, // Assuming the client data is already in this format
-          psychotherapist: doc.psychotherapist, // Same assumption
-          booking: doc.booking,
-          id: doc.$id, 
-          clientFirstName: doc.client.firstname,
-          clientLastName: doc.client.lastname,
-          psychoFirstName: doc.psychotherapist.firstName,
-          psychoLastName: doc.psychotherapist.lastName,
-          email: doc.client.userid.email,
-          createdAt: doc.$createdAt,
-          declineReason: doc.declineReason,
-        }));        
+        // Map fetched data to match Payment type
+        const fetchedPayments: Payment[] = response.documents.map((doc) => {
+          const client = doc.client || {};  // Fallback to an empty object if doc.client is null or undefined
+          const psychotherapist = doc.psychotherapist || {}; // Similarly, handle psychotherapist
 
-        setPayments(fetchedPayments); // Store the payments in the state
+          return {
+            referenceNo: doc.referenceNo,
+            mode: doc.booking.mode,  // Accessing `mode` from `booking`
+            channel: doc.channel,
+            amount: doc.amount,
+            status: doc.status,
+            client: doc.client,
+            psychotherapist: doc.psychotherapist,
+            booking: doc.booking,
+            id: doc.$id,
+            clientFirstName: client.firstname || "",  // Fallback to empty string if firstname is missing
+            clientLastName: client.lastname || "",    // Fallback to empty string if lastname is missing
+            clientProfilePic: client.profilepic || "",
+            psychoFirstName: psychotherapist.firstName || "",  // Fallback to empty string if missing
+            psychoLastName: psychotherapist.lastName || "",    // Fallback to empty string if missing
+            email: client.userid?.email || "",  // Safely access the email with optional chaining
+            createdAt: new Date(doc.$createdAt),
+            declineReason: doc.declineReason,
+            receipt: doc.receipt,
+            $id: doc.$id,  // Ensure the ID is included
+            $createdAt: doc.$createdAt, // Include createdAt field
+          };
+        });
 
-        // Extract the query parameter from the URL
-        const url = new URL(window.location.href);
-        const tab = url.searchParams.get("tab");
-        
-        if (tab) {
-          setActiveTab(tab); // Set active tab based on the query parameter
+        setPayments(fetchedPayments);
+
+        // Fetch profile images for each client
+        const profileImages: { [key: string]: string } = {};
+
+        for (const doc of response.documents) {
+          const client = doc.client || {};  // Ensure client is always an object
+          const clientProfilePic = client.profilepic;
+
+          if (clientProfilePic) {
+            const url = await fetchProfileImageUrl(clientProfilePic);  // Fetch the image URL using your function
+            if (url) {
+              profileImages[doc.$id] = url;  // Store the URL in the state
+            }
+          }
         }
+
+        setProfileImageUrls(profileImages);  // Update state with all profile images
+
       } catch (error) {
         console.error("Error fetching data: ", error);
       } finally {
-        setLoading(false); // End the loading state once data is fetched
+        setLoading(false);
       }
     };
 
     fetchData();
-  }, []);
+  }, []); // Empty dependency array ensures the effect runs only once
 
-  const openModal = (client) => {
+  const openModal = (client: Payment) => {
     setSelectedClient(client);
     setShowModal(true);
   };
@@ -98,68 +133,25 @@ const ClientsPayment = () => {
     setSelectedClient(null);
   };
 
-  const renderPendingClients = () => (
+  const renderClientsByStatus = (status: string) => (
     <div className="mt-4 space-y-3">
-      {payments.filter((client) => client.status === "pending")
+      {payments.filter((client) => client.status === status)
         .map((client, index) => (
           <div
             key={index}
             className="flex items-center justify-between p-4 bg-white shadow rounded-lg"
           >
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-full bg-gray-200"></div>
-              <div>
-                <h4 className="font-semibold">{client.clientFirstName}</h4>
-                <p className="text-sm text-gray-500">{client.email}</p>
+              <div className="w-10 h-10 rounded-full bg-gray-200">
+                <Image
+                  src={profileImageUrls[client.id] || "/images/default-profile.png"}
+                  alt={`${client.clientFirstName} ${client.clientLastName}`}
+                  className="rounded-full mb-4"
+                  width={96}  // Set width explicitly
+                  height={96} // Set height explicitly
+                  unoptimized
+                />
               </div>
-            </div>
-            <button
-              className="px-4 py-2 text-sm font-semibold text-white bg-blue-400 rounded-full hover:bg-blue-600 transition"
-              onClick={() => openModal(client)}
-            >
-              View Payment
-            </button>
-          </div>
-        ))}
-    </div>
-  );
-
-  const renderPaidClients = () => (
-    <div className="mt-4 space-y-3">
-      {payments.filter((client) => client.status === "paid")
-        .map((client, index) => (
-          <div
-            key={index}
-            className="flex items-center justify-between p-4 bg-white shadow rounded-lg"
-          >
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-full bg-gray-200"></div>
-              <div>
-                <h4 className="font-semibold">{client.clientFirstName}</h4>
-                <p className="text-sm text-gray-500">{client.email}</p>
-              </div>
-            </div>
-            <button
-              className="px-4 py-2 text-sm font-semibold text-white bg-blue-400 rounded-full hover:bg-blue-600 transition"
-              onClick={() => openModal(client)}
-            >
-              View Payment
-            </button>
-          </div>
-        ))}
-    </div>
-  );
-
-  const renderDeclinedClients = () => (
-    <div className="mt-4 space-y-3">
-      {payments.filter((client) => client.status === "declined")
-        .map((client, index) => (
-          <div
-            key={index}
-            className="flex items-center justify-between p-4 bg-white shadow rounded-lg"
-          >
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-full bg-gray-200"></div>
               <div>
                 <h4 className="font-semibold">{client.clientFirstName}</h4>
                 <p className="text-sm text-gray-500">{client.email}</p>
@@ -183,14 +175,14 @@ const ClientsPayment = () => {
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
       <div className="bg-blue-50 min-h-screen overflow-auto">
-      <div className="bg-white width rounded-b-lg fixed p-5 top-0 w-full z-10">
-          <h2 className="text-2xl font-bold text-blue-400">Client's Payment</h2>
+        <div className="bg-white width rounded-b-lg fixed p-5 top-0 w-full z-10">
+          <h2 className="text-2xl font-bold text-blue-400">Client&apos;s Payment</h2>
         </div>
 
         <div className="mt-24 px-5">
           <div className="flex items-center justify-between">
             <div className="flex space-x-8 border-b">
-              {["Pending", "Paid", "Declined"].map((tab) => (
+              {["Pending", "Paid", "Rescheduled", "Refunded"].map((tab) => (
                 <button
                   key={tab}
                   className={`pb-2 text-lg font-medium transition ${
@@ -238,7 +230,7 @@ const ClientsPayment = () => {
                   : "opacity-0 translate-y-10"
               }`}
             >
-              {activeTab === "Pending" && renderPendingClients()}
+              {activeTab === "Pending" && renderClientsByStatus("pending")}
             </div>
 
             <div
@@ -248,17 +240,27 @@ const ClientsPayment = () => {
                   : "opacity-0 translate-y-10"
               }`}
             >
-              {activeTab === "Paid" && renderPaidClients()}
+              {activeTab === "Paid" && renderClientsByStatus("paid")}
             </div>
 
             <div
               className={`transition-all duration-500 ease-in-out ${
-                activeTab === "Declined"
+                activeTab === "Rescheduled"
                   ? "opacity-100 translate-y-0"
                   : "opacity-0 translate-y-10"
               }`}
             >
-              {activeTab === "Declined" && renderDeclinedClients()}
+              {activeTab === "Rescheduled" && renderClientsByStatus("rescheduled")}
+            </div>
+
+            <div
+              className={`transition-all duration-500 ease-in-out ${
+                activeTab === "Refunded"
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-10"
+              }`}
+            >
+              {activeTab === "Refunded" && renderClientsByStatus("refunded")}
             </div>
           </div>
         </div>
@@ -266,7 +268,6 @@ const ClientsPayment = () => {
 
       {/* Modal for Payment Details */}
       <PaymentModal 
-        isOpen={showModal} 
         onClose={closeModal} 
         client={selectedClient} 
       />

@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { databases } from "@/appwrite";
-import { useRouter } from "next/navigation";
+import Image from 'next/image';
 import { Models } from 'appwrite';
+import { fetchProfileImageUrl } from "@/hooks/userService";
 
 interface ClientProfileModalProps {
   clientId: string;
@@ -11,6 +12,7 @@ interface ClientProfileModalProps {
 
 const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpen, onClose }) => {
   const [clientData, setClientData] = useState<Models.Document | null>(null);
+  const [profileImageUrls, setProfileImageUrls] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
@@ -19,9 +21,26 @@ const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpe
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'sessions' | 'goals'>('sessions');
 
+  // Format the birthdate into a more readable format
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
+
   const fetchClientData = async (id: string) => {
     try {
       const clientData = await databases.getDocument('Butterfly-Database', 'Client', id);
+      const profileImages = {};
+      const url = await fetchProfileImageUrl(clientData.profilepic);
+      if (url) {
+        profileImages[clientData.$id] = url;
+      }
+      setProfileImageUrls(profileImages);
+      console.log(url);
       return clientData;
     } catch (err: unknown) {
       console.error("Error fetching client data:", err);
@@ -82,7 +101,6 @@ const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpe
       }
     }
   };
-  
 
   const handleViewDetails = (details: string) => {
     setSelectedReportDetails(details);
@@ -115,26 +133,24 @@ const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpe
             <>
               <div className="flex space-x-12 items-center">
                 <div className="flex-shrink-0 text-center">
-                  <img
-                    src={clientData.profilePictureUrl || '/default-profile.jpg'}
+                  <Image
+                    src={profileImageUrls[clientId] || '/images/default-profile.png'}
                     alt="Profile"
-                    className="w-48 h-48 rounded-full object-cover mx-auto"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.onerror = null;
-                      target.src = '/default-profile.jpg';
-                    }}
+                    width={192} // Equivalent to 48 * 4 for a consistent image size
+                    height={192} // Equivalent to 48 * 4 for a consistent image size
+                    className="rounded-full object-cover mx-auto"
+                    unoptimized
                   />
                   <h2 className="mt-4 text-2xl font-bold text-gray-800">
                     {clientData.firstname} {clientData.lastname}
                   </h2>
                 </div>
                 <div className="flex-grow">
-                  <h3 className="text-xl font-bold mb-2 text-gray-900">Client's Profile</h3>
+                  <h3 className="text-xl font-bold mb-2 text-gray-900">Client&apos;s Profile</h3>
                   <div className="grid grid-cols-2 gap-6 text-gray-700">
                     <div>
                       <p><strong>Home Address:</strong> {clientData.address}</p>
-                      <p><strong>Date of Birth:</strong> {clientData.birthdate}</p>
+                      <p><strong>Date of Birth:</strong> {clientData.birthdate ? formatDate(clientData.birthdate) : 'Loading...'}</p>
                       <p><strong>Contact Number:</strong> {clientData.phonenum}</p>
                       <p><strong>Sex:</strong> {clientData.sex || 'Not Specified'}</p>
                       <p><strong>Age:</strong> {clientData.age || 'Not Specified'}</p>

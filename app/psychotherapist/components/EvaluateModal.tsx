@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { Models, Query } from 'appwrite';
 import { databases } from '@/appwrite';
 import Image from 'next/image';
@@ -141,7 +140,7 @@ const ReviewPreAssModal: React.FC<ReviewPreAssModalProps> = ({ clientId, isOpen,
         <div className="bg-white rounded-xl w-3/6 p-6">
           <div className="flex justify-between items-center">
             <h2 className="text-3xl font-bold font-poppins">
-              {clientData?.firstname}'s Answers
+              {clientData?.firstname}&apos;s Answers
             </h2>
             <button onClick={onClose} className="text-blue-400 hover:text-blue-600">
               &#10005;

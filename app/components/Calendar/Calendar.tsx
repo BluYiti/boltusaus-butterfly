@@ -1,8 +1,7 @@
 import { databases, Query } from '@/appwrite';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
-// Define the CalendarProps interface
 interface CalendarProps {
     currentMonth: string;
     nextMonth: string;
@@ -14,8 +13,15 @@ interface CalendarProps {
     setSelectedMonth: (month: string) => void;
     selectedTime: string | null;
     setSelectedTime: (time: string | null) => void;
-    selectedTherapistId: string | null;
     isTherapistSelected: boolean;
+    selectedTherapistId: string | null;
+}
+
+interface Booking {
+    day: number;
+    month: string;
+    slots: string; // This could be a time like "09:00am"
+    status: 'pending' | 'paid' | 'rescheduled' | 'happening' | 'missed' | 'disabled' | 'refunded'; // Adjust based on the actual statuses you have
 }
 
 const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -34,30 +40,38 @@ const Calendar: React.FC<CalendarProps> = ({
     isTherapistSelected,
 }) => {
     const [date, setDate] = useState(new Date());
-    const [bookedSlots, setBookedSlots] = useState<any[]>([]); // To store fetched booked slots
+    const [bookedSlots, setBookedSlots] = useState<Booking[]>([]); // To store fetched booked slots
     const [isNextMonthAvailable, setIsNextMonthAvailable] = useState(false);
-    const [isFormComplete, setIsFormComplete] = useState(false);
+    const [, setIsFormComplete] = useState(false);
+    const [accountRole,] = useState(null);
 
-    const today = new Date(); // Month is 0-indexed, so 10 is November
-    const tomorrow = new Date(today);
-    tomorrow.setDate(today.getDate() + 4);
-
-    const bookingEndDate = new Date(today);
-    bookingEndDate.setDate(today.getDate() + 12);
+    // Memoize the 'today' date object to ensure it's stable across renders
+    const today = useMemo(() => new Date(), []);
+    const tomorrow = useMemo(() => {
+        const newTomorrow = new Date(today);
+        newTomorrow.setDate(today.getDate() + 4);
+        return newTomorrow;
+    }, [today]);
+    
+    const bookingEndDate = useMemo(() => {
+        const newBookingEndDate = new Date(today);
+        newBookingEndDate.setDate(today.getDate() + 12);
+        return newBookingEndDate;
+    }, [today]);
 
     const isMonthEndingSoon = today.getDate() >= 25;
 
-    const isDateInRange = (date: Date) => {
-        return date >= tomorrow && date <= bookingEndDate && date.getDay() !== 0; // Exclude Sundays
-    };
+    const isDateInRange = React.useCallback((date: Date) => {
+        return date >= tomorrow && date <= bookingEndDate && date.getDay() !== 0;
+    }, [tomorrow, bookingEndDate]);    
 
     const currentMonthIndex = new Date(`${currentMonth} 1, ${currentYear}`).getMonth();
     const nextMonthIndex = new Date(`${nextMonth} 1, ${currentYear}`).getMonth();
 
-    const monthsToDisplay = [
+    const monthsToDisplay = React.useMemo(() => [
         { name: currentMonth, days: new Date(currentYear, currentMonthIndex + 1, 0).getDate() },
         { name: nextMonth, days: new Date(currentYear, nextMonthIndex + 1, 0).getDate() },
-    ];
+    ], [currentMonth, currentYear, currentMonthIndex, nextMonth, nextMonthIndex]);
 
     const firstDayOfMonth = selectedMonth === currentMonth
         ? new Date(currentYear, currentMonthIndex, 1).getDay()
@@ -70,44 +84,53 @@ const Calendar: React.FC<CalendarProps> = ({
         for (let day = 1; day <= previousMonthDays; day++) {
             const dateToCheck = new Date(previousMonth.getFullYear(), previousMonth.getMonth(), day);
             if (isDateInRange(dateToCheck)) {
-                return true; // Bookable date found in the previous month
+                return true;
             }
         }
-        return false; // No bookable dates in the previous month
+        return false;
     };
 
     const isPreviousMonthAvailable = checkPreviousMonthAvailability(); 
 
+    // Fetch booked slots when therapist changes
     useEffect(() => {
         const fetchBookedSlots = async () => {
-            if (!selectedTherapistId) return; // Ensure therapist is selected
-
+            if (!selectedTherapistId) return;
+        
             try {
                 const bookingsResponse = await databases.listDocuments(
                     'Butterfly-Database', 'Bookings',
                     [Query.equal('psychotherapist', selectedTherapistId)] // Filter by therapistId
                 );
-                const bookedData = bookingsResponse.documents;
-                console.log("Fetched Booked Slots:", bookedData); // Log to verify the fetched data
-                setBookedSlots(bookedData); // Update state with booked slots
+        
+                const bookedData: Booking[] = bookingsResponse.documents.map((doc) => ({
+                    day: doc.day, // assuming the document contains a 'day' field
+                    month: doc.month, // assuming the document contains a 'month' field
+                    slots: doc.slots, // assuming the document contains a 'slots' field
+                    status: doc.status, // assuming the document contains a 'status' field
+                }));
+                
+                console.log("Booked slots:", bookedData); // Log the booked slots
+                setBookedSlots(bookedData);
             } catch (error) {
                 console.error('Error fetching booked slots:', error);
-            }
+            }            
         };
+        
 
         fetchBookedSlots();
     }, [selectedTherapistId]); // Re-run when therapistId changes
 
     const handleNextMonthClick = () => {
         const newDate = new Date(date.getFullYear(), date.getMonth() + 1, 1);
-        setDate(newDate); // Update the current date state
-        setSelectedMonth(newDate.toLocaleString('default', { month: 'long' })); // Explicitly set the selected month
+        setDate(newDate); 
+        setSelectedMonth(newDate.toLocaleString('default', { month: 'long' }));
     };
 
     const handlePreviousMonthClick = () => {
         const newDate = new Date(date.getFullYear(), date.getMonth() - 1, 1);
-        setDate(newDate); // Update the current date state
-        setSelectedMonth(newDate.toLocaleString('default', { month: 'long' })); // Explicitly set the selected month
+        setDate(newDate);
+        setSelectedMonth(newDate.toLocaleString('default', { month: 'long' }));
     };
 
     useEffect(() => {
@@ -124,27 +147,25 @@ const Calendar: React.FC<CalendarProps> = ({
         };
 
         checkNextMonthAvailability();
-    }, [isMonthEndingSoon, monthsToDisplay, nextMonthIndex, currentYear]);
+    }, [isDateInRange, isMonthEndingSoon, monthsToDisplay, nextMonthIndex, currentYear]);
 
     useEffect(() => {
         setIsFormComplete(!!selectedDay && !!selectedTime);
     }, [selectedDay, selectedTime]);
 
-    // Check if a specific time slot for the selected day is booked
     const isSlotBooked = (day: number, time: string) => {
         return bookedSlots.some(
             (slot) => 
-                slot.day === day &&
-                slot.month === selectedMonth && 
-                slot.slots === time &&  
-                (slot.status === 'pending' || slot.status === 'paid') && // Ensure status is either 'pending' or 'paid'
-                slot.therapistId === selectedTherapistId // Ensure therapistId matches
+                slot.day === day && 
+                slot.month.toLowerCase() === selectedMonth.toLowerCase() &&  // Ensure month comparison is case-insensitive
+                slot.slots === time && 
+                (slot.status === 'pending' || slot.status === 'paid' || slot.status === 'rescheduled' || slot.status === 'disabled')  // Add 'rescheduled' to consider those as booked too
         );
-    };
+    };    
 
     const isDayFullyBooked = (day: number) => {
         const times = ["09:00am", "10:00am", "11:00am", "01:00pm", "02:00pm", "03:00pm", "04:00pm"];
-        return times.every((time) => isSlotBooked(day, time)); // Check if all slots for the day are booked
+        return times.every((time) => isSlotBooked(day, time)); 
     };
 
     return (
@@ -188,7 +209,7 @@ const Calendar: React.FC<CalendarProps> = ({
                     const day = i + 1;
                     const date = new Date(currentYear, selectedMonth === currentMonth ? currentMonthIndex : nextMonthIndex, day);
                     const isPastDate = !isDateInRange(date);
-                    const isFullyBooked = isDayFullyBooked(day); // Check if the day is fully booked
+                    const isFullyBooked = isDayFullyBooked(day);
 
                     return (
                         <button
@@ -202,7 +223,7 @@ const Calendar: React.FC<CalendarProps> = ({
                                         : "rounded-3xl bg-[#49c987] text-white font-poppins hover:bg-green-300 hover:text-black hover:scale-110"
                                 }`}
                             onClick={() => !isPastDate && !isFullyBooked && isTherapistSelected && setSelectedDay(day)}
-                            disabled={isPastDate || !isTherapistSelected || isFullyBooked} // Disable if fully booked
+                            disabled={isPastDate || !isTherapistSelected || isFullyBooked}
                         >
                             {day}
                         </button>
@@ -211,9 +232,12 @@ const Calendar: React.FC<CalendarProps> = ({
             </div>
 
             <h3 className="text-lg font-bold text-blue-900">Select Time {!selectedTime && <span className="text-red-500">*</span>}</h3>
+            {accountRole === "client"
+
+            }
             <div className="grid grid-cols-4 gap-4 mt-4">
                 {["09:00am", "10:00am", "11:00am", "01:00pm", "02:00pm", "03:00pm", "04:00pm"].map((time) => {
-                    const isBooked = isSlotBooked(selectedDay || 0, time);  // Check if the slot is booked for the selected day and time
+                    const isBooked = isSlotBooked(selectedDay || 0, time);
 
                     return (
                         <button

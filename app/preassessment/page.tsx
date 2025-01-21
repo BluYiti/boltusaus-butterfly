@@ -1,14 +1,20 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Question from '@/preassessment/components/Question';
 import NavigationButtons from '@/preassessment/components/NavigationButtons';
 import { useAssessment } from '@/preassessment/hooks/useAssessment';
 import { questions } from '@/preassessment/data/questions';
 import BubbleAnimation from '@/components/BubbleAnimation';
 import SubmissionModal from '@/preassessment/components/Submission';
+import useAuthCheck from '@/auth/page';
+import LoadingScreen from '@/components/LoadingScreen';
+import { account } from '@/appwrite';
+import { fetchClientId, hasPreAssessment } from '@/hooks/userService';
 
 export default function PreAssessmentPage() {
+  const authLoading = useAuthCheck(['client']); // Call the useAuthCheck hook
+  const [dataLoading, setDataLoading] = useState(true); // State to track if data is still loading
   const {
     currentQuestionIndex,
     answers,
@@ -21,23 +27,51 @@ export default function PreAssessmentPage() {
     modalMessage, // The message to display in the modal
     modalType, // The type of modal (confirmation, error, success)
     closeModal, // Close modal handler
-    isAllAnswered,
   } = useAssessment(questions || []);
   
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isReviewPage = currentQuestionIndex === questions.length;
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const user = await account.get(); // Get user information
+        const hasPreAssessmentResult = await hasPreAssessment(await fetchClientId(user.$id));
+        
+        // If pre-assessment exists, redirect
+        if (hasPreAssessmentResult) {
+          window.location.replace("/client");
+          return; // Ensure that no further code executes after redirect
+        } else {
+          setDataLoading(false); // Data is loaded, proceed to render the assessment
+        }
+      } catch (error) {
+        console.error("Error fetching data: ", error);
+        setDataLoading(false); // In case of error, set dataLoading to false to allow rendering
+      }
+    };
+  
+    fetchData();
+  }, []); // Empty dependency array ensures this runs only on component mount  
+
+  const handleBackButton = () => {
+    setIsSubmitting(false);
+    handleBack();
+  }
+
   const handleSubmit = () => {
     setIsSubmitting(true);
     handleFormSubmit(); // Proceed with the existing form submission logic
   };
 
+  if (authLoading || dataLoading) return <LoadingScreen />;
+
   return (
     <div className="min-h-screen flex justify-center items-center bg-blue-500">
       {isReviewPage ? (
-        <div className="text-center rounded-xl p-8 shadow-lg w-full max-w-3xl">
-          <h3 className="text-xl mb-4 text-gray-800">Review Your Answers</h3>
+        <div className="text-center rounded-xl p-8 w-full max-w-3xl">
+          <h3 className="text-4xl font-extrabold mb-4 text-white">Review Your Answers</h3>
 
           <ul className="text-left mb-4 space-y-4">
             {questions.map((question, index) => (
@@ -62,7 +96,7 @@ export default function PreAssessmentPage() {
           <div className="flex justify-between gap-4 mt-6">
             <button
               className="flex-1 bg-blue-400 text-white py-2 px-4 rounded-md hover:bg-blue-800"
-              onClick={handleBack}
+              onClick={handleBackButton}
             >
               Back
             </button>

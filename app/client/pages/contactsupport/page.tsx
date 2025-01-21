@@ -2,8 +2,11 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import useAuthCheck from "@/auth/page";
+import LoadingScreen from "@/components/LoadingScreen";
 
 const ContactForm: React.FC = () => {
+  const authLoading = useAuthCheck(['client']);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -22,6 +25,8 @@ const ContactForm: React.FC = () => {
     e.preventDefault();
     // Handle form submission here
   };
+
+  if (authLoading) return <LoadingScreen />;
 
   return (
     <div

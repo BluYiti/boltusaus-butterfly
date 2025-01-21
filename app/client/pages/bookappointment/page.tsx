@@ -12,13 +12,16 @@ import ChoosePaymentModal from "./choosepayment";
 import CashPayment from "./cash";
 import CreditCardPayment from "./creditcard";
 import GCashPayment from "./gcash";
+import Image from 'next/image';
+import { useRouter } from "next/navigation";
 
 const AppointmentBooking = () => {
-  const { loading: authLoading } = useAuthCheck(['client']);
+  const authLoading = useAuthCheck(['client']);
   const today = new Date();
   const currentYear = today.getFullYear();
   const selectedMonth = today.toLocaleString('default', { month: 'long' });
   const nextMonth = new Date(today.setMonth(today.getMonth() + 1)).toLocaleString('default', { month: 'long' });
+  const router = useRouter();
 
   const [appointmentData, setAppointmentData] = useState({
     selectedMonth,
@@ -28,7 +31,7 @@ const AppointmentBooking = () => {
     selectedTherapistId: null,
     selectedMode: null,
     appointmentBooked: false,
-    createdAt: today,
+    createdAt: new Date().toISOString(),
     allowTherapistChange: null, // Control therapist selection ability
     isBookingDisabled: null, // New state to disable booking
     bookingMessage: "", // New state to show booking message
@@ -36,17 +39,15 @@ const AppointmentBooking = () => {
 
   const [loading, setLoading] = useState(true);
   const [clientsPsycho, setClientsPsycho] = useState(null);
-  const [payments, setPayments] = useState<any[]>([]); // State to store all payments
   const [paymentStatus, setPaymentStatus] = useState(null);
   const [declineReason, setDeclineReason] = useState(null);
   const [psychotherapists, setPsychotherapists] = useState([]);
-  const [selectedTherapistId, setSelectedTherapistId] = useState<Number | null>(null); // Start with null
+  const [, setSelectedTherapistId] = useState<number | null>(null); // Start with null
   const [profileImageUrls, setProfileImageUrls] = useState({});
   const [showPrompt, setShowPrompt] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string | null>(null);
 
-  const handleOpenModal = () => setIsModalOpen(true);
   const handleCloseModal = () => setIsModalOpen(false);
 
   const handleBookAppointment = () => {
@@ -94,23 +95,16 @@ const AppointmentBooking = () => {
     }
   };
 
-  // Define a mapping from month name to number (0-based index)
-  const monthMap: { [key: string]: number } = {
-    January: 0,
-    February: 1,
-    March: 2,
-    April: 3,
-    May: 4,
-    June: 5,
-    July: 6,
-    August: 7,
-    September: 8,
-    October: 9,
-    November: 10,
-    December: 11
-  };
-
+  const handleReschedule = () => {
+    router.push('./bookappointment/reschedule');
+  }
+  
   useEffect(() => {
+    const monthMap: { [key: string]: number } = {
+      January: 0, February: 1, March: 2, April: 3, May: 4, June: 5,
+      July: 6, August: 7, September: 8, October: 9, November: 10, December: 11
+    };
+    
     const fetchData = async () => {
       try {
         const user = await account.get();
@@ -244,7 +238,7 @@ const AppointmentBooking = () => {
     };
   
     fetchData(); 
-  }, []);
+  }, [currentYear]);
   
   const isFormComplete = appointmentData.selectedDay !== null && appointmentData.selectedTime && appointmentData.selectedTherapist;
 
@@ -259,38 +253,54 @@ const AppointmentBooking = () => {
         <div className="min-h-screen flex items-center justify-center bg-gray-100">
           <div className="bg-white p-8 rounded-lg shadow-lg text-center max-w-lg mx-auto">
             {paymentStatus === "pending" ? (
-                <>
-                  <h1 className="text-3xl font-bold text-blue-400 mb-4">Appointment Confirmation</h1>
-                  <p className="text-xl text-gray-600">
-                    You will receive a confirmation notification for your appointment in <strong>1-2 days</strong>. If you have any questions in the meantime, feel free to reach out to your therapist via the communication tab.
-                  </p>
-                  <p className="text-lg text-gray-600 mt-5">Your payment status is {paymentStatus}.</p>
-                  <p className="text-lg text-gray-600 mt-5">Your payment status is {paymentStatus}.</p>
-                  <p className="text-lg text-gray-600 mt-2">{appointmentData.bookingMessage}</p>
-                </>
-              ) : paymentStatus === "paid" ? (
-                <>
-                  <h1 className="text-3xl font-bold text-green-400 mb-4">Appointment Confirmed</h1><p className="text-xl text-gray-600">
+              <>
+                <h2 className="text-3xl font-bold text-blue-400 mb-4">Appointment Confirmation</h2>
+                <p className="text-xl text-gray-600">
+                  You will receive a confirmation notification for your appointment in <strong>1-2 days</strong>. If you have any questions in the meantime, feel free to reach out to your therapist via the communication tab.
+                </p>
+                <p className="text-lg text-gray-600 mt-5">Your payment status is {paymentStatus}.</p>
+                <p className="text-lg text-gray-600 mt-2">{appointmentData.bookingMessage}</p>
+              </>
+            ) : paymentStatus === "paid" ? (
+              <>
+                <h2 className="text-3xl font-bold text-green-400 mb-4">Appointment Confirmed</h2>
+                <p className="text-xl text-gray-600">
                   Your appointment has been confirmed. Please wait for the scheduled date to arrive, and feel free to contact your psychotherapist with any questions about your upcoming appointment via the communication tab.
-                  </p>
-                  <p className="text-lg text-gray-600 mt-5">Your payment status is {paymentStatus}.</p>
-                  <p className="text-lg text-gray-600 mt-2">{appointmentData.bookingMessage}</p>
-                </>
-              ) : (
-                <>
-                  <h1 className="text-3xl font-bold text-red-400 mb-4">Payment Declined</h1><p className="text-xl text-gray-600">
-                    Your appointment has been declined. Please contact your psychotherapist for any questions about your appointment being declined via the communication tab.
-                  </p>
-                  <p className="text-lg text-gray-600 mt-5">The reason for your appointment decline:</p>
-                  <p className="text-lg text-gray-600">"{declineReason}"</p>
-                </>
-              )
-            }
+                </p>
+                <p className="text-lg text-gray-600 mt-5">Your payment status is {paymentStatus}.</p>
+                <p className="text-lg text-gray-600 mt-2">{appointmentData.bookingMessage}</p>
+              </>
+            ) : paymentStatus === "rescheduled" ? (
+              <>
+                <h2 className="text-3xl font-bold text-red-400 mb-4">Payment Rescheduled</h2>
+                <p className="text-xl text-gray-600">
+                  Your appointment has been rescheduled. Please feel free to contact your psychotherapist for any questions about your rescheduling via the communication tab.
+                </p>
+                <p className="text-lg text-gray-600 mt-5">Your payment status is {paymentStatus}.</p>
+                <p className="text-lg text-gray-600 mt-5">Reason for rescheduling: {declineReason}.</p>
+                <p className="text-lg text-gray-600 mt-2">{appointmentData.bookingMessage}</p>
+                  <button 
+                    className="px-6 py-3 bg-gradient-to-r from-blue-300 to-blue-400 text-white rounded-lg text-lg font-semibold shadow-lg transform transition-all hover:scale-105 hover:shadow-2xl active:scale-100 mt-2"
+                    onClick={handleReschedule}
+                  >
+                  Click me to reschedule appointment
+                </button>
+              </>
+            ) : (
+              <>
+                <h2 className="text-3xl font-bold text-red-400 mb-4">Payment Declined</h2>
+                <p className="text-xl text-gray-600">
+                  Your appointment has been declined. Please contact your psychotherapist for any questions about your appointment being declined via the communication tab.
+                </p>
+                <p className="text-lg text-gray-600 mt-5">The reason for your appointment decline:</p>
+                <p className="text-lg text-gray-600">&quot;{declineReason}&quot;</p>
+              </>
+            )}
           </div>
         </div>
       </Layout>
     );
-  }else{
+  } else {
     return (
       <Layout sidebarTitle="Butterfly" sidebarItems={items}>
         <div className="text-black min-h-screen flex">
@@ -308,10 +318,13 @@ const AppointmentBooking = () => {
                     {!clientsPsycho ? (
                       psychotherapists.map((therapist) => (
                         <div key={therapist.$id} className="flex items-center space-x-4">
-                          <img
-                            src={profileImageUrls[therapist.$id] || "/images/default-profile.png"}  // fallback to a default image
+                          <Image
+                            src={profileImageUrls[therapist.$id] || "/images/default-profile.png"}
                             alt={`${therapist.firstName} ${therapist.lastName}`}
-                            className="rounded-full w-16 h-16"
+                            width={64}   // Equivalent to w-16 (16 * 4)
+                            height={64}  // Equivalent to h-16 (16 * 4)
+                            className="rounded-full"
+                            unoptimized
                           />
                           <div>
                             <h3 className="text-lg font-bold">{therapist.firstName} {therapist.lastName}</h3>
@@ -336,10 +349,13 @@ const AppointmentBooking = () => {
                       ))
                     ) : (
                       <div className="flex items-center space-x-4">
-                        <img
-                          src={clientsPsycho && clientsPsycho.$id ? profileImageUrls[clientsPsycho.$id] : "/images/default-profile.png"}  // fallback to a default image
+                        <Image
+                          src={clientsPsycho && clientsPsycho.$id ? profileImageUrls[clientsPsycho.$id] : "/images/default-profile.png"}
                           alt={`${clientsPsycho ? clientsPsycho.firstName : "No Therapist"} ${clientsPsycho ? clientsPsycho.lastName : ""}`}
-                          className="rounded-full w-16 h-16"
+                          width={64}   // Equivalent to 16 * 4
+                          height={64}  // Equivalent to 16 * 4
+                          className="rounded-full"
+                          unoptimized
                         />
                         <div>
                           <h3 className="text-lg font-bold">
@@ -358,7 +374,7 @@ const AppointmentBooking = () => {
                       </div>
                     )}
                   </div>
-  
+
                   <h2 className="text-3xl font-bold text-left text-blue-900 mt-8">Counseling and Therapy Sessions</h2>
                   <div className="bg-gray-50 p-4 rounded-lg shadow border border-gray-200 mt-4">
                     <Calendar
@@ -372,11 +388,11 @@ const AppointmentBooking = () => {
                       setSelectedMonth={(month) => setAppointmentData((prev) => ({ ...prev, selectedMonth: month, selectedDay: null }))}
                       selectedTime={appointmentData.selectedTime}
                       setSelectedTime={(time) => setAppointmentData((prev) => ({ ...prev, selectedTime: time }))}
-                      selectedTherapistId={appointmentData.selectedTherapistId}
-                      isTherapistSelected={!!appointmentData.selectedTherapist} // Pass the selection state
+                      selectedTherapistId={appointmentData.selectedTherapistId} // Pass therapist ID to Calendar
+                      isTherapistSelected={!!appointmentData.selectedTherapist} // Indicate whether a therapist is selected
                     />
                   </div>
-  
+
                   {/* Therapy Mode Selection */}
                   <div className="mb-4">
                     <label className="block mb-2 text-lg font-medium text-gray-700">
@@ -392,7 +408,7 @@ const AppointmentBooking = () => {
                       <option value="f2f">In-Person</option>
                     </select>
                   </div>
-  
+
                   {/* Selected Info */}
                   <div className="mt-6">
                       <p className="text-gray-500">
@@ -411,7 +427,7 @@ const AppointmentBooking = () => {
             </div>
           </div>
         </div>
-  
+
         {/* Confirmation Prompt */}
         {showPrompt && (
           <div className="fixed inset-0 flex justify-center items-center bg-gray-800 bg-opacity-50 z-50">
@@ -434,7 +450,7 @@ const AppointmentBooking = () => {
             </div>
           </div>
         )}
-  
+
         {/* Success Message and Confetti */}
         {appointmentData.appointmentBooked && (
           <div className="fixed inset-0 flex justify-center items-center bg-gray-800 bg-opacity-50 z-50">
@@ -448,8 +464,8 @@ const AppointmentBooking = () => {
               <h3 className="text-2xl font-bold text-green-600">You Are Almost Done With Booking your Appointment!</h3>
               <p className="mt-2">
                 Service Counseling and Therapy<br />
-                <strong>Date & Time</strong>: {appointmentData.selectedMonth} {appointmentData.selectedDay}, {currentYear} | {appointmentData.selectedTime}<br/>
-                <strong>Mode</strong>: {appointmentData.selectedMode}<br/>
+                <strong>Date & Time</strong>: {appointmentData.selectedMonth} {appointmentData.selectedDay}, {currentYear} | {appointmentData.selectedTime}<br />
+                <strong>Mode</strong>: {appointmentData.selectedMode}<br />
                 <strong>Psychotherapist</strong>: {appointmentData.selectedTherapist ? `${appointmentData.selectedTherapist.firstName} ${appointmentData.selectedTherapist.lastName}` : "No therapist selected"}
               </p>
               <p className="text-lg text-gray-700">You can proceed to payment to complete the booking.</p>
@@ -472,7 +488,7 @@ const AppointmentBooking = () => {
             appointmentData={appointmentData} // Pass booking details here
           />
         )}
-  
+    
         {/* Render selected payment component based on `selectedPaymentMethod` */}
         {selectedPaymentMethod === "credit card" && (
           <React.Suspense fallback={<LoadingScreen />}>
