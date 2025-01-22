@@ -226,12 +226,12 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
     };
 
     return (
-        <div className="w-full p-8">
-            <form className="mt-8 space-y-4" onSubmit={handleFormSubmit}>
+        <div className="w-full mt-8 p-8">
+            <form className="3xl:mt-24 space-y-4" onSubmit={handleFormSubmit}>
                 {error && <div className="text-red-600 text-lg font-bold">{error}</div>}
                 {validationError && <div className="text-red-600 text-lg font-bold">{validationError}</div>}
 
-                <div className="rounded-md shadow-sm">
+                <div>
                 {/* Two-Column Layout */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2 gap-y-0">
                     {/* First Name */}
@@ -258,7 +258,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
                             placeholder="Last Name"
                             value={lastName}
                             onChange={(e) => setLastName(e.target.value)}
-                            className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
+                            className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-[0.35rem] w-full text-gray-500"
                         />
                     </div>
 
@@ -274,7 +274,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
                                 onChange={(e) => handleBirthdayChange(e.target.value)}
                                 min="1900-01-01"  // Setting the minimum date to 1900
                                 max="2099-12-31"  // Setting the maximum date to 2099
-                                className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
+                                className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-[0.35rem] w-full text-gray-500"
                             />
                         </div>
                         <div className="flex-none w-1/3">
@@ -283,7 +283,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
                                 type="text"
                                 value={age !== null ? age : ''}
                                 readOnly
-                                className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
+                                className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-[0.325rem] w-full text-gray-500"
                             />
                         </div>
                     </div>
@@ -319,7 +319,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
                     </div>
 
                     {/* Region Dropdown */}
-                    <div className='mb-4'>
+                    <div>
                         <label className="block text-[#38b6ff]">Region</label>
                         <select
                             className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
@@ -412,7 +412,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
                     </div>
 
                     {/* Street Input */}
-                    <div className="mb-4">
+                    <div>
                         <label className="block text-[#38b6ff]">Street</label>
                         <input
                             className="border border-[#38b6ff] rounded-xl pl-3 pr-3 py-2 w-full text-gray-500"
@@ -424,9 +424,9 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
                     </div>
 
                     {/* Contact Number */}
-                    <div className="mb-4">
+                    <div>
                         <div className="flex items-center">
-                            <label htmlFor="contactNumber" className="block text-[#38b6ff]">Contact Number of Minor</label>
+                            <label htmlFor="contactNumber" className="block text-[#38b6ff]">Contact Number</label>
                             <p className="text-xs text-red-500 ml-2">*No zero at the start</p> {/* Add message here */}
                         </div>
                         <input
@@ -445,11 +445,34 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
                                     setContactNumber(`63${value}`);  // Internally prepend '63' to the number
                                 }
                             }}
-                            className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500 mt-1"
+                            className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
                             required
                             autoComplete="tel"
                             maxLength={10}  // Limits input to 11 characters
                             inputMode="numeric"  // Suggest numeric keyboard on mobile
+                        />
+                    </div>
+
+                    {/* Upload ID */}
+                    <div>
+                        <label htmlFor="idFile" className="block text-[#38b6ff]">
+                        {isAdult ? "Upload ID" : "Upload ID of Parent / Guardian"}
+                        </label>
+                        <input
+                            id="idFile"
+                            type="file"
+                            accept="image/png, image/jpeg, image/gif, image/webp"
+                            onChange={(e) => {
+                                const file = e.target.files ? e.target.files[0] : null;
+                                if (file && !file.type.startsWith('image/')) {
+                                    setValidationError('Please upload a valid image file (PNG, JPEG, GIF, WEBP).');
+                                    setIdFile(null); // Reset the file input
+                                } else {
+                                    setValidationError(null);
+                                    setIdFile(file);
+                                }
+                            }}
+                            className="border border-[#38b6ff] rounded-xl pl-2 pr-10 py-1 w-full text-gray-500 mt-1"
                         />
                     </div>
 
@@ -493,27 +516,37 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
                         />
                     </div>
 
-                    {/* Upload ID */}
-                    <div>
-                        <label htmlFor="idFile" className="block text-[#38b6ff]">
-                        {isAdult ? "Upload ID" : "Upload ID of Guardian"}
-                        </label>
+                    {/* Password */}
+                    <div className="relative">
+                        <label htmlFor="password" className="block text-[#38b6ff]">Password</label>
                         <input
-                            id="idFile"
-                            type="file"
-                            accept="image/png, image/jpeg, image/gif, image/webp"
-                            onChange={(e) => {
-                                const file = e.target.files ? e.target.files[0] : null;
-                                if (file && !file.type.startsWith('image/')) {
-                                    setValidationError('Please upload a valid image file (PNG, JPEG, GIF, WEBP).');
-                                    setIdFile(null); // Reset the file input
-                                } else {
-                                    setValidationError(null);
-                                    setIdFile(file);
-                                }
-                            }}
-                            className="border border-[#38b6ff] rounded-xl w-full text-gray-500"
+                            id="password"
+                            type="password"
+                            value={password}
+                            onChange={handlePasswordChange}
+                            placeholder="********"
+                            className={`border rounded-xl pl-3 pr-10 py-2 w-full text-gray-500 ${isPasswordValid ? 'border-green-500' : 'border-red-500'}`}
                         />
+                        {/* Password requirements */}
+                        {!isPasswordValid && (
+                            <div className="absolute left-0 top-full mt-2 bg-white bg-opacity-95 border rounded-xl w-full p-2 text-sm text-gray-500">
+                                <p className={`text-sm ${passwordCriteria.length ? 'text-green-500' : 'text-red-500'}`}>
+                                    - At least 8 characters
+                                </p>
+                                <p className={`text-sm ${passwordCriteria.number ? 'text-green-500' : 'text-red-500'}`}>
+                                    - At least 1 number
+                                </p>
+                                <p className={`text-sm ${passwordCriteria.specialChar ? 'text-green-500' : 'text-red-500'}`}>
+                                    - At least 1 special character (@, $, !, %, *, ?, &)
+                                </p>
+                                <p className={`text-sm ${passwordCriteria.uppercase ? 'text-green-500' : 'text-red-500'}`}>
+                                    - At least 1 uppercase letter
+                                </p>
+                                <p className={`text-sm ${passwordCriteria.lowercase ? 'text-green-500' : 'text-red-500'}`}>
+                                    - At least 1 lowercase letter
+                                </p>
+                            </div>
+                        )}
                     </div>
 
                     {/* Email */}
@@ -535,41 +568,8 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
                         </p>
                     </div>
 
-                    {/* Password */}
-                    <div className="relative">
-                        <label htmlFor="password" className="block text-[#38b6ff]">Password</label>
-                        <input
-                            id="password"
-                            type="password"
-                            value={password}
-                            onChange={handlePasswordChange}
-                            placeholder="********"
-                            className={`border rounded-xl pl-3 pr-10 py-2 w-full text-gray-500 ${isPasswordValid ? 'border-green-500' : 'border-red-500'}`}
-                        />
-                        {/* Password requirements */}
-                        {!isPasswordValid && (
-                            <div className="absolute left-0 top-full mt-2 bg-white bg-opacity-50 border rounded-xl w-full p-2 text-sm text-gray-500">
-                                <p className={`text-sm ${passwordCriteria.length ? 'text-green-500' : 'text-red-500'}`}>
-                                    - At least 8 characters
-                                </p>
-                                <p className={`text-sm ${passwordCriteria.number ? 'text-green-500' : 'text-red-500'}`}>
-                                    - At least 1 number
-                                </p>
-                                <p className={`text-sm ${passwordCriteria.specialChar ? 'text-green-500' : 'text-red-500'}`}>
-                                    - At least 1 special character (@, $, !, %, *, ?, &)
-                                </p>
-                                <p className={`text-sm ${passwordCriteria.uppercase ? 'text-green-500' : 'text-red-500'}`}>
-                                    - At least 1 uppercase letter
-                                </p>
-                                <p className={`text-sm ${passwordCriteria.lowercase ? 'text-green-500' : 'text-red-500'}`}>
-                                    - At least 1 lowercase letter
-                                </p>
-                            </div>
-                        )}
-                    </div>
-
                     {/* Confirm Password */}
-                    <div className="mb-4">
+                    <div>
                         <label htmlFor="rePassword" className="block text-[#38b6ff]">Confirm Password</label>
                         <input
                         id="rePassword"
@@ -590,8 +590,8 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
                         </div>
                     </div>
 
-                    {/* Agree to Terms and Conditions */}
-                    <div className="mb-4">
+                    {/* Submit Button */}
+                    <div>
                         <input
                             type="checkbox"
                             checked={agreeToTerms}
@@ -622,11 +622,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
                                 Privacy Policy
                             </button>.
                         </label>
-                    </div>
-
-                    {/* Submit Button */}
-                    <div className="mt-8">
-                        <div className="mt-8">
+                        <div>
                             <button
                                 type="submit"
                                 disabled={loading || !isFormValid()} // Disable the button if form is invalid
