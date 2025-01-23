@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { FaCalendarAlt, FaChevronLeft, FaChevronRight, FaEdit, FaTimes } from "react-icons/fa";
 import DayGrid from '@/components/Calendar/DayGrid';
 
 interface CalendarProps {
@@ -16,7 +16,6 @@ const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Frida
 
 const Calendar: React.FC<CalendarProps> = ({
   currentMonth,
-  nextMonth,
   currentYear,
   selectedDay,
   setSelectedDay,
@@ -24,6 +23,7 @@ const Calendar: React.FC<CalendarProps> = ({
   setSelectedMonth,
 }) => {
   const [date, setDate] = useState(new Date(currentYear, new Date(`${currentMonth} 1, ${currentYear}`).getMonth()));
+  const [activeTab, setActiveTab] = useState("appointments");
 
   // Get days in a month
   const getDaysInMonth = (year: number, month: number) => new Date(year, month + 1, 0).getDate();
@@ -56,72 +56,110 @@ const Calendar: React.FC<CalendarProps> = ({
   return (
     <div>
       <div className="flex justify-between mb-4">
-        <button
-          onClick={handlePreviousMonthClick}
-          className="p-2 text-blue-500 hover:bg-blue-100 rounded transition"
-          aria-label="Previous Month"
-        >
-          <FaChevronLeft />
-        </button>
+      <button
+        onClick={handlePreviousMonthClick}
+        className="p-2 text-blue-500 hover:bg-blue-100 rounded transition"
+        aria-label="Previous Month"
+      >
+        <FaChevronLeft />
+      </button>
 
-        <h4 className="font-semibold text-xl text-blue-400">
-          {date.toLocaleString("default", { month: "long" })} {date.getFullYear()}
-        </h4>
+      <h4 className="font-semibold text-xl text-blue-400">
+        {date.toLocaleString("default", { month: "long" })} {date.getFullYear()}
+      </h4>
 
-        <button
-          onClick={handleNextMonthClick}
-          className="p-2 text-blue-500 hover:bg-blue-100 rounded transition"
-          aria-label="Next Month"
-        >
-          <FaChevronRight />
-        </button>
+      <button
+        onClick={handleNextMonthClick}
+        className="p-2 text-blue-500 hover:bg-blue-100 rounded transition"
+        aria-label="Next Month"
+      >
+        <FaChevronRight />
+      </button>
       </div>
 
       <div className="grid grid-cols-7 gap-2 text-center font-bold text-gray-600 mb-2">
-        {weekdays.map((day) => (
-          <div key={day}>{day}</div>
-        ))}
+      {weekdays.map((day) => (
+        <div key={day}>{day}</div>
+      ))}
       </div>
 
       <div className="grid grid-cols-7 gap-2 mb-4 p-4 rounded shadow-md bg-gray-200">
-        {/* Empty slots */}
-        {emptySlots.map((_, index) => (
-          <div key={index} className="invisible">-</div>
-        ))}
+      {/* Empty slots */}
+      {emptySlots.map((_, index) => (
+        <div key={index} className="invisible">-</div>
+      ))}
 
-        {/* Days in the month */}
-        {daysArray.map((day) => {
-        const isToday =
-            day === new Date().getDate() &&
-            date.getMonth() === new Date().getMonth() &&
-            date.getFullYear() === new Date().getFullYear();
+      {/* Days in the month */}
+      {daysArray.map((day) => {
+      const isToday =
+        day === new Date().getDate() &&
+        date.getMonth() === new Date().getMonth() &&
+        date.getFullYear() === new Date().getFullYear();
 
-        const isWeekend = [0, 6].includes(new Date(date.getFullYear(), date.getMonth(), day).getDay());
+      const isWeekend = [0, 6].includes(new Date(date.getFullYear(), date.getMonth(), day).getDay());
 
-        return (
-            <button
-            key={day}
-            className={`py-2 px-1 rounded-lg ${
-                selectedDay === day
-                ? "bg-blue-300 text-white"
-                : isToday
-                ? "bg-green-200 text-black"
-                : isWeekend
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-white hover:bg-blue-100"
-            }`}
-            onClick={() => !isWeekend && setSelectedDay(day)}
-            disabled={isWeekend}
-            >
-            {day}
-            </button>
-        );
-        })}
+      return (
+        <button
+        key={day}
+        className={`py-2 px-1 rounded-lg ${
+          selectedDay === day
+          ? "bg-blue-300 text-white"
+          : isToday
+          ? "bg-green-200 text-black"
+          : isWeekend
+          ? "bg-gray-400 cursor-not-allowed"
+          : "bg-white hover:bg-blue-100"
+        }`}
+        onClick={() => !isWeekend && setSelectedDay(day)}
+        disabled={isWeekend}
+        >
+        {day}
+        </button>
+      );
+      })}
       </div>
 
-      <div>
-          <DayGrid selectedDay={selectedDay} selectedMonth={selectedMonth} />
+      {/* Appointments, Time Cancelation, Time Slot Editing */}
+      <div className="flex">
+      <div className="tabs flex flex-col">
+        <button
+        className={`tab py-6 px-4 rounded-lg transition flex items-center ${
+          activeTab === "appointments" ? "bg-blue-100 text-white" : "text-blue-400 hover:bg-blue-100"
+        }`}
+        onClick={() => setActiveTab("appointments")}
+        >
+        <FaCalendarAlt/>
+        </button>
+        <button
+        className={`tab py-6 px-4 rounded-lg transition flex items-center ${
+          activeTab === "timeCancelation" ? "bg-blue-100 text-white" : "text-blue-400 hover:bg-blue-100"
+        }`}
+        onClick={() => setActiveTab("timeCancelation")}
+        >
+        <FaTimes/>
+        </button>
+        <button
+        className={`tab py-6 px-4 rounded-lg transition flex items-center ${
+          activeTab === "timeSlotEditing" ? "bg-blue-100 text-white" : "text-blue-400 hover:bg-blue-100"
+        }`}
+        onClick={() => setActiveTab("timeSlotEditing")}
+        >
+        <FaEdit/>
+        </button>
+      </div>
+        <div className={`tab-content flex-1 p-4 rounded-lg bg-blue-100`}>
+        {activeTab === "appointments" && <DayGrid selectedDay={selectedDay} selectedMonth={selectedMonth} />}
+        {activeTab === "timeCancelation" && <div>Time Cancelation Content</div>}
+        {activeTab === "timeSlotEditing" && <div>Time Slot Editing Content</div>}
+        {selectedDay === null && (
+          <div className="flex justify-center items-center h-full">
+          <p className="text-lg text-red-500">
+            Please click on a date to view details.
+          </p>
+          </div>
+        )}
         </div>
+      </div>
     </div>
   );
 };

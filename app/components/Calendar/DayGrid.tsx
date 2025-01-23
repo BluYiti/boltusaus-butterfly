@@ -1,4 +1,6 @@
 import React from 'react';
+import { account, databases } from '@/appwrite';
+import { Query } from 'appwrite';
 
 interface DayGridProps {
   selectedDay: number | null;
@@ -13,7 +15,7 @@ const DayGrid: React.FC<DayGridProps> = ({ selectedDay, selectedMonth }) => {
   return (
     <div>
         <div>
-            <h1 className="text-2xl font-bold text-[#3585ff] mt-7">{selectedMonth} {selectedDay.toString()} Appointments</h1>
+            <h1 className="text-2xl font-bold text-[#3585ff]">{selectedMonth} {selectedDay.toString()} Appointments</h1>
         </div>
         <div className="grid grid-cols-1 gap-4 mt-4">
             <table className="min-w-full divide-y divide-gray-200">
