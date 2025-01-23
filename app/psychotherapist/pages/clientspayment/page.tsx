@@ -1,34 +1,32 @@
 'use client';
 
-import { useState, useEffect } from "react";
-import Layout from "@/components/Sidebar/Layout";
-import items from "@/psychotherapist/data/Links";
-import PaymentModal from "@/psychotherapist/components/PaymentModal"; // Import the new modal component
+import React, { useState, useEffect } from 'react';
+import Layout from '@/components/Sidebar/Layout';
+import items from '@/psychotherapist/data/Links';
+import PaymentModal from '@/psychotherapist/components/PaymentModal';
 
-const ClientsPayment = () => {
-  const [activeTab, setActiveTab] = useState("Pending");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [clients, setClients] = useState([]);
+interface Client {
+  name: string;
+  email: string;
+  status: 'Pending' | 'Paid';
+}
+
+const ClientsPayment: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<'Pending' | 'Paid' | 'Reports'>('Pending');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false); // State for modal visibility
-  const [selectedClient, setSelectedClient] = useState(null); // State for selected client's payment details
+  const [showModal, setShowModal] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
 
   // Mock data for clients
   useEffect(() => {
-    // Simulating fetching data from Appwrite with a delay
-    const mockClients = [
-      { name: "Bella Swan", email: "bella@twilight.com", status: "Paid" },
-      { name: "Michael Bieber", email: "michael@bieber.com", status: "Pending" },
-      { name: "Nicki Minaj", email: "nicki@minaj.com", status: "Paid" },
-      { name: "Ana Smith", email: "ana@smith.com", status: "Pending" },
-      { name: "Chris Grey", email: "chris@grey.com", status: "Paid" },
-      { name: "Lana Dress", email: "lana@dress.com", status: "Pending" },
-      { name: "Sza Padilla", email: "sza@padilla.com", status: "Paid" },
-      { name: "Case Oh", email: "case@oh.com", status: "Pending" },
-      { name: "Jennie Kim", email: "jennie@kim.com", status: "Paid" },
-      { name: "Denzel White", email: "denzel@white.com", status: "Pending" },
-      { name: "Angel Wong", email: "angel@wong.com", status: "Paid" },
-      { name: "Jennifer Lawrence", email: "jennifer@lawrence.com", status: "Pending" },
+    const mockClients: Client[] = [
+      { name: 'Bella Swan', email: 'bella@twilight.com', status: 'Paid' },
+      { name: 'Michael Bieber', email: 'michael@bieber.com', status: 'Pending' },
+      { name: 'Nicki Minaj', email: 'nicki@minaj.com', status: 'Paid' },
+      { name: 'Ana Smith', email: 'ana@smith.com', status: 'Pending' },
+      { name: 'Chris Grey', email: 'chris@grey.com', status: 'Paid' },
     ];
 
     setTimeout(() => {
@@ -37,11 +35,21 @@ const ClientsPayment = () => {
     }, 1000);
   }, []);
 
+  // Mock data for daily profit
+  const dailyProfit: Record<string, string> = {
+    '2024-10-10': '₱16,000',
+    '2024-10-11': '₱22,500',
+    '2024-10-12': '₱20,000',
+    '2024-10-13': '₱25,000',
+    '2024-10-14': '₱17,500',
+    '2024-10-15': '₱30,000',
+  };
+
   const filteredClients = clients.filter((client) =>
     client.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const openModal = (client) => {
+  const openModal = (client: Client) => {
     setSelectedClient(client);
     setShowModal(true);
   };
@@ -54,7 +62,7 @@ const ClientsPayment = () => {
   const renderPendingClients = () => (
     <div className="mt-4 space-y-3">
       {filteredClients
-        .filter((client) => client.status === "Pending")
+        .filter((client) => client.status === 'Pending')
         .map((client, index) => (
           <div
             key={index}
@@ -81,7 +89,7 @@ const ClientsPayment = () => {
   const renderPaidClients = () => (
     <div className="mt-4 space-y-3">
       {filteredClients
-        .filter((client) => client.status === "Paid")
+        .filter((client) => client.status === 'Paid')
         .map((client, index) => (
           <div
             key={index}
@@ -99,6 +107,23 @@ const ClientsPayment = () => {
             </button>
           </div>
         ))}
+    </div>
+  );
+
+  const renderReports = () => (
+    <div className="mt-4 space-y-3">
+      <h3 className="text-lg font-bold mb-4">Daily Profit</h3>
+      <div className="grid grid-cols-3 gap-4">
+        {Object.entries(dailyProfit).map(([date, profit]) => (
+          <div
+            key={date}
+            className="p-4 bg-white shadow rounded-lg text-center"
+          >
+            <h4 className="font-semibold text-blue-500">{date}</h4>
+            <p className="text-gray-700 text-lg">{profit}</p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 
@@ -122,15 +147,15 @@ const ClientsPayment = () => {
         <div className="mt-6 px-5">
           <div className="flex items-center justify-between">
             <div className="flex space-x-8 border-b">
-              {["Pending", "Paid"].map((tab) => (
+              {['Pending', 'Paid', 'Reports'].map((tab) => (
                 <button
                   key={tab}
                   className={`pb-2 text-lg font-medium transition ${
                     activeTab === tab
-                      ? "border-b-4 border-blue-400 text-blue-500"
-                      : "text-gray-500 hover:text-blue-400"
+                      ? 'border-b-4 border-blue-400 text-blue-500'
+                      : 'text-gray-500 hover:text-blue-400'
                   }`}
-                  onClick={() => setActiveTab(tab)}
+                  onClick={() => setActiveTab(tab as 'Pending' | 'Paid' | 'Reports')}
                 >
                   {tab}
                 </button>
@@ -163,35 +188,14 @@ const ClientsPayment = () => {
           </div>
 
           <div className="mt-6">
-            <div
-              className={`transition-all duration-500 ease-in-out ${
-                activeTab === "Pending"
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-10"
-              }`}
-            >
-              {activeTab === "Pending" && renderPendingClients()}
-            </div>
-
-            <div
-              className={`transition-all duration-500 ease-in-out ${
-                activeTab === "Paid"
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-10"
-              }`}
-            >
-              {activeTab === "Paid" && renderPaidClients()}
-            </div>
+            {activeTab === 'Pending' && renderPendingClients()}
+            {activeTab === 'Paid' && renderPaidClients()}
+            {activeTab === 'Reports' && renderReports()}
           </div>
         </div>
       </div>
 
-      {/* Modal for Payment Details */}
-      <PaymentModal 
-        isOpen={showModal} 
-        onClose={closeModal} 
-        client={selectedClient} 
-      />
+      <PaymentModal isOpen={showModal} onClose={closeModal} client={selectedClient} />
     </Layout>
   );
 };
