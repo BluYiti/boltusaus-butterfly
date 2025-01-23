@@ -297,7 +297,7 @@ const ClientsPayment = () => {
                   : "opacity-0 translate-y-10"
               }`}
             >
-              {activeTab === "Report" && renderReports("report")}
+              {activeTab === "Report" && renderReports()}
             </div>
           </div>
         </div>
