@@ -24,7 +24,7 @@ interface Booking {
 
 const Appointments = () => {
   HappeningAppointment();
-  const { loading: authLoading } = useAuthCheck(['psychotherapist']); // Call the useAuthCheck hook
+  const authLoading = useAuthCheck(['psychotherapist']); // Call the useAuthCheck hook
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isTakeNotesModalOpen, setIsTakeNotesModalOpen] = useState(false);
@@ -207,7 +207,7 @@ const Appointments = () => {
         isOpen={isCountdownModalOpen}
         onClose={() => setIsCountdownModalOpen(false)}
         onComplete={handleCountdownComplete} // A function to handle completion logic
-        seconds={60} // Countdown duration in seconds
+        seconds={10} // Countdown duration in seconds
       />
       <CallModal isOpen={isCallModalOpen} clientName={selectedClient} onClose={() => setIsCallModalOpen(false)} />
       <RescheduleModal isOpen={isRescheduleModalOpen} booking={selectedBooking} onConfirm={handleConfirmReschedule} onClose={() => setIsRescheduleModalOpen(false)} />

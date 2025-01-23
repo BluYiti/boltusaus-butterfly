@@ -24,7 +24,7 @@ interface Payment {
 }
 
 const PaymentsPage: React.FC = () => {
-  const { loading: authLoading } = useAuthCheck(['client']);
+  const authLoading = useAuthCheck(['client']);
   const [payments, setPayments] = useState<Payment[]>([]); // State to store all payments
   const [selectedReceipt, setSelectedReceipt] = useState<Payment | null>(null); // Selected payment for modal
   const [showModal, setShowModal] = useState<boolean>(false); // Modal visibility control

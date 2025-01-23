@@ -14,7 +14,7 @@ import DeleteAccountModal from "@/admin/components/DeleteAccountModal";
 const ROLES = ["Client", "Associate", "Psychotherapist"];
 
 const Account = () => {
-  const { loading: authLoading } = useAuthCheck(['admin']);
+  const authLoading = useAuthCheck(['admin']);
   const [selectedTab, setSelectedTab] = useState(ROLES[0]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);

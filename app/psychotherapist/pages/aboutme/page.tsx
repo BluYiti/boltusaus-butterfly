@@ -19,7 +19,7 @@ interface UpdateData {
 }
 
 const AboutMe = () => {
-  const { loading: authLoading } = useAuthCheck(['psychotherapist']);
+  const authLoading = useAuthCheck(['psychotherapist']);
   const [loading, setLoading] = useState(true);
   const [description, setDescription] = useState("");
   const [professionalBackground, setProfessionalBackground] = useState("");

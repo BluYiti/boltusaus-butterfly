@@ -19,7 +19,7 @@ interface Resource {
 
 
 const ResourcesPage: React.FC = () => {
-  const { loading: authLoading } = useAuthCheck(['client']); // Call the useAuthCheck hook
+  const authLoading = useAuthCheck(['client']); // Call the useAuthCheck hook
   const [resources, setResources] = useState<Resource[]>([]);
 
   const DATABASE_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || 'Butterfly-Database';

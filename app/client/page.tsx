@@ -16,7 +16,7 @@ import PsychotherapistProfile from '@/client/components/PsychotherapistProfile';
 import Image from 'next/image';
 
 const NewClientDashboard = () => {
-  const { loading: authLoading } = useAuthCheck(['client']); // Call the useAuthCheck hook
+  const authLoading = useAuthCheck(['client']); // Call the useAuthCheck hook
   const [dataLoading, setDataLoading] = useState(true); // State to track if data is still loading
   const [, setUsers] = useState([]);
   const [psychotherapists, setPsychotherapists] = useState([]);
@@ -94,9 +94,7 @@ const NewClientDashboard = () => {
     setSelectedPsychotherapist(null); // Reset selected psychotherapist
   };
 
-  if (authLoading || dataLoading) {
-    return <LoadingScreen />; // Show the loading screen while the auth check or data loading is in progress
-  }
+  if (authLoading || dataLoading) return <LoadingScreen />; // Show the loading screen while the auth check or data loading is in progress
 
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
@@ -139,10 +137,10 @@ const NewClientDashboard = () => {
             <>
               <div className="relative group flex"> {/* Wrapper for hover effect */}
                 <button
-                  className="bg-gray-300 text-gray-600 font-bold mb-4 py-2 px-4 rounded cursor-not-allowed"
+                  className="bg-gray-300 text-green-500 font-bold mb-4 py-2 px-4 rounded cursor-not-allowed"
                   disabled
                 >
-                  Pre-Assessment Done!
+                  Preassessment Done!
                 </button>
                 <p className="ml-2 bg-[#2563EB] text-white mb-4 py-2 px-4 rounded">
                   Please wait for the confirmation here in your dashboard, it might take 1-2 days! Thank You for your patience!

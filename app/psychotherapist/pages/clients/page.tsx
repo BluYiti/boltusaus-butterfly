@@ -34,7 +34,7 @@ interface AccountType {
 }
 
 const Clients = () => {
-  const { loading: authLoading } = useAuthCheck(['psychotherapist']); // Call the useAuthCheck hook
+  const authLoading = useAuthCheck(['psychotherapist']); // Call the useAuthCheck hook
   const [activeTab, setActiveTab] = useState("Current");
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
@@ -54,16 +54,16 @@ const Clients = () => {
       setLoading(true);
       try {
         const user = await account.get();
-        const psychoId = fetchPsychoId(user.$id)
-
+        const psychoId = fetchPsychoId(user.$id);
+  
         const clientResponse = await databases.listDocuments('Butterfly-Database', 'Client', [
-          Query.equal('psychotherapist', await psychoId)
+          Query.equal('psychotherapist', await psychoId),
         ]);
-
+  
         const combinedClients = clientResponse.documents.map((clientDoc) => {
           const email = clientDoc.userid.email;
           const username = clientDoc.userid.username;
-
+  
           return {
             id: clientDoc.$id,
             clientid: clientDoc.clientid,
@@ -79,22 +79,21 @@ const Clients = () => {
             profilepic: clientDoc.profilepic,
             emergencyContact: clientDoc.emergencyContact,
             status: clientDoc.status,
-            email: email || "No email available",
-            username: username || "",
+            email: email || 'No email available',
+            username: username || '',
           };
         });
-
+  
         setClients(combinedClients);
-        console.log(combinedClients);
-
+  
         const clientEvaluate = await databases.listDocuments('Butterfly-Database', 'Client', [
-          Query.equal('state', 'evaluate')
-        ])
-
+          Query.equal('state', 'evaluate'),
+        ]);
+  
         const combinedEvaluateClients = clientEvaluate.documents.map((clientDoc) => {
           const email = clientDoc.userid.email;
           const username = clientDoc.userid.username;
-
+  
           return {
             id: clientDoc.$id,
             clientid: clientDoc.clientid,
@@ -110,15 +109,17 @@ const Clients = () => {
             profilepic: clientDoc.profilepic,
             emergencyContact: clientDoc.emergencyContact,
             status: clientDoc.status,
-            email: email || "No email available",
-            username: username || "",
+            email: email || 'No email available',
+            username: username || '',
           };
         });
-
+  
         setEvaluateClients(combinedEvaluateClients);
-
-        // Fetch profile images for each psychotherapist
+  
+        // Fetch profile images for each client, including evaluated clients
         const profileImages = {};
+  
+        // Fetch profile images for the "current" clients
         for (const client of clientResponse.documents) {
           if (client.profilepic) {
             const url = await fetchProfileImageUrl(client.profilepic);
@@ -127,13 +128,23 @@ const Clients = () => {
             }
           }
         }
+  
+        // Fetch profile images for the "to be evaluated" clients
+        for (const client of clientEvaluate.documents) {
+          if (client.profilepic) {
+            const url = await fetchProfileImageUrl(client.profilepic);
+            if (url) {
+              profileImages[client.$id] = url;
+            }
+          }
+        }
+  
         setProfileImageUrls(profileImages);
-
-        
+  
         // Extract the query parameter from the URL
         const url = new URL(window.location.href);
-        const tab = url.searchParams.get("tab");
-        
+        const tab = url.searchParams.get('tab');
+  
         if (tab) {
           setActiveTab(tab); // Set active tab based on the query parameter
         }
@@ -143,9 +154,9 @@ const Clients = () => {
         setLoading(false);
       }
     };
-
+  
     fetchClientsAndAccounts();
-  }, []);
+  }, []);  
 
   const filteredClients = () => {
     let searchFiltered = clients.filter(client =>
@@ -187,7 +198,6 @@ const Clients = () => {
         return stateFilteredClients;
     }
   };
-  
 
   const renderClientList = () => {
     if (loading) {
@@ -204,14 +214,14 @@ const Clients = () => {
           <div key={index} className="flex items-center justify-between p-4 bg-white shadow rounded-lg">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 rounded-full bg-gray-200">
-                      <Image
-                         src={profileImageUrls[client.id] || "/images/default-profile.png"}
-                         alt={`${client.firstname} ${client.lastname}`}
-                        className="rounded-full mb-4"
-                        width={96}  // Set width explicitly
-                        height={96} // Set height explicitly
-                        unoptimized
-                      />
+                <Image
+                  src={profileImageUrls[client.id] || "/images/default-profile.png"}
+                  alt={`${client.firstname} ${client.lastname}`}
+                  className="rounded-full mb-4"
+                  width={96}  // Set width explicitly
+                  height={96} // Set height explicitly
+                  unoptimized
+                />
               </div>
               <div>
                 <h4 className="font-semibold flex items-center">

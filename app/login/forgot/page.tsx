@@ -13,12 +13,20 @@ const ForgotPassword: React.FC = () => {
     const handleSubmit = async (email: string) => {
         setLoading(true);
         setError(null);
+
         try {
-            // Make a call to Appwrite's account service to send password reset email
-            await account.createRecovery(email, `${window.location.origin}/reset-password`); // Reset password URL
+            // Attempt to send the password reset email using Appwrite
+            await account.createRecovery(email, `${window.location.origin}/login/forgot/reset-password`);
             alert('Password reset link sent to your email!');
-        } catch (err) {
-            setError('Failed to send reset link. Please try again.');
+        } catch (err: any) {
+            // If error is caused by account not existing, show specific message
+            if (err.code === 404) {
+                setError('No account found with this email address.');
+            } else if (err.code === 500) {
+                setError('A server error occurred. Please try again later');
+            } else {
+                setError('Failed to send reset link. Please try again.');
+            }
         } finally {
             setLoading(false);
         }

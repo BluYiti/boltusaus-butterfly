@@ -502,10 +502,14 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
                             name="emergencyContactNumber"
                             value={emergencyContactNumber.replace(/^63/, '')}  // Display only the 11 digits without the country code
                             onChange={(e) => {
-                                // Allow only numeric input and restrict the length to 11 characters
-                                const value = e.target.value.replace(/[^\d]/g, '');  // Remove non-numeric characters
+                                // Allow only numeric input and restrict length to 11 digits
+                                let value = e.target.value.replace(/[^\d]/g, '');  // Remove non-numeric characters
                                 if (value.length <= 11) {
-                                    setEmergencyContactNumber(`63${value}`);  // Internally prepend '+63' to the number
+                                    // If the value starts with '0', remove it before adding the country code
+                                    if (value.startsWith('0')) {
+                                        value = value.slice(1);  // Remove leading '0'
+                                    }
+                                    setEmergencyContactNumber(`63${value}`);  // Internally prepend '63' to the number
                                 }
                             }}
                             className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500 mt-1"

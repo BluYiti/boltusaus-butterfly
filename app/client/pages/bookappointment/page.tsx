@@ -16,7 +16,7 @@ import Image from 'next/image';
 import { useRouter } from "next/navigation";
 
 const AppointmentBooking = () => {
-  const { loading: authLoading } = useAuthCheck(['client']);
+  const authLoading = useAuthCheck(['client']);
   const today = new Date();
   const currentYear = today.getFullYear();
   const selectedMonth = today.toLocaleString('default', { month: 'long' });
@@ -31,7 +31,7 @@ const AppointmentBooking = () => {
     selectedTherapistId: null,
     selectedMode: null,
     appointmentBooked: false,
-    createdAt: today,
+    createdAt: new Date().toISOString(),
     allowTherapistChange: null, // Control therapist selection ability
     isBookingDisabled: null, // New state to disable booking
     bookingMessage: "", // New state to show booking message

@@ -1,14 +1,20 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Question from '@/preassessment/components/Question';
 import NavigationButtons from '@/preassessment/components/NavigationButtons';
 import { useAssessment } from '@/preassessment/hooks/useAssessment';
 import { questions } from '@/preassessment/data/questions';
 import BubbleAnimation from '@/components/BubbleAnimation';
 import SubmissionModal from '@/preassessment/components/Submission';
+import useAuthCheck from '@/auth/page';
+import LoadingScreen from '@/components/LoadingScreen';
+import { account } from '@/appwrite';
+import { fetchClientId, hasPreAssessment } from '@/hooks/userService';
 
 export default function PreAssessmentPage() {
+  const authLoading = useAuthCheck(['client']); // Call the useAuthCheck hook
+  const [dataLoading, setDataLoading] = useState(true); // State to track if data is still loading
   const {
     currentQuestionIndex,
     answers,
@@ -27,6 +33,28 @@ export default function PreAssessmentPage() {
 
   const isReviewPage = currentQuestionIndex === questions.length;
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const user = await account.get(); // Get user information
+        const hasPreAssessmentResult = await hasPreAssessment(await fetchClientId(user.$id));
+        
+        // If pre-assessment exists, redirect
+        if (hasPreAssessmentResult) {
+          window.location.replace("/client");
+          return; // Ensure that no further code executes after redirect
+        } else {
+          setDataLoading(false); // Data is loaded, proceed to render the assessment
+        }
+      } catch (error) {
+        console.error("Error fetching data: ", error);
+        setDataLoading(false); // In case of error, set dataLoading to false to allow rendering
+      }
+    };
+  
+    fetchData();
+  }, []); // Empty dependency array ensures this runs only on component mount  
+
   const handleBackButton = () => {
     setIsSubmitting(false);
     handleBack();
@@ -36,6 +64,8 @@ export default function PreAssessmentPage() {
     setIsSubmitting(true);
     handleFormSubmit(); // Proceed with the existing form submission logic
   };
+
+  if (authLoading || dataLoading) return <LoadingScreen />;
 
   return (
     <div className="min-h-screen flex justify-center items-center bg-blue-500">

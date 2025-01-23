@@ -21,10 +21,19 @@ const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpe
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'sessions' | 'goals'>('sessions');
 
+  // Format the birthdate into a more readable format
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
+
   const fetchClientData = async (id: string) => {
     try {
       const clientData = await databases.getDocument('Butterfly-Database', 'Client', id);
-
       const profileImages = {};
       const url = await fetchProfileImageUrl(clientData.profilepic);
       if (url) {
@@ -92,7 +101,6 @@ const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpe
       }
     }
   };
-  
 
   const handleViewDetails = (details: string) => {
     setSelectedReportDetails(details);
@@ -142,7 +150,7 @@ const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpe
                   <div className="grid grid-cols-2 gap-6 text-gray-700">
                     <div>
                       <p><strong>Home Address:</strong> {clientData.address}</p>
-                      <p><strong>Date of Birth:</strong> {clientData.birthdate}</p>
+                      <p><strong>Date of Birth:</strong> {clientData.birthdate ? formatDate(clientData.birthdate) : 'Loading...'}</p>
                       <p><strong>Contact Number:</strong> {clientData.phonenum}</p>
                       <p><strong>Sex:</strong> {clientData.sex || 'Not Specified'}</p>
                       <p><strong>Age:</strong> {clientData.age || 'Not Specified'}</p>

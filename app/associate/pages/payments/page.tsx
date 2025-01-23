@@ -30,7 +30,7 @@ interface PaymentHistory {
 }
 
 const ClientsPayment = () => {
-  const { loading: authLoading } = useAuthCheck(['associate']);
+  const authLoading = useAuthCheck(['associate']);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all"); // Add state for the status filter

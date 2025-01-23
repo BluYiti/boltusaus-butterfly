@@ -1,14 +1,15 @@
 'use client';
 
-import { FC, useState, useEffect, useRef } from 'react';
+import { FC, useState, useEffect, useRef, useCallback } from 'react';
 import { FaVideo, FaSearch } from 'react-icons/fa';
 import Layout from '@/components/Sidebar/Layout';
 import VideoCall from '@/components/VideoCall';
 import items from '@/psychotherapist/data/Links';
 import { Query, ID } from 'appwrite';
 import Image from 'next/image';
-import Link from 'next/link';
 import { account, databases, storage } from '@/appwrite';
+import useAuthCheck from '@/auth/page';
+import LoadingScreen from '@/components/LoadingScreen';
 
 // Define interfaces
 interface Contact {
@@ -74,7 +75,7 @@ const ContactList: FC<{ onContactClick: (id: string) => void; selectedContact: s
 };
 
 // Chat Box component
-const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSendMessage: (text: string) => void; onStartCall: () => void }> = ({ selectedContact, messages, onSendMessage }) => {
+const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSendMessage: (text: string) => void; onStartCall: () => void }> = ({selectedContact, messages, onSendMessage, onStartCall,}) => {
   const [messageInput, setMessageInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -84,6 +85,14 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSend
       setMessageInput('');
     }
   };
+
+  const handleStartCall = () => {
+    onStartCall();
+  };
+
+  const handleGoogleMeet = () => {
+    window.open('https://meet.google.com/landing', '_blank');
+  }
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -103,28 +112,55 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSend
 
   return (
     <div className="w-3/4 p-6 flex flex-col justify-between">
-      <div className="flex items-center mb-4 justify-between">
-      <div className="flex items-center">
-        <Image
-          src={selectedContact.imageUrl}
-          alt={selectedContact.name}
-          width={48}  // 12 * 4 = 48px for the width
-          height={48} // 12 * 4 = 48px for the height
-          className="rounded-full mr-4"
-        />
-        <h2 className="text-xl font-bold">{selectedContact.name}</h2>
-      </div>
-        {/* Video Call Icon */}
-        <Link href='/psychotherapist/pages/vcountdown'>
-          <button className="p-2 bg-blue-500 text-white rounded-full">
-            <FaVideo />
+      <div className="flex items-center justify-between mb-6">
+        {/* Contact Details */}
+        <div className="flex items-center">
+          <Image
+            src={selectedContact.imageUrl}
+            alt={selectedContact.name}
+            width={48} // Width in pixels
+            height={48} // Height in pixels
+            className="rounded-full mr-4"
+          />
+          <h2 className="text-xl font-bold">{selectedContact.name}</h2>
+        </div>
+
+        {/* Buttons for Google Meet and Video Call */}
+        <div className="flex items-center space-x-4">
+          {/* Google Meet Icon */}
+          <button
+            onClick={handleGoogleMeet} // Use the onStartCall prop here
+            className="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
+            aria-label="Start Video Call"
+          >
+            <Image
+              src="/images/meet-logo.png"
+              alt={selectedContact.name}
+              width={30} // Width in pixels
+              height={30} // Height in pixels
+              className="rounded-full"
+            />
           </button>
-        </Link>
+
+          {/* Video Call Icon */}
+          {/* <button
+            onClick={handleStartCall} // Use the onStartCall prop here
+            className="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
+            aria-label="Start Video Call"
+          >
+            <FaVideo className="w-7 h-7" />
+          </button> */}
+        </div>
       </div>
 
       <div className="flex-grow overflow-y-auto space-y-4">
         {messages.map((message) => (
-          <div key={message.id} className={`group relative ${message.sender === 'psychotherapist' ? 'justify-end' : 'justify-start'} flex`}>
+          <div
+            key={message.id}
+            className={`group relative ${
+              message.sender === 'psychotherapist' ? 'justify-end' : 'justify-start'
+            } flex`}
+          >
             <div
               className={`max-w-xs p-4 rounded-lg shadow ${
                 message.sender === 'psychotherapist' ? 'bg-blue-100' : 'bg-gray-100'
@@ -164,11 +200,11 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSend
 
 // Main Communication Page component with Layout
 const Communication: FC = () => {
+  const authLoading = useAuthCheck(['psychotherapist']);
   const [selectedContactId, setSelectedContactId] = useState<string | null>(null);
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversationId, setConversationId] = useState<string | null>(null);
-  const [, setLoggedInUser] = useState<string | null>(null);
   const [psychotherapistDocumentId, setPsychotherapistDocumentId] = useState<string | null>(null); // Store psychotherapist document ID
   const [isVideoCallActive, setIsVideoCallActive] = useState(false);
 
@@ -217,12 +253,12 @@ const Communication: FC = () => {
     const fetchPsychotherapistData = async () => {
       try {
         const loggedInUser = await account.get();
-        setLoggedInUser(loggedInUser);
+        const userId = loggedInUser.$id;
 
         const psychotherapistResponse = await databases.listDocuments(
           'Butterfly-Database',
           'Psychotherapist',
-          [Query.equal('userId', loggedInUser.$id)]
+          [Query.equal('userId', userId)]
         );
 
         if (psychotherapistResponse.documents.length === 0) {
@@ -231,7 +267,6 @@ const Communication: FC = () => {
 
         const psychotherapistDocumentId = psychotherapistResponse.documents[0].$id;
         setPsychotherapistDocumentId(psychotherapistDocumentId); // Store psychotherapist document ID
-        console.log("Psychotherapist Document ID:", psychotherapistDocumentId);
 
         const clientResponse = await databases.listDocuments(
           'Butterfly-Database',
@@ -241,9 +276,11 @@ const Communication: FC = () => {
 
         const clientDataPromises = clientResponse.documents.map(async (doc) => {
           let profilePicUrl = '/default-avatar.jpg';
-          if (doc.idFile) {
-            const imagePreview = storage.getFilePreview('Images', doc.idFile);
+          if (doc.profilepic) {
+            const imagePreview = storage.getFilePreview('Images', doc.profilepic);
             profilePicUrl = imagePreview;
+          }else{
+            profilePicUrl = '/images/default-profile.png';
           }
 
           const conversationResponse = await databases.listDocuments(
@@ -273,7 +310,7 @@ const Communication: FC = () => {
 
             if (messageResponse.documents.length > 0) {
               const latestMessage = messageResponse.documents[0];
-              lastMessage = `${latestMessage.senderId === loggedInUser.$id ? 'You' : doc.firstname}: ${latestMessage.content}`;
+              lastMessage = `${latestMessage.senderId === userId ? 'You' : doc.firstname}: ${latestMessage.content}`;
               lastMessageTime = new Date(latestMessage.dateTime).toLocaleTimeString();
             }
           }
@@ -298,24 +335,25 @@ const Communication: FC = () => {
     fetchPsychotherapistData();
   }, []);
 
-  const fetchOrCreateConversation = async (contactId: string): Promise<string | null> => {
-    try {
+  const fetchOrCreateConversation = useCallback(
+    async (contactId: string): Promise<string | null> => {
       if (!psychotherapistDocumentId) return null;
-
-      const response = await databases.listDocuments(
-        'Butterfly-Database',
-        'Conversation',
-        [
-          Query.equal('clientId', contactId),
-          Query.equal('psychotherapistId', psychotherapistDocumentId)
-        ]
-      );
-
-      if (response.documents.length > 0) {
-        const existingConversation = response.documents[0];
-        setConversationId(existingConversation.$id);
-        return existingConversation.$id;
-      } else {
+      try {
+        const response = await databases.listDocuments(
+          'Butterfly-Database',
+          'Conversation',
+          [
+            Query.equal('clientId', contactId),
+            Query.equal('psychotherapistId', psychotherapistDocumentId),
+          ]
+        );
+  
+        if (response.documents.length > 0) {
+          const existingConversation = response.documents[0];
+          setConversationId(existingConversation.$id);
+          return existingConversation.$id;
+        }
+  
         const newConversation = await databases.createDocument(
           'Butterfly-Database',
           'Conversation',
@@ -324,17 +362,17 @@ const Communication: FC = () => {
             clientId: contactId,
             psychotherapistId: psychotherapistDocumentId,
             startDate: new Date().toISOString(),
-            endDate: null,
           }
         );
         setConversationId(newConversation.$id);
         return newConversation.$id;
+      } catch (error) {
+        console.error('Error in fetchOrCreateConversation:', error);
+        return null;
       }
-    } catch (error) {
-      console.error('Error in fetchOrCreateConversation:', error);
-      return null;
-    }
-  };
+    },
+    [psychotherapistDocumentId]
+  );  
 
   const handleSendMessage = async (text: string) => {
     if (!selectedContactId) return;
@@ -427,6 +465,8 @@ const Communication: FC = () => {
       }
     };
   }, [selectedContactId, conversationId, psychotherapistDocumentId]);
+
+  if (authLoading) return <LoadingScreen />;
 
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>

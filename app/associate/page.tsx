@@ -32,7 +32,7 @@ interface Session {
 }
 
 const AssociateDashboard: React.FC = () => {
-  const { loading: authLoading } = useAuthCheck(['associate']);
+  const authLoading = useAuthCheck(['associate']);
   const [loading, setLoading] = useState(true);
   const [sessionData, setSessionData] = useState<Session[]>([]);
   const [error, setError] = useState<string | null>(null);
