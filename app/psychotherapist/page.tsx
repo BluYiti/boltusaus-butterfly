@@ -7,7 +7,7 @@ import items from './data/Links';
 import useAuthCheck from '@/auth/page';
 import LoadingScreen from '@/components/LoadingScreen';
 import { useRouter } from 'next/navigation';
-import Calendar from '@/components/Calendar/Calendar';
+import Calendar from '@/components/Calendar/PsychoCalendar';
 import { fetchPsychoId } from '@/hooks/userService';
 import { HappeningAppointment } from './components/HappeningAppointment';
 
@@ -39,18 +39,15 @@ type Payment = {
 };
 
 const Dashboard: React.FC = () => {
-  HappeningAppointment();
   const authLoading = useAuthCheck(['psychotherapist']);
   const [userName, setUserName] = useState<string | null>(null);
   const [evaluationData, setEvaluationData] = useState<Client[]>([]);
   const [missedData, setMissedData] = useState<Booking[]>([]);
-  const [sessionData, setSessionData] = useState<Booking[]>([]);
   const [paymentsData, setPaymentsData] = useState<Payment[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [psychoId, setPsychoId] = useState<string | null>(null);
   
   const [loading, setLoading] = useState<boolean>(true);  // General loading state
-  const [loadingUpcomingSessions, setLoadingUpcomingSessions] = useState<boolean>(true); // Track loading state for upcoming sessions
   const [loadingMissedSessions, setLoadingMissedSessions] = useState<boolean>(true);  // Track loading state for missed sessions
   const [loadingPayments, setLoadingPayments] = useState<boolean>(true); // Track loading state for payments
   
@@ -71,6 +68,34 @@ const Dashboard: React.FC = () => {
 
   const router = useRouter();
 
+  useEffect(() => {
+    HappeningAppointment();
+    const fetchData = async () => {
+      try {
+        const user = await account.get();
+        setUserName(user.name); 
+        const psychoId = await fetchPsychoId(user.$id);
+        setPsychoId(psychoId);
+        
+        setAppointmentData((prevData) => ({
+          ...prevData,
+          selectedTherapist: psychoId,
+        }));
+
+        fetchEvaluation();
+        fetchMissedSessions();
+        fetchPayments();
+      } catch (err) {
+        setError('Failed to fetch data.');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   const fetchEvaluation = async () => {
     try {
       const evaluationResponse = await databases.listDocuments(
@@ -89,46 +114,6 @@ const Dashboard: React.FC = () => {
       setEvaluationData(clients); 
     } catch (error) {
       setError('Failed to fetch evaluation data');
-    }
-  };
-
-  const fetchUpcomingSessions = async () => {
-    setLoadingUpcomingSessions(true); // Set loading state for upcoming sessions
-    try {
-      const sessionResponse = await databases.listDocuments(
-        'Butterfly-Database', 
-        'Bookings', 
-        [Query.equal('status', 'paid')] 
-      );
-      
-      const clientIds = sessionResponse.documents.map((booking) => booking.client.$id).filter((id) => id);
-    
-      const clientPromises = clientIds.map((clientId) => {
-        if (!clientId) return Promise.resolve(null);
-        return databases.getDocument('Butterfly-Database', 'Client', clientId);
-      });
-    
-      const clientData = await Promise.all(clientPromises);
-      const validClientData = clientData.filter((client) => client !== null);
-    
-      const sessionsWithClientNames: Booking[] = sessionResponse.documents.map((booking) => {
-        const client = validClientData.find((client) => client.$id === booking.client.$id);
-        return {
-          $id: booking.$id,
-          clientId: booking.clientId,
-          status: booking.status,
-          client: {
-            firstname: client?.firstname || 'Unknown',
-            lastname: client?.lastname || 'Unknown',
-          },
-        };
-      });
-    
-      setSessionData(sessionsWithClientNames);
-    } catch (error) {
-      setError('Failed to fetch upcoming sessions');
-    } finally {
-      setLoadingUpcomingSessions(false); // Set loading state to false after data is fetched
     }
   };
 
@@ -206,39 +191,11 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const user = await account.get();
-        setUserName(user.name); 
-        const psychoId = await fetchPsychoId(user.$id);
-        setPsychoId(psychoId);
-        
-        setAppointmentData((prevData) => ({
-          ...prevData,
-          selectedTherapist: psychoId,
-        }));
-
-        fetchEvaluation();
-        fetchUpcomingSessions();
-        fetchMissedSessions();
-        fetchPayments();
-      } catch (err) {
-        setError('Failed to fetch data.');
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
   const handleViewListClick = () => {
     router.push(`/psychotherapist/pages/clients?tab=To%20Be%20Evaluated`);
   };
 
-  const handleViewUpcomingListClick = () => {
+  const handleViewMissedClick = () => {
     router.push(`/psychotherapist/pages/appointments`);
   };
 
@@ -246,7 +203,7 @@ const Dashboard: React.FC = () => {
     router.push(`/psychotherapist/pages/clientspayment`);
   };
 
-  if (authLoading || loading || loadingUpcomingSessions || loadingMissedSessions || loadingPayments) {
+  if (authLoading || loading || loadingMissedSessions || loadingPayments) {
     return <LoadingScreen />;
   }
 
@@ -287,38 +244,12 @@ const Dashboard: React.FC = () => {
               )}
             </div>
 
-            {/* Upcoming Sessions Section */}
-            <div className="bg-white p-4 rounded-lg shadow-md transition hover:shadow-lg max-h-96 overflow-y-auto">
-              <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold mb-4 text-blue-500">Upcoming Sessions</h3>
-                <button
-                  onClick={handleViewUpcomingListClick}
-                  className="bg-blue-400 rounded-full text-white px-2 py-1 hover:bg-blue-600 transition -mt-2"
-                >
-                  View List
-                </button>
-              </div>
-              {loading ? (
-                <p className="text-blue-600">Loading upcoming session data...</p>
-              ) : error ? (
-                <p className="text-red-500">{error}</p>
-              ) : (
-                <ul>
-                  {sessionData.map((doc) => (
-                    <li key={doc.$id}>
-                      <p>{doc.client.firstname} {doc.client.lastname}</p>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-
             {/* Missed Appointments Section */}
             <div className="bg-white p-4 rounded-lg shadow-md transition hover:shadow-lg max-h-96 overflow-y-auto">
               <div className="flex justify-between items-center">
                 <h3 className="text-lg font-semibold mb-4 text-blue-500">Missed Appointments</h3>
                 <button
-                  onClick={handleViewUpcomingListClick}
+                  onClick={handleViewMissedClick}
                   className="bg-blue-400 rounded-full text-white px-2 py-1 hover:bg-blue-600 transition -mt-2"
                 >
                   View List
@@ -338,28 +269,6 @@ const Dashboard: React.FC = () => {
                 </ul>
               )}
             </div>
-          </div>
-        </div>
-          
-        <div className="grid grid-cols-3 gap-4 mt-8 mx-10">
-          {/* Availability Calendar */}
-          <div className='col-span-2 bg-white p-4 rounded-lg shadow-md transition hover:shadow-lg'>
-            <Calendar
-              currentMonth={selectedMonth}
-              nextMonth={nextMonth}
-              currentDate={today.getDate()}
-              currentYear={currentYear}
-              selectedDay={appointmentData.selectedDay}
-              setSelectedDay={(day) => setAppointmentData((prev) => ({ ...prev, selectedDay: day }))}
-              selectedMonth={appointmentData.selectedMonth}
-              setSelectedMonth={(month) => setAppointmentData((prev) => ({ ...prev, selectedMonth: month, selectedDay: null }))}
-              selectedTime={appointmentData.selectedTime}
-              setSelectedTime={(time) => setAppointmentData((prev) => ({ ...prev, selectedTime: time }))}
-              selectedTherapistId={psychoId}
-              isTherapistSelected={true} 
-              >
-            </Calendar>
-          </div>
 
           {/* Payments Status Section */}
           <div className="bg-white p-4 rounded-lg shadow-md transition hover:shadow-lg">
@@ -379,6 +288,23 @@ const Dashboard: React.FC = () => {
                   </li>
                 ))}
               </ul>
+          </div>
+          </div>
+        </div>
+          
+        <div className="grid grid-cols-2 gap-4 mt-8 mx-10">
+          {/* Availability Calendar */}
+          <div className='col-span-2 bg-white p-4 rounded-lg shadow-md transition hover:shadow-lg'>
+            <Calendar
+              currentMonth={selectedMonth}
+              nextMonth={nextMonth}
+              currentYear={currentYear}
+              selectedDay={appointmentData.selectedDay}
+              setSelectedDay={(day) => setAppointmentData((prev) => ({ ...prev, selectedDay: day }))}
+              selectedMonth={appointmentData.selectedMonth}
+              setSelectedMonth={(month) => setAppointmentData((prev) => ({ ...prev, selectedMonth: month, selectedDay: null }))}
+              >
+            </Calendar>
           </div>
         </div>
       </div>
