@@ -168,6 +168,33 @@ const ClientsPayment = () => {
     </div>
   );
 
+  // Mock data for daily profit
+  const dailyProfit: Record<string, string> = {
+    '2024-10-10': '₱16,000',
+    '2024-10-11': '₱22,500',
+    '2024-10-12': '₱20,000',
+    '2024-10-13': '₱25,000',
+    '2024-10-14': '₱17,500',
+    '2024-10-15': '₱30,000',
+  };
+
+  const renderReports = () => (
+    <div className="mt-4 space-y-3">
+      <h3 className="text-lg font-bold mb-4">Daily Profit</h3>
+      <div className="grid grid-cols-3 gap-4">
+        {Object.entries(dailyProfit).map(([date, profit]) => (
+          <div
+            key={date}
+            className="p-4 bg-white shadow rounded-lg text-center"
+          >
+            <h4 className="font-semibold text-blue-500">{date}</h4>
+            <p className="text-gray-700 text-lg">{profit}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
   if (authLoading || loading) {
     return <LoadingScreen />;
   }
@@ -182,7 +209,7 @@ const ClientsPayment = () => {
         <div className="mt-24 px-5">
           <div className="flex items-center justify-between">
             <div className="flex space-x-8 border-b">
-              {["Pending", "Paid", "Rescheduled", "Refunded"].map((tab) => (
+              {["Pending", "Paid", "Rescheduled", "Refunded", "Report"].map((tab) => (
                 <button
                   key={tab}
                   className={`pb-2 text-lg font-medium transition ${
@@ -261,6 +288,16 @@ const ClientsPayment = () => {
               }`}
             >
               {activeTab === "Refunded" && renderClientsByStatus("refunded")}
+            </div>
+
+            <div
+              className={`transition-all duration-500 ease-in-out ${
+                activeTab === "Report"
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-10"
+              }`}
+            >
+              {activeTab === "Report" && renderReports("report")}
             </div>
           </div>
         </div>
