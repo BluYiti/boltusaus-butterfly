@@ -25,6 +25,8 @@ const RegisterPage: React.FC = () => {
 
     const handleVerify = async () => {
         try {
+            setIsVerified(true); // Set the verification status to true
+            console.log('Verification email sent');
             await account.getSession('current');
             await account.createVerification("http://localhost:3000/register/pages/verify/email/success");
             console.log('Verification email sent');
