@@ -11,9 +11,9 @@ const LoginPage: React.FC = () => {
     const { login, error } = useLogin();
     const [loading, setLoading] = useState<boolean>(false);
 
-    const handleLogin = async (email: string, password: string) => {
+    const handleLogin = async (email: string, password: string, rememberMe: boolean) => {
         setLoading(true);
-        await login(email, password);
+        await login(email, password, rememberMe);
         setLoading(false);
     };
 
@@ -45,7 +45,7 @@ const LoginPage: React.FC = () => {
                     </div>
                     <div>
                         <h2 className='absolute mt-20 ml-6 text-sm'>
-                            Don't have an account?
+                            Don&apos;t have an account?
                             <button onClick={handleRegister} className='text-blue-400 underline ml-2'>Register</button>
                         </h2> 
                     </div>

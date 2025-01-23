@@ -16,7 +16,7 @@ const Countdown: FC<{ seconds: number; onComplete: () => void }> = ({ seconds, o
       });
     }, 1000);
 
-    return () => clearInterval(intervalId);
+    return () => clearInterval(intervalId); // Cleanup on component unmount
   }, [onComplete]);
 
   const formatTime = (time: number) => {

@@ -1,55 +1,71 @@
-import React, { useState } from 'react';
-import CashPayment from './cash';
-import CreditCardPayment from './creditcard';
-import GCashPayment from './gcash';
+import Image from 'next/image';
 
-interface ChoosePaymentModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-const ChoosePaymentModal: React.FC<ChoosePaymentModalProps> = ({ isOpen, onClose }) => {
-    const [selectedPayment, setSelectedPayment] = useState<string>('');
-
-  if (!isOpen) return null; // Return null if the modal is not open
+const ChoosePaymentModal = ({ isOpen, onClose, onProceed, appointmentData }) => {
+  if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 bg-gray-800 bg-opacity-50">
-      <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
-        <h2 className="text-lg font-semibold mb-4">Choose Payment Method</h2>
-        
-        <div className="flex flex-col space-y-4">
-          {/* Credit Card */}
-          <button
-            className={`py-2 px-4 rounded ${selectedPayment === 'credit card' ? 'bg-blue-500 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
-            onClick={() =>  <CreditCardPayment />}
-          >
-            Credit Card
-          </button>
-
-          {/* GCash */}
-          <button
-            className={`py-2 px-4 rounded ${selectedPayment === 'gcash' ? 'bg-blue-500 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
-            onClick={() => <GCashPayment />}
-          >
-            GCash
-          </button>
-
-          {/* Cash */}
-          <button
-            className={`py-2 px-4 rounded ${selectedPayment === 'cash' ? 'bg-blue-500 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
-            onClick={() => <CashPayment />}
-          >
-            Cash
-          </button>
-        </div>
-
+    <div className="fixed inset-0 flex justify-center items-center bg-gray-800 bg-opacity-50 z-50">
+      <div className="bg-white p-6 rounded-lg shadow-xl max-w-lg w-full relative">
+        {/* Close Button */}
         <button
-          className="mt-6 py-2 px-4 bg-red-500 text-white rounded hover:bg-red-600 w-full"
+          className="absolute top-2 right-2 bg-gray-300 rounded-full w-6 h-6 flex items-center justify-center text-black hover:bg-gray-400"
           onClick={onClose}
         >
-          Cancel
+          &times;
         </button>
+
+        <h2 className="text-xl font-semibold mb-4">Payment Options</h2>
+        
+        {/* Booking Details Section */}
+        <div>
+          <h3 className="text-lg font-semibold text-gray-800">Booking Details</h3>
+          <p className="text-gray-600 mb-4">
+            <strong>Psychotherapist:</strong> {appointmentData.selectedTherapist?.firstName} {appointmentData.selectedTherapist?.lastName}<br />
+            <strong>Date and Time:</strong> {appointmentData.selectedMonth} {appointmentData.selectedDay}, {new Date().getFullYear()} at {appointmentData.selectedTime}<br />
+            <strong>Type:</strong> {appointmentData.selectedMode}<br />
+            <strong>Amount to be Paid:</strong> ₱1,000.00 {/* Replace with dynamic pricing if available */}
+          </p>
+        </div>
+
+        {/* Payment Options */}
+        <div className="flex justify-evenly mb-4">
+          <button
+            className="bg-red-700 text-white px-4 rounded-2xl hover:bg-red-400"
+            onClick={() => onProceed("credit card")}
+          >
+            <Image
+              src="/images/bpi.png"
+              alt="Credit Card"
+              className="w-24 h-24 object-contain"
+              width={96}
+              height={96}
+            />
+          </button>
+          <button
+            className="bg-blue-400 text-white px-4 rounded-2xl hover:bg-blue-300"
+            onClick={() => onProceed("gcash")}
+          >
+            <Image
+              src="/images/gcash.png"
+              alt="GCash"
+              className="w-24 h-24 object-contain"
+              width={96}
+              height={96}
+            />
+          </button>
+          <button
+            className="bg-green-400 text-white px-4 rounded-2xl hover:bg-green-200"
+            onClick={() => onProceed("cash")}
+          >
+            <Image
+              src="/images/cash.png"
+              alt="Cash"
+              className="w-24 h-24 object-contain"
+              width={96}  // 24 * 4 (since 1rem = 4px in most setups)
+              height={96} // 24 * 4
+            />
+          </button>
+        </div>
       </div>
     </div>
   );

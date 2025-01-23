@@ -17,7 +17,7 @@ export const useFetchClients = () => {
       const response = await fetch('/api/users');
       const data = await response.json();
 
-      const fetchedClients = data.users.map((user: any) => ({
+      const fetchedClients = data.users.map((user) => ({
         initials: `${user.name[0]}${user.name.split(' ')[1]?.[0] || ''}`,
         name: user.name,
         userID: user.$id,

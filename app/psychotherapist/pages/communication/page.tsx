@@ -5,7 +5,10 @@ import { FaVideo, FaSearch } from 'react-icons/fa';
 import Layout from '@/components/Sidebar/Layout';
 import VideoCall from '@/components/VideoCall';
 import items from '@/psychotherapist/data/Links';
-import { Client, Databases, Account, Query, Storage, ID } from 'appwrite';
+import { Query, ID } from 'appwrite';
+import Image from 'next/image';
+import Link from 'next/link';
+import { account, databases, storage } from '@/appwrite';
 
 // Define interfaces
 interface Contact {
@@ -23,21 +26,6 @@ interface Message {
   sender: string;
   time: string;
 }
-
-interface Conversation {
-  id: string;
-  clientId: string;
-  psychotherapistId: string;
-}
-
-const client = new Client();
-client
-  .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT as string)
-  .setProject(process.env.NEXT_PUBLIC_PROJECT_ID as string);
-
-const databases = new Databases(client);
-const account = new Account(client);
-const storage = new Storage(client);
 
 // Contact List component
 const ContactList: FC<{ onContactClick: (id: string) => void; selectedContact: string | null; contacts: Contact[] }> = ({ onContactClick, selectedContact, contacts }) => {
@@ -61,10 +49,13 @@ const ContactList: FC<{ onContactClick: (id: string) => void; selectedContact: s
             }`}
             onClick={() => onContactClick(contact.id)}
           >
-            <img
+            <Image
               src={contact.imageUrl}
               alt={contact.name}
-              className="w-12 h-12 rounded-full mr-4"
+              width={48}  // 12 * 4 = 48px width
+              height={48} // 12 * 4 = 48px height
+              className="rounded-full mr-4"
+              unoptimized
             />
             <div className="flex-grow">
               <div className="flex justify-between items-center">
@@ -83,7 +74,7 @@ const ContactList: FC<{ onContactClick: (id: string) => void; selectedContact: s
 };
 
 // Chat Box component
-const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSendMessage: (text: string) => void; onStartCall: () => void }> = ({ selectedContact, messages, onSendMessage, onStartCall }) => {
+const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSendMessage: (text: string) => void; onStartCall: () => void }> = ({ selectedContact, messages, onSendMessage }) => {
   const [messageInput, setMessageInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -113,20 +104,22 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSend
   return (
     <div className="w-3/4 p-6 flex flex-col justify-between">
       <div className="flex items-center mb-4 justify-between">
-        <div className="flex items-center">
-          <img
-            src={selectedContact.imageUrl}
-            alt={selectedContact.name}
-            className="w-12 h-12 rounded-full mr-4"
-          />
-          <h2 className="text-xl font-bold">{selectedContact.name}</h2>
-        </div>
-        <button
-          onClick={onStartCall}
-          className="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600"
-        >
-          <FaVideo />
-        </button>
+      <div className="flex items-center">
+        <Image
+          src={selectedContact.imageUrl}
+          alt={selectedContact.name}
+          width={48}  // 12 * 4 = 48px for the width
+          height={48} // 12 * 4 = 48px for the height
+          className="rounded-full mr-4"
+        />
+        <h2 className="text-xl font-bold">{selectedContact.name}</h2>
+      </div>
+        {/* Video Call Icon */}
+        <Link href='/psychotherapist/pages/vcountdown'>
+          <button className="p-2 bg-blue-500 text-white rounded-full">
+            <FaVideo />
+          </button>
+        </Link>
       </div>
 
       <div className="flex-grow overflow-y-auto space-y-4">
@@ -175,7 +168,7 @@ const Communication: FC = () => {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversationId, setConversationId] = useState<string | null>(null);
-  const [loggedInUser, setLoggedInUser] = useState<any>(null);
+  const [, setLoggedInUser] = useState<string | null>(null);
   const [psychotherapistDocumentId, setPsychotherapistDocumentId] = useState<string | null>(null); // Store psychotherapist document ID
   const [isVideoCallActive, setIsVideoCallActive] = useState(false);
 
@@ -246,7 +239,7 @@ const Communication: FC = () => {
           [Query.equal('psychotherapist', psychotherapistDocumentId)]
         );
 
-        const clientDataPromises = clientResponse.documents.map(async (doc: any) => {
+        const clientDataPromises = clientResponse.documents.map(async (doc) => {
           let profilePicUrl = '/default-avatar.jpg';
           if (doc.idFile) {
             const imagePreview = storage.getFilePreview('Images', doc.idFile);

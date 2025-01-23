@@ -1,4 +1,7 @@
-import React, { useEffect, useRef } from 'react';
+// ClientVideoCall.tsx
+
+import React, { useRef } from 'react';
+import SimplePeer from 'simple-peer';
 import { Client, Databases, ID, Query } from 'appwrite';
 
 const client = new Client();
@@ -19,8 +22,8 @@ const ClientVideoCall: React.FC<ClientVideoCallProps> = ({ callerId, receiverId,
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
   const peerConnection = useRef<RTCPeerConnection | null>(null);
   const processedMessageIds = useRef<Set<string>>(new Set());
-  const isOfferCreated = useRef(false);
-  const candidateQueue: RTCIceCandidate[] = [];
+  const isOfferCreated = useRef(false); 
+  let signalingInterval = null;
 
   const setupLocalStream = async () => {
     const devices = await navigator.mediaDevices.enumerateDevices();
@@ -32,9 +35,14 @@ const ClientVideoCall: React.FC<ClientVideoCallProps> = ({ callerId, receiverId,
     return navigator.mediaDevices.getUserMedia({ video: hasVideoInput, audio: hasAudioInput });
   };
 
-  useEffect(() => {
-    const setupPeerConnection = async () => {
-      if (peerConnection.current || isOfferCreated.current) return;
+  useRef(() => {
+    if (!callerId) {
+      console.error("Caller ID is undefined. Ensure it is passed as a prop.");
+      return;
+    }
+
+    const setupVideoCall = async () => {
+      if (peerRef.current || isOfferCreated.current) return;
 
       try {
         const localStream = await setupLocalStream();
@@ -89,18 +97,9 @@ const ClientVideoCall: React.FC<ClientVideoCallProps> = ({ callerId, receiverId,
         (ref.current?.srcObject as MediaStream)?.getTracks().forEach(track => track.stop());
       });
     };
-  }, [callerId, receiverId]);
+  }, []);
 
-  const sendSignalingMessage = async (message: any) => {
-    const signalingData = {
-      type: message.type,
-      from: receiverId,
-      to: callerId,
-      timestamp: new Date().toISOString(),
-      sdp: message.sdp,
-      candidate: message.candidate,
-    };
-    console.log("Sending signaling message:", signalingData);
+  const sendSignalingMessage = async (message) => {
     try {
       await databases.createDocument(
         "Butterfly-Database",
@@ -133,16 +132,9 @@ const ClientVideoCall: React.FC<ClientVideoCallProps> = ({ callerId, receiverId,
     }
   };
 
-  let remoteDescriptionSet = false; // Flag to track when remote description is set
-  let answerQueue: any[] = []; // Queue to store answers received in the wrong state
-  
-  const handleSignalingMessage = async (message: any) => {
-    const { type, sdp, candidate } = message;
-    if (!peerConnection.current) {
-      console.error("Peer connection is not initialized.");
-      return;
-    }
-  
+  const handleSignalingMessage = (message) => {
+    if (!peerRef.current) return;
+
     try {
       if (type === 'offer' && sdp) {
         // Only set remote description if signaling state is "stable"

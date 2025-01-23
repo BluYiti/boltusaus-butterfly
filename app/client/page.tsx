@@ -3,24 +3,32 @@
 import React, { useState, useEffect } from "react";
 import Layout from "@/components/Sidebar/Layout"; // Adjust the path if necessary
 import items from "@/client/data/Links";
+import SessionHandler from "@/auth/logout/component/SessionHandler"
 import Link from "next/link"; // Import Link for navigation
 import 'typeface-roboto';
 import 'typeface-lora';
 import { account, databases, Query } from "@/appwrite"; // Import Appwrite account service for fetching user data
 import useAuthCheck from "@/auth/page"; // Correct import path for useAuthCheck
 import LoadingScreen from "@/components/LoadingScreen"; // Import LoadingScreen component
+import { fetchProfileImageUrl } from "@/hooks/userService";
 import { downloadCertificate } from "@/hooks/userService";
+import PsychotherapistProfile from '@/client/components/PsychotherapistProfile'; // Adjust the path if necessary
+import Image from 'next/image';
 
 const NewClientDashboard = () => {
   const { loading: authLoading } = useAuthCheck(['client']); // Call the useAuthCheck hook
   const [dataLoading, setDataLoading] = useState(true); // State to track if data is still loading
-  const [users, setUsers] = useState([]);
+  const [, setUsers] = useState([]);
   const [psychotherapists, setPsychotherapists] = useState([]);
+  const [profileImageUrls, setProfileImageUrls] = useState({});
   const [state, setState] = useState<string | null>(null); // State to track user state
   const [status, setStatus] = useState<string | null>(null); // State to track user status
-  const [cert, setCert] = useState<string | null>(null); // State to track user status
+  const [cert, setCert] = useState<string | null>(null); // State to track user certificate
   const [userName, setUserName] = useState<string | null>(null); // State to track user name
-  const [currentIndex, setCurrentIndex] = useState(0);
+  
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedPsychotherapist, setSelectedPsychotherapist] = useState<null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -49,6 +57,18 @@ const NewClientDashboard = () => {
         const therapistResponse = await databases.listDocuments('Butterfly-Database', 'Psychotherapist');
         setPsychotherapists(therapistResponse.documents);
 
+        // Fetch profile images for client
+        const profileImages = {};
+        for (const therapist of therapistResponse.documents) {
+          if (therapist.profilepic) {
+            const url = await fetchProfileImageUrl(therapist.profilepic);
+            if (url) {
+              profileImages[therapist.$id] = url;
+            }
+          }
+        }
+        setProfileImageUrls(profileImages);
+
       } catch (error) {
         console.error("Error fetching data: ", error);
       } finally {
@@ -64,24 +84,14 @@ const NewClientDashboard = () => {
     downloadCertificate(documentId, userName);
   };
 
-  const visibleSlides = 2;
-
-  // Function to go to the next slide
-  const handleNext = () => {
-    setCurrentIndex((prevIndex) => {
-      const nextIndex = prevIndex + visibleSlides;
-      return nextIndex >= psychotherapists.length ? 0 : nextIndex;
-    });
+  const handleProfileClick = (psychotherapist) => {
+    setSelectedPsychotherapist(psychotherapist); // Set the selected psychotherapist
+    setIsModalOpen(true); // Open the modal
   };
 
-  // Function to go to the previous slide
-  const handlePrevious = () => {
-    setCurrentIndex((prevIndex) => {
-      const prevIndexAdjusted = prevIndex - visibleSlides;
-      return prevIndexAdjusted < 0
-        ? psychotherapists.length - (psychotherapists.length % visibleSlides || visibleSlides)
-        : prevIndexAdjusted;
-    });
+  const handleCloseModal = () => {
+    setIsModalOpen(false); // Close the modal
+    setSelectedPsychotherapist(null); // Reset selected psychotherapist
   };
 
   if (authLoading || dataLoading) {
@@ -90,19 +100,20 @@ const NewClientDashboard = () => {
 
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
+      <SessionHandler />
       {/* Header Section */}
       <div className="bg-white rounded-b-lg shadow-md p-5 top-0 left-60 w-full">
-          <h2 className="text-4xl font-bold text-blue-500 font-roboto">
+        <h2 className="text-4xl font-bold text-blue-500 font-roboto">
           Welcome, {userName ? userName : "Client"}!
-          </h2>
-          <p className="text-gray-600 text-lg font-lora">
+        </h2>
+        <p className="text-gray-600 text-lg font-lora">
           Book your therapy sessions with ease and embark on your path to well-being.
-          </p>
+        </p>
       </div>
 
       <div className="flex justify-between items-start space-x-4 px-8 ">
         {/* Left side - Pre-assessment and Psychotherapists Section */}
-        <div className="flex-1 bg-white p-6 rounded-lg shadow-lg mb-6 mt-8 h-[27rem] w-[56%]">
+        <div className="flex-1 bg-white p-6 rounded-lg shadow-lg mb-6 mt-8 h-[27rem] w-[50%]">
           {/* Conditionally render based on client state */}
           {state === "new" && (
             <Link href="/preassessment">
@@ -124,20 +135,27 @@ const NewClientDashboard = () => {
             </div>
           )}
 
-          {state === "referred" && status === "pending" && (
+          {state === "evaluate" && (
             <>
               <div className="relative group flex"> {/* Wrapper for hover effect */}
                 <button
                   className="bg-gray-300 text-gray-600 font-bold mb-4 py-2 px-4 rounded cursor-not-allowed"
                   disabled
                 >
-                  Pre-assessment Done!
+                  Pre-Assessment Done!
                 </button>
                 <p className="ml-2 bg-[#2563EB] text-white mb-4 py-2 px-4 rounded">
-                    Please wait for the confirmation via SMS, it might take 1-2 days! Thank You!
-                  </p>
+                  Please wait for the confirmation here in your dashboard, it might take 1-2 days! Thank You for your patience!
+                </p>
               </div>
             </>
+          )}
+
+          {state === "referred" && status === "pending" && (
+            <div className="mb-4 text-green-600 text-4xl flex items-center">
+              <span className="text-green-600 animate-bounce">✅</span>
+              <span className="ml-2 text-lg font-bold">You have been referred. Your certificate of referral is on the way!</span>
+            </div>
           )}
 
           {state === "referred" && status === "attached" && (
@@ -154,64 +172,44 @@ const NewClientDashboard = () => {
           )}
 
           {/* Psychotherapists Section */}
-          <div>
-            <h3 className="text-2xl font-bold text-blue-500 text-left mb-2 font-lora">
-              Meet our caring psychotherapists, here to guide your healing!
-            </h3>
             <div className="relative overflow-hidden">
-              {/* Container for carousel */}
-              <div
-                className="flex transition-transform duration-500 ease-in-out"
-                style={{
-                  transform: `translateX(-${(currentIndex / psychotherapists.length) * 100}%)`,
-                  width: `${(psychotherapists.length / visibleSlides) * 100}%`,
-                }}
-              >
+              <div className="flex overflow-x-auto p-4 space-x-4 scrollbar-thin scrollbar-thumb-blue-300">
                 {psychotherapists.map((psychotherapist, index) => (
                   <div
                     key={index}
-                    className="flex-shrink-0 flex items-center justify-center p-4 w-[33%]"
+                    className="flex-shrink-0 flex items-center justify-center w-[300px] p-4"
+                    onClick={() => handleProfileClick(psychotherapist)}
+                    tabIndex={0} // Makes it focusable
+                    aria-label={`View profile of ${psychotherapist.firstName} ${psychotherapist.lastName}`}
                   >
-                    <div className="flex flex-col items-center bg-white border border-blue-300 p-4 rounded-3xl transform transition-transform duration-500 ease-in-out hover:scale-105 min-w-[300px]">
-                      <img
-                        src={psychotherapist.imgSrc}
-                        alt={psychotherapist.name}
-                        className="rounded-full w-24 h-24 mb-4"
+                    <div className="flex flex-col items-center bg-white border border-blue-300 rounded-3xl p-3 min-w-[300px] transform transition-transform duration-500 ease-in-out hover:scale-105 shadow-lg">
+                      <Image
+                        src={profileImageUrls[psychotherapist.$id] || "/images/default-profile.png"}
+                        alt={`${psychotherapist.firstName || "N/A"} ${psychotherapist.lastName || "N/A"}`}
+                        className="rounded-full mb-4"
+                        width={96}
+                        height={96}
+                        unoptimized
+                        onError={() => "/images/default-profile.png"}
                       />
-                      <div className="flex flex-col items-center text-center">
+                      <div className="text-center">
                         <h4 className="text-lg font-bold text-blue-500 font-roboto">
-                          {psychotherapist.firstName} {psychotherapist.lastName}
+                          {psychotherapist.firstName || "First Name"} {psychotherapist.lastName || "Last Name"}
                         </h4>
                         <p className="text-sm text-gray-600 font-lora">
-                          {psychotherapist.specialties}
+                          {psychotherapist.specialties || "Specialties not specified"}
                         </p>
                         <h3 className="text-gray-600 font-lora">
                           {psychotherapist.position
-                            ? psychotherapist.position.charAt(0).toUpperCase() +
-                              psychotherapist.position.slice(1)
-                            : 'Position not specified'}
+                            ? `${psychotherapist.position.charAt(0).toUpperCase()}${psychotherapist.position.slice(1)}`
+                            : "Position not specified"}
                         </h3>
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
-
-              {/* Navigation Buttons */}
-              <button
-                className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-[#2563EB] text-white p-2 rounded-full"
-                onClick={handlePrevious}
-              >
-                &nbsp;&lt;&nbsp;
-              </button>
-              <button
-                className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-[#2563EB] text-white p-2 rounded-full"
-                onClick={handleNext}
-              >
-                &nbsp;&gt;&nbsp;
-              </button>
             </div>
-          </div>
         </div>
 
         {/* Right side - A Daily Reminder Section */}
@@ -228,7 +226,7 @@ const NewClientDashboard = () => {
               </div>
               <div className="bg-blue-50 border-blue-300 p-2 rounded-lg shadow-lg transition-transform transform hover:scale-105 hover:shadow-2xl duration-300">
                   <h3 className="font-semibold text-lg mb-2">🫵 You Are Enough.</h3>
-                  <p className="text-gray-800">Your worth isn't measured by your struggles. You are enough just as you are.</p>
+                  <p className="text-gray-800">Your worth isn&apos;t measured by your struggles. You are enough just as you are.</p>
               </div>
           </div>
         </div>
@@ -258,6 +256,14 @@ const NewClientDashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* Psychotherapist Modal */}
+      {isModalOpen && selectedPsychotherapist && (
+        <PsychotherapistProfile
+          psychotherapist={selectedPsychotherapist}
+          onClose={handleCloseModal}
+        />
+      )}
     </Layout>
   );
 };

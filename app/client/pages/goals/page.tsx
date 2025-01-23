@@ -1,14 +1,19 @@
 "use client"; // Add this at the top to mark it as a Client Component
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, ReactNode } from 'react';
 import { format, startOfMonth, endOfMonth, addMonths, addDays, isBefore, isAfter } from 'date-fns';
 import Layout from '@/components/Sidebar/Layout';
 import items from '@/client/data/Links';
 import { MdArrowBack, MdArrowForward } from 'react-icons/md';
 import ConfirmationModal from "@/components/ConfirmationModal";
-import { Account, Client, Databases, Permission, Query, Role } from 'appwrite';
+import { Query } from 'appwrite';
+import { databases, account } from '@/appwrite'; // Import Appwrite client configuration and account API
+import LoadingScreen from '@/components/LoadingScreen';
+import useAuthCheck from '@/auth/page';
 
 interface Goal {
+    duration: ReactNode;
+    $id: string;
     id: string;
     client: string;
     clientId: string;
@@ -22,15 +27,10 @@ interface Goal {
     progress: 'todo' | 'doing' | 'done' | 'missed';
 }
 
-const client = new Client();
-client
-  .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT as string)
-  .setProject(process.env.NEXT_PUBLIC_PROJECT_ID as string);
-  const databases = new Databases(client);
-  const account = new Account(client);
 const CLIENT_COLLECTION_ID = 'Client';
 
 const GoalsPage = () => {
+    const { loading: authLoading } = useAuthCheck(['client']); // Call the useAuthCheck hook
     const [goals, setGoals] = useState<Goal[]>([]);
     const [mood, setMood] = useState<'HAPPY' | 'SAD' | 'ANXIOUS' | 'FEAR' | 'FRUSTRATED' | ''>(''); 
     const [activities, setActivities] = useState('meditate');
@@ -45,10 +45,10 @@ const GoalsPage = () => {
     const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
     const [showConfirmationModal, setShowConfirmationModal] = useState(false);
-    const [showModal, setShowModal] = useState(false);
+    const [, setShowModal] = useState(false);
     const [userName, setUserName] = useState('Client');
-    const [clientId, setClientId] = useState<string | null>(null);
-    const [psychotherapistId, setPsychotherapistId] = useState<string | null>(null);
+    const [, setClientId] = useState<string | null>(null);
+    const [, setPsychotherapistId] = useState<string | null>(null);
 
     const oneWeekAhead = addDays(new Date(), 7);
 
@@ -89,44 +89,44 @@ const GoalsPage = () => {
     }, []);
 
     // Function to fetch goals created by the authenticated user
-useEffect(() => {
-    const fetchUserGoals = async () => {
-        try {
-            // Retrieve the current user
-            const user = await account.get().catch(error => {
-                console.error("User not authenticated:", error);
-                alert("Please log in to view goals.");
-                return null;
-            });
+    useEffect(() => {
+        const fetchUserGoals = async () => {
+            try {
+                // Retrieve the current user
+                const user = await account.get().catch(error => {
+                    console.error("User not authenticated:", error);
+                    alert("Please log in to view goals.");
+                    return null;
+                });
 
-            if (!user) return;
+                if (!user) return;
 
-            // Fetch the Client document ID for the current user
-            const clientResponse = await databases.listDocuments('Butterfly-Database', 'Client', [
-                Query.equal('userid', user.$id)
-            ]);
+                // Fetch the Client document ID for the current user
+                const clientResponse = await databases.listDocuments('Butterfly-Database', 'Client', [
+                    Query.equal('userid', user.$id)
+                ]);
 
-            if (clientResponse.documents.length === 0) {
-                throw new Error("Client document not found for the current user.");
+                if (clientResponse.documents.length === 0) {
+                    throw new Error("Client document not found for the current user.");
+                }
+
+                const clientDocument = clientResponse.documents[0];
+                const clientId = clientDocument.$id;
+
+                // Fetch goals where the clientId matches the logged-in user's clientId
+                const response = await databases.listDocuments('Butterfly-Database', 'Goals', [
+                    Query.equal('clientId', clientId)
+                ]);
+
+                // Set only the goals created by this user
+                setGoals(response.documents);
+            } catch (error) {
+                console.error('Error fetching user goals:', error);
             }
+        };
 
-            const clientDocument = clientResponse.documents[0];
-            const clientId = clientDocument.$id;
-
-            // Fetch goals where the clientId matches the logged-in user's clientId
-            const response = await databases.listDocuments('Butterfly-Database', 'Goals', [
-                Query.equal('clientId', clientId)
-            ]);
-
-            // Set only the goals created by this user
-            setGoals(response.documents);
-        } catch (error) {
-            console.error('Error fetching user goals:', error);
-        }
-    };
-
-    fetchUserGoals();
-}, []);
+        fetchUserGoals();
+    }, []);
 
     const handleSave = async () => {
         if (!selectedDate) {
@@ -197,6 +197,8 @@ useEffect(() => {
             psychotherapistId: psychotherapistId,
             psychotherapist: '',
             client: '',
+            duration: undefined,
+            $id: undefined
         };
     
         try {
@@ -290,10 +292,17 @@ const handleProgressChange = async (newProgress: Goal['progress'], goalId: strin
         setEndHour(endHourValue);
         setEndPeriod(endPeriodValue);
     };
+    if (authLoading ) {
+        return <LoadingScreen />; // Show the loading screen while the auth check or data loading is in progress
+    }
 
     return (
         <Layout sidebarTitle="Butterfly" sidebarItems={items}>
-            <div className="flex-grow p-8 bg-gradient-to-br from-blue-50 to-blue-100">
+            <div 
+                className="min-h-screen p-8 bg-cover bg-center"
+                style={{ backgroundImage: "url('/images/contact.jpeg')" }} // Update the path to your image
+            >
+            <div className="flex-grow p-8">
                 <div className="bg-white shadow-lg rounded-xl p-8 mb-10 border border-blue-200">
                     <h2 className="text-4xl font-bold text-blue-500 mb-4">Hello, {userName}!</h2>
                     <p className="text-gray-600 text-lg">Set and track your personal goals with ease.</p>
@@ -437,6 +446,16 @@ const handleProgressChange = async (newProgress: Goal['progress'], goalId: strin
                             </div>
                         </div>
 
+
+                        <div className="mt-4">
+                            <label className="flex items-center font-semibold text-gray-700">
+                                <input
+                                    checked={goalReminder}
+                                    onChange={() => setGoalReminder(!goalReminder)}
+                                    className="mr-2"
+                                />
+                            </label>
+                        </div>
                     </div>
 
                     {/* Mood Tracker Section */}
@@ -450,14 +469,6 @@ const handleProgressChange = async (newProgress: Goal['progress'], goalId: strin
                                 { label: 'FEAR', emoji: '😨' },
                                 { label: 'FRUSTRATED', emoji: '😠' }
                             ].map((moodOption) => {
-                                const moodColors = {
-                                    HAPPY: 'bg-yellow-200 hover:bg-yellow-400 hover:text-white',
-                                    SAD: 'bg-blue-200 hover:bg-blue-400 hover:text-white',
-                                    ANXIOUS: 'bg-orange-200 hover:bg-orange-400 hover:text-white',
-                                    FEAR: 'bg-red-200 hover:bg-red-400 hover:text-white',
-                                    FRUSTRATED: 'bg-purple-200 hover:bg-purple-400 hover:text-white',
-                                };
-
                                 const selectedMoodColors = {
                                     HAPPY: 'bg-yellow-500 text-white',
                                     SAD: 'bg-blue-500 text-white',
@@ -479,12 +490,6 @@ const handleProgressChange = async (newProgress: Goal['progress'], goalId: strin
                                 );
                             })}
                         </div>
-                        <button
-                            onClick={() => setMood('')}
-                            className="mt-6 bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition-colors duration-300 shadow-md"
-                        >
-                            Cancel Mood Selection
-                        </button>
                     </div>
                 </div>
 
@@ -559,7 +564,7 @@ const handleProgressChange = async (newProgress: Goal['progress'], goalId: strin
         <p className="mt-2 text-gray-600">No goals logged yet.</p>
     )}
 </div>
-
+</div>
             </div>
         </Layout>
     );

@@ -14,7 +14,6 @@ const NavigationButtons: React.FC<NavigationButtonsProps> = ({
   onBack,
   onNext,
   showBack,
-  isLastQuestion,
   nextButtonLabel, // Receive this prop
 }) => {
   return (

@@ -8,12 +8,18 @@ import useAuthCheck from "@/auth/page";
 import LoadingScreen from "@/components/LoadingScreen";
 import { PencilIcon, TrashIcon } from "@heroicons/react/solid"; // Heroicons for pencil and trash icons
 import AddAccountModal from "@/admin/components/AddAccountModal";
+import EditAccountModal from "@/admin/components/EditAccountModal";
+import DeleteAccountModal from "@/admin/components/DeleteAccountModal";
 
 const ROLES = ["Client", "Associate", "Psychotherapist"];
 
 const Account = () => {
+  const { loading: authLoading } = useAuthCheck(['admin']);
   const [selectedTab, setSelectedTab] = useState(ROLES[0]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [users, setUsers] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -31,7 +37,7 @@ const Account = () => {
     };
 
     fetchUsers();
-  }, []);
+  }, [setUsers]);
 
   const handleTabChange = (tab: SetStateAction<string>) => {
     setSelectedTab(tab);
@@ -39,10 +45,14 @@ const Account = () => {
     setCurrentPage(1);
   };
 
-  const openModal = () => setIsModalOpen(true);
-  const closeModal = () => setIsModalOpen(false);
-  const handleEdit = (userId: any) => console.log("Edit user with ID:", userId);
-  const handleDelete = (userId: any) => console.log("Delete user with ID:", userId);
+  const openAddModal = () => setIsAddModalOpen(true);
+  const closeAddModal = () => setIsAddModalOpen(false);
+
+  const openEditModal = () => setIsEditModalOpen(true);
+  const closeEditModal = () => setIsEditModalOpen(false);
+
+  const openDeleteModal = () => setIsDeleteModalOpen(true);
+  const closeDeleteModal = () => setIsDeleteModalOpen(false);
 
   const filteredUsers = useMemo(() => {
     const lowerSearchQuery = searchQuery.toLowerCase();
@@ -59,9 +69,7 @@ const Account = () => {
 
   const paginate = (pageNumber: SetStateAction<number>) => setCurrentPage(pageNumber);
 
-  const { loading } = useAuthCheck(['admin']);
-
-  if (loading) return <LoadingScreen />;
+  if (authLoading) return <LoadingScreen />;
 
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
@@ -90,7 +98,7 @@ const Account = () => {
           />
           <button 
             className={`px-4 py-2 rounded hover:bg-blue-600 ${selectedTab === "Client" ? "bg-gray-400 cursor-not-allowed" : "bg-green-500 text-white"}`}
-            onClick={openModal}
+            onClick={openAddModal}
             disabled={selectedTab === "Client"}
           >
             Add Account
@@ -116,10 +124,22 @@ const Account = () => {
                     <td className="px-4 py-2">{user.username}</td>
                     <td className="px-4 py-2">{user.email}</td>
                     <td className="px-4 py-2 flex space-x-2">
-                      <button onClick={() => handleEdit(user.$id)} className="text-blue-500 hover:text-blue-700">
+                      <button 
+                        onClick={() => {
+                          setSelectedClient(user.$id); // Set the selected client ID
+                          openEditModal(); // Open the Edit Modal
+                        }} 
+                        className="text-blue-500 hover:text-blue-700"
+                      >
                         <PencilIcon className="h-5 w-5" />
                       </button>
-                      <button onClick={() => handleDelete(user.$id)} className="text-red-500 hover:text-red-700">
+                      <button 
+                        onClick={() => {
+                          setSelectedClient(user.$id); // Set the selected client ID
+                          openDeleteModal(); // Open the Edit Modal
+                        }} 
+                        className="text-red-500 hover:text-red-700"
+                      >
                         <TrashIcon className="h-5 w-5" />
                       </button>
                     </td>
@@ -151,9 +171,21 @@ const Account = () => {
       </div>
 
       <AddAccountModal 
-        isOpen={isModalOpen} 
-        onClose={closeModal} 
+        isOpen={isAddModalOpen} 
+        onClose={closeAddModal} 
         selectedTab={selectedTab} 
+      />
+      <EditAccountModal 
+        isOpen={isEditModalOpen} 
+        onClose={closeEditModal} 
+        selectedTab={selectedTab} 
+        clientId={selectedClient}
+      />
+      <DeleteAccountModal 
+        isOpen={isDeleteModalOpen} 
+        onClose={closeDeleteModal} 
+        selectedTab={selectedTab} 
+        clientId={selectedClient}
       />
     </Layout>
   );

@@ -1,50 +1,63 @@
 'use client'
 
-// app/auth/useAuthCheck.ts
 import { useEffect, useState } from "react";
 import { account, databases } from "@/appwrite"; // Import Appwrite account and database instances
 import { useRouter } from "next/navigation";
 import LoadingScreen from "@/components/LoadingScreen"; // Import the LoadingScreen component
 
-const useAuthCheck = (allowedRoles: string[]) => {
+const VALID_ROLES = ["admin", "client", "psychotherapist", "associate"]; // Define allowed roles
+
+const useAuthCheck = (allowedRoles) => {
   const [loading, setLoading] = useState(true); // Loading state for authentication check
   const router = useRouter(); // Router to handle redirects
+
+  // Validate the allowedRoles prop
+  useEffect(() => {
+    const invalidRoles = allowedRoles.filter((role: string) => !VALID_ROLES.includes(role));
+    if (invalidRoles.length > 0) {
+      console.warn(`Invalid roles detected: ${invalidRoles.join(", ")}. Only the following roles are allowed: ${VALID_ROLES.join(", ")}.`);
+      return;
+    }
+  }, [allowedRoles]);
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const user = await account.get(); // Check if session exists
-        const userId = user.$id; // Get the user ID
+        const user = await account.get();
+        const userId = user.$id;
 
-        // Fetch user role from Accounts collection
         const roleResponse = await databases.getDocument(
-          "Butterfly-Database", // Replace with your database ID
-          "Accounts", // Replace with your collection ID
-          userId // Use the user ID to fetch the document
+          "Butterfly-Database",
+          "Accounts",
+          userId
         );
 
-        const userRole = roleResponse.role; // Adjust based on how your role is stored
+        const userRole = roleResponse.role;
 
-        // Check if the user role is allowed
         if (allowedRoles.includes(userRole)) {
-          setLoading(false); // User is authenticated and has a valid role
+          setLoading(false);
         } else {
-          await account.deleteSession("current"); // Destroy the session
-          router.push("/login"); // Redirect to login if role is not allowed
+          await account.deleteSession("current");
+          router.push("/login");
         }
       } catch (error) {
-        console.error(error); // Log the error for debugging
+        console.error("Error during authentication:", error);
         try {
-          await account.deleteSession("current"); // Destroy the session if there was an error
+          await account.deleteSession("current");
         } catch (sessionError) {
           console.error("Error destroying session:", sessionError);
         }
-        router.push("/login"); // Redirect to login if not authenticated or other error
+        setLoading(false);
+        router.push("/login");
       }
     };
 
-    checkAuth();
-  }, [router, allowedRoles]);
+    if (allowedRoles.every((role: string) => VALID_ROLES.includes(role))) {
+      checkAuth(); // Run authentication only if allowedRoles are valid
+    } else {
+      setLoading(false); // Skip authentication if there are invalid roles
+    }
+  }, [allowedRoles, router]);
 
   return { loading, LoadingScreen }; // Return loading state and LoadingScreen component
 };

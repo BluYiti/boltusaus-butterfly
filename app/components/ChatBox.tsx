@@ -1,5 +1,6 @@
 'use client';
 import { FC } from 'react';
+import Image from 'next/image';
 
 interface Message {
   id: number;
@@ -17,10 +18,12 @@ const ChatBox: FC = () => {
     <div className="w-3/4 p-6 flex flex-col justify-between">
       {/* Chat Header */}
       <div className="flex items-center mb-4">
-        <img
+        <Image
           src="/images/denzel.jpg"
           alt="Denzel White"
-          className="w-12 h-12 rounded-full mr-4"
+          width={48}  // width in pixels
+          height={48} // height in pixels
+          className="rounded-full mr-4"
         />
         <h2 className="text-xl font-bold">Denzel White</h2>
       </div>
