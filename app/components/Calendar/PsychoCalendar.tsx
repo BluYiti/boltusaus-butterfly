@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { FaCalendarAlt, FaChevronLeft, FaChevronRight, FaEdit, FaTimes } from "react-icons/fa";
 import DayGrid from '@/components/Calendar/DayGrid';
+import TimeCancelation from "@/psychotherapist/components/TimeCancelation";
+import TimeSlotEditing from "@/psychotherapist/components/TimeSlotEditing";
 
 interface CalendarProps {
   currentMonth: string;
@@ -84,39 +86,39 @@ const Calendar: React.FC<CalendarProps> = ({
       </div>
 
       <div className="grid grid-cols-7 gap-2 mb-4 p-4 rounded shadow-md bg-gray-200">
-      {/* Empty slots */}
-      {emptySlots.map((_, index) => (
-        <div key={index} className="invisible">-</div>
-      ))}
+        {/* Empty slots */}
+        {emptySlots.map((_, index) => (
+          <div key={index} className="invisible">-</div>
+        ))}
 
-      {/* Days in the month */}
-      {daysArray.map((day) => {
-      const isToday =
-        day === new Date().getDate() &&
-        date.getMonth() === new Date().getMonth() &&
-        date.getFullYear() === new Date().getFullYear();
+        {/* Days in the month */}
+        {daysArray.map((day) => {
+        const isToday =
+          day === new Date().getDate() &&
+          date.getMonth() === new Date().getMonth() &&
+          date.getFullYear() === new Date().getFullYear();
 
-      const isWeekend = [0, 6].includes(new Date(date.getFullYear(), date.getMonth(), day).getDay());
+        const isWeekend = [0, 6].includes(new Date(date.getFullYear(), date.getMonth(), day).getDay());
 
-      return (
-        <button
-        key={day}
-        className={`py-2 px-1 rounded-lg ${
-          selectedDay === day
-          ? "bg-blue-300 text-white"
-          : isToday
-          ? "bg-green-200 text-black"
-          : isWeekend
-          ? "bg-gray-400 cursor-not-allowed"
-          : "bg-white hover:bg-blue-100"
-        }`}
-        onClick={() => !isWeekend && setSelectedDay(day)}
-        disabled={isWeekend}
-        >
-        {day}
-        </button>
-      );
-      })}
+        return (
+          <button
+          key={day}
+          className={`py-2 px-1 rounded-lg ${
+            selectedDay === day
+            ? "bg-blue-300 text-white"
+            : isToday
+            ? "bg-green-200 text-black"
+            : isWeekend
+            ? "bg-gray-400 cursor-not-allowed"
+            : "bg-white hover:bg-blue-100"
+          }`}
+          onClick={() => !isWeekend && setSelectedDay(day)}
+          disabled={isWeekend}
+          >
+          {day}
+          </button>
+        );
+        })}
       </div>
 
       {/* Appointments, Time Cancelation, Time Slot Editing */}
@@ -149,13 +151,13 @@ const Calendar: React.FC<CalendarProps> = ({
       </div>
         <div className={`tab-content flex-1 p-4 rounded-lg bg-blue-100`}>
         {activeTab === "appointments" && <DayGrid selectedDay={selectedDay} selectedMonth={selectedMonth} />}
-        {activeTab === "timeCancelation" && <div>Time Cancelation Content</div>}
-        {activeTab === "timeSlotEditing" && <div>Time Slot Editing Content</div>}
+        {activeTab === "timeCancelation" && <TimeCancelation selectedDay={selectedDay} selectedMonth={selectedMonth} />}
+        {activeTab === "timeSlotEditing" && <TimeSlotEditing selectedDay={selectedDay} selectedMonth={selectedMonth} />}
         {selectedDay === null && (
           <div className="flex justify-center items-center h-full">
-          <p className="text-lg text-red-500">
-            Please click on a date to view details.
-          </p>
+            <p className="text-lg text-blue-500">
+              Please click on a date to view details.
+            </p>
           </div>
         )}
         </div>

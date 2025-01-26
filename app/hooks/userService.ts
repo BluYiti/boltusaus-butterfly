@@ -242,3 +242,35 @@ export const hasPreAssessment = async (userId: string): Promise<boolean> => {
         return false; // Return false in case of an error
     }
 };
+
+// Fetch appointments for the selected day
+export const fetchAppointmentsForDay = async (day: number, month: string, psychotherapist: string): Promise<any[] | null> => {
+    try {
+        if (day == null) {
+            throw new Error('Invalid day parameter');
+        }
+        const response = await databases.listDocuments('Butterfly-Database', 'Bookings', [
+            Query.equal('day', day),
+            Query.equal('month', month),
+            Query.equal('psychotherapist', psychotherapist),
+        ]);
+
+        return response.documents || null; // Assuming response.documents contains an array of appointments
+    } catch (error) {
+        console.error('Error fetching appointments for the selected day:', error);
+        return null;
+    }
+};
+
+// Fetch payment status for an appointment
+export const fetchPaymentStatus = async (appointmentId: string): Promise<string | null> => {
+    try {
+        const response = await databases.listDocuments('Butterfly-Database', 'Payment', [
+            Query.equal('booking', appointmentId),
+        ]);
+        return response.documents[0]?.status || null; // Assuming response.documents contains an array and status is a field
+    } catch (error) {
+        console.error('Error fetching payment status:', error);
+        return null;
+    }
+};
