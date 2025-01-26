@@ -91,15 +91,6 @@ const TimeCancelation: React.FC<TimeCancelationProps> = ({ selectedDay, selected
     console.log('Disabling entire day:', selectedDay, selectedMonth);
   };
 
-  if (loading) {
-    return         <div className="flex justify-center items-center mt-4">
-            <div className="flex justify-center items-center">
-          <img src="/gifs/butterfly.gif" alt="Loading" className="h-8 w-8" />
-          <span className="ml-2 text-blue-500">Loading...</span>
-            </div>
-        </div>;
-  }
-
   return (
     <div>
       <div>
@@ -108,41 +99,48 @@ const TimeCancelation: React.FC<TimeCancelationProps> = ({ selectedDay, selected
           {selectedMonth} {selectedDay.toString()}
         </h1>
       </div>
-      <div className="grid grid-cols-4 gap-4 mt-4">
-        {["09:00am", "10:00am", "11:00am", "01:00pm", "02:00pm", "03:00pm", "04:00pm"].map((time) => {
-          const isBooked = isSlotBooked(selectedDay || 0, time);
+      {loading ? (        
+        <div className="flex justify-center items-center mt-4">
+            <div className="flex justify-center items-center">
+          <img src="/gifs/butterfly.gif" alt="Loading" className="h-8 w-8" />
+          <span className="ml-2 text-blue-500">Loading...</span>
+            </div>
+        </div>
+      ) : (<>
+        <div className="grid grid-cols-4 gap-4 mt-4">
+          {["09:00am", "10:00am", "11:00am", "01:00pm", "02:00pm", "03:00pm", "04:00pm"].map((time) => {
+            const isBooked = isSlotBooked(selectedDay || 0, time);
 
-          return (
+            return (
+              <button
+                key={time}
+                className={`py-2 px-4 rounded-lg ${selectedTime === time ? "bg-blue-300 text-white" : isBooked
+                  ? "bg-gray-400 text-gray-700 cursor-not-allowed"
+                  : "bg-gray-300 text-black hover:bg-blue-200 hover:text-white hover:scale-110"}`}
+                onClick={() => !isBooked && setSelectedTime(time)}
+                disabled={isBooked}
+              >
+                {time}
+              </button>
+            );
+          })}
+        </div>
+        <div className="mt-4">
             <button
-              key={time}
-              className={`py-2 px-4 rounded-lg ${selectedTime === time ? "bg-blue-300 text-white" : isBooked
-                ? "bg-gray-400 text-gray-700 cursor-not-allowed"
-                : "bg-gray-300 text-black hover:bg-blue-200 hover:text-white hover:scale-110"
-                }`}
-              onClick={() => !isBooked && setSelectedTime(time)}
-              disabled={isBooked}
+            className={`py-2 px-4 rounded-lg mr-4 ${!selectedTime ? "bg-gray-400 text-gray-700 cursor-not-allowed" : "bg-red-500 text-white"}`}
+            onClick={handleDisableTimeSlot}
+            disabled={!selectedTime}
             >
-              {time}
+            Disable Time Slot
             </button>
-          );
-        })}
-      </div>
-      {errorMessage && <p className="text-red-500 mt-4">{errorMessage}</p>}
-      <div className="mt-4">
-        <button
-          className="py-2 px-4 bg-red-500 text-white rounded-lg mr-4"
-          onClick={handleDisableTimeSlot}
-          disabled={!selectedTime}
-        >
-          Disable Time Slot
-        </button>
-        <button
-          className="py-2 px-4 bg-red-500 text-white rounded-lg"
-          onClick={handleDisableDay}
-        >
-          Disable Day
-        </button>
-      </div>
+          <button
+            className="py-2 px-4 bg-red-500 text-white rounded-lg"
+            onClick={handleDisableDay}
+          >
+            Disable Day
+          </button>
+        </div></>
+      )}
     </div>
   );
 };
