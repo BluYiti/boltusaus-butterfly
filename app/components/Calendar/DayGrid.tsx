@@ -22,8 +22,6 @@ const DayGrid: React.FC<DayGridProps> = ({ selectedDay, selectedMonth }) => {
         const psychoId = await fetchPsychoId(user.$id);
         setPsychoId(psychoId);
 
-        console.log(psychoId, selectedDay, selectedMonth);
-
         if (selectedDay && selectedMonth && psychoId) {
           const appointments = await fetchAppointmentsForDay(selectedDay, selectedMonth, psychoId);
           
