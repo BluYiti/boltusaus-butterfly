@@ -129,6 +129,7 @@ const Calendar: React.FC<CalendarProps> = ({
           activeTab === "appointments" ? "bg-blue-100 text-white" : "text-blue-400 hover:bg-blue-100"
         }`}
         onClick={() => setActiveTab("appointments")}
+        title="Appointments"
         >
         <FaCalendarAlt/>
         </button>
@@ -137,6 +138,7 @@ const Calendar: React.FC<CalendarProps> = ({
           activeTab === "timeCancelation" ? "bg-blue-100 text-white" : "text-blue-400 hover:bg-blue-100"
         }`}
         onClick={() => setActiveTab("timeCancelation")}
+        title="Time Cancelation"
         >
         <FaTimes/>
         </button>
@@ -145,6 +147,7 @@ const Calendar: React.FC<CalendarProps> = ({
           activeTab === "timeSlotEditing" ? "bg-blue-100 text-white" : "text-blue-400 hover:bg-blue-100"
         }`}
         onClick={() => setActiveTab("timeSlotEditing")}
+        title="Time Slot Editing"
         >
         <FaEdit/>
         </button>

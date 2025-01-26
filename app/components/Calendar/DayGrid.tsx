@@ -10,8 +10,8 @@ interface DayGridProps {
 
 const DayGrid: React.FC<DayGridProps> = ({ selectedDay, selectedMonth }) => {
   const [loading, setLoading] = useState<boolean>(true);  // General loading state
-  const [error, setError] = useState<string | null>(null);
-  const [psychoId, setPsychoId] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
+  const [, setPsychoId] = useState<string | null>(null);
   const [appointments, setAppointments] = useState<any[]>([]); // State to store appointments
 
   useEffect(() => {
