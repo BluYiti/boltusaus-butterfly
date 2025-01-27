@@ -255,7 +255,7 @@ export const fetchAppointmentsForDay = async (day: number, month: string, psycho
             Query.equal('psychotherapist', psychotherapist),
         ]);
 
-        return response.documents || null; // Assuming response.documents contains an array of appointments
+        return response.documents || null; 
     } catch (error) {
         console.error('Error fetching appointments for the selected day:', error);
         return null;
@@ -271,6 +271,18 @@ export const fetchPaymentStatus = async (appointmentId: string): Promise<string 
         return response.documents[0]?.status || null; // Assuming response.documents contains an array and status is a field
     } catch (error) {
         console.error('Error fetching payment status:', error);
+        return null;
+    }
+};
+
+// Fetch available time slots
+export const fetchTimeSlots = async (): Promise<any[] | null> => {
+    try {
+        const response = await databases.listDocuments('Butterfly-Database', 'TimeSlots');
+
+        return response.documents || null; // Assuming response.documents contains an array of time slots
+    } catch (error) {
+        console.error('Error fetching time slots:', error);
         return null;
     }
 };
