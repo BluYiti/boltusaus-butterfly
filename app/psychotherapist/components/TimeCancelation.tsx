@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { account, databases } from '@/appwrite';
 import { Query } from 'appwrite';
-import { fetchPsychoId } from '@/hooks/userService';
+import { fetchPsychoId, fetchTimeSlots } from '@/hooks/userService';
 
 interface TimeCancelationProps {
   selectedDay: number | null;
@@ -18,11 +18,17 @@ interface Booking {
 const TimeCancelation: React.FC<TimeCancelationProps> = ({ selectedDay, selectedMonth }) => {
   const [selectedTime, setSelectedTime] = React.useState<string | null>(null);
   const [bookedSlots, setBookedSlots] = useState<Booking[]>([]);
+  const [timeSlots, setTimeSlots] = useState<string[]>([]);
   const [psychoId, setPsychoId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
+    const getTimeSlots = async () => {
+      const slots = (await fetchTimeSlots() || []).map(slot => slot.time);
+      setTimeSlots(slots);
+    };
+
     const fetchBookedSlots = async () => {
       try {
         const user = await account.get();
@@ -49,6 +55,7 @@ const TimeCancelation: React.FC<TimeCancelationProps> = ({ selectedDay, selected
     };
 
     fetchBookedSlots();
+    getTimeSlots();
   }, [psychoId]);
 
   if (!selectedDay || !selectedMonth) {
@@ -108,7 +115,7 @@ const TimeCancelation: React.FC<TimeCancelationProps> = ({ selectedDay, selected
         </div>
       ) : (<>
         <div className="grid grid-cols-4 gap-4 mt-4">
-          {["09:00am", "10:00am", "11:00am", "01:00pm", "02:00pm", "03:00pm", "04:00pm"].map((time) => {
+          {timeSlots.map((time) => {
             const isBooked = isSlotBooked(selectedDay || 0, time);
 
             return (

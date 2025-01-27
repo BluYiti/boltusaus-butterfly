@@ -10,6 +10,7 @@ const TimeSlotAdding: React.FC<TimeSlotAddingProps> = ({ selectedDay, selectedMo
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [timeSlots, setTimeSlots] = useState<string[]>([]);
   const [showDropdown, setShowDropdown] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const getTimeSlots = async () => {
@@ -18,6 +19,7 @@ const TimeSlotAdding: React.FC<TimeSlotAddingProps> = ({ selectedDay, selectedMo
     };
 
     getTimeSlots();
+    setLoading(false);
   }, []);
 
   if (!selectedDay || !selectedMonth) {
