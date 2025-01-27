@@ -97,23 +97,54 @@ const TimeSlotAdding: React.FC<TimeSlotAddingProps> = ({ selectedDay, selectedMo
               Add Time Slot
             </button>
             {showDropdown && (
-              <div className="origin-bottom-right absolute right-0 mb-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
-                <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+              <div className="bg-white rounded-lg shadow-lg w-1/3">
+                <div className="flex justify-between items-center p-4 border-b">
+                <h2 className="text-xl font-semibold">Add Time Slot</h2>
+                <button
+                  className="text-gray-500 hover:text-gray-700"
+                  onClick={() => setShowDropdown(false)}
+                >
+                  &times;
+                </button>
+                </div>
+                <div className="p-4">
+                <div className="flex border-b mb-4">
                   <button
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 w-full text-left"
-                    role="menuitem"
+                  className={`flex-1 py-2 text-center ${selectedTime === 'global' ? 'border-b-2 border-blue-500' : ''}`}
+                  onClick={() => setSelectedTime('global')}
+                  >
+                  Add Global Time Slot
+                  </button>
+                  <button
+                  className={`flex-1 py-2 text-center ${selectedTime === 'single' ? 'border-b-2 border-blue-500' : ''}`}
+                  onClick={() => setSelectedTime('single')}
+                  >
+                  Add Time Slot for a Single Date
+                  </button>
+                </div>
+                {selectedTime === 'global' && (
+                  <div>
+                  <button
+                    className="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 text-left"
                     onClick={() => handleAddTimeSlot('global')}
                   >
                     Add Global Time Slot
                   </button>
+                  </div>
+                )}
+                {selectedTime === 'single' && (
+                  <div>
                   <button
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 w-full text-left"
-                    role="menuitem"
+                    className="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 text-left"
                     onClick={() => handleAddTimeSlot('single')}
                   >
                     Add Time Slot for a Single Date
                   </button>
+                  </div>
+                )}
                 </div>
+              </div>
               </div>
             )}
           </div>
