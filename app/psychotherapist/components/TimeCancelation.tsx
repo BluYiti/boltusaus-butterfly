@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { account, databases } from '@/appwrite';
 import { Query } from 'appwrite';
-import { fetchPsychoId, fetchTimeSlots } from '@/hooks/userService';
+import { bookAppointmentWithDisabledStatus, enableTimeSlot, fetchPsychoId, fetchTimeSlots } from '@/hooks/userService';
 
 interface TimeCancelationProps {
   selectedDay: number | null;
@@ -56,7 +56,11 @@ const TimeCancelation: React.FC<TimeCancelationProps> = ({ selectedDay, selected
 
     fetchBookedSlots();
     getTimeSlots();
-  }, [psychoId]);
+  }, [psychoId, timeSlots]);
+
+  useEffect(() => {
+    setSelectedTime(null);
+  }, [selectedDay, selectedMonth]);
 
   if (!selectedDay || !selectedMonth) {
     return null;
@@ -68,11 +72,21 @@ const TimeCancelation: React.FC<TimeCancelationProps> = ({ selectedDay, selected
         slot.day === day &&
         slot.month.toLowerCase() === selectedMonth?.toLowerCase() &&
         slot.slots === time &&
-        ['pending', 'paid', 'rescheduled', 'disabled', 'missed'].includes(slot.status)
+        ['pending', 'paid', 'rescheduled', 'missed'].includes(slot.status)
+    );
+  };
+  
+  const isSlotDisabled = (day: number, time: string) => {
+    return bookedSlots.some(
+      (slot) =>
+        slot.day === day &&
+        slot.month.toLowerCase() === selectedMonth?.toLowerCase() &&
+        slot.slots === time &&
+        ['disabled'].includes(slot.status)
     );
   };
 
-  const handleDisableTimeSlot = () => {
+  const handleDisableTimeSlot = async () => {
     const currentDate = new Date();
     const selectedDate = new Date(`${selectedMonth} ${selectedDay}, ${currentDate.getFullYear()}`);
 
@@ -81,8 +95,33 @@ const TimeCancelation: React.FC<TimeCancelationProps> = ({ selectedDay, selected
       return;
     }
 
-    // Logic to disable the selected time slot
-    console.log('Disabling time slot:', selectedTime);
+    if (!psychoId) {
+      setErrorMessage('Psychotherapist ID not found.');
+      return;
+    }
+
+    try {
+      await bookAppointmentWithDisabledStatus({ client: null, psychotherapist: psychoId, slots: selectedTime, day: selectedDay, month: selectedMonth });
+      setSelectedTime(null);
+    } catch (error) {
+      console.error('Error disabling time slot:', error);
+      setErrorMessage('Failed to disable the time slot. Please try again.');
+    }
+  };
+  
+  const handleEnableTimeSlot = async () => {
+    if (!psychoId) {
+      setErrorMessage('Psychotherapist ID not found.');
+      return;
+    }
+
+    try {
+      await enableTimeSlot(selectedTime, selectedDay, selectedMonth, psychoId);
+      setSelectedTime(null);
+    } catch (error) {
+      console.error('Error enabling time slot:', error);
+      setErrorMessage('Failed to enable the time slot. Please try again.')
+    };
   };
 
   const handleDisableDay = () => {
@@ -115,30 +154,33 @@ const TimeCancelation: React.FC<TimeCancelationProps> = ({ selectedDay, selected
         </div>
       ) : (<>
         <div className="grid grid-cols-4 gap-4 mt-4">
-          {timeSlots.map((time) => {
+            {timeSlots.map((time) => {
             const isBooked = isSlotBooked(selectedDay || 0, time);
+            const isDisabled = isSlotDisabled(selectedDay || 0, time);
 
             return (
               <button
-                key={time}
-                className={`py-2 px-4 rounded-lg ${selectedTime === time ? "bg-blue-300 text-white" : isBooked
-                  ? "bg-gray-400 text-gray-700 cursor-not-allowed"
-                  : "bg-gray-300 text-black hover:bg-blue-200 hover:text-white hover:scale-110"}`}
-                onClick={() => !isBooked && setSelectedTime(time)}
-                disabled={isBooked}
+              key={time}
+              className={`py-2 px-4 rounded-lg ${selectedTime === time ? "bg-blue-300 text-white" : isBooked
+              ? "bg-gray-400 text-gray-700 cursor-not-allowed"
+              : isDisabled
+              ? "bg-yellow-400 text-gray-700"
+              : "bg-gray-300 text-black hover:bg-blue-200 hover:text-white hover:scale-110"}`}
+              onClick={() => !isBooked && setSelectedTime(time)}
+              disabled={isBooked}
               >
-                {time}
+              {time}
               </button>
             );
-          })}
+            })}
         </div>
         <div className="mt-4">
             <button
-            className={`py-2 px-4 rounded-lg mr-4 ${!selectedTime ? "bg-gray-400 text-gray-700 cursor-not-allowed" : "bg-red-500 text-white"}`}
-            onClick={handleDisableTimeSlot}
+            className={`py-2 px-4 rounded-lg mr-4 ${!selectedTime ? "bg-gray-400 text-gray-700 cursor-not-allowed" : isSlotDisabled(selectedDay || 0, selectedTime) ? "bg-green-500 text-white" : "bg-red-500 text-white"}`}
+            onClick={isSlotDisabled(selectedDay || 0, selectedTime) ? handleEnableTimeSlot : handleDisableTimeSlot}
             disabled={!selectedTime}
             >
-            Disable Time Slot
+            {isSlotDisabled(selectedDay || 0, selectedTime) ? "Enable Time Slot" : "Disable Time Slot"}
             </button>
           <button
             className="py-2 px-4 bg-red-500 text-white rounded-lg"

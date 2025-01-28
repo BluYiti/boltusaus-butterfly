@@ -326,3 +326,50 @@ export const deleteTimeSlotFromDatabase = async (time: string): Promise<boolean>
         return false; // Return false if an error occurred
     }
 };
+
+// Book an appointment with status disabled
+export const bookAppointmentWithDisabledStatus = async (appointment: { client: string, psychotherapist: string, slots: string, day: number, month: string}): Promise<boolean> => {
+    try {
+        const response = await databases.createDocument(
+            'Butterfly-Database', // Database ID
+            'Bookings',           // Collection ID
+            'unique()',           // Unique document ID
+            {
+                ...appointment,
+                status: 'disabled', // Set the status to disabled
+                createdAt: new Date().toISOString() // Add createdAt attribute
+            }
+        );
+
+        console.log('Appointment booked successfully with disabled status:', response);
+        return true; // Return true if the appointment was booked successfully
+    } catch (error) {
+        console.error('Error booking appointment with disabled status:', error);
+        return false; // Return false if an error occurred
+    }
+};
+
+// Enable a time slot by deleting it from the database
+export const enableTimeSlot = async (selectedTime: string, selectedDay: number, selectedMonth: string, psychoId: string): Promise<boolean> => {
+    try {
+        const response = await databases.listDocuments('Butterfly-Database', 'Bookings', [
+            Query.equal('time', selectedTime),
+            Query.equal('day', selectedDay),
+            Query.equal('month', selectedMonth),
+            Query.equal('psychotherapist', psychoId),
+        ]);
+
+        if (response.documents.length > 0) {
+            const documentId = response.documents[0].$id;
+            await databases.deleteDocument('Butterfly-Database', 'TimeSlots', documentId);
+            console.log('Time slot enabled (deleted) successfully');
+            return true; // Return true if the time slot was deleted successfully
+        } else {
+            console.log('No time slot found with the specified time');
+            return false; // Return false if no time slot was found
+        }
+    } catch (error) {
+        console.error('Error enabling (deleting) time slot:', error);
+        return false; // Return false if an error occurred
+    }
+};
