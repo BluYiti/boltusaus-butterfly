@@ -110,86 +110,86 @@ const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpe
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-blue-600 bg-opacity-50 flex justify-center items-center z-50">
+    <div className="fixed inset-0 bg-blue-600 bg-opacity-50 flex justify-center items-center z-50 p-4 sm:p-8">
       <div
-        role="dialog"
-        aria-modal="true"
-        className="bg-white rounded-lg p-8 w-full max-w-4xl shadow-lg relative"
+      role="dialog"
+      aria-modal="true"
+      className="bg-white rounded-lg p-4 sm:p-8 w-full max-w-4xl shadow-lg relative"
       >
-        <button
-          onClick={onClose}
-          className="text-blue-400 hover:text-blue-600 absolute top-4 right-4"
-          aria-label="Close modal"
-        >
-          &#10005;
-        </button>
+      <button
+        onClick={onClose}
+        className="text-blue-400 hover:text-blue-600 absolute top-4 right-4"
+        aria-label="Close modal"
+      >
+        &#10005;
+      </button>
 
-        {loading ? (
-          <p>Loading...</p>
-        ) : error ? (
-          <p className="text-red-500">{error}</p>
-        ) : (
-          clientData && (
-            <>
-              <div className="flex space-x-12 items-center">
-                <div className="flex-shrink-0 text-center">
-                  <Image
-                    src={profileImageUrls[clientId] || '/images/default-profile.png'}
-                    alt="Profile"
-                    width={192} // Equivalent to 48 * 4 for a consistent image size
-                    height={192} // Equivalent to 48 * 4 for a consistent image size
-                    className="rounded-full object-cover mx-auto"
-                    unoptimized
-                  />
-                  <h2 className="mt-4 text-2xl font-bold text-gray-800">
-                    {clientData.firstname} {clientData.lastname}
-                  </h2>
-                </div>
-                <div className="flex-grow">
-                  <h3 className="text-xl font-bold mb-2 text-gray-900">Client&apos;s Profile</h3>
-                  <div className="grid grid-cols-2 gap-6 text-gray-700">
-                    <div>
-                      <p><strong>Home Address:</strong> {clientData.address}</p>
-                      <p><strong>Date of Birth:</strong> {clientData.birthdate ? formatDate(clientData.birthdate) : 'Loading...'}</p>
-                      <p><strong>Contact Number:</strong> {clientData.phonenum}</p>
-                      <p><strong>Sex:</strong> {clientData.sex || 'Not Specified'}</p>
-                      <p><strong>Age:</strong> {clientData.age || 'Not Specified'}</p>
-                      <p><strong>Email Address:</strong> {clientData.email}</p>
-                    </div>
-                    <div>
-                      <p><strong>Emergency Contact Person:</strong> {clientData.emergencyContact}</p>
-                      <p><strong>Conditions:</strong></p>
-                      <ul className="list-disc pl-4">
-                        {Array.isArray(clientData.conditions) && clientData.conditions.length > 0 ? (
-                          clientData.conditions.map((condition, index) => (
-                            <li key={index}>{condition}</li>
-                          ))
-                        ) : (
-                          <li>No conditions available</li>
-                        )}
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              </div>
+      {loading ? (
+        <p>Loading...</p>
+      ) : error ? (
+        <p className="text-red-500">{error}</p>
+      ) : (
+        clientData && (
+        <>
+          <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-12 items-center">
+          <div className="flex-shrink-0 text-center">
+            <Image
+            src={profileImageUrls[clientId] || '/images/default-profile.png'}
+            alt="Profile"
+            width={192} // Equivalent to 48 * 4 for a consistent image size
+            height={192} // Equivalent to 48 * 4 for a consistent image size
+            className="rounded-full object-cover mx-auto"
+            unoptimized
+            />
+            <h2 className="mt-4 text-2xl font-bold text-gray-800">
+            {clientData.firstname} {clientData.lastname}
+            </h2>
+          </div>
+          <div className="flex-grow">
+            <h3 className="text-xl font-bold mb-2 text-gray-900">Client&apos;s Profile</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-gray-700">
+            <div>
+              <p><strong>Home Address:</strong> {clientData.address}</p>
+              <p><strong>Date of Birth:</strong> {clientData.birthdate ? formatDate(clientData.birthdate) : 'Loading...'}</p>
+              <p><strong>Contact Number:</strong> {clientData.phonenum}</p>
+              <p><strong>Sex:</strong> {clientData.sex || 'Not Specified'}</p>
+              <p><strong>Age:</strong> {clientData.age || 'Not Specified'}</p>
+              <p><strong>Email Address:</strong> {clientData.email}</p>
+            </div>
+            <div>
+              <p><strong>Emergency Contact Person:</strong> {clientData.emergencyContact}</p>
+              <p><strong>Conditions:</strong></p>
+              <ul className="list-disc pl-4">
+              {Array.isArray(clientData.conditions) && clientData.conditions.length > 0 ? (
+                clientData.conditions.map((condition, index) => (
+                <li key={index}>{condition}</li>
+                ))
+              ) : (
+                <li>No conditions available</li>
+              )}
+              </ul>
+            </div>
+            </div>
+          </div>
+          </div>
 
-              <div className="mt-8 flex justify-center space-x-6">
-                <button
-                  onClick={() => setIsReportsModalOpen(true)}
-                  className="bg-blue-400 text-white px-6 py-2 rounded-full shadow-md hover:shadow-lg hover:bg-blue-500 transition-all"
-                >
-                  View Reports
-                </button>
-                <button
-                  onClick={() => setIsConfirmModalOpen(true)}
-                  className="bg-green-500 text-white px-6 py-2 rounded-full shadow-md hover:shadow-lg hover:bg-green-600 transition-all"
-                >
-                  Refer
-                </button>
-              </div>
-            </>
-          )
-        )}
+          <div className="mt-8 flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6">
+          <button
+            onClick={() => setIsReportsModalOpen(true)}
+            className="bg-blue-400 text-white px-6 py-2 rounded-full shadow-md hover:shadow-lg hover:bg-blue-500 transition-all"
+          >
+            View Reports
+          </button>
+          <button
+            onClick={() => setIsConfirmModalOpen(true)}
+            className="bg-green-500 text-white px-6 py-2 rounded-full shadow-md hover:shadow-lg hover:bg-green-600 transition-all"
+          >
+            Refer
+          </button>
+          </div>
+        </>
+        )
+      )}
       </div>
 
       {/* Reports Modal */}
