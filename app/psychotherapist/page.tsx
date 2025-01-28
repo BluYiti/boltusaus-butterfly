@@ -217,82 +217,82 @@ const Dashboard: React.FC = () => {
         </div>
 
         <div className="pt-[6.5rem]">
-          <div className="grid grid-cols-3 gap-4 mx-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mx-4 md:mx-10">
             {/* To Be Evaluated Section */}
             <div className="bg-white p-4 rounded-lg shadow-md transition hover:shadow-lg max-h-96 overflow-y-auto">
               <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold mb-4 text-blue-500">To be Evaluated</h3>
-                <button
-                  onClick={handleViewListClick}
-                  className="bg-blue-400 rounded-full text-white px-2 py-1 hover:bg-blue-600 transition -mt-2"
-                >
-                  View List
-                </button>
+          <h3 className="text-lg font-semibold mb-4 text-blue-500">To be Evaluated</h3>
+          <button
+            onClick={handleViewListClick}
+            className="bg-blue-400 rounded-full text-white px-2 py-1 hover:bg-blue-600 transition -mt-2 text-sm md:text-base"
+          >
+            View List
+          </button>
               </div>
               {loading ? (
-                <p className="text-blue-600">Loading evaluation data...</p>
+          <p className="text-blue-600">Loading evaluation data...</p>
               ) : error ? (
-                <p className="text-red-500">{error}</p>
+          <p className="text-red-500">{error}</p>
               ) : (
-                <ul>
-                  {evaluationData.map((doc) => (
-                    <li key={doc.$id}>
-                      <p>{doc.firstname} {doc.lastname}</p>
-                    </li>
-                  ))}
-                </ul>
+          <ul>
+            {evaluationData.map((doc) => (
+              <li key={doc.$id}>
+                <p>{doc.firstname} {doc.lastname}</p>
+              </li>
+            ))}
+          </ul>
               )}
             </div>
 
             {/* Missed Appointments Section */}
             <div className="bg-white p-4 rounded-lg shadow-md transition hover:shadow-lg max-h-96 overflow-y-auto">
               <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold mb-4 text-blue-500">Missed Appointments</h3>
-                <button
-                  onClick={handleViewMissedClick}
-                  className="bg-blue-400 rounded-full text-white px-2 py-1 hover:bg-blue-600 transition -mt-2"
-                >
-                  View List
-                </button>
+          <h3 className="text-lg font-semibold mb-4 text-blue-500">Missed Appointments</h3>
+          <button
+            onClick={handleViewMissedClick}
+            className="bg-blue-400 rounded-full text-white px-2 py-1 hover:bg-blue-600 transition -mt-2 text-sm md:text-base"
+          >
+            View List
+          </button>
               </div>
               {loading ? (
-                <p className="text-blue-600">Loading missed session data...</p>
+          <p className="text-blue-600">Loading missed session data...</p>
               ) : error ? (
-                <p className="text-red-500">{error}</p>
+          <p className="text-red-500">{error}</p>
               ) : (
-                <ul>
-                  {missedData.map((doc) => (
-                    <li key={doc.$id}>
-                      <p>{doc.client.firstname} {doc.client.lastname}</p>
-                    </li>
-                  ))}
-                </ul>
+          <ul>
+            {missedData.map((doc) => (
+              <li key={doc.$id}>
+                <p>{doc.client.firstname} {doc.client.lastname}</p>
+              </li>
+            ))}
+          </ul>
               )}
             </div>
 
-          {/* Payments Status Section */}
-          <div className="bg-white p-4 rounded-lg shadow-md transition hover:shadow-lg">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold mb-4 text-yellow-500">Pending Payments</h3>
-              <button
-                  onClick={handleViewPaymentClick}
-                  className="bg-blue-400 rounded-full text-white px-2 py-1 hover:bg-blue-600 transition -mt-2"
-                >
-                  View List
-                </button>
-            </div>
+            {/* Payments Status Section */}
+            <div className="bg-white p-4 rounded-lg shadow-md transition hover:shadow-lg">
+              <div className="flex justify-between items-center">
+          <h3 className="text-lg font-semibold mb-4 text-yellow-500">Pending Payments</h3>
+          <button
+            onClick={handleViewPaymentClick}
+            className="bg-blue-400 rounded-full text-white px-2 py-1 hover:bg-blue-600 transition -mt-2 text-sm md:text-base"
+          >
+            View List
+          </button>
+              </div>
               <ul>
-                {paymentsData.map((doc) => (
-                  <li key={doc.$id}>
-                    <p>{doc.client.firstname} {doc.client.lastname}</p>
-                  </li>
-                ))}
+          {paymentsData.map((doc) => (
+            <li key={doc.$id}>
+              <p>{doc.client.firstname} {doc.client.lastname}</p>
+            </li>
+          ))}
               </ul>
-          </div>
+            </div>
           </div>
         </div>
           
-        <div className="grid grid-cols-2 gap-4 mt-8 mx-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8 mx-4 md:mx-10">
           {/* Availability Calendar */}
           <div className='col-span-2 bg-white p-4 rounded-lg shadow-md transition hover:shadow-lg'>
             <Calendar
