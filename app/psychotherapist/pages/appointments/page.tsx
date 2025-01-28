@@ -3,7 +3,7 @@
 import Layout from "@/components/Sidebar/Layout";
 import items from "@/psychotherapist/data/Links";
 import { useEffect, useState } from "react";
-import { databases } from "@/appwrite"; 
+import { databases, Query } from "@/appwrite"; 
 import TakeNotesModal from '@/psychotherapist/components/TakeNotesModal'; 
 import CallModal from '@/psychotherapist/components/CallModal'; 
 import CountdownModal from '@/psychotherapist/components/CountdownModal';
@@ -18,7 +18,7 @@ interface Booking {
   clientName: string;
   date: string;
   time: string;
-  status: 'happening' | 'paid' | 'missed';
+  status: 'happening' | 'paid' | 'missed' | 'rescheduleRequest' | 'rescheduled' | 'declined';
   mode: 'f2f' | 'online';
 }
 
@@ -38,6 +38,9 @@ const Appointments = () => {
   const [happeningBookings, setHappeningBookings] = useState<Booking[]>([]);
   const [paidBookings, setPaidBookings] = useState<Booking[]>([]);
   const [missedBookings, setMissedBookings] = useState<Booking[]>([]);
+  const [rescheduleRequestBookings, setRescheduleRequestBookings] = useState<Booking[]>([]);
+  const [rescheduledBookings, setRescheduledBookings] = useState<Booking[]>([]);
+  const [declinedBookings, setDeclinedBookings] = useState<Booking[]>([]);
 
   // Fetch data from Appwrite
   useEffect(() => {
@@ -57,7 +60,9 @@ const Appointments = () => {
         setHappeningBookings(formattedData.filter((booking) => booking.status === "happening"));
         setPaidBookings(formattedData.filter((booking) => booking.status === "paid"));
         setMissedBookings(formattedData.filter((booking) => booking.status === "missed"));
-        
+        setRescheduleRequestBookings(formattedData.filter((booking) => booking.status === "rescheduleRequest"));
+        setRescheduledBookings(formattedData.filter((booking) => booking.status === "rescheduled"));
+        setDeclinedBookings(formattedData.filter((booking) => booking.status === "declined"));
         setLoading(false);
       } catch (err) {
         setError("Failed to fetch data.");
@@ -89,11 +94,91 @@ const Appointments = () => {
     setIsRescheduleModalOpen(true);
   };
 
-  const handleConfirmReschedule = () => {
-    console.log('Rescheduling:', selectedBooking); // For now, just log it
-    setIsRescheduleModalOpen(false);
-    // Optionally, refresh the data or update the state
+  const handleConfirmReschedule = async () => {
+    if (!selectedBooking) return;
+  
+    try {
+      // Update the booking status in the database
+      await databases.updateDocument(
+        'Butterfly-Database', // Database ID
+        'Bookings', // Collection ID
+        selectedBooking.id, // Document ID
+        { status: 'rescheduled' } // Fields to update
+      );
+  
+      console.log(`Booking ${selectedBooking.id} status updated to 'rescheduled'.`);
+  
+      // Fetch the payment associated with the booking
+      const paymentResponse = await databases.listDocuments('Butterfly-Database', 'Payment', [
+        Query.equal('booking', selectedBooking.id), // Assuming the payment document links to the booking by its ID
+      ]);
+  
+      if (paymentResponse.documents.length === 0) {
+        console.error(`No payment found for booking ${selectedBooking.id}.`);
+        return;
+      }
+  
+      // Get the most recent payment for the selected booking
+      const payment = paymentResponse.documents[0]; // Assuming there's one payment per booking
+  
+      // Update the payment status to 'rescheduled'
+      await databases.updateDocument(
+        'Butterfly-Database', // Database ID
+        'Payment', // Collection ID
+        payment.$id, // Document ID
+        { status: 'rescheduled' } // Fields to update
+      );
+  
+      console.log(`Payment ${payment.$id} status updated to 'rescheduled'.`);
+  
+      // Reflect the change in the state
+      setRescheduleRequestBookings((prev) =>
+        prev.filter((booking) => booking.id !== selectedBooking.id)
+      );
+  
+      setRescheduledBookings((prev) => [...prev, { ...selectedBooking, status: 'rescheduled' }]);
+  
+      // Optionally, reset selectedBooking and close the modal
+      setSelectedBooking(null);
+      setIsRescheduleModalOpen(false);
+  
+      console.log(`Booking ${selectedBooking.id} and its associated payment have been successfully rescheduled.`);
+    } catch (err) {
+      console.error("Failed to update booking or payment status:", err);
+    }
   };
+
+  const handleDeclineReschedule = async () => {
+    if (!selectedBooking) return;
+  
+    try {
+      // Update the booking status to 'declined' in the database
+      await databases.updateDocument(
+        'Butterfly-Database', // Database ID
+        'Bookings', // Collection ID
+        selectedBooking.id, // Document ID
+        { status: 'declined' } // Fields to update
+      );
+  
+      console.log(`Booking ${selectedBooking.id} status updated to 'declined'.`);
+  
+      // Reflect the change in the state
+      setRescheduleRequestBookings((prev) =>
+        prev.filter((booking) => booking.id !== selectedBooking.id)
+      );
+  
+      console.log(`Booking ${selectedBooking.id} and its associated payment have been declined.`);
+  
+      // Optionally reset selectedBooking and close the modal
+      setSelectedBooking(null);
+      setIsRescheduleModalOpen(false);
+    } catch (err) {
+      console.error("Failed to decline booking or payment status:", err);
+    }
+  };
+  
+  
+  
 
   if (authLoading) {
     return <LoadingScreen />;
@@ -168,10 +253,24 @@ const Appointments = () => {
                 ) : (
                   <p>No upcoming appointments.</p>
                 )}
+                {rescheduledBookings.length > 0 ? (
+                  <div className="grid grid-cols-1 gap-6 mt-4">
+                    {rescheduledBookings.map((booking, index) => (
+                      <div key={index} className="bg-blue-50 rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-200 border-l-4 border-blue-500">
+                        <h4 className="font-semibold text-blue-700">{booking.clientName}</h4>
+                        <p className="text-gray-600">Date: <span className="font-semibold">{booking.date}</span></p>
+                        <p className="text-gray-600">Time: <span className="font-semibold">{booking.time}</span></p>
+                        <p className="text-gray-600">Mode: <span className="font-semibold">{booking.mode}</span></p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p>No upcoming appointments.</p>
+                )}
               </div>
 
               <div className="mt-6">
-  <h3 className="font-semibold text-lg border-b-2 border-gray-300 pb-2">For Rescheduling</h3>
+  <h3 className="font-semibold text-lg border-b-2 border-gray-300 pb-2">Missed Appointments</h3>
   {missedBookings.length > 0 ? (
     <div className="grid grid-cols-1 gap-6 mt-4">
       {missedBookings.map((booking, index) => (
@@ -191,12 +290,44 @@ const Appointments = () => {
               Mode: <span className="font-semibold">{booking.mode}</span>
             </p>
           </div>
+        </div>
+      ))}
+    </div>
+  ) : (
+    <p>No missed appointments.</p>
+  )}
+</div>
+
+<div className="mt-6">
+  <h3 className="font-semibold text-lg border-b-2 border-gray-300 pb-2">Reschedule Request</h3>
+  {rescheduleRequestBookings.length > 0 ? (
+    <div className="grid grid-cols-1 gap-6 mt-4">
+      {rescheduleRequestBookings.map((booking, index) => (
+        <div
+          key={index}
+          className="bg-red-50 rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-200 border-l-4 border-red-500 flex justify-between items-center"
+        >
+          <div>
+            <h4 className="font-semibold text-red-700">{booking.clientName}</h4>
+            <p className="text-gray-600">
+              Date: <span className="font-semibold">{booking.date}</span>
+            </p>
+            <p className="text-gray-600">
+              Time: <span className="font-semibold">{booking.time}</span>
+            </p>
+            <p className="text-gray-600">
+              Mode: <span className="font-semibold">{booking.mode}</span>
+            </p>
+          </div>
           <div className="flex gap-2">
             <button
-              className="bg-red-500 text-white py-1 px-3 rounded hover:bg-red-600 transition-colors duration-200"
-              onClick={() => handleRescheduleOpen(booking)}
-            >
-              Decline
+                  className="bg-red-500 text-white py-1 px-3 rounded hover:bg-red-600 transition-colors duration-200"
+                  onClick={() => {
+                    setSelectedBooking(booking);
+                    handleDeclineReschedule();
+                  }}
+                >
+                  Decline
             </button>
             <button
               className="bg-green-500 text-white py-1 px-3 rounded hover:bg-green-600 transition-colors duration-200"
@@ -209,7 +340,36 @@ const Appointments = () => {
       ))}
     </div>
   ) : (
-    <p>No missed appointments.</p>
+    <p>No reschedule requests.</p>
+  )}
+</div>
+
+<div className="mt-6">
+  <h3 className="font-semibold text-lg border-b-2 border-gray-300 pb-2">Declined Appointments</h3>
+  {declinedBookings.length > 0 ? (
+    <div className="grid grid-cols-1 gap-6 mt-4">
+      {declinedBookings.map((booking, index) => (
+        <div
+          key={index}
+          className="bg-red-50 rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-200 border-l-4 border-red-500 flex justify-between items-center"
+        >
+          <div>
+            <h4 className="font-semibold text-red-700">{booking.clientName}</h4>
+            <p className="text-gray-600">
+              Date: <span className="font-semibold">{booking.date}</span>
+            </p>
+            <p className="text-gray-600">
+              Time: <span className="font-semibold">{booking.time}</span>
+            </p>
+            <p className="text-gray-600">
+              Mode: <span className="font-semibold">{booking.mode}</span>
+            </p>
+          </div>
+        </div>
+      ))}
+    </div>
+  ) : (
+    <p>No declined appointments.</p>
   )}
 </div>
 

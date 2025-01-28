@@ -50,9 +50,82 @@ const RescheduleBooking = () => {
     }
   };
 
-  const handleReschedule = () => {
+  const handleReschedule = async () => {
+    try {
+      // Fetch the logged-in user and their client ID
+      const user = await account.get();
+      const clientId = await fetchClientId(user.$id);
+  
+      // Fetch the most recent payment for the client
+      const paymentResponse = await databases.listDocuments('Butterfly-Database', 'Payment', [
+        Query.equal('client', clientId),
+      ]);
+  
+      if (paymentResponse.documents.length === 0) {
+        console.log("No payment found for this client.");
+        return;
+      }
+  
+      // Get the most recent payment
+      const sortedPayments = paymentResponse.documents.sort((a, b) => {
+        const dateA = new Date(a.$createdAt).getTime();
+        const dateB = new Date(b.$createdAt).getTime();
+        return dateB - dateA; // Sort in descending order
+      });
+  
+      const mostRecentPayment = sortedPayments[0];
+  
+      // Update the payment status to "reschedule"
+      await databases.updateDocument('Butterfly-Database', 'Payment', mostRecentPayment.$id, {
+        status: 'reschedule',
+      });
+  
+      console.log("Payment status successfully updated to 'reschedule'.");
+  
+      // Fetch the current booking for the client
+      const bookingResponse = await databases.listDocuments('Butterfly-Database', 'Bookings', [
+        Query.equal('client', clientId),
+      ]);
+  
+      if (bookingResponse.documents.length === 0) {
+        console.log("No booking found for this client.");
+        return;
+      }
+  
+      // Get the most recent booking (assuming there's only one active booking)
+      const booking = bookingResponse.documents[0];
+  
+      // Update the booking status to "rescheduleRequest"
+      await databases.updateDocument('Butterfly-Database', 'Bookings', booking.$id, {
+        status: 'rescheduleRequest',
+      });
+  
+      console.log("Booking status successfully updated to 'rescheduleRequest'.");
+      // Ensure the user has selected a new date and time
+      if (!appointmentData.selectedDay || !appointmentData.selectedTime) {
+        console.log("Please select a new date and time before rescheduling.");
+        return;
+      }
 
-  }
+      // Update the booking with the new date, time, and status
+      await databases.updateDocument('Butterfly-Database', 'Bookings', booking.$id, {
+        status: 'rescheduleRequest',
+        day: appointmentData.selectedDay,
+        month: appointmentData.selectedMonth,
+        slots: appointmentData.selectedTime,
+      });
+
+      console.log("Booking successfully updated with new date, time, and status.");
+
+      // Optionally redirect or show success message
+      router.push('/client/pages/bookappointment');
+      } catch (error) {
+      console.error("Error while updating booking:", error);
+      }
+
+
+  };
+  
 
   const confirmBooking = () => {
     setAppointmentData((prev) => ({
@@ -291,7 +364,7 @@ const RescheduleBooking = () => {
                             onClick={handleBookAppointment}
                             disabled={!isFormComplete}
                         >
-                            Book
+                            Reschedule
                         </button>
                     </div>
                 </div>
