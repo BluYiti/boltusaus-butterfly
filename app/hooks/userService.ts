@@ -286,3 +286,43 @@ export const fetchTimeSlots = async (): Promise<any[] | null> => {
         return null;
     }
 };
+
+// Add a new time slot to the database
+export const addTimeSlotToDatabase = async (timeSlot: { time: string, month: string, day: any }): Promise<boolean> => {
+    try {
+        const response = await databases.createDocument(
+            'Butterfly-Database', // Database ID
+            'TimeSlots',          // Collection ID
+            'unique()',           // Unique document ID
+            timeSlot              // Time slot data
+        );
+
+        console.log('Time slot added successfully:', response);
+        return true; // Return true if the time slot was added successfully
+    } catch (error) {
+        console.error('Error adding time slot to database:', error);
+        return false; // Return false if an error occurred
+    }
+};
+
+// Delete a time slot from the database by time attribute
+export const deleteTimeSlotFromDatabase = async (time: string): Promise<boolean> => {
+    try {
+        const response = await databases.listDocuments('Butterfly-Database', 'TimeSlots', [
+            Query.equal('time', time),
+        ]);
+
+        if (response.documents.length > 0) {
+            const documentId = response.documents[0].$id;
+            await databases.deleteDocument('Butterfly-Database', 'TimeSlots', documentId);
+            console.log('Time slot deleted successfully');
+            return true; // Return true if the time slot was deleted successfully
+        } else {
+            console.log('No time slot found with the specified time');
+            return false; // Return false if no time slot was found
+        }
+    } catch (error) {
+        console.error('Error deleting time slot from database:', error);
+        return false; // Return false if an error occurred
+    }
+};

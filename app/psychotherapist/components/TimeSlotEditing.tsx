@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { fetchTimeSlots } from '@/hooks/userService';
+import { addTimeSlotToDatabase, deleteTimeSlotFromDatabase, fetchTimeSlots } from '@/hooks/userService';
 
 interface TimeSlotAddingProps {
   selectedDay: number | null;
@@ -10,7 +10,11 @@ const TimeSlotAdding: React.FC<TimeSlotAddingProps> = ({ selectedDay, selectedMo
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [timeSlots, setTimeSlots] = useState<string[]>([]);
   const [showDropdown, setShowDropdown] = useState<boolean>(false);
+  const [selectedHour, setSelectedHour] = useState<string>('');
+  const [selectedMinute, setSelectedMinute] = useState<string>('');
+  const [selectedPeriod, setSelectedPeriod] = useState<string>('AM');
   const [loading, setLoading] = useState<boolean>(true);
+  const [showEditDropdown, setShowEditDropdown] = useState<boolean>(false);
 
   useEffect(() => {
     const getTimeSlots = async () => {
@@ -27,18 +31,6 @@ const TimeSlotAdding: React.FC<TimeSlotAddingProps> = ({ selectedDay, selectedMo
     getTimeSlots();
   }, []);
 
-  if (!selectedDay || !selectedMonth) {
-    return null;
-  }
-
-  const handleAddTimeSlot = (type: string) => {
-    if (type === 'global') {
-      // logic to add global time slot
-    } else if (type === 'single') {
-      // logic to add time slot for a single date
-    }
-  };
-
   const handleDisableTimeSlot = () => {
     // logic to disable selected time slot
   };
@@ -47,10 +39,51 @@ const TimeSlotAdding: React.FC<TimeSlotAddingProps> = ({ selectedDay, selectedMo
     // logic to disable the entire day
   };
 
+  const handleAddTimeSlot = async (type: string) => {
+    const timeString = `${selectedHour.padStart(2, '0')}:${selectedMinute.padStart(2, '0')}${selectedPeriod}`;
+    let newTimeSlot;
+    if (type === 'global') {
+      newTimeSlot = {
+        time: timeString,
+        month: "all",
+        day: null,
+      };
+    } else if (type === 'single') {
+      newTimeSlot = {
+        time: timeString,
+        month: selectedMonth,
+        day: selectedDay,
+      };
+    }
+    try {
+      await addTimeSlotToDatabase(newTimeSlot);
+      console.log('Added time slot:', newTimeSlot);
+      setTimeSlots([...timeSlots, timeString]);
+    } catch (error) {
+      console.error('Error adding time slot:', error);
+    }
+  };
+
+  const handleDeleteTimeSlot = async (selectedTimeSlot: string) => {
+    try {
+      // Assuming you have a function to delete a time slot from the database
+      await deleteTimeSlotFromDatabase(selectedTimeSlot);
+      console.log('Deleted time slot:', selectedTimeSlot);
+      // Update the state to remove the deleted time slot from the list
+      setTimeSlots(timeSlots.filter(time => time !== selectedTimeSlot));
+    } catch (error) {
+      console.error('Error deleting time slot:', error);
+    }
+  };
+
   const isSlotBooked = (day: number, time: string) => {
     // logic to check if the slot is booked
     return false;
   };
+
+  if (!selectedDay || !selectedMonth) {
+    return null;
+  }
 
   return (
     <>
@@ -98,7 +131,7 @@ const TimeSlotAdding: React.FC<TimeSlotAddingProps> = ({ selectedDay, selectedMo
             </button>
             {showDropdown && (
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-              <div className="bg-white rounded-lg shadow-lg w-1/3">
+              <div className="bg-white rounded-lg shadow-lg w-full max-w-md mx-4 md:mx-0">
                 <div className="flex justify-between items-center p-4 border-b">
                 <h2 className="text-xl font-semibold">Add Time Slot</h2>
                 <button
@@ -123,25 +156,45 @@ const TimeSlotAdding: React.FC<TimeSlotAddingProps> = ({ selectedDay, selectedMo
                   Add Time Slot for a Single Date
                   </button>
                 </div>
-                {selectedTime === 'global' && (
-                  <div>
-                  <button
-                    className="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 text-left"
-                    onClick={() => handleAddTimeSlot('global')}
-                  >
-                    Add Global Time Slot
-                  </button>
-                  </div>
-                )}
-                {selectedTime === 'single' && (
-                  <div>
-                  <button
-                    className="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 text-left"
-                    onClick={() => handleAddTimeSlot('single')}
-                  >
-                    Add Time Slot for a Single Date
-                  </button>
-                  </div>
+                {(selectedTime === 'global' || selectedTime === 'single') && (
+                    <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 mb-2">
+                    <input
+                    type="number"
+                    min={1}
+                    max={12}
+                    className="border rounded-lg py-2 px-4 w-full md:w-1/4"
+                    placeholder="HH"
+                    value={selectedHour}
+                    onChange={(e) => setSelectedHour(e.target.value)}
+                    />
+                    <input
+                    type="number"
+                    min={0}
+                    max={59}
+                    className="border rounded-lg py-2 px-4 w-full md:w-1/4"
+                    placeholder="MM"
+                    value={selectedMinute}
+                    onChange={(e) => setSelectedMinute(e.target.value)}
+                    />
+                    <select
+                    className="border rounded-lg py-2 px-4 w-full md:w-1/4"
+                    value={selectedPeriod}
+                    onChange={(e) => setSelectedPeriod(e.target.value)}
+                    >
+                    <option value="AM">AM</option>
+                    <option value="PM">PM</option>
+                    </select>
+                    <button
+                    className="bg-blue-500 text-white py-2 px-4 rounded-lg w-full md:w-1/4 hover:bg-blue-600"
+                    onClick={() => {
+                      const timeString = `${selectedHour.padStart(2, '0')}:${selectedMinute.padStart(2, '0')}${selectedPeriod}`;
+                      setSelectedTime(timeString);
+                      handleAddTimeSlot(selectedTime);
+                    }}
+                    >
+                    {selectedTime === 'global' ? 'Add Global Time Slot' : 'Add Time Slot for a Single Date'}
+                    </button>
+                    </div>
                 )}
                 </div>
               </div>
@@ -149,15 +202,10 @@ const TimeSlotAdding: React.FC<TimeSlotAddingProps> = ({ selectedDay, selectedMo
             )}
           </div>
           <button
-            className={`bg-yellow-500 text-white py-2 px-4 rounded-lg mr-2 ${!selectedTime ? "opacity-50 cursor-not-allowed" : "hover:bg-yellow-600"}`}
-            disabled={!selectedTime}
-          >
-            Edit Time Slot
-          </button>
-          <button
             className={`bg-red-500 text-white py-2 px-4 rounded-lg mr-2 ${!selectedTime ? "opacity-50 cursor-not-allowed" : "hover:bg-red-600"}`}
             disabled={!selectedTime}
-          >
+            onClick={() => handleDeleteTimeSlot(selectedTime)}
+            >
             Delete Time Slot
           </button>
         </div>
