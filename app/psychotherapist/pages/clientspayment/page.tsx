@@ -72,7 +72,7 @@ const ClientsPayment = () => {
 
           return {
             referenceNo: doc.referenceNo,
-            mode: doc.booking.mode,  // Accessing `mode` from `booking`
+            mode: doc.booking?.mode || "",  // Accessing `mode` from `booking` with null check
             channel: doc.channel,
             amount: doc.amount,
             status: doc.status,
@@ -206,7 +206,7 @@ const ClientsPayment = () => {
           <h2 className="text-2xl font-bold text-blue-400">Client&apos;s Payment</h2>
         </div>
 
-        <div className="mt-24 px-5">
+        <div className="mt-24 px-5 mb-5 ">
           <div className="flex items-center justify-between">
             <div className="flex space-x-8 border-b">
               {["Pending", "Paid", "Rescheduled", "Refunded", "Report"].map((tab) => (

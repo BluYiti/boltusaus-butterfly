@@ -25,11 +25,6 @@ const PaymentModal = ({ onClose, client }) => {
   const [error, setError] = useState(''); // State to manage the error message
   const [actionType, setActionType] = useState(null);
 
-  // Check if client is available
-  if (!client) {
-    return <div>Loading...</div>; // Show loading message or fallback UI if client is not available
-  }
-
   // Move logic into the conditionally rendered sections or useEffect if needed
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -119,6 +114,11 @@ const PaymentModal = ({ onClose, client }) => {
       console.error('Failed to update document', error);
     }
   };
+
+  // Check if client is available
+  if (!client) {
+    return; // Show loading message or fallback UI if client is not available
+  }
 
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
