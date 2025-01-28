@@ -201,17 +201,17 @@ const Clients = () => {
 
   const renderClientList = () => {
     if (loading) {
-      return <div className="text-center">Loading clients...</div>;
+      return <div className="text-left">Loading clients...</div>;
     }
 
-    if (authLoading ) {
+    if (authLoading) {
       return <LoadingScreen />; // Show the loading screen while the auth check or data loading is in progress
-  }
+    }
 
     return (
       <div className="mt-4 space-y-3">
         {renderClients().map((client, index) => (
-          <div key={index} className="flex items-center justify-between p-4 bg-white shadow rounded-lg">
+          <div key={index} className="flex flex-col md:flex-row items-start md:items-center justify-between p-4 bg-white shadow rounded-lg">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 rounded-full bg-gray-200">
                 <Image
@@ -264,7 +264,7 @@ const Clients = () => {
                   setSelectedClientId(client.id);
                   setIsProfileModalOpen(true);
                 }}
-                className="px-4 py-2 text-sm font-semibold text-white bg-blue-400 rounded-full hover:bg-blue-600 transition"
+                className="mt-2 md:mt-0 px-4 py-2 text-sm font-semibold text-white bg-blue-400 rounded-full hover:bg-blue-600 transition"
               >
                 View Profile
               </button>
@@ -275,7 +275,7 @@ const Clients = () => {
                   setSelectedClientId(client.id);
                   setIsReferredProfileModalOpen(true);
                 }}
-                className="px-4 py-2 text-sm font-semibold text-white bg-blue-400 rounded-full hover:bg-blue-600 transition"
+                className="mt-2 md:mt-0 px-4 py-2 text-sm font-semibold text-white bg-blue-400 rounded-full hover:bg-blue-600 transition"
               >
                 View Profile
               </button>
@@ -286,7 +286,7 @@ const Clients = () => {
                   setSelectedClientId(client.id);
                   setIsPreAssessmentModalOpen(true); // Open the new pre-assessment modal
                 }}
-                className="px-4 py-2 text-sm font-semibold text-white bg-blue-400 rounded-full hover:bg-blue-600 transition"
+                className="mt-2 md:mt-0 px-4 py-2 text-sm font-semibold text-white bg-blue-400 rounded-full hover:bg-blue-600 transition"
               >
                 View Pre-Assessment
               </button>
@@ -305,7 +305,7 @@ const Clients = () => {
         </div>
 
         <div className="mt-24 px-5">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col md:flex-row items-center justify-between">
             <div className="flex space-x-8 border-b">
               {["Current", "To Be Evaluated", "For Referral"].map((tab) => (
                 <button
@@ -322,8 +322,8 @@ const Clients = () => {
               ))}
             </div>
 
-            <div className="flex space-x-4">
-              <div className="relative w-80">
+            <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 mt-4 md:mt-0">
+              <div className="relative w-full md:w-80">
                 <div className="absolute inset-y-0 left-0 flex items-center pl-3">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -350,7 +350,7 @@ const Clients = () => {
               </div>
 
               {activeTab === "For Referral" && (
-                <div className="relative w-48">
+                <div className="relative w-full md:w-48">
                   <select
                     className="w-full px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
                     value={filterStatus}
