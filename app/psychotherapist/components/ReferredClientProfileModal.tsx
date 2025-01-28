@@ -136,51 +136,51 @@ const ReferredClientProfileModal: React.FC<ReferredClientProfileModalProps> = ({
           ) : (
           clientData && (
             <>
-              <div className=" flex space-x-12 items-center">
+                <div className="flex flex-col md:flex-row space-y-6 md:space-y-0 md:space-x-12 items-center">
                 <div className="flex-shrink-0 text-center">
                   <Image
-                    src={clientData.profilePictureUrl || '/default-profile.jpg'} // Fallback to default profile image
-                    alt="Profile"
-                    width={192}  // Width of the image (48 * 4 for higher resolution)
-                    height={192} // Height of the image (48 * 4 for higher resolution)
-                    className="rounded-full object-cover mx-auto"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement; // Cast e.target to HTMLImageElement
-                      target.src = '/default-profile.jpg'; // Handle fallback logic
-                    }}
-                    priority // Use priority if this image is important for initial load
+                  src={clientData.profilePictureUrl || '/default-profile.jpg'} // Fallback to default profile image
+                  alt="Profile"
+                  width={192}  // Width of the image (48 * 4 for higher resolution)
+                  height={192} // Height of the image (48 * 4 for higher resolution)
+                  className="rounded-full object-cover mx-auto"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement; // Cast e.target to HTMLImageElement
+                    target.src = '/default-profile.jpg'; // Handle fallback logic
+                  }}
+                  priority // Use priority if this image is important for initial load
                   />
                   <h2 className="mt-4 text-2xl font-bold text-gray-800">
-                    {clientData.firstname} {clientData.lastname}
+                  {clientData.firstname} {clientData.lastname}
                   </h2>
                 </div>
                 <div className="flex-grow">
                   <h3 className="text-xl font-bold mb-2 text-gray-900">Client’s Profile</h3>
-                  <div className="grid grid-cols-2 gap-6 text-gray-700">
-                    <div>
-                      <p><strong>Home Address:</strong> {clientData.address}</p>
-                      <p><strong>Date of Birth:</strong> {clientData.birthdate}</p>
-                      <p><strong>Contact Number:</strong> {clientData.phonenum}</p>
-                      <p><strong>Sex:</strong> {clientData.sex || 'Not Specified'}</p>
-                      <p><strong>Age:</strong> {clientData.age || 'Not Specified'}</p>
-                      <p><strong>Email Address:</strong> {clientData.email}</p>
-                    </div>
-                    <div>
-                      <p><strong>Emergency Contact Person:</strong> {clientData.emergencyContact}</p>
-                      <p><strong>Conditions:</strong></p>
-                      <ul className="list-disc pl-4">
-                        {Array.isArray(clientData.conditions) && clientData.conditions.length > 0 ? (
-                          clientData.conditions.map((condition, index) => (
-                            <li key={index}>{condition}</li>
-                          ))
-                        ) : (
-                          <li>No conditions available</li>
-                        )}
-                      </ul>
-                    </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-700">
+                  <div>
+                    <p><strong>Home Address:</strong> {clientData.address}</p>
+                    <p><strong>Date of Birth:</strong> {clientData.birthdate}</p>
+                    <p><strong>Contact Number:</strong> {clientData.phonenum}</p>
+                    <p><strong>Sex:</strong> {clientData.sex || 'Not Specified'}</p>
+                    <p><strong>Age:</strong> {clientData.age || 'Not Specified'}</p>
+                    <p><strong>Email Address:</strong> {clientData.email}</p>
+                  </div>
+                  <div>
+                    <p><strong>Emergency Contact Person:</strong> {clientData.emergencyContact}</p>
+                    <p><strong>Conditions:</strong></p>
+                    <ul className="list-disc pl-4">
+                    {Array.isArray(clientData.conditions) && clientData.conditions.length > 0 ? (
+                      clientData.conditions.map((condition, index) => (
+                      <li key={index}>{condition}</li>
+                      ))
+                    ) : (
+                      <li>No conditions available</li>
+                    )}
+                    </ul>
+                  </div>
                   </div>
                 </div>
-              </div>
+                </div>
 
               <div className="mt-8 flex justify-center space-x-6">
                 <button
