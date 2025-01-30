@@ -91,17 +91,17 @@ const ProfilePage: React.FC = () => {
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
       <div className="text-black min-h-screen flex bg-gradient-to-r from-blue-500 to-blue-700">
-        <div className="flex-grow flex flex-col bg-white px-12 py-10 shadow-lg overflow-y-auto">
-          <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white py-5 px-8 flex justify-between items-center rounded-lg shadow-md mb-10">
+        <div className="flex-grow flex flex-col bg-white px-4 md:px-12 py-10 shadow-lg overflow-y-auto">
+          <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white py-5 px-4 md:px-8 flex justify-between items-center rounded-lg shadow-md mb-10">
             <h1 className="text-2xl font-semibold">Account Profile</h1>
           </div>
 
-          <div className="bg-white shadow-xl p-10 rounded-lg">
+          <div className="bg-white shadow-xl p-4 md:p-10 rounded-lg">
             <div className="relative flex flex-col items-center text-center mb-10">
               <Image
                 src={profileImageUrls[clientId] || "/images/default-profile.png"}
                 alt="Profile"
-                className="rounded-full w-40 h-40 object-cover bg-gray-200 shadow-lg border-4 border-white"
+                className="rounded-full w-32 h-32 md:w-40 md:h-40 object-cover bg-gray-200 shadow-lg border-4 border-white"
                 width={160}
                 height={160}
                 unoptimized
@@ -109,7 +109,7 @@ const ProfilePage: React.FC = () => {
               <h2 className="mt-6 text-2xl font-semibold text-gray-900">{name || 'Loading...'}</h2>
             </div>
 
-            <div className="bg-gray-50 p-8 rounded-lg shadow-md">
+            <div className="bg-gray-50 p-4 md:p-8 rounded-lg shadow-md">
               <h2 className="text-lg font-bold text-blue-400 mb-6">Personal Information</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
