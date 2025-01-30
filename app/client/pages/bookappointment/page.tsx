@@ -439,21 +439,21 @@ const AppointmentBooking = () => {
                     />
                   </div>
 
-                  {/* Therapy Mode Selection */}
-                  <div className="mb-4">
+                    {/* Therapy Mode Selection */}
+                    <div className="mb-4">
                     <label className="block mb-2 text-lg font-medium text-gray-700">
                       Select Therapy Mode {!appointmentData.selectedMode && <span className="text-red-500">*</span>}
                     </label>
                     <select
                       value={appointmentData.selectedMode || ""}
                       onChange={(e) => setAppointmentData(prev => ({ ...prev, selectedMode: e.target.value }))}
-                      className="border w-32 border-gray-300 rounded-lg p-2"
+                      className="border w-full sm:w-32 border-gray-300 rounded-lg p-2"
                     >
                       <option value="" disabled>Select Mode</option>
                       <option value="online">Online</option>
                       <option value="f2f">In-Person</option>
                     </select>
-                  </div>
+                    </div>
 
                   {/* Selected Info */}
                   <div className="mt-6">
