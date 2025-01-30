@@ -121,53 +121,78 @@ const NewClientDashboard = () => {
             </Link>
           )}
 
-          {state === "current" && (
-            <div className="mb-4 text-green-600 text-4xl flex items-center">
-              <Link href="/client/pages/bookappointment">
-          <button className="text-xl font-semibold bg-blue-500 hover:bg-gray-500 text-white py-2 px-4 rounded">
-            Book your appointment
-          </button>
-              </Link>
-              <span className="ml-3 text-green-600 animate-bounce">✅</span>
-              <span className="text-lg font-bold">Evaluation Completed!</span>
-            </div>
-          )}
+            {state === "current" && (
+              <div className="mb-6 flex flex-col items-center lg:flex-row lg:justify-center text-center lg:text-left space-y-3 lg:space-y-0 lg:space-x-4 p-4 bg-white shadow-lg rounded-xl">
+                
+                {/* Book Appointment Button */}
+                <Link href="/client/pages/bookappointment">
+                  <button className="text-lg font-semibold bg-blue-800 hover:bg-blue-700 transition-colors duration-300 text-white py-3 px-6 rounded-xl w-full lg:w-auto shadow-md">
+                    📅 Book Your Appointment
+                  </button>
+                </Link>
 
-            {state === "evaluate" && (
-            <>
-              <div className="relative group flex flex-col lg:flex-row items-start lg:items-center space-y-2 lg:space-y-0 lg:space-x-2"> {/* Wrapper for hover effect */}
-              <button
-                className="bg-gray-300 text-green-500 font-bold py-2 px-4 rounded cursor-not-allowed w-full lg:w-auto"
-                disabled
-              >
-                Preassessment Done!
-              </button>
-              <p className="bg-[#2563EB] text-white py-2 px-4 rounded w-full lg:w-auto">
-                Please wait for the confirmation here in your dashboard, it might take 1-2 days! Thank You for your patience!
-              </p>
+                {/* Animated Checkmark */}
+                <span className="text-green-600 animate-bounce text-2xl">✅</span>
+
+                {/* Evaluation Completed Message */}
+                <span className="text-lg font-bold text-gray-700">Evaluation Completed!</span>
               </div>
-            </>
             )}
 
-          {state === "referred" && status === "pending" && (
-            <div className="mb-4 text-green-600 text-4xl flex items-center">
-              <span className="text-green-600 animate-bounce">✅</span>
-              <span className="ml-2 text-lg font-bold">You have been referred. Your certificate of referral is on the way!</span>
-            </div>
-          )}
+  
 
-          {state === "referred" && status === "attached" && (
-            <div className="mb-4 text-green-600 text-4xl flex items-center">
-              <button
-          className="text-xl font-semibold bg-blue-500 hover:bg-gray-500 text-white py-2 px-4 rounded"
-          onClick={handleDownload}
-              >
-          Click me to download Certificate.
-              </button>
-              <span className="text-green-600 animate-bounce">✅</span>
-              <span className="ml-2 text-lg font-bold">You have been referred</span>
-            </div>
-          )}
+            {state === "evaluate" && (
+              <div className="relative flex flex-col items-center lg:flex-row lg:justify-center space-y-3 lg:space-y-0 lg:space-x-4 p-4 bg-white shadow-lg rounded-xl text-center lg:text-left">
+                
+                {/* Disabled Preassessment Button */}
+                <button
+                  className="bg-gray-300 text-green-600 font-semibold py-3 px-6 rounded-xl w-full lg:w-auto shadow-md cursor-not-allowed"
+                  disabled
+                >
+                  ✅ Preassessment Done!
+                </button>
+
+                {/* Confirmation Message */}
+                <p className="bg-blue-400 text-white py-3 px-6 rounded-xl w-full lg:w-auto shadow-md">
+                  ⏳ Please wait for confirmation in your dashboard. It may take 1-2 days.  
+                  Thank you for your patience!
+                </p>
+              </div>
+            )}
+
+
+            {state === "referred" && status === "pending" && (
+              <div className="mb-6 flex flex-col items-center lg:flex-row lg:justify-center space-y-3 lg:space-y-0 lg:space-x-4 p-4 bg-blue-400 shadow-lg rounded-xl text-center lg:text-left">
+                
+                {/* Animated Checkmark */}
+                <span className="text-green-600 animate-bounce text-3xl">✅</span>
+
+                {/* Referral Message */}
+                <span className="text-lg font-bold text-white">
+                  You have been referred. Your certificate of referral is on the way!📜✨
+                </span>
+              </div>
+            )}
+
+            {state === "referred" && status === "attached" && (
+              <div className="mb-6 flex flex-col items-center lg:flex-row lg:justify-center space-y-3 lg:space-y-0 lg:space-x-4 p-4 bg-white shadow-lg rounded-xl text-center lg:text-left">
+                
+                {/* Download Button */}
+                <button
+                  className="text-lg font-semibold bg-blue-600 hover:bg-blue-700 transition-colors duration-300 text-white py-3 px-6 rounded-xl shadow-md"
+                  onClick={handleDownload}
+                >
+                  📥 Click to Download Certificate
+                </button>
+
+                {/* Animated Checkmark */}
+                <span className="text-green-600 animate-bounce text-3xl">✅</span>
+
+                {/* Confirmation Message */}
+                <span className="text-lg font-bold text-gray-700">You have been referred! 🎉</span>
+              </div>
+            )}
+
 
           {/* Psychotherapists Section */}
             <div className="relative overflow-hidden">
@@ -213,25 +238,25 @@ const NewClientDashboard = () => {
         {/* Right side - A Daily Reminder Section */}
         <div className="flex-1 bg-white p-6 rounded-lg shadow-lg mt-8 h-auto lg:h-[27rem] w-full">
           <h2 className="font-bold sm:text-2xl 2xl:text-4xl text-blue-950 mb-6">A Daily Reminder to Yourself</h2>
-          <div className="sm:space-y-5 3xl:space-y-8 max-h-[300px] text-black">
+          <div className="space-y-5 max-h-[300px] text-black">
               <div className="bg-blue-50 border-blue-300 p-2 rounded-lg shadow-lg transition-transform transform hover:scale-105 hover:shadow-2xl duration-300">
-                  <h2 className="font-semibold text-lg mb-2">😊 This Too Shall Pass</h2>
-                  <p className="text-gray-800">Feelings are temporary. Hold on, better days are coming.</p>
+            <h2 className="font-semibold text-lg mb-2">😊 This Too Shall Pass</h2>
+            <p className="text-gray-800">Feelings are temporary. Hold on, better days are coming.</p>
               </div>
               <div className="bg-blue-50 border-blue-300 p-2 rounded-lg shadow-lg transition-transform transform hover:scale-105 hover:shadow-2xl duration-300">
-                  <h3 className="font-semibold text-lg mb-2">😮‍💨 Breathe In, Let Go</h3>
-                  <p className="text-gray-800">Take a moment to breathe. Release the tension in your mind and body.</p>
+            <h3 className="font-semibold text-lg mb-2">😮‍💨 Breathe In, Let Go</h3>
+            <p className="text-gray-800">Take a moment to breathe. Release the tension in your mind and body.</p>
               </div>
               <div className="bg-blue-50 border-blue-300 p-2 rounded-lg shadow-lg transition-transform transform hover:scale-105 hover:shadow-2xl duration-300">
-                  <h3 className="font-semibold text-lg mb-2">🫵 You Are Enough.</h3>
-                  <p className="text-gray-800">Your worth isn&apos;t measured by your struggles. You are enough just as you are.</p>
+            <h3 className="font-semibold text-lg mb-2">🫵 You Are Enough.</h3>
+            <p className="text-gray-800">Your worth isn&apos;t measured by your struggles. You are enough just as you are.</p>
               </div>
           </div>
         </div>
-      </div>
+            </div>
 
-      {/* What to do section */}
-      <div className="flex flex-col lg:flex-row justify-between items-start space-x-8 px-8 w-full">
+            {/* What to do section */}
+            <div className="flex flex-col lg:flex-row justify-between items-start space-y-8 lg:space-y-0 lg:space-x-8 px-8 w-full">
         <div className="bg-white rounded-lg shadow-lg p-6 w-full mb-8">
           <h2 className="text-lg font-semibold text-blue-500">What to do during your freetime?</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
@@ -253,7 +278,7 @@ const NewClientDashboard = () => {
             </div>
           </div>
         </div>
-      </div>
+            </div>
 
       {/* Psychotherapist Modal */}
       {isModalOpen && selectedPsychotherapist && (
