@@ -10,16 +10,18 @@ const RegisterPage: React.FC = () => {
         <div className='overflow-hidden flex flex-col items-center min-h-screen'>
             <Back />
             <h1 className="fixed top-5 left-20 text-[#2081c3] text-2xl md:text-3xl font-bold">Butterfly</h1>
-            <Image 
-                src={"/images/registerfly.png"} 
-                alt='butterfly' 
-                width={540} 
-                height={540} 
-                priority // Set priority for LCP
-                className="fixed object-contain max-w-full h-auto 3xl:left-48 3xl:top-64 sm:left-12 sm:top-44" // Maintain aspect ratio
-            />
-            <div className="flex justify-end items-end">
-                <div className="ml-[35rem]">
+            <div className="hidden sm:block">
+                <Image 
+                    src={"/images/registerfly.png"} 
+                    alt='butterfly' 
+                    width={540} 
+                    height={540} 
+                    priority // Set priority for LCP
+                    className="fixed object-contain max-w-full h-auto 3xl:left-48 3xl:top-64 sm:left-12 sm:top-44" // Maintain aspect ratio
+                />
+            </div>
+            <div className="flex justify-end items-end w-full px-4 sm:px-0">
+                <div className="w-full sm:w-auto sm:ml-[35rem]">
                     <RegisterForm 
                         isAdult={true}  // Pass the `isAdult` prop to indicate adult registration
                         error={null}
