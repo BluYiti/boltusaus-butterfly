@@ -11,6 +11,7 @@ import { account, databases, storage } from '@/appwrite';
 import useAuthCheck from '@/auth/page';
 import LoadingScreen from '@/components/LoadingScreen';
 
+
 // Define interfaces
 interface Contact {
   id: string;
@@ -31,7 +32,7 @@ interface Message {
 // Contact List component
 const ContactList: FC<{ onContactClick: (id: string) => void; selectedContact: string | null; contacts: Contact[] }> = ({ onContactClick, selectedContact, contacts }) => {
   return (
-    <div className="w-1/4 bg-gray-100 p-4 border-r border-gray-200">
+    <div className="w-full md:w-1/4 bg-gray-100 p-4 border-r border-gray-200">
       <div className="flex items-center bg-white p-2 rounded-full mb-4">
         <FaSearch className="text-gray-400 ml-2" />
         <input
