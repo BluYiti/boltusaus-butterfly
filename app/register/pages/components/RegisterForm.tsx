@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react';
+import React, { useState } from 'react';
 import termsContent from '@/constants/terms';
 import privacyContent from '@/constants/privacy';
 import TermsAndPrivacy from '../../../components/TermsAndPrivacy';
@@ -15,6 +15,7 @@ import { useFetchBarangays } from '@/register/pages/hooks/useFetch/useFetchBaran
 import { useRouter } from 'next/navigation';
 
 const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
+    const [isFocused, setIsFocused] = useState(false);
     const router = useRouter();
 
     const {
@@ -528,12 +529,16 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
                             type="password"
                             value={password}
                             onChange={handlePasswordChange}
+                            onFocus={() => setIsFocused(true)}
+                            onBlur={() => setIsFocused(false)}
                             placeholder="********"
-                            className={`border rounded-xl pl-3 pr-10 py-2 w-full text-gray-500 ${isPasswordValid ? 'border-green-500' : 'border-red-500'}`}
+                            className={`border rounded-xl pl-3 pr-10 py-2 w-full text-gray-500 ${
+                                isPasswordValid ? 'border-green-500' : 'border-red-500'
+                            }`}
                         />
-                        {/* Password requirements */}
-                        {!isPasswordValid && (
-                            <div className="absolute left-0 top-full mt-2 bg-white bg-opacity-95 border rounded-xl w-full p-2 text-sm text-gray-500">
+                        {/* Show password requirements only when the input is focused */}
+                        {isFocused && (
+                            <div className="absolute left-0 top-full mt-2 bg-white bg-opacity-95 border rounded-xl w-full p-2 text-sm text-gray-500 shadow-md">
                                 <p className={`text-sm ${passwordCriteria.length ? 'text-green-500' : 'text-red-500'}`}>
                                     - At least 8 characters
                                 </p>
