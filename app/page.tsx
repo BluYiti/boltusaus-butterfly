@@ -274,7 +274,6 @@ const HomePage: React.FC = () => {
           </div>
         </div>
       </section>
-
       {/* Contacts Section */}
       <section id="contacts" className="py-8 md:py-32 bg-[#c2dffd]">
         <div className="max-w-4xl mx-auto text-center md:text-left px-4">
@@ -314,25 +313,25 @@ const HomePage: React.FC = () => {
         <div className="text-center md:text-left mt-4 md:ml-36 flex flex-col md:flex-row justify-center md:justify-between items-center">
           <div>
         <button
-            type="button"
-            onClick={() => {
+          type="button"
+          onClick={() => {
             setIsModalOpen(true);
             setModalContentType('terms');
-            }}
-            className="text-blue-500 hover:underline ml-1"
+          }}
+          className="text-blue-500 hover:underline ml-1"
         >
-            Terms and Conditions
+          Terms and Conditions
         </button>
         &nbsp;|&nbsp;
         <button
-            type="button"
-            onClick={() => {
+          type="button"
+          onClick={() => {
             setIsModalOpen(true);
             setModalContentType('privacy');
-            }}
-            className="text-blue-500 hover:underline ml-1"
+          }}
+          className="text-blue-500 hover:underline ml-1"
         >
-            Privacy Policy
+          Privacy Policy
         </button>
           </div>
         </div>
