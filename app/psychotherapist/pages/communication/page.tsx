@@ -1,7 +1,7 @@
 'use client';
 
 import { FC, useState, useEffect, useRef, useCallback } from 'react';
-import { FaVideo, FaSearch } from 'react-icons/fa';
+import { FaSearch, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import Layout from '@/components/Sidebar/Layout';
 import VideoCall from '@/components/VideoCall';
 import items from '@/psychotherapist/data/Links';
@@ -10,7 +10,6 @@ import Image from 'next/image';
 import { account, databases, storage } from '@/appwrite';
 import useAuthCheck from '@/auth/page';
 import LoadingScreen from '@/components/LoadingScreen';
-
 
 // Define interfaces
 interface Contact {
@@ -29,56 +28,82 @@ interface Message {
   time: string;
 }
 
-// Contact List component
-const ContactList: FC<{ onContactClick: (id: string) => void; selectedContact: string | null; contacts: Contact[] }> = ({ onContactClick, selectedContact, contacts }) => {
+const ContactList: FC<{
+  onContactClick: (id: string) => void;
+  selectedContact: string | null;
+  contacts: Contact[];
+}> = ({ onContactClick, selectedContact, contacts }) => {
+  const [isMinimized, setIsMinimized] = useState(false);
+
   return (
-    <div className="bg-gray-100 border-gray-200 overflow-x-auto">
-      {/* Sticky Search Bar */}
-      <div className="sticky top-0 bg-white z-10 shadow">
-        <div className="flex items-center bg-white p-2 rounded-lg">
-          <FaSearch className="text-gray-400 ml-2" />
-          <input
-            type="text"
-            placeholder="Search"
-            className="flex-grow bg-transparent p-2 outline-none text-sm"
-          />
+    <>
+      {/* Floating Button when Minimized */}
+      {isMinimized && (
+        <button
+          className="fixed top-4 left-4 z-20 p-3 bg-white shadow-lg rounded-full hover:bg-gray-200 transition md:hidden"
+          onClick={() => setIsMinimized(false)}
+        >
+          <FaChevronRight />
+        </button>
+      )}
+
+      <div
+        className={`bg-gray-100 border-gray-200 transition-all duration-300 overflow-hidden h-full flex flex-col 
+        ${isMinimized ? "w-0 hidden" : "w-full sm:w-1/3 md:w-1/4 lg:w-1/5"}`}
+      >
+        {/* Sticky Search Bar */}
+        <div className="sticky top-0 bg-white z-10 shadow flex items-center p-2">
+          <div className="flex items-center bg-white p-2 rounded-lg flex-grow">
+            <FaSearch className="text-gray-400 ml-2" />
+            <input
+              type="text"
+              placeholder="Search"
+              className="flex-grow bg-transparent p-2 outline-none text-sm"
+            />
+          </div>
+          {/* Minimize Button (Mobile) */}
+          <button
+            className="ml-2 p-2 rounded-full hover:bg-gray-200 transition md:hidden"
+            onClick={() => setIsMinimized(true)}
+          >
+            <FaChevronLeft />
+          </button>
+        </div>
+
+        {/* Contact List */}
+        <div className="space-y-2 overflow-y-auto flex-grow">
+          {contacts.map((contact) => (
+            <div
+              key={contact.id}
+              className={`flex items-center p-3 rounded-lg cursor-pointer transition 
+              ${selectedContact === contact.id ? "bg-blue-100" : "hover:bg-gray-100"}`}
+              onClick={() => onContactClick(contact.id)}
+            >
+              <Image
+                src={contact.imageUrl}
+                alt={contact.name}
+                width={48}
+                height={48}
+                className="rounded-full mr-4"
+                unoptimized
+              />
+              <div className="flex-grow">
+                <div className="flex justify-between items-center">
+                  <span className="font-semibold">{contact.name}</span>
+                  <span className="text-xs text-gray-500">{contact.time}</span>
+                </div>
+                <p className={`text-sm ${contact.isSession ? "text-blue-500" : "text-gray-500"}`}>
+                  {contact.lastMessage}
+                </p>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
-
-      <div className="space-y-2">
-        {contacts.map((contact) => (
-          <div
-            key={contact.id}
-            className={`flex items-center p-3 rounded-lg cursor-pointer transition ${
-              selectedContact === contact.id ? 'bg-blue-100' : 'hover:bg-gray-100'
-            }`}
-            onClick={() => onContactClick(contact.id)}
-          >
-            <Image
-              src={contact.imageUrl}
-              alt={contact.name}
-              width={48}  // 12 * 4 = 48px width
-              height={48} // 12 * 4 = 48px height
-              className="rounded-full mr-4"
-              unoptimized
-            />
-            <div className="flex-grow">
-              <div className="flex justify-between items-center">
-                <span className="font-semibold">{contact.name}</span>
-                <span className="text-xs text-gray-500">{contact.time}</span>
-              </div>
-              <p className={`text-sm ${contact.isSession ? 'text-blue-500' : 'text-gray-500'}`}>
-                {contact.lastMessage}
-              </p>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
+    </>
   );
 };
 
-// Chat Box component
 const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSendMessage: (text: string) => void; onStartCall: () => void }> = ({selectedContact, messages, onSendMessage, onStartCall,}) => {
   const [messageInput, setMessageInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -90,85 +115,40 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSend
     }
   };
 
-  const handleStartCall = () => {
-    onStartCall();
-  };
-
-  const handleGoogleMeet = () => {
-    window.open('https://meet.google.com/landing', '_blank');
-  }
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
   useEffect(() => {
-    scrollToBottom();
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   if (!selectedContact) {
     return (
-      <div className="w-3/4 p-6 flex items-center justify-center">
+      <div className="w-full sm:w-2/3 md:w-3/4 p-6 flex items-center justify-center">
         <p>Select a contact to start chatting</p>
       </div>
     );
   }
 
   return (
-    <div className="w-3/4 p-6 flex flex-col justify-between">
-      <div className="flex items-center justify-between mb-6">
-        {/* Contact Details */}
+    <div className="w-full sm:w-2/3 md:w-3/4 p-4 flex flex-col justify-between">
+      <div className="flex items-center justify-between mb-4 border-b pb-2">
         <div className="flex items-center">
           <Image
             src={selectedContact.imageUrl}
             alt={selectedContact.name}
-            width={48} // Width in pixels
-            height={48} // Height in pixels
+            width={48}
+            height={48}
             className="rounded-full mr-4"
           />
           <h2 className="text-xl font-bold">{selectedContact.name}</h2>
         </div>
-
-        {/* Buttons for Google Meet and Video Call */}
-        <div className="flex items-center space-x-4">
-          {/* Google Meet Icon */}
-          <button
-            onClick={handleGoogleMeet} // Use the onStartCall prop here
-            className="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
-            aria-label="Start Video Call"
-          >
-            <Image
-              src="/images/meet-logo.png"
-              alt={selectedContact.name}
-              width={30} // Width in pixels
-              height={30} // Height in pixels
-              className="rounded-full"
-            />
-          </button>
-
-          {/* Video Call Icon */}
-          {/* <button
-            onClick={handleStartCall} // Use the onStartCall prop here
-            className="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
-            aria-label="Start Video Call"
-          >
-            <FaVideo className="w-7 h-7" />
-          </button> */}
-        </div>
       </div>
 
-      <div className="flex-grow overflow-y-auto space-y-4">
+      <div className="flex-grow overflow-y-auto space-y-4 p-2">
         {messages.map((message) => (
           <div
             key={message.id}
-            className={`group relative ${
-              message.sender === 'psychotherapist' ? 'justify-end' : 'justify-start'
-            } flex`}
+            className={`flex ${message.sender === 'psychotherapist' ? 'justify-end' : 'justify-start'}`}
           >
-            <div
-              className={`max-w-xs p-4 rounded-lg shadow ${
-                message.sender === 'psychotherapist' ? 'bg-blue-100' : 'bg-gray-100'
-              }`}
+            <div className={`max-w-xs p-3 rounded-lg shadow ${message.sender === 'psychotherapist' ? 'bg-blue-100' : 'bg-gray-100'}`}
             >
               <p>{message.text}</p>
               <span className="block text-xs text-gray-400">{message.time}</span>
@@ -183,11 +163,7 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSend
           type="text"
           value={messageInput}
           onChange={(e) => setMessageInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              handleSendMessage();
-            }
-          }}
+          onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
           placeholder="Type a message..."
           className="flex-grow p-2 border border-gray-300 rounded-full"
         />
@@ -201,6 +177,7 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSend
     </div>
   );
 };
+
 
 // Main Communication Page component with Layout
 const Communication: FC = () => {
