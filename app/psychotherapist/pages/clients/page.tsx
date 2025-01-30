@@ -200,16 +200,8 @@ const Clients = () => {
   };
 
   const renderClientList = () => {
-    if (loading) {
-      return <div className="text-left">Loading clients...</div>;
-    }
-
-    if (authLoading) {
-      return <LoadingScreen />; // Show the loading screen while the auth check or data loading is in progress
-    }
-
     return (
-      <div className="mt-4 space-y-3">
+      <div className="mt-4 space-y-3 mb- overflow-hidden">
         {renderClients().map((client, index) => (
           <div key={index} className="flex flex-col md:flex-row items-start md:items-center justify-between p-4 bg-white shadow rounded-lg">
             <div className="flex items-center space-x-3">
@@ -296,6 +288,10 @@ const Clients = () => {
       </div>
     );
   };
+  
+  if (authLoading) {
+    return <LoadingScreen />; // Show the loading screen while the auth check or data loading is in progress
+  }
 
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
