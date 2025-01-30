@@ -104,7 +104,7 @@ const ClientsPayment = () => {
       {filteredPayments.map((client, index) => (
         <div
           key={index}
-          className="flex items-center justify-between p-4 bg-white shadow rounded-lg"
+          className="flex flex-col md:flex-row items-center justify-between p-4 bg-white shadow rounded-lg"
         >
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 rounded-full bg-gray-200"></div>
@@ -114,7 +114,7 @@ const ClientsPayment = () => {
             </div>
           </div>
           <button
-            className="px-4 py-2 text-sm font-semibold text-white bg-blue-400 rounded-full hover:bg-blue-600 transition"
+            className="mt-2 md:mt-0 px-4 py-2 text-sm font-semibold text-white bg-blue-400 rounded-full hover:bg-blue-600 transition"
             onClick={() => openModal(client)}
           >
             View Payment
@@ -136,15 +136,15 @@ const ClientsPayment = () => {
         </div>
 
         <div className="mt-24 px-5 flex-1 overflow-hidden">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col md:flex-row items-center justify-between">
             {/* Combined Search Input and Dropdown Filter */}
-            <div className="flex items-center space-x-4">
+            <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4">
               {/* Search Input */}
-              <div className="relative max-w-md">
+              <div className="relative max-w-md w-full">
                 <input
                   type="text"
                   placeholder="Search clients..."
-                  className="px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  className="w-full px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -169,7 +169,7 @@ const ClientsPayment = () => {
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  className="w-full md:w-auto px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
                 >
                   <option value="all">All Status</option>
                   <option value="pending">Pending</option>

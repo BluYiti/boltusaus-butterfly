@@ -320,7 +320,7 @@ const handleProgressChange = async (newProgress: Goal['progress'], goalId: strin
                     <h2 className="text-4xl font-bold text-blue-500 mb-4">Hello, {userName}!</h2>
                     <p className="text-gray-600 text-lg">Set and track your personal goals with ease.</p>
                 </div>
-                <div className="flex space-x-8">
+                <div className="flex flex-col lg:flex-row space-y-8 lg:space-y-0 lg:space-x-8">
                     <div className="flex-1 bg-white shadow-lg rounded-xl p-6 border border-gray-200">
                         <div className="flex justify-between items-center mb-6">
                             <button

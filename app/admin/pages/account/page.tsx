@@ -77,95 +77,95 @@ const Account = () => {
         <h2 className="text-2xl font-bold">Accounts</h2>
       </div>
       <div className="p-6">
-        <div className="flex justify-between items-center mb-6 space-x-4">
+        <div className="flex flex-col md:flex-row justify-between items-center mb-6 space-y-4 md:space-y-0 md:space-x-4">
           <div className="flex space-x-4">
-            {ROLES.map((tab) => (
-              <button
-                key={tab}
-                onClick={() => handleTabChange(tab)}
-                className={`px-4 py-2 rounded ${selectedTab === tab ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"}`}
-              >
-                {tab}
-              </button>
-            ))}
+        {ROLES.map((tab) => (
+          <button
+            key={tab}
+            onClick={() => handleTabChange(tab)}
+            className={`px-4 py-2 rounded ${selectedTab === tab ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"}`}
+          >
+            {tab}
+          </button>
+        ))}
           </div>
           <input
-            type="text"
-            placeholder={`Search ${selectedTab.toLowerCase()}s by name`}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="flex-1 w-full px-4 py-2 border rounded"
+        type="text"
+        placeholder={`Search ${selectedTab.toLowerCase()}s by name`}
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        className="flex-1 w-full md:w-auto px-4 py-2 border rounded"
           />
           <button 
-            className={`px-4 py-2 rounded hover:bg-blue-600 ${selectedTab === "Client" ? "bg-gray-400 cursor-not-allowed" : "bg-green-500 text-white"}`}
-            onClick={openAddModal}
-            disabled={selectedTab === "Client"}
+        className={`px-4 py-2 rounded hover:bg-blue-600 ${selectedTab === "Client" ? "bg-gray-400 cursor-not-allowed" : "bg-green-500 text-white"}`}
+        onClick={openAddModal}
+        disabled={selectedTab === "Client"}
           >
-            Add Account
+        Add Account
           </button>
         </div>
 
-        <div className="bg-white rounded shadow p-4">
+        <div className="bg-white rounded shadow p-4 overflow-x-auto">
           <h2 className="text-xl font-bold mb-4">{selectedTab} List</h2>
           {currentUsers.length > 0 ? (
-            <table className="min-w-full table-auto">
-              <thead>
-                <tr className="bg-gray-200">
-                  <th className="px-4 py-2 text-left">UserID</th>
-                  <th className="px-4 py-2 text-left">Name</th>
-                  <th className="px-4 py-2 text-left">Email</th>
-                  <th className="px-4 py-2 text-left">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentUsers.map((user) => (
-                  <tr key={user.$id} className="border-t">
-                    <td className="px-4 py-2">{user.$id}</td>
-                    <td className="px-4 py-2">{user.username}</td>
-                    <td className="px-4 py-2">{user.email}</td>
-                    <td className="px-4 py-2 flex space-x-2">
-                      <button 
-                        onClick={() => {
-                          setSelectedClient(user.$id); // Set the selected client ID
-                          openEditModal(); // Open the Edit Modal
-                        }} 
-                        className="text-blue-500 hover:text-blue-700"
-                      >
-                        <PencilIcon className="h-5 w-5" />
-                      </button>
-                      <button 
-                        onClick={() => {
-                          setSelectedClient(user.$id); // Set the selected client ID
-                          openDeleteModal(); // Open the Edit Modal
-                        }} 
-                        className="text-red-500 hover:text-red-700"
-                      >
-                        <TrashIcon className="h-5 w-5" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        <table className="min-w-full table-auto">
+          <thead>
+            <tr className="bg-gray-200">
+          <th className="px-4 py-2 text-left">UserID</th>
+          <th className="px-4 py-2 text-left">Name</th>
+          <th className="px-4 py-2 text-left">Email</th>
+          <th className="px-4 py-2 text-left">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {currentUsers.map((user) => (
+          <tr key={user.$id} className="border-t">
+            <td className="px-4 py-2">{user.$id}</td>
+            <td className="px-4 py-2">{user.username}</td>
+            <td className="px-4 py-2">{user.email}</td>
+            <td className="px-4 py-2 flex space-x-2">
+              <button 
+            onClick={() => {
+              setSelectedClient(user.$id); // Set the selected client ID
+              openEditModal(); // Open the Edit Modal
+            }} 
+            className="text-blue-500 hover:text-blue-700"
+              >
+            <PencilIcon className="h-5 w-5" />
+              </button>
+              <button 
+            onClick={() => {
+              setSelectedClient(user.$id); // Set the selected client ID
+              openDeleteModal(); // Open the Edit Modal
+            }} 
+            className="text-red-500 hover:text-red-700"
+              >
+            <TrashIcon className="h-5 w-5" />
+              </button>
+            </td>
+          </tr>
+            ))}
+          </tbody>
+        </table>
           ) : (
-            <p>No {selectedTab.toLowerCase()}s found.</p>
+        <p>No {selectedTab.toLowerCase()}s found.</p>
           )}
         </div>
 
-        <div className="flex justify-between items-center mt-4">
+        <div className="flex flex-col md:flex-row justify-between items-center mt-4 space-y-4 md:space-y-0">
           <span>
-            Showing {indexOfLastUser - usersPerPage + 1} to {Math.min(indexOfLastUser, totalEntries)} out of {totalEntries} entries
+        Showing {indexOfLastUser - usersPerPage + 1} to {Math.min(indexOfLastUser, totalEntries)} out of {totalEntries} entries
           </span>
           <div className="space-x-2">
-            {Array.from({ length: Math.ceil(totalEntries / usersPerPage) }, (_, i) => (
-              <button
-                key={i}
-                onClick={() => paginate(i + 1)}
-                className={`px-3 py-1 rounded ${currentPage === i + 1 ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"}`}
-              >
-                {i + 1}
-              </button>
-            ))}
+        {Array.from({ length: Math.ceil(totalEntries / usersPerPage) }, (_, i) => (
+          <button
+            key={i}
+            onClick={() => paginate(i + 1)}
+            className={`px-3 py-1 rounded ${currentPage === i + 1 ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"}`}
+          >
+            {i + 1}
+          </button>
+        ))}
           </div>
         </div>
       </div>

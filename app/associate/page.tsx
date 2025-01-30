@@ -190,7 +190,7 @@ useEffect(() => {
         </div>
 
         <div className="pt-[6.5rem]">
-        <div className="grid grid-cols-2 gap-4 mx-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mx-4 md:mx-10">
 
             {/* Client List for Reschedule */}
             <div className="bg-white rounded-lg shadow-lg p-6 text-blue-500">
@@ -214,86 +214,86 @@ useEffect(() => {
               )}
             </div>
 
-           {/* Upcoming Sessions Section */}
-              <div className="bg-white p-4 rounded-lg shadow-md transition hover:shadow-lg max-h-96 overflow-y-auto">
-                <div className="flex justify-between items-center">
-                  <h3 className="text-lg font-semibold mb-4 text-blue-500">
-                    Upcoming Sessions
-                    <span className="text-sm text-gray-500 ml-2">
-                      {format(new Date(), 'MMMM d, yyyy')}
-                    </span>
-                  </h3>
+            {/* Upcoming Sessions Section */}
+            <div className="bg-white p-4 rounded-lg shadow-md transition hover:shadow-lg max-h-96 overflow-y-auto">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold mb-4 text-blue-500">
+                  Upcoming Sessions
+                  <span className="text-sm text-gray-500 ml-2">
+                    {format(new Date(), 'MMMM d, yyyy')}
+                  </span>
+                </h3>
+              </div>
+              {loading ? (
+                <p className="text-blue-600">Loading upcoming session data...</p>
+              ) : error ? (
+                <p className="text-red-500">{error}</p>
+              ) : (
+                <ul>
+                  {sessionData.map((doc) => (
+                    <li key={doc.$id}>
+                      <p>{doc.client.firstname} {doc.client.lastname}</p>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            {/* Appointment List */}
+            <div className="bg-white rounded-lg shadow-lg p-6 text-blue-500">
+              <h3 className="text-xl font-semibold mb-4">Appointment List</h3>
+              {loading ? (
+                <div className="flex justify-center items-center">
+                  <span className="text-gray-500">Loading appointments...</span>
                 </div>
-                {loading ? (
-                  <p className="text-blue-600">Loading upcoming session data...</p>
-                ) : error ? (
-                  <p className="text-red-500">{error}</p>
-                ) : (
-                  <ul>
-                    {sessionData.map((doc) => (
+              ) : (
+                <ul className="space-y-3 text-black">
+                  {sessionData.length > 0 ? (
+                    sessionData.map((doc) => (
                       <li key={doc.$id}>
                         <p>{doc.client.firstname} {doc.client.lastname}</p>
                       </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
+                    ))
+                  ) : (
+                    <div className="text-gray-500">No appointments available.</div>
+                  )}
+                </ul>
+              )}
+            </div>
 
-              {/* Appointment List */}
-              <div className="bg-white rounded-lg shadow-lg p-6 text-blue-500">
-                <h3 className="text-xl font-semibold mb-4">Appointment List</h3>
-                {loading ? (
-                  <div className="flex justify-center items-center">
-                    <span className="text-gray-500">Loading appointments...</span>
-                  </div>
-                ) : (
-                  <ul className="space-y-3 text-black">
-                    {sessionData.length > 0 ? (
-                      sessionData.map((doc) => (
-                        <li key={doc.$id}>
-                          <p>{doc.client.firstname} {doc.client.lastname}</p>
-                        </li>
-                      ))
-                    ) : (
-                      <div className="text-gray-500">No appointments available.</div>
-                    )}
-                  </ul>
-                )}
-              </div>
-
-          {/* Payment Status */}
-          <div className="bg-white rounded-lg shadow-lg p-6 text-blue-500">
-            <h3 className="text-xl font-semibold mb-4">
-              Payment Status
-              <span className="text-sm text-gray-500 ml-2">{format(new Date(), 'MMMM d, yyyy')}</span>
-            </h3>
-            {loadingPayments ? (
-              <div className="flex justify-center items-center">
-                <span className="text-gray-500">Loading payments...</span>
-              </div>
-            ) : (
-              <ul className="space-y-3">
-                {payments.length > 0 ? (
-                  payments.map((payment, index) => (
-                    <li key={index} className="flex justify-between items-center bg-gray-100 rounded-lg px-4 py-2">
-                      <span className="flex-1 text-center">{payment.firstname}</span>
-                      <span className="flex-1 text-center">{payment.channel}</span>
-                      <span
-                        className={`flex-none min-w-[90px] px-4 py-1 rounded-full text-white text-center ${
-                          payment.status && payment.status.toUpperCase() === 'PAID' ? 'bg-green-500' : 'bg-yellow-500'
-                        }`}
-                      >
-                        {payment.status}
-                      </span>
-                    </li>
-                  ))
-                ) : (
-                  <div className="text-gray-500">No payment data available.</div>
-                )}
-              </ul>
-            )}
+            {/* Payment Status */}
+            <div className="bg-white rounded-lg shadow-lg p-6 text-blue-500">
+              <h3 className="text-xl font-semibold mb-4">
+                Payment Status
+                <span className="text-sm text-gray-500 ml-2">{format(new Date(), 'MMMM d, yyyy')}</span>
+              </h3>
+              {loadingPayments ? (
+                <div className="flex justify-center items-center">
+                  <span className="text-gray-500">Loading payments...</span>
+                </div>
+              ) : (
+                <ul className="space-y-3">
+                  {payments.length > 0 ? (
+                    payments.map((payment, index) => (
+                      <li key={index} className="flex flex-col md:flex-row justify-between items-center bg-gray-100 rounded-lg px-4 py-2">
+                        <span className="flex-1 text-center">{payment.firstname}</span>
+                        <span className="flex-1 text-center">{payment.channel}</span>
+                        <span
+                          className={`flex-none min-w-[90px] px-4 py-1 rounded-full text-white text-center ${
+                            payment.status && payment.status.toUpperCase() === 'PAID' ? 'bg-green-500' : 'bg-yellow-500'
+                          }`}
+                        >
+                          {payment.status}
+                        </span>
+                      </li>
+                    ))
+                  ) : (
+                    <div className="text-gray-500">No payment data available.</div>
+                  )}
+                </ul>
+              )}
+            </div>
           </div>
-        </div>
 
           {/* Final Confirmation Modal (Yes/No) */}
           {showFinalConfirm && (
