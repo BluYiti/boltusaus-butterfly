@@ -275,7 +275,7 @@ const AppointmentBooking = () => {
         <Layout sidebarTitle="Butterfly" sidebarItems={items}>
           <div className="min-h-screen flex items-center justify-center bg-gray-100">
             <div className="bg-white p-8 rounded-lg shadow-lg text-center max-w-lg mx-auto">
-            <h2 className="text-3xl font-bold text-red-400 mb-4">Rescheduled Confirmed</h2>
+            <h2 className="text-3xl font-bold text-red-400 mb-4">Rescheduled Declined</h2>
                 <p className="text-xl text-gray-600">
                   Your request has been declined. Please choose a different date. Please feel free to contact your psychotherapist for any questions about your rescheduling via the communication tab.
                 </p>
