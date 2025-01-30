@@ -26,21 +26,11 @@ interface AppointmentData {
 }
 
 const CreditCardPayment: React.FC<CreditCardPaymentProps> = ({ isOpen, onClose, appointmentData }) => {
-  const [referenceNumber, setReferenceNumber] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   const [showSuccess, setShowSuccess] = useState<boolean>(false); // State for success modal
   const [receipt, setReceipt] = useState<File | null>(null); // State for receipt file
   const [receiptPreview, setReceiptPreview] = useState<string | null>(null); // State for previewing the receipt
-
-  const handleReferenceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let inputValue = e.target.value;
-    inputValue = inputValue.replace(/\D/g, ''); // Remove non-numeric characters
-    if (inputValue.length > 13) {
-      inputValue = inputValue.substring(0, 13); // Limit to 13 digits
-    }
-    setReferenceNumber(inputValue);
-  };
 
   const handleReceiptChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files ? e.target.files[0] : null;
@@ -58,10 +48,6 @@ const CreditCardPayment: React.FC<CreditCardPaymentProps> = ({ isOpen, onClose, 
     e.preventDefault();
   
     // Validation checks
-    if (referenceNumber.length !== 13) {
-      setError('Reference number must be 13 digits long');
-      return;
-    }
     if (!receipt) {
       setError('Please upload a receipt');
       return;
@@ -108,7 +94,6 @@ const CreditCardPayment: React.FC<CreditCardPaymentProps> = ({ isOpen, onClose, 
   
       // 4. Create the payment data with the receipt ID
       const PaymentData = {
-        referenceNo: referenceNumber,
         channel: "bpi",
         amount: 1000,
         status: "pending",
@@ -194,23 +179,11 @@ const CreditCardPayment: React.FC<CreditCardPaymentProps> = ({ isOpen, onClose, 
                 </div>
               )}
 
-              {/* Reference Number Input */}
-              <label htmlFor="referenceNumber" className="block text-gray-800 mb-2">Enter Reference Number</label>
-              <input
-                id="referenceNumber"
-                type="text"
-                value={referenceNumber}
-                onChange={handleReferenceChange}
-                className="w-full p-2 border border-gray-300 rounded-lg mb-4"
-                maxLength={13}
-                placeholder="Enter 13-digit number"
-                required
-              />
               {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
               <button
                 type="submit"
-                className={`w-full p-2 bg-green-500 text-white rounded-lg ${isSubmitting || referenceNumber.trim().length !== 13 || !receipt ? 'opacity-50 cursor-not-allowed' : ''}`}
-                disabled={isSubmitting || referenceNumber.trim().length !== 13 || !receipt}
+                className={`w-full p-2 bg-green-500 text-white rounded-lg ${isSubmitting || !receipt ? 'opacity-50 cursor-not-allowed' : ''}`}
+                disabled={isSubmitting || !receipt}
               >
                 {isSubmitting ? 'Processing...' : 'Next'}
               </button>
