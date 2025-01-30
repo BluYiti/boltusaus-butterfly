@@ -191,21 +191,22 @@ const AppointmentBooking = () => {
 
         if (bookingResponse.documents.length > 0) {
           const booking = bookingResponse.documents[0]; // Assuming there's only one active booking
-        
+          
           // Extract the day, month, and slots (time)
           const { day, month, slots } = booking;
           console.log("Booking Data:", booking);
         
           // Convert the month name to the corresponding number
           const monthNumber = monthMap[month]; // Should give you the correct number (e.g., November -> 10)
-        
+          
           // Parse the time (e.g., "02:00pm" -> 2:00 PM)
-          const timeMatch = slots.match(/(\d+):(\d+)(am|pm)/);
-        
+          const timeMatch = slots.match(/(\d+):(\d+)(am|pm)/i);
+
           if (timeMatch) {
             let hour = parseInt(timeMatch[1], 10);
             const minute = parseInt(timeMatch[2], 10);
             const ampm = timeMatch[3];
+            console.log("Parsed Time:", { hour, minute, ampm });
         
             // Convert to 24-hour format
             if (ampm === 'pm' && hour < 12) {
