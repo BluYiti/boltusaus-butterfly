@@ -285,68 +285,67 @@ const HomePage: React.FC = () => {
             ))}
           </div>
         </div>
-      </section>
-
       {/* Contacts Section */}
       <section id="contacts" className="py-8 md:py-32 bg-[#c2dffd]">
-        <div className="max-w-4xl mx-auto text-center md:text-left">
+        <div className="max-w-4xl mx-auto text-center md:text-left px-4">
           <h1 className="text-4xl md:text-6xl lg:text-8xl font-paintbrush mb-8 text-blue-800">Get in Touch</h1>
           <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-8">
-            <ContactInfo 
-              Icon={FaMapMarkerAlt} 
-              title="Visit Us" 
-              description="Our Clinic is located at Unit 303 Sam-son's Building, Lower Mabini St., Baguio City" 
-            />
-            <ContactInfo 
-              Icon={FaEnvelope} 
-              title="Email Us" 
-              description="Feel free to send us an email at amperaltapsychservices@gmail.com" 
-            />
-            <ContactInfo 
-              Icon={FaPhone} 
-              title="Call Us" 
-              description="You can reach us at +63 9266 696 242" 
-            />
+        <ContactInfo 
+          Icon={FaMapMarkerAlt} 
+          title="Visit Us" 
+          description="Our Clinic is located at Unit 303 Sam-son's Building, Lower Mabini St., Baguio City" 
+        />
+        <ContactInfo 
+          Icon={FaEnvelope} 
+          title="Email Us" 
+          description="Feel free to send us an email at amperaltapsychservices@gmail.com" 
+        />
+        <ContactInfo 
+          Icon={FaPhone} 
+          title="Call Us" 
+          description="You can reach us at +63 9266 696 242" 
+        />
           </div>
-          <div className="text-center my-10">
-            <a href="https://maps.app.goo.gl/yiV8BHgQP4zqpPta8" className="relative inline-block hover:transition-colors duration-300 group mr-4" target="_blank" rel="noopener noreferrer">
-              <div className="w-12 h-12 flex items-center justify-center bg-white rounded-full">
-                <FaMap className="text-blue-800 text-3xl" />
-              </div>
-              <span className="absolute inset-0 bg-blue-300 rounded-full opacity-0 transition-opacity duration-300 group-hover:opacity-50"></span>
-            </a>
-            <a href="https://www.facebook.com/amperaltapsychservices" className="relative inline-block hover:transition-colors duration-300 group" target="_blank" rel="noopener noreferrer">
-              <div className="w-12 h-12 flex items-center justify-center bg-white rounded-full">
-                <FaFacebookF className="text-blue-800 text-3xl" />
-              </div>
-              <span className="absolute inset-0 bg-blue-300 rounded-full opacity-0 transition-opacity duration-300 group-hover:opacity-50"></span>
-            </a>
+          <div className="flex justify-center space-x-4 my-10">
+        <a href="https://maps.app.goo.gl/yiV8BHgQP4zqpPta8" className="relative inline-block hover:transition-colors duration-300 group" target="_blank" rel="noopener noreferrer">
+          <div className="w-12 h-12 flex items-center justify-center bg-white rounded-full">
+            <FaMap className="text-blue-800 text-3xl" />
+          </div>
+          <span className="absolute inset-0 bg-blue-300 rounded-full opacity-0 transition-opacity duration-300 group-hover:opacity-50"></span>
+        </a>
+        <a href="https://www.facebook.com/amperaltapsychservices" className="relative inline-block hover:transition-colors duration-300 group" target="_blank" rel="noopener noreferrer">
+          <div className="w-12 h-12 flex items-center justify-center bg-white rounded-full">
+            <FaFacebookF className="text-blue-800 text-3xl" />
+          </div>
+          <span className="absolute inset-0 bg-blue-300 rounded-full opacity-0 transition-opacity duration-300 group-hover:opacity-50"></span>
+        </a>
           </div>
         </div>
+      </section>
 
 
-        <div className="text-left mt-4 ml-36 flex justify-between items-center">
-          <div>
+        <div className="text-left mt-4 ml-4 md:ml-36 flex flex-col md:flex-row justify-between items-center">
+          <div className="flex flex-col md:flex-row items-center">
             <button
-                type="button"
-                onClick={() => {
-                    setIsModalOpen(true);
-                    setModalContentType('terms');
-                }}
-                className="text-blue-500 hover:underline ml-1"
+          type="button"
+          onClick={() => {
+              setIsModalOpen(true);
+              setModalContentType('terms');
+          }}
+          className="text-blue-500 hover:underline ml-1"
             >
-                Terms and Conditions
+          Terms and Conditions
             </button>
-            &nbsp;|&nbsp;
+            <span className="hidden md:inline">&nbsp;|&nbsp;</span>
             <button
-                type="button"
-                onClick={() => {
-                    setIsModalOpen(true);
-                    setModalContentType('privacy');
-                }}
-                className="text-blue-500 hover:underline ml-1"
+          type="button"
+          onClick={() => {
+              setIsModalOpen(true);
+              setModalContentType('privacy');
+          }}
+          className="text-blue-500 hover:underline ml-1 mt-2 md:mt-0 md:ml-1"
             >
-                Privacy Policy
+          Privacy Policy
             </button>
           </div>
         </div>
