@@ -14,6 +14,7 @@ import CreditCardPayment from "./creditcard";
 import GCashPayment from "./gcash";
 import Image from 'next/image';
 import { useRouter } from "next/navigation";
+import RescheduleBooking from "./reschedule/page";
 
 const AppointmentBooking = () => {
   const authLoading = useAuthCheck(['client']);
@@ -22,6 +23,7 @@ const AppointmentBooking = () => {
   const selectedMonth = today.toLocaleString('default', { month: 'long' });
   const nextMonth = new Date(today.setMonth(today.getMonth() + 1)).toLocaleString('default', { month: 'long' });
   const router = useRouter();
+  const [bookingStatus, setBookingStatus] = useState(null); 
 
   const [appointmentData, setAppointmentData] = useState({
     selectedMonth,
@@ -191,7 +193,7 @@ const AppointmentBooking = () => {
 
         if (bookingResponse.documents.length > 0) {
           const booking = bookingResponse.documents[0]; // Assuming there's only one active booking
-          
+          setBookingStatus(booking.status);
           // Extract the day, month, and slots (time)
           const { day, month, slots } = booking;
           console.log("Booking Data:", booking);
@@ -246,7 +248,50 @@ const AppointmentBooking = () => {
   if (authLoading || loading) {
     return <LoadingScreen />;
   }
-  
+
+    // If the booking status is "missed," render the ReschedulePage
+    if (bookingStatus === "missed") {
+      return <RescheduleBooking />;
+    }
+
+    if (bookingStatus === "rescheduleRequest") {
+      return (
+        <Layout sidebarTitle="Butterfly" sidebarItems={items}>
+          <div className="min-h-screen flex items-center justify-center bg-gray-100">
+            <div className="bg-white p-8 rounded-lg shadow-lg text-center max-w-lg mx-auto">
+              <h2 className="text-3xl font-bold text-green-400 mb-4">Sent Reschedule</h2>
+              <p className="text-xl text-gray-600">
+                Your request scheduled appointment has been sent. Please wait for the confirmation, and feel free to contact your psychotherapist with any questions about your upcoming appointment via the communication tab.
+              </p>
+              <p className="text-lg text-gray-600 mt-2">{appointmentData.bookingMessage}</p>
+            </div>
+          </div>
+        </Layout>
+      );
+    }
+
+    if (bookingStatus === "declined") {
+      return (
+        <Layout sidebarTitle="Butterfly" sidebarItems={items}>
+          <div className="min-h-screen flex items-center justify-center bg-gray-100">
+            <div className="bg-white p-8 rounded-lg shadow-lg text-center max-w-lg mx-auto">
+            <h2 className="text-3xl font-bold text-red-400 mb-4">Rescheduled Confirmed</h2>
+                <p className="text-xl text-gray-600">
+                  Your request has been declined. Please choose a different date. Please feel free to contact your psychotherapist for any questions about your rescheduling via the communication tab.
+                </p>
+                  <button 
+                    className="px-6 py-3 bg-gradient-to-r from-blue-300 to-blue-400 text-white rounded-lg text-lg font-semibold shadow-lg transform transition-all hover:scale-105 hover:shadow-2xl active:scale-100 mt-2"
+                    onClick={handleReschedule}
+                  >
+                  Click me to reschedule appointment
+                </button>
+            </div>
+          </div>
+        </Layout>
+      );
+    }
+    
+    
   // If booking is disabled, show the message instead of the normal form
   if (appointmentData.isBookingDisabled) {
     return (
@@ -273,7 +318,7 @@ const AppointmentBooking = () => {
               </>
             ) : paymentStatus === "rescheduled" ? (
               <>
-                <h2 className="text-3xl font-bold text-red-400 mb-4">Payment Rescheduled</h2>
+                <h2 className="text-3xl font-bold text-red-400 mb-4">Rescheduled Confirmed</h2>
                 <p className="text-xl text-gray-600">
                   Your appointment has been rescheduled. Please feel free to contact your psychotherapist for any questions about your rescheduling via the communication tab.
                 </p>

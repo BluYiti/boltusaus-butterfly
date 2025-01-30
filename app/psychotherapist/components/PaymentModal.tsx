@@ -127,14 +127,13 @@ const PaymentModal = ({ onClose, client }) => {
 
         {/* Payment details */}
         <p><strong>Appointment ID:</strong> {client.id}</p>
-        <p><strong>Reference No:</strong> {client.referenceNo}</p>
         <p><strong>Channel:</strong> {client.channel}</p>
         <p><strong>Client Name:</strong> {client.clientFirstName} {client.clientLastName}</p>
         <p><strong>Email:</strong> {client.email}</p>
         <p><strong>Amount:</strong> ₱{client.amount.toFixed(2)}</p>
         <p><strong>Status:</strong> {client.status}</p>
         {/* Format the date */}
-        <p><strong>Transaction Date and Time:</strong> {formatDate(client.createdAt)}</p>
+        <p><strong>Submission Date and Time:</strong> {formatDate(client.createdAt)}</p>
         <p className="text-gray-800">
           <strong>Receipt:</strong>
           <button 

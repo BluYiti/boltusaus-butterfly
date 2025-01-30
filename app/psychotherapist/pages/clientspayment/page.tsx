@@ -51,7 +51,7 @@ const ClientsPayment = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [payments, setPayments] = useState<Payment[]>([]);
   const [, setShowModal] = useState(false); // State for modal visibility
-  const [selectedClient, setSelectedClient] = useState(null); // State for selected client's payment details
+  const [selectedClient, setSelectedClient] = useState<Payment | null>(null); // State for selected client's payment details
   const [profileImageUrls, setProfileImageUrls] = useState<{ [key: string]: string }>({});
 
   // Fetch payment data
@@ -96,18 +96,12 @@ const ClientsPayment = () => {
 
         setPayments(fetchedPayments);
 
-        // Fetch profile images for each client
         const profileImages: { [key: string]: string } = {};
-
         for (const doc of response.documents) {
-          const client = doc.client || {};  // Ensure client is always an object
-          const clientProfilePic = client.profilepic;
-
+          const clientProfilePic = doc.client?.profilepic;
           if (clientProfilePic) {
-            const url = await fetchProfileImageUrl(clientProfilePic);  // Fetch the image URL using your function
-            if (url) {
-              profileImages[doc.$id] = url;  // Store the URL in the state
-            }
+            const url = await fetchProfileImageUrl(clientProfilePic);
+            if (url) profileImages[doc.$id] = url;
           }
         }
 
@@ -128,7 +122,7 @@ const ClientsPayment = () => {
     };
 
     fetchData();
-  }, []); // Empty dependency array ensures the effect runs only once
+  }, []);
 
   const openModal = (client: Payment) => {
     setSelectedClient(client);
@@ -140,40 +134,58 @@ const ClientsPayment = () => {
     setSelectedClient(null);
   };
 
-  const renderClientsByStatus = (status: string) => (
-    <div className="mt-4 space-y-3">
-      {payments.filter((client) => client.status === status)
-        .map((client, index) => (
-          <div
-            key={index}
-            className="flex items-center justify-between p-4 bg-white shadow rounded-lg"
-          >
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-full bg-gray-200">
-                <Image
-                  src={profileImageUrls[client.id] || "/images/default-profile.png"}
-                  alt={`${client.clientFirstName} ${client.clientLastName}`}
-                  className="rounded-full mb-4"
-                  width={96}  // Set width explicitly
-                  height={96} // Set height explicitly
-                  unoptimized
-                />
-              </div>
-              <div>
-                <h4 className="font-semibold">{client.clientFirstName}</h4>
-                <p className="text-sm text-gray-500">{client.email}</p>
-              </div>
-            </div>
-            <button
-              className="px-4 py-2 text-sm font-semibold text-white bg-blue-400 rounded-full hover:bg-blue-600 transition"
-              onClick={() => openModal(client)}
-            >
-              View Payment
-            </button>
-          </div>
-        ))}
-    </div>
-  );
+  const renderClientsByStatus = (status: string) => {
+    return (
+      <div className="mt-4">
+        <table className="min-w-full bg-white shadow rounded-lg">
+          <thead>
+            <tr className="bg-blue-100 text-blue-600">
+              <th className="py-3 px-6 text-left">Client Name</th>
+              <th className="py-3 px-6 text-left">Email</th>
+              <th className="py-3 px-6 text-left">Amount</th>
+              <th className="py-3 px-6 text-left">Payment Mode</th>
+              <th className="py-3 px-6 text-left">Status</th>
+              <th className="py-3 px-6 text-left">Date</th>
+              <th className="py-3 px-6 text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {payments
+              .filter((client) => client.status === status.toLowerCase())
+              .map((client, index) => (
+                <tr key={index} className="border-b hover:bg-gray-50">
+                  <td className="py-3 px-6 flex items-center space-x-3">
+                    <div className="w-8 h-8 rounded-full bg-gray-200 overflow-hidden">
+                      <Image
+                        src={profileImageUrls[client.id] || "/images/default-profile.png"}
+                        alt={`${client.clientFirstName} ${client.clientLastName}`}
+                        width={32}
+                        height={32}
+                        className="rounded-full"
+                        unoptimized
+                      />
+                    </div>
+                    <span>{`${client.clientFirstName} ${client.clientLastName}`}</span>
+                  </td>
+                  <td className="py-3 px-6">{client.email}</td>
+                  <td className="py-3 px-6">{`₱${client.amount.toFixed(2)}`}</td>
+                  <td className="py-3 px-6">{client.mode}</td>
+                  <td className="py-3 px-6">{client.status}</td>
+                  <td className="py-3 px-6">{new Date(client.createdAt).toLocaleDateString()}</td>
+                  <td className="py-3 px-6 text-center">
+                    <button
+                      className="px-4 py-2 text-sm font-semibold text-white bg-blue-400 rounded-full hover:bg-blue-600 transition"
+                      onClick={() => openModal(client)}
+                    >
+                      Receipt
+                    </button>
+                  </td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
+      </div>
+    );
 
   // Mock data for daily profit
   const dailyProfit: Record<string, string> = {
@@ -201,6 +213,7 @@ const ClientsPayment = () => {
       </div>
     </div>
   );
+  };
 
   if (authLoading || loading) {
     return <LoadingScreen />;
@@ -230,72 +243,19 @@ const ClientsPayment = () => {
                 </button>
               ))}
             </div>
-
-            <div className="relative max-w-md">
-              <input
-                type="text"
-                placeholder="Search clients..."
-                className="px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="absolute top-2.5 right-3 h-5 w-5 text-gray-500"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M21 21l-4.35-4.35M11 18a7 7 0 110-14 7 7 0 010 14z"
-                />
-              </svg>
-            </div>
           </div>
 
           <div className="mt-6">
-            <div
-              className={`transition-all duration-500 ease-in-out ${
-                activeTab === "Pending"
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-10"
-              }`}
-            >
-              {activeTab === "Pending" && renderClientsByStatus("pending")}
-            </div>
-
-            <div
-              className={`transition-all duration-500 ease-in-out ${
-                activeTab === "Paid"
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-10"
-              }`}
-            >
-              {activeTab === "Paid" && renderClientsByStatus("paid")}
-            </div>
-
-            <div
-              className={`transition-all duration-500 ease-in-out ${
-                activeTab === "Rescheduled"
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-10"
-              }`}
-            >
-              {activeTab === "Rescheduled" && renderClientsByStatus("rescheduled")}
-            </div>
-
-            <div
-              className={`transition-all duration-500 ease-in-out ${
-                activeTab === "Refunded"
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-10"
-              }`}
-            >
-              {activeTab === "Refunded" && renderClientsByStatus("refunded")}
-            </div>
+            {["Pending", "Paid", "Rescheduled", "Refunded"].map((tab) => (
+              <div
+                key={tab}
+                className={`transition-all duration-500 ease-in-out ${
+                  activeTab === tab ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+                }`}
+              >
+                {activeTab === tab && renderClientsByStatus(tab.toLowerCase())}
+              </div>
+            ))}
 
             <div
               className={`transition-all duration-500 ease-in-out ${
@@ -310,11 +270,7 @@ const ClientsPayment = () => {
         </div>
       </div>
 
-      {/* Modal for Payment Details */}
-      <PaymentModal 
-        onClose={closeModal} 
-        client={selectedClient} 
-      />
+      <PaymentModal onClose={closeModal} client={selectedClient} />
     </Layout>
   );
 };
