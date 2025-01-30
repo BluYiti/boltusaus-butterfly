@@ -373,3 +373,22 @@ export const enableTimeSlot = async (selectedTime: string, selectedDay: number, 
         return false; // Return false if an error occurred
     }
 };
+
+export const findPaymentData = async (bookingId: string): Promise<any | null> => {
+    try {
+      // Fetch the document based on the bookingId
+      const response = await databases.getDocument('Butterfly-Database', 'Payment', bookingId);
+      
+      // Check if response contains data
+      if (response && response.$id) {
+        return response.$id; // Return the payment document ID
+      } else {
+        console.error('Payment record not found.');
+        return null;
+      }
+    } catch (error) {
+      console.error('Error fetching payment data:', error);
+      return null;
+    }
+  };
+  

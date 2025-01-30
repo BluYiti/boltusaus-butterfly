@@ -203,7 +203,14 @@ const PaymentModal = ({ onClose, client }) => {
           isOpen={showReceipt}
           onClose={() => setShowReceipt(false)}
           imageUrl={client.receipt} // Pass the receipt object
+          paymentId={client.id} // Pass the payment ID
+          client = {client}
         />
+        <p
+          className="py-2 text-sm font-semibold text-green-700 rounded-full"
+        >
+          Confirm Payment inside Receipt
+        </p>
 
         {/* Buttons */}
         {!isDeclining && (
@@ -217,13 +224,7 @@ const PaymentModal = ({ onClose, client }) => {
             {client.status === 'pending' ? (
               <>
                 <button
-                  className="ml-20 px-4 py-2 text-sm font-semibold text-white bg-green-400 rounded-full hover:bg-green-200 hover:text-green-400 transition"
-                  onClick={handleSubmit}
-                >
-                  Confirm
-                </button>
-                <button
-                  className="ml-5 px-4 py-2 text-sm font-semibold text-white bg-red-400 rounded-full hover:bg-red-300 hover:text-red-400 transition"
+                  className="ml-25 px-4 py-2 text-sm font-semibold text-white bg-red-400 rounded-full hover:bg-red-300 hover:text-red-400 transition"
                   onClick={handleDecline}
                 >
                   Decline
