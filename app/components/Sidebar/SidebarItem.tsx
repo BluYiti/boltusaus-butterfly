@@ -14,7 +14,6 @@ const SidebarItem: React.FC<SidebarItemProps> = ({ href, icon: Icon, label, isMi
   const pathname = usePathname();
   const isActive = pathname === href;
 
-  // If the item is disabled, render it without the Link wrapper
   if (isDisabled) {
     return (
       <div className="flex items-center p-2 rounded text-gray-400 cursor-not-allowed">
@@ -28,7 +27,6 @@ const SidebarItem: React.FC<SidebarItemProps> = ({ href, icon: Icon, label, isMi
     );
   }
 
-  // If the item is not disabled, render it with the Link wrapper
   return (
     <Link
       href={href}
