@@ -102,27 +102,31 @@ const ShowReceiptModal: React.FC<ShowReceiptModalProps> = ({ isOpen, onClose, im
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
-          <form onSubmit={handleSubmit} className="p-4 mb-4">
-            <label htmlFor="referenceNumber" className="block text-gray-800 mb-2">Enter Reference Number to Confirm Payment</label>
-            <input
-              id="referenceNumber"
-              type="text"
-              value={referenceNumber}
-              onChange={handleReferenceChange}
-              className="w-full p-2 border border-gray-300 rounded-lg mb-4"
-              maxLength={13}
-              placeholder="Enter 13-digit number"
-              required
-            />
-            {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
-            <button
-              type="submit"
-              className={`w-full p-2 bg-green-500 text-white rounded-lg ${isSubmitting || referenceNumber.trim().length !== 13 ? 'opacity-50 cursor-not-allowed' : ''}`}
-              disabled={isSubmitting || referenceNumber.trim().length !== 13}
-            >
-              {isSubmitting ? 'Processing...' : 'Submit'}
-            </button>
-          </form>
+          {client.status === 'pending' ? (<>
+              <form onSubmit={handleSubmit} className="p-4 mb-4">
+                <label htmlFor="referenceNumber" className="block text-gray-800 mb-2">Enter Reference Number to Confirm Payment</label>
+                <input
+                  id="referenceNumber"
+                  type="text"
+                  value={referenceNumber}
+                  onChange={handleReferenceChange}
+                  className="w-full p-2 border border-gray-300 rounded-lg mb-4"
+                  maxLength={13}
+                  placeholder="Enter 13-digit number"
+                  required
+                />
+                {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+                <button
+                  type="submit"
+                  className={`w-full p-2 bg-green-500 text-white rounded-lg ${isSubmitting || referenceNumber.trim().length !== 13 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  disabled={isSubmitting || referenceNumber.trim().length !== 13}
+                >
+                  {isSubmitting ? 'Processing...' : 'Submit'}
+                </button>
+              </form></>
+            ) : (
+              <></>
+            )}
         </div>
       </div>
 

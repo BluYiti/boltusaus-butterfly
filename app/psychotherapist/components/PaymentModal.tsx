@@ -25,23 +25,6 @@ const PaymentModal = ({ onClose, client }) => {
   const [error, setError] = useState(''); // State to manage the error message
   const [actionType, setActionType] = useState(null);
 
-  // Move logic into the conditionally rendered sections or useEffect if needed
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await databases.updateDocument('Butterfly-Database', 'Payment', client.id, {
-        status: 'paid',
-      });
-      await databases.updateDocument('Butterfly-Database', 'Bookings', client.booking.$id, {
-        status: 'paid',
-      });
-      onClose();
-      window.location.href = `/psychotherapist/pages/clientspayment?tab=Paid`;
-    } catch (error) {
-      console.error('Failed to update document', error);
-    }
-  };
-
   const handleDecline = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsDeclining(true); // Show the input box for decline reason
@@ -205,11 +188,15 @@ const PaymentModal = ({ onClose, client }) => {
           paymentId={client.id} // Pass the payment ID
           client = {client}
         />
-        <p
-          className="py-2 text-sm font-semibold text-green-700 rounded-full"
-        >
-          Confirm Payment inside Receipt
-        </p>
+        {client.status === 'pending' ? (<>   
+              <p
+                className="py-2 text-sm font-semibold text-green-700 rounded-full"
+              >
+                Confirm Payment inside Receipt
+              </p></>
+            ) : (
+              <></>
+            )}
 
         {/* Buttons */}
         {!isDeclining && (
