@@ -23,6 +23,25 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, sele
   const [adminError, setAdminError] = useState<string | null>(null);
   const [isAdminValidating, setIsAdminValidating] = useState(false);
   const [isModalOpen, setModalOpen] = useState(false);
+  const [passwordCriteria, setPasswordCriteria] = useState({
+    length: false,
+    number: false,
+    specialChar: false,
+    uppercase: false,
+    lowercase: false,
+  });
+  const [isPasswordValid, setIsPasswordValid] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
+
+  const validateFirstName = (name: string) => {
+    const nameRegex = /^[a-zA-Z]+$/;
+    return nameRegex.test(name);
+  };
+
+  const validateLastName = (name: string) => {
+    const nameRegex = /^[a-zA-Z]+$/;
+    return nameRegex.test(name);
+  }
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -33,7 +52,24 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, sele
     const phoneRegex = /^63\d{10}$/;
     return phoneRegex.test(phone);
   };
-  
+
+  const validatePassword = (password: string) => {
+    const length = password.length >= 8;
+    const number = /\d/.test(password);
+    const specialChar = /[@$!%*?&]/.test(password);
+    const uppercase = /[A-Z]/.test(password);
+    const lowercase = /[a-z]/.test(password);
+
+    setPasswordCriteria({
+        length,
+        number,
+        specialChar,
+        uppercase,
+        lowercase,
+    });
+
+    setIsPasswordValid(length && number && specialChar && uppercase && lowercase);
+};
 
   const handleAdminValidation = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,6 +120,18 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, sele
 
   const handleSubmit = async () => {
     setError(null);
+    
+    // Check if the first and last name are valid
+    if (!validateFirstName(firstName)) {
+      setError('Invalid email format.');
+      return;
+    }
+    
+    if (!validateLastName(lastName)) {
+      setError('Invalid email format.');
+      return;
+    }
+
     // Check if the email and phone number are valid
     if (!validateEmail(email)) {
       setError('Invalid email format.');
@@ -134,6 +182,12 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, sele
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const newPassword = e.target.value;
+      setPassword(newPassword);
+      validatePassword(newPassword);
   };
 
   if (!isOpen) return null;
@@ -212,13 +266,37 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, sele
                 Password
               </label>
               <input
-                type="password"
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-black"
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={handlePasswordChange}
+                  onFocus={() => setIsFocused(true)}
+                  onBlur={() => setIsFocused(false)}
+                  placeholder="********"
+                  className={`border rounded-xl pl-3 pr-10 py-2 w-full text-gray-500 ${
+                      isPasswordValid ? 'border-green-500' : 'border-red-500'
+                  }`}
               />
+              {/* Show password requirements only when the input is focused */}
+              {isFocused && (
+                  <div className="absolute left-0 top-full mt-2 bg-white bg-opacity-95 border rounded-xl w-full p-2 text-sm text-gray-500 shadow-md">
+                      <p className={`text-sm ${passwordCriteria.length ? 'text-green-500' : 'text-red-500'}`}>
+                          - At least 8 characters
+                      </p>
+                      <p className={`text-sm ${passwordCriteria.number ? 'text-green-500' : 'text-red-500'}`}>
+                          - At least 1 number
+                      </p>
+                      <p className={`text-sm ${passwordCriteria.specialChar ? 'text-green-500' : 'text-red-500'}`}>
+                          - At least 1 special character (@, $, !, %, *, ?, &)
+                      </p>
+                      <p className={`text-sm ${passwordCriteria.uppercase ? 'text-green-500' : 'text-red-500'}`}>
+                          - At least 1 uppercase letter
+                      </p>
+                      <p className={`text-sm ${passwordCriteria.lowercase ? 'text-green-500' : 'text-red-500'}`}>
+                          - At least 1 lowercase letter
+                      </p>
+                  </div>
+              )}
             </div>
 
             <div className="flex justify-end space-x-2">
