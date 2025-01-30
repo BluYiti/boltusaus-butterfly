@@ -218,7 +218,7 @@ const HomePage: React.FC = () => {
           <div className="absolute right-40 w-full h-full bg-contain bg-no-repeat" style={{ backgroundImage: `url('/images/cloud.png')`, backgroundPosition: 'right center' }}></div>
           <div className="absolute bottom-0 left-20 w-screen h-3/5 bg-contain bg-no-repeat" style={{ backgroundImage: `url('/images/services.png')`, backgroundPosition: 'left bottom' }}></div>
 
-            <h1 className="absolute md:top-16 top-0 md:left-48 left-20 text-6xl md:text-8xl z-10 font-paintbrush text-blue-800">
+            <h1 className="absolute top-4 md:top-16 left-4 md:left-48 text-4xl md:text-6xl lg:text-8xl z-10 font-paintbrush text-blue-800">
             Butterfly Offers
             </h1>
 
@@ -262,7 +262,7 @@ const HomePage: React.FC = () => {
           </div>
         </div>
       </section>
-      
+
       {/* Contacts Section */}
       <section id="contacts" className="py-8 md:py-32 bg-[#c2dffd]">
         <div className="max-w-4xl mx-auto text-center md:text-left px-4">
