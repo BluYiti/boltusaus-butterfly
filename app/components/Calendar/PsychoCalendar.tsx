@@ -14,7 +14,7 @@ interface CalendarProps {
   setSelectedMonth: (month: string) => void;
 }
 
-const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 const Calendar: React.FC<CalendarProps> = ({
   currentMonth,
