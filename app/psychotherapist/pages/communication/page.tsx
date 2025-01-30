@@ -31,14 +31,17 @@ interface Message {
 // Contact List component
 const ContactList: FC<{ onContactClick: (id: string) => void; selectedContact: string | null; contacts: Contact[] }> = ({ onContactClick, selectedContact, contacts }) => {
   return (
-    <div className="w-1/4 bg-gray-100 p-4 border-r border-gray-200">
-      <div className="flex items-center bg-white p-2 rounded-full mb-4">
-        <FaSearch className="text-gray-400 ml-2" />
-        <input
-          type="text"
-          placeholder="Search"
-          className="flex-grow bg-transparent p-2 outline-none text-sm"
-        />
+    <div className="bg-gray-100 border-gray-200 overflow-x-auto">
+      {/* Sticky Search Bar */}
+      <div className="sticky top-0 bg-white z-10 shadow">
+        <div className="flex items-center bg-white p-2 rounded-lg">
+          <FaSearch className="text-gray-400 ml-2" />
+          <input
+            type="text"
+            placeholder="Search"
+            className="flex-grow bg-transparent p-2 outline-none text-sm"
+          />
+        </div>
       </div>
 
       <div className="space-y-2">
