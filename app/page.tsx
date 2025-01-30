@@ -154,33 +154,32 @@ const HomePage: React.FC = () => {
           </Link>
         </div>
       </section>
-
       {/* About Section */}
-      <section ref={aboutRef} id="about" className="py-8 md:py-32 bg-white text-center md:text-left h-[80vh]">
+      <section ref={aboutRef} id="about" className="py-8 md:py-32 bg-white text-center md:text-left h-auto md:h-[80vh]">
         <motion.div
           initial="hidden"
           animate={hasAnimated ? "visible" : "hidden"}
           variants={aboutVariants}
         >
           <div className="flex flex-col md:flex-row md:items-center max-w-4xl mx-auto">
-            <div className="md:w-2/3 px-2">
-              <h1 className="text-7xl ml-24 font-paintbrush text-blue-800 mb-4 md:mb-8">
-                What is Butterfly?
-              </h1>
-              <p className="text-base text-center md:text-lg mb-8">
-                Butterfly is a psychological wellness web application of A.M. Peralta Psychological Services that offers the features: enhanced appointment system with an automated interactive SMS service, refined remote psychotherapy counseling, and a comprehensive client monitoring and management. These integrated services will allow clients to book appointments and communicate remotely with psychotherapists at any time even in the comfort of their homes. Butterfly aims to deliver more efficient, effective, and reliable mental healthcare digital service.
-              </p>
-            </div>
-            <div className="md:w-1/3 flex justify-right md:justify-end md:ml-2">
-              <Image 
-                src="/images/amperalta.jpg" 
-                alt="A.M. Peralta Psychological Services" 
-                width={288} // 72 * 4 (for example, you can adjust width/height to suit your design)
-                height={288} 
-                className="rounded-full" 
-                priority // Optional: if it's a critical image that should be loaded first
-              />
-            </div>
+        <div className="md:w-2/3 px-2">
+          <h1 className="text-4xl md:text-7xl ml-0 md:ml-24 font-paintbrush text-blue-800 mb-4 md:mb-8">
+            What is Butterfly?
+          </h1>
+          <p className="text-base md:text-lg mb-8">
+            Butterfly is a psychological wellness web application of A.M. Peralta Psychological Services that offers the features: enhanced appointment system with an automated interactive SMS service, refined remote psychotherapy counseling, and a comprehensive client monitoring and management. These integrated services will allow clients to book appointments and communicate remotely with psychotherapists at any time even in the comfort of their homes. Butterfly aims to deliver more efficient, effective, and reliable mental healthcare digital service.
+          </p>
+        </div>
+        <div className="md:w-1/3 flex justify-center md:justify-end md:ml-2">
+          <Image 
+            src="/images/amperalta.jpg" 
+            alt="A.M. Peralta Psychological Services" 
+            width={288} // 72 * 4 (for example, you can adjust width/height to suit your design)
+            height={288} 
+            className="rounded-full" 
+            priority // Optional: if it's a critical image that should be loaded first
+          />
+        </div>
           </div>
         </motion.div>
       </section>
@@ -213,31 +212,55 @@ const HomePage: React.FC = () => {
           </div>
         </div>
       </section>
-
-      {/* Services Section */}
-      <section id="services" className="relative flex flex-col justify-center items-end h-screen bg-white">
-        <div className="absolute right-40 w-full h-full bg-contain bg-no-repeat" style={{ backgroundImage: `url('/images/cloud.png')`, backgroundPosition: 'right center' }}></div>
-        <div className="absolute bottom-0 left-20 w-screen h-3/5 bg-contain bg-no-repeat" style={{ backgroundImage: `url('/images/services.png')`, backgroundPosition: 'left bottom' }}></div>
-
-        <h1 className="absolute top-16 left-48 text-8xl z-10 font-paintbrush text-blue-800">
-          Butterfly Offers
-        </h1>
-
-        <div className="relative z-10 flex flex-col items-end justify-center right-48 font-montserrat">
-          <ServiceItem 
-            title="Counseling and Psychotherapy" 
-            description="Counseling and psychotherapy involve talking with a trained professional to address mental health challenges. Counseling focuses on specific issues for guidance, while psychotherapy explores deeper emotional and psychological aspects for overall healing and personal growth." 
-          />
-          <ServiceItem 
-            title="Reading Modules" 
-            description="Reading modules are structured educational units that provide curated texts and resources on counseling and psychotherapy. They enhance understanding of theories and practices through case studies, exercises, and reflective questions." 
-          />
-          <ServiceItem 
-            title="Goals and Mood Tracking" 
-            description="Goals and mood tracking is a practice that helps individuals set personal goals while monitoring their emotional states. It fosters self-awareness and accountability, enabling clients to identify mood patterns and assess the impact of their actions on mental health." 
-          />
+        <div className="absolute mt-16 right-0 w-1/2 h-screen bg-cover bg-no-repeat" style={{ backgroundImage: `url('/images/booksession.png')` }}></div>
+        <div className="relative z-10 max-w-5xl py-16 px-4 md:px-8 ml-10">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-paintbrush mb-8 text-left text-blue-800">
+            How to Book a Session
+          </h2>
+          <p className="mb-8 text-base md:text-lg text-left max-w-2xl">
+          A.M. Peralta Psychological Services&apos; web application is designed to help you easily book an appointment in just a few simple steps.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="md:col-span-2">
+              <ol className="space-y-4">
+                {bookingSteps.map((step, index) => (
+                  <li key={index} className="flex items-start">
+                    <span className={`text-6xl font-paintbrush text-gray-${500 + index * 100} w-10 text-center mr-4`}>
+                      {index + 1}
+                    </span>
+                    <div className="flex-1">
+                      <p className="text-left">{step}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </div>
         </div>
-      </section>
+        {/* Services Section */}
+        <section id="services" className="relative flex flex-col justify-center items-end h-screen bg-white">
+          <div className="absolute right-40 w-full h-full bg-contain bg-no-repeat" style={{ backgroundImage: `url('/images/cloud.png')`, backgroundPosition: 'right center' }}></div>
+          <div className="absolute bottom-0 left-20 w-screen h-3/5 bg-contain bg-no-repeat" style={{ backgroundImage: `url('/images/services.png')`, backgroundPosition: 'left bottom' }}></div>
+
+            <h1 className="absolute md:top-16 top-0 md:left-48 left-20 text-6xl md:text-8xl z-10 font-paintbrush text-blue-800">
+            Butterfly Offers
+            </h1>
+
+          <div className="relative z-10 flex flex-col items-end justify-center right-0 md:right-48 font-montserrat">
+            <div className="rounded-xl p-6 w-full md:w-2/3 lg:w-1/2 xl:w-1/3">
+              <h3 className="text-2xl mb-4 font-bold text-gray-800">Counseling and Psychotherapy</h3>
+              <p>Counseling and psychotherapy involve talking with a trained professional to address mental health challenges. Counseling focuses on specific issues for guidance, while psychotherapy explores deeper emotional and psychological aspects for overall healing and personal growth.</p>
+            </div>
+            <div className="rounded-xl p-6 w-full md:w-2/3 lg:w-1/2 xl:w-1/3">
+              <h3 className="text-2xl mb-4 font-bold text-gray-800">Reading Modules</h3>
+              <p>Reading modules are structured educational units that provide curated texts and resources on counseling and psychotherapy. They enhance understanding of theories and practices through case studies, exercises, and reflective questions.</p>
+            </div>
+            <div className="rounded-xl p-6 w-full md:w-2/3 lg:w-1/2 xl:w-1/3">
+              <h3 className="text-2xl mb-4 font-bold text-gray-800">Goals and Mood Tracking</h3>
+              <p>Goals and mood tracking is a practice that helps individuals set personal goals while monitoring their emotional states. It fosters self-awareness and accountability, enabling clients to identify mood patterns and assess the impact of their actions on mental health.</p>
+            </div>
+          </div>
+        </section>
 
       {/* FAQ Section */}
       <section id="faq" className="px-4 md:px-8 py-8 md:py-32 bg-[#c2dffd] text-center md:text-left">
@@ -347,7 +370,7 @@ interface ServiceItemProps {
 }
 
 const ServiceItem: React.FC<ServiceItemProps> = ({ title, description }) => (
-  <div className="rounded-xl p-6 w-2/6">
+  <div className="rounded-xl p-6 w-full md:w-2/3 lg:w-1/2 xl:w-1/3">
     <h3 className="text-2xl mb-4 font-bold text-gray-800">{title}</h3>
     <p>{description}</p>
   </div>
