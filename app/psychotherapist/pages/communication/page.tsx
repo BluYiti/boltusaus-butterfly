@@ -40,7 +40,7 @@ const ContactList: FC<{
       {/* Floating Button when Minimized */}
       {isMinimized && (
         <button
-          className="fixed top-4 left-4 z-20 p-3 bg-white shadow-lg rounded-full hover:bg-gray-200 transition md:hidden"
+          className="fixed top-4 left-4 md:left-64 z-20 p-3 bg-white shadow-lg rounded-full hover:bg-gray-200 transition"
           onClick={() => setIsMinimized(false)}
         >
           <FaChevronRight />
@@ -48,8 +48,9 @@ const ContactList: FC<{
       )}
 
       <div
-        className={`bg-gray-100 border-gray-200 transition-all duration-300 overflow-hidden h-full flex flex-col 
-        ${isMinimized ? "w-0 hidden" : "w-full sm:w-1/3 md:w-1/4 lg:w-1/5"}`}
+        className={`bg-gray-100 border-gray-200 transition-all duration-300 overflow-x-auto ${
+          isMinimized ? "w-0" : "w-1/4"
+        }`}
       >
         {/* Sticky Search Bar */}
         <div className="sticky top-0 bg-white z-10 shadow flex items-center p-2">
@@ -61,9 +62,9 @@ const ContactList: FC<{
               className="flex-grow bg-transparent p-2 outline-none text-sm"
             />
           </div>
-          {/* Minimize Button (Mobile) */}
+          {/* Minimize Button */}
           <button
-            className="ml-2 p-2 rounded-full hover:bg-gray-200 transition md:hidden"
+            className="ml-2 p-2 rounded-full hover:bg-gray-200 transition"
             onClick={() => setIsMinimized(true)}
           >
             <FaChevronLeft />
@@ -71,12 +72,13 @@ const ContactList: FC<{
         </div>
 
         {/* Contact List */}
-        <div className="space-y-2 overflow-y-auto flex-grow">
+        <div className={`space-y-2 transition-all duration-300 ${isMinimized ? "hidden" : "block"}`}>
           {contacts.map((contact) => (
             <div
               key={contact.id}
-              className={`flex items-center p-3 rounded-lg cursor-pointer transition 
-              ${selectedContact === contact.id ? "bg-blue-100" : "hover:bg-gray-100"}`}
+              className={`flex items-center p-3 rounded-lg cursor-pointer transition ${
+                selectedContact === contact.id ? "bg-blue-100" : "hover:bg-gray-100"
+              }`}
               onClick={() => onContactClick(contact.id)}
             >
               <Image
@@ -104,6 +106,7 @@ const ContactList: FC<{
   );
 };
 
+// Chat Box component
 const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSendMessage: (text: string) => void; onStartCall: () => void }> = ({selectedContact, messages, onSendMessage, onStartCall,}) => {
   const [messageInput, setMessageInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -115,40 +118,72 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSend
     }
   };
 
-  useEffect(() => {
+  const handleGoogleMeet = () => {
+    window.open('https://meet.google.com/landing', '_blank');
+  }
+
+  const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
   }, [messages]);
 
   if (!selectedContact) {
     return (
-      <div className="w-full sm:w-2/3 md:w-3/4 p-6 flex items-center justify-center">
+      <div className="w-full ml-10 p-6 flex items-center justify-center">
         <p>Select a contact to start chatting</p>
       </div>
     );
   }
 
   return (
-    <div className="w-full sm:w-2/3 md:w-3/4 p-4 flex flex-col justify-between">
-      <div className="flex items-center justify-between mb-4 border-b pb-2">
+    <div className="w-full ml-10 p-6 flex flex-col justify-between">
+      <div className="flex items-center justify-between mb-6">
+        {/* Contact Details */}
         <div className="flex items-center">
           <Image
             src={selectedContact.imageUrl}
             alt={selectedContact.name}
-            width={48}
-            height={48}
+            width={48} // Width in pixels
+            height={48} // Height in pixels
             className="rounded-full mr-4"
           />
           <h2 className="text-xl font-bold">{selectedContact.name}</h2>
         </div>
+
+        {/* Buttons for Google Meet and Video Call */}
+        <div className="flex items-center space-x-4">
+          {/* Google Meet Icon */}
+          <button
+            onClick={handleGoogleMeet} // Use the onStartCall prop here
+            className="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
+            aria-label="Start Video Call"
+          >
+            <Image
+              src="/images/meet-logo.png"
+              alt={selectedContact.name}
+              width={30} // Width in pixels
+              height={30} // Height in pixels
+              className="rounded-full"
+            />
+          </button>
+        </div>
       </div>
 
-      <div className="flex-grow overflow-y-auto space-y-4 p-2">
+      <div className="flex-grow overflow-y-auto space-y-4">
         {messages.map((message) => (
           <div
             key={message.id}
-            className={`flex ${message.sender === 'psychotherapist' ? 'justify-end' : 'justify-start'}`}
+            className={`group relative ${
+              message.sender === 'psychotherapist' ? 'justify-end' : 'justify-start'
+            } flex`}
           >
-            <div className={`max-w-xs p-3 rounded-lg shadow ${message.sender === 'psychotherapist' ? 'bg-blue-100' : 'bg-gray-100'}`}
+            <div
+              className={`max-w-xs p-4 rounded-lg shadow ${
+                message.sender === 'psychotherapist' ? 'bg-blue-100' : 'bg-gray-100'
+              }`}
             >
               <p>{message.text}</p>
               <span className="block text-xs text-gray-400">{message.time}</span>
@@ -163,7 +198,11 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSend
           type="text"
           value={messageInput}
           onChange={(e) => setMessageInput(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              handleSendMessage();
+            }
+          }}
           placeholder="Type a message..."
           className="flex-grow p-2 border border-gray-300 rounded-full"
         />
@@ -177,7 +216,6 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSend
     </div>
   );
 };
-
 
 // Main Communication Page component with Layout
 const Communication: FC = () => {
