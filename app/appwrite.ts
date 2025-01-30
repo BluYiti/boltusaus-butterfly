@@ -1,4 +1,4 @@
-import { Client, Account, Databases, Storage, ID, Query, Functions } from 'appwrite';
+import { Client, Account, Databases, Storage, ID, Query, Functions, RealtimeResponseEvent } from 'appwrite';
 
 // Initialize Appwrite client
 const client = new Client();
@@ -23,6 +23,33 @@ const account = new Account(client); // For user authentication and sessions
 const databases = new Databases(client); // For database operations
 const storage = new Storage(client); // For file storage operations
 const functions = new Functions(client);
+
+// Subscribe to all databases and buckets
+client.subscribe('databases.*.collections.*.documents.*', response => {
+  if (response.events.includes('databases.*.collections.*.documents.*.create')) {
+    // Log when a new document is created
+    console.log('New document created:', response.payload);
+  } else if (response.events.includes('databases.*.collections.*.documents.*.update')) {
+    // Log when a document is updated
+    console.log('Document updated:', response.payload);
+  } else if (response.events.includes('databases.*.collections.*.documents.*.delete')) {
+    // Log when a document is deleted
+    console.log('Document deleted:', response.payload);
+  }
+});
+
+client.subscribe('buckets.*.files.*', response => {
+  if (response.events.includes('buckets.*.files.*.create')) {
+    // Log when a new file is uploaded
+    console.log('New file uploaded:', response.payload);
+  } else if (response.events.includes('buckets.*.files.*.update')) {
+    // Log when a file is updated
+    console.log('File updated:', response.payload);
+  } else if (response.events.includes('buckets.*.files.*.delete')) {
+    // Log when a file is deleted
+    console.log('File deleted:', response.payload);
+  }
+});
 
 // JWT Function: Create a JWT for the current authenticated user
 async function createJWT() {

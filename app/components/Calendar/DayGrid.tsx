@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { account, databases } from '@/appwrite';
-import { Query } from 'appwrite';
+import { account } from '@/appwrite';
 import { fetchAppointmentsForDay, fetchPsychoId, fetchPaymentStatus } from '@/hooks/userService';
 
 interface DayGridProps {
@@ -95,7 +94,7 @@ const DayGrid: React.FC<DayGridProps> = ({ selectedDay, selectedMonth }) => {
                 {appointments.map((appointment) => (
                   <tr key={appointment.$id}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {appointment.client.firstname} {appointment.client.lastname}
+                      {appointment.client?.firstname || 'N/A'} {appointment.client?.lastname || 'N/A'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {appointment.slots}
@@ -107,9 +106,13 @@ const DayGrid: React.FC<DayGridProps> = ({ selectedDay, selectedMonth }) => {
                       {appointment.paymentStatus}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      {appointment.paymentStatus === 'paid' || appointment.paymentStatus === 'reschedule'  ? (
                       <a href="#" className="text-white p-[0.3rem] rounded-xl bg-amber-400 hover:text-indigo-900">
                         Reschedule
                       </a>
+                      ) : (
+                      <span className="text-gray-500">Not Available</span>
+                      )}
                     </td>
                   </tr>
                 ))}

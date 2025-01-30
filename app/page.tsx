@@ -96,27 +96,50 @@ const HomePage: React.FC = () => {
         <motion.img
           src="/gifs/butterfly.gif" 
           alt="Butterfly Animation"
-          className="absolute z-20 w-[35rem] h-[35rem] sm:right-[14rem] 2xl:right-[14rem] 3xl:right-[22rem]" 
+          className="hidden sm:block absolute z-20 w-[35rem] h-[35rem] sm:right-[14rem] 2xl:right-[14rem] 3xl:right-[22rem]" 
           initial={{ opacity: 0, scale: 0.5 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6, delay: 0.5 }}
         />
 
-        {/* Centered Navbar */}
-        <nav className="absolute top-6 left-1/2 transform -translate-x-1/2 flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4 text-white">
-          {navItems.map((item, index) => (
-            <motion.a
-              key={item.label}
-              href={item.href}
-              className="hover:text-gray-400"
-              initial="hidden"
-              animate="visible"
-              variants={navVariants}
-              custom={index}
+        {/* Centered Navbar with Burger Icon for Mobile */}
+        <nav className="absolute top-6 left-1/2 transform -translate-x-1/2 flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4 text-white text-center transition-all duration-300">
+          <div className="md:hidden">
+            <button
+              className="text-white focus:outline-none"
+              onClick={() => setOpen(open === -1 ? null : -1)}
             >
-              {item.label}
-            </motion.a>
-          ))}
+              <svg
+          className="w-6 h-6"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+              >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M4 6h16M4 12h16m-7 6h7"
+          ></path>
+              </svg>
+            </button>
+          </div>
+          <div className={`md:flex ${open === -1 ? 'block' : 'hidden'} transition-all duration-300`}>
+            {navItems.map((item, index) => (
+              <motion.a
+          key={item.label}
+          href={item.href}
+          className="hover:text-gray-400 mr-5 block md:inline-block"
+          initial="hidden"
+          animate="visible"
+          variants={navVariants}
+          custom={index}
+              >
+          {item.label}
+              </motion.a>
+            ))}
+          </div>
         </nav>
 
         {/* Right Side Butterfly Header */}
