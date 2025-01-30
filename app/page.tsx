@@ -212,31 +212,7 @@ const HomePage: React.FC = () => {
           </div>
         </div>
       </section>
-        <div className="absolute mt-16 right-0 w-1/2 h-screen bg-cover bg-no-repeat" style={{ backgroundImage: `url('/images/booksession.png')` }}></div>
-        <div className="relative z-10 max-w-5xl py-16 px-4 md:px-8 ml-10">
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-paintbrush mb-8 text-left text-blue-800">
-            How to Book a Session
-          </h2>
-          <p className="mb-8 text-base md:text-lg text-left max-w-2xl">
-          A.M. Peralta Psychological Services&apos; web application is designed to help you easily book an appointment in just a few simple steps.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="md:col-span-2">
-              <ol className="space-y-4">
-                {bookingSteps.map((step, index) => (
-                  <li key={index} className="flex items-start">
-                    <span className={`text-6xl font-paintbrush text-gray-${500 + index * 100} w-10 text-center mr-4`}>
-                      {index + 1}
-                    </span>
-                    <div className="flex-1">
-                      <p className="text-left">{step}</p>
-                    </div>
-                  </li>
-                ))}
-              </ol>
-            </div>
-          </div>
-        </div>
+      
         {/* Services Section */}
         <section id="services" className="relative flex flex-col justify-center items-end h-screen bg-white">
           <div className="absolute right-40 w-full h-full bg-contain bg-no-repeat" style={{ backgroundImage: `url('/images/cloud.png')`, backgroundPosition: 'right center' }}></div>
