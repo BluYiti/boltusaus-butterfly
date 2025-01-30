@@ -11,6 +11,7 @@ import { account, databases, storage } from '@/appwrite';
 import useAuthCheck from '@/auth/page';
 import LoadingScreen from '@/components/LoadingScreen';
 
+
 // Define interfaces
 interface Contact {
   id: string;
