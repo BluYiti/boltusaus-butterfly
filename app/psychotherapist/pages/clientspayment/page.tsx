@@ -139,7 +139,7 @@ const ClientsPayment = () => {
       <div className="mt-4">
         <table className="min-w-full bg-white shadow rounded-lg">
           <thead>
-            <tr className="bg-blue-100 text-blue-600">
+            <tr className="bg-blue-100 text-black">
               <th className="py-3 px-6 text-left">Client Name</th>
               <th className="py-3 px-6 text-left">Email</th>
               <th className="py-3 px-6 text-left">Amount</th>
@@ -186,6 +186,11 @@ const ClientsPayment = () => {
         </table>
       </div>
     );
+  };
+
+  if (authLoading || loading) {
+    return <LoadingScreen />;
+  }
 
   // Mock data for daily profit
   const dailyProfit: Record<string, string> = {
@@ -213,11 +218,6 @@ const ClientsPayment = () => {
       </div>
     </div>
   );
-  };
-
-  if (authLoading || loading) {
-    return <LoadingScreen />;
-  }
 
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>

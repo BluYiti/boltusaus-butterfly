@@ -180,7 +180,7 @@ const PaymentModal = ({ onClose, client }) => {
             />
             {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
 
-            <div className="flex justify-between mt-4">
+            <div className="flex">
               <button
                 className="px-4 py-2 text-sm font-semibold text-gray-500 bg-transparent border border-gray-400 rounded-full hover:bg-gray-200"
                 onClick={() => setIsDeclining(false)} // Go back to initial state
@@ -188,7 +188,7 @@ const PaymentModal = ({ onClose, client }) => {
                 Back
               </button>
               <button
-                className="ml-4 px-4 py-2 text-sm font-semibold text-white bg-red-400 rounded-full hover:bg-red-300"
+                className="px-4 py-2 text-sm font-semibold text-white bg-red-400 rounded-full hover:bg-red-300"
                 onClick={handleDeclineSubmit} // Handle Decline, Reschedule, Refund, or Others
               >
                 Decline
@@ -213,9 +213,9 @@ const PaymentModal = ({ onClose, client }) => {
 
         {/* Buttons */}
         {!isDeclining && (
-          <div className="flex mt-6">
+          <div>
             <button
-              className="px-4 py-2 text-sm font-semibold text-blue-500 bg-transparent border border-blue-400 rounded-full hover:bg-blue-400 hover:text-white transition"
+              className="mr-3 px-4 py-2 text-sm font-semibold text-blue-500 bg-transparent border border-blue-400 rounded-full hover:bg-blue-400 hover:text-white transition"
               onClick={onClose}
             >
               Back
@@ -223,7 +223,7 @@ const PaymentModal = ({ onClose, client }) => {
             {client.status === 'pending' ? (
               <>
                 <button
-                  className="ml-25 px-4 py-2 text-sm font-semibold text-white bg-red-400 rounded-full hover:bg-red-300 hover:text-red-400 transition"
+                  className="px-4 py-2 text-sm font-semibold text-white bg-red-400 rounded-full hover:bg-red-300 hover:text-red-400 transition"
                   onClick={handleDecline}
                 >
                   Decline
