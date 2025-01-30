@@ -62,12 +62,6 @@ const GCashPayment: React.FC<GCashPaymentProps> = ({ isOpen, onClose, appointmen
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Simple validation for the reference number
-    if (referenceNumber.length !== 13) {
-      setError('Reference number must be 13 digits long');
-      return;
-    }
-
     // Ensure receipt is uploaded
     if (!receipt) {
       setError('Please upload a receipt');
@@ -116,7 +110,6 @@ const GCashPayment: React.FC<GCashPaymentProps> = ({ isOpen, onClose, appointmen
 
       // 4. Create the payment data with the receipt ID
       const PaymentData = {
-        referenceNo: referenceNumber,
         channel: "gcash",
         amount: 1000,
         status: "pending",
@@ -201,26 +194,13 @@ const GCashPayment: React.FC<GCashPaymentProps> = ({ isOpen, onClose, appointmen
               </div>
             )}
 
-            {/* Reference Number Input */}
-            <label htmlFor="referenceNumber" className="block text-gray-800 mb-2">Enter Reference Number</label>
-            <input
-              id="referenceNumber"
-              type="text"
-              value={referenceNumber}
-              onChange={handleReferenceChange}
-              className="w-full p-2 border border-gray-300 rounded-lg mb-4"
-              maxLength={13}
-              placeholder="Enter 13-digit number"
-              required
-            />
-
             {/* Display error if exists */}
             {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
 
             <button
               type="submit"
-              className={`w-full p-2 bg-green-500 text-white rounded-lg ${isSubmitting || referenceNumber.trim().length !== 13 || !receipt ? 'opacity-50 cursor-not-allowed' : ''}`}
-              disabled={isSubmitting || referenceNumber.trim().length !== 13 || !receipt}
+              className={`w-full p-2 bg-green-500 text-white rounded-lg ${isSubmitting || !receipt ? 'opacity-50 cursor-not-allowed' : ''}`}
+              disabled={isSubmitting || !receipt}
             >
               {isSubmitting ? 'Processing...' : 'Next'}
             </button>

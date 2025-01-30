@@ -240,7 +240,7 @@ const AppointmentBooking = () => {
     fetchData(); 
   }, [currentYear]);
   
-  const isFormComplete = appointmentData.selectedDay !== null && appointmentData.selectedTime && appointmentData.selectedTherapist;
+  const isFormComplete = appointmentData.selectedDay !== null && appointmentData.selectedTime && appointmentData.selectedTherapist && appointmentData.selectedMode;
 
   if (authLoading || loading) {
     return <LoadingScreen />;

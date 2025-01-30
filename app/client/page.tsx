@@ -77,7 +77,7 @@ const NewClientDashboard = () => {
     };
 
     fetchData();
-  }, []); // Empty dependency array to run once on component mount
+  }, [state]); // Empty dependency array to run once on component mount
 
   const handleDownload = () => {
     const documentId = cert; // Assuming userCert is defined in the same scope
