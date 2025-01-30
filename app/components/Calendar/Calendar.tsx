@@ -1,5 +1,6 @@
 import { databases, Query } from '@/appwrite';
-import React, { useState, useEffect, useMemo } from 'react';
+import { fetchTimeSlots } from '@/hooks/userService';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
 interface CalendarProps {
@@ -40,19 +41,18 @@ const Calendar: React.FC<CalendarProps> = ({
     isTherapistSelected,
 }) => {
     const [date, setDate] = useState(new Date());
-    const [bookedSlots, setBookedSlots] = useState<Booking[]>([]); // To store fetched booked slots
+    const [bookedSlots, setBookedSlots] = useState<Booking[]>([]);
+    const [timeSlots, setTimeSlots] = useState<string[]>([]);
     const [isNextMonthAvailable, setIsNextMonthAvailable] = useState(false);
-    const [, setIsFormComplete] = useState(false);
     const [accountRole,] = useState(null);
 
-    // Memoize the 'today' date object to ensure it's stable across renders
     const today = useMemo(() => new Date(), []);
     const tomorrow = useMemo(() => {
         const newTomorrow = new Date(today);
         newTomorrow.setDate(today.getDate() + 4);
         return newTomorrow;
     }, [today]);
-    
+
     const bookingEndDate = useMemo(() => {
         const newBookingEndDate = new Date(today);
         newBookingEndDate.setDate(today.getDate() + 12);
@@ -61,80 +61,73 @@ const Calendar: React.FC<CalendarProps> = ({
 
     const isMonthEndingSoon = today.getDate() >= 25;
 
-    const isDateInRange = React.useCallback((date: Date) => {
-        return date >= tomorrow && date <= bookingEndDate && date.getDay() !== 0;
-    }, [tomorrow, bookingEndDate]);    
+    const isDateInRange = useCallback((date: Date) => {
+        return date >= tomorrow && date <= bookingEndDate && date.getDay() !== 0 && date.getDay() !== 6;
+    }, [tomorrow, bookingEndDate]);
 
-    const currentMonthIndex = new Date(`${currentMonth} 1, ${currentYear}`).getMonth();
-    const nextMonthIndex = new Date(`${nextMonth} 1, ${currentYear}`).getMonth();
+    const currentMonthIndex = today.getMonth();
+    const nextMonthIndex = (currentMonthIndex + 1) % 12;
 
-    const monthsToDisplay = React.useMemo(() => [
+    const monthsToDisplay = useMemo(() => [
         { name: currentMonth, days: new Date(currentYear, currentMonthIndex + 1, 0).getDate() },
         { name: nextMonth, days: new Date(currentYear, nextMonthIndex + 1, 0).getDate() },
     ], [currentMonth, currentYear, currentMonthIndex, nextMonth, nextMonthIndex]);
 
-    const firstDayOfMonth = selectedMonth === currentMonth
-        ? new Date(currentYear, currentMonthIndex, 1).getDay()
-        : new Date(currentYear, nextMonthIndex, 1).getDay();
+    const firstDayOfMonth = useMemo(() => {
+        const monthIndex = selectedMonth === currentMonth ? currentMonthIndex : nextMonthIndex;
+        return new Date(currentYear, monthIndex, 1).getDay();
+    }, [selectedMonth, currentMonth, currentYear, currentMonthIndex, nextMonthIndex]);
 
-    const checkPreviousMonthAvailability = () => {
-        const previousMonth = new Date(date.getFullYear(), date.getMonth() - 1, 1);
-        const previousMonthDays = new Date(previousMonth.getFullYear(), previousMonth.getMonth() + 1, 0).getDate();
-    
-        for (let day = 1; day <= previousMonthDays; day++) {
-            const dateToCheck = new Date(previousMonth.getFullYear(), previousMonth.getMonth(), day);
-            if (isDateInRange(dateToCheck)) {
-                return true;
-            }
-        }
-        return false;
-    };
-
-    const isPreviousMonthAvailable = checkPreviousMonthAvailability(); 
-
-    // Fetch booked slots when therapist changes
     useEffect(() => {
+        const getTimeSlots = async () => {
+            const slots = (await fetchTimeSlots() || []).map(slot => slot.time);
+            setTimeSlots(slots);
+        };
+
         const fetchBookedSlots = async () => {
             if (!selectedTherapistId) return;
-        
+
             try {
                 const bookingsResponse = await databases.listDocuments(
                     'Butterfly-Database', 'Bookings',
-                    [Query.equal('psychotherapist', selectedTherapistId)] // Filter by therapistId
+                    [Query.equal('psychotherapist', selectedTherapistId)]
                 );
-        
+
                 const bookedData: Booking[] = bookingsResponse.documents.map((doc) => ({
-                    day: doc.day, // assuming the document contains a 'day' field
-                    month: doc.month, // assuming the document contains a 'month' field
-                    slots: doc.slots, // assuming the document contains a 'slots' field
-                    status: doc.status, // assuming the document contains a 'status' field
+                    day: doc.day,
+                    month: doc.month,
+                    slots: doc.slots,
+                    status: doc.status,
                 }));
-                
-                console.log("Booked slots:", bookedData); // Log the booked slots
+
+                console.log("Booked slots:", bookedData);
                 setBookedSlots(bookedData);
             } catch (error) {
                 console.error('Error fetching booked slots:', error);
-            }            
+            }
         };
-        
 
         fetchBookedSlots();
-    }, [selectedTherapistId]); // Re-run when therapistId changes
-
-    const handleNextMonthClick = () => {
-        const newDate = new Date(date.getFullYear(), date.getMonth() + 1, 1);
-        setDate(newDate); 
-        setSelectedMonth(newDate.toLocaleString('default', { month: 'long' }));
-    };
+        getTimeSlots();
+    }, [selectedTherapistId, timeSlots]);
 
     const handlePreviousMonthClick = () => {
-        const newDate = new Date(date.getFullYear(), date.getMonth() - 1, 1);
+        if (selectedMonth === currentMonth) return; // Prevent going to previous months
+        const newDate = new Date(currentYear, currentMonthIndex, 1);
         setDate(newDate);
         setSelectedMonth(newDate.toLocaleString('default', { month: 'long' }));
-    };
+    };  
+
+    const handleNextMonthClick = () => {
+        if (selectedMonth === nextMonth) return; // Prevent going beyond next month
+        const newDate = new Date(currentYear, nextMonthIndex, 1);
+        setDate(newDate);
+        setSelectedMonth(newDate.toLocaleString('default', { month: 'long' }));
+    };    
 
     useEffect(() => {
         const checkNextMonthAvailability = () => {
+            if (!isMonthEndingSoon) return;
             for (let day = 1; day <= monthsToDisplay[1].days; day++) {
                 const date = new Date(currentYear, nextMonthIndex, day);
                 if (isDateInRange(date)) {
@@ -146,35 +139,31 @@ const Calendar: React.FC<CalendarProps> = ({
         };
 
         checkNextMonthAvailability();
-    }, [isDateInRange, monthsToDisplay, nextMonthIndex, currentYear]);
+    }, [isDateInRange, isMonthEndingSoon, monthsToDisplay, nextMonthIndex, currentYear]);
 
-    useEffect(() => {
-        setIsFormComplete(!!selectedDay && !!selectedTime);
-    }, [selectedDay, selectedTime]);
-
-    const isSlotBooked = (day: number, time: string) => {
+    const isSlotBooked = useCallback((day: number, time: string) => {
         return bookedSlots.some(
-            (slot) => 
-                slot.day === day && 
-                slot.month.toLowerCase() === selectedMonth.toLowerCase() &&  // Ensure month comparison is case-insensitive
-                slot.slots === time && 
-                (slot.status === 'pending' || slot.status === 'paid' || slot.status === 'rescheduled' || slot.status === 'disabled')  // Add 'rescheduled' to consider those as booked too
+            (slot) =>
+                slot.day === day &&
+                slot.month.toLowerCase() === selectedMonth.toLowerCase() &&
+                slot.slots === time &&
+                (slot.status === 'pending' || slot.status === 'paid' || slot.status === 'rescheduled' || slot.status === 'disabled')
         );
-    };    
+    }, [bookedSlots, selectedMonth]);
 
-    const isDayFullyBooked = (day: number) => {
+    const isDayFullyBooked = useCallback((day: number) => {
         const times = ["09:00am", "10:00am", "11:00am", "01:00pm", "02:00pm", "03:00pm", "04:00pm"];
-        return times.every((time) => isSlotBooked(day, time)); 
-    };
+        return times.every((time) => isSlotBooked(day, time));
+    }, [isSlotBooked]);
 
     return (
         <div>
             <div className="flex justify-between mb-4">
                 <button
                     onClick={handlePreviousMonthClick}
-                    className="p-2 text-blue-500 hover:bg-blue-100 rounded transition"
+                    disabled={selectedMonth === currentMonth}
+                    className={`p-2 ${selectedMonth === currentMonth ? 'text-gray-400 cursor-not-allowed' : 'text-blue-500 hover:bg-blue-100'} rounded transition`}
                     aria-label="Previous Month"
-                    disabled={!isPreviousMonthAvailable}
                 >
                     <FaChevronLeft />
                 </button>
@@ -185,9 +174,9 @@ const Calendar: React.FC<CalendarProps> = ({
 
                 <button
                     onClick={handleNextMonthClick}
-                    className="p-2 text-blue-500 hover:bg-blue-100 rounded transition"
+                    disabled={selectedMonth === nextMonth}
+                    className={`p-2 ${selectedMonth === nextMonth ? 'text-gray-400 cursor-not-allowed' : 'text-blue-500 hover:bg-blue-100'} rounded transition`}
                     aria-label="Next Month"
-                    disabled={!isNextMonthAvailable || !isTherapistSelected}
                 >
                     <FaChevronRight />
                 </button>
@@ -203,7 +192,7 @@ const Calendar: React.FC<CalendarProps> = ({
                 {Array.from({ length: firstDayOfMonth }).map((_, index) => (
                     <div key={index}></div>
                 ))}
-
+    
                 {Array.from({ length: selectedMonth === currentMonth ? monthsToDisplay[0].days : monthsToDisplay[1].days }, (_, i) => {
                     const day = i + 1;
                     const date = new Date(currentYear, selectedMonth === currentMonth ? currentMonthIndex : nextMonthIndex, day);
@@ -223,6 +212,7 @@ const Calendar: React.FC<CalendarProps> = ({
                                 }`}
                             onClick={() => !isPastDate && !isFullyBooked && isTherapistSelected && setSelectedDay(day)}
                             disabled={isPastDate || !isTherapistSelected || isFullyBooked}
+                            aria-label={`Select ${day}`}
                         >
                             {day}
                         </button>
@@ -231,13 +221,9 @@ const Calendar: React.FC<CalendarProps> = ({
             </div>
 
             <h3 className="text-lg font-bold text-blue-900">Select Time {!selectedTime && <span className="text-red-500">*</span>}</h3>
-            {accountRole === "client"
-
-            }
             <div className="grid grid-cols-4 gap-4 mt-4">
-                {["09:00am", "10:00am", "11:00am", "01:00pm", "02:00pm", "03:00pm", "04:00pm"].map((time) => {
+                {timeSlots.map((time) => {
                     const isBooked = isSlotBooked(selectedDay || 0, time);
-
                     return (
                         <button
                             key={time}
@@ -247,6 +233,7 @@ const Calendar: React.FC<CalendarProps> = ({
                                 }`}
                             onClick={() => !isBooked && setSelectedTime(time)}
                             disabled={isBooked}
+                            aria-label={`Select ${time}`}
                         >
                             {time}
                         </button>
