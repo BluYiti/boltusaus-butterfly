@@ -135,7 +135,6 @@ const Calendar: React.FC<CalendarProps> = ({
 
     useEffect(() => {
         const checkNextMonthAvailability = () => {
-            if (!isMonthEndingSoon) return;
             for (let day = 1; day <= monthsToDisplay[1].days; day++) {
                 const date = new Date(currentYear, nextMonthIndex, day);
                 if (isDateInRange(date)) {
@@ -147,7 +146,7 @@ const Calendar: React.FC<CalendarProps> = ({
         };
 
         checkNextMonthAvailability();
-    }, [isDateInRange, isMonthEndingSoon, monthsToDisplay, nextMonthIndex, currentYear]);
+    }, [isDateInRange, monthsToDisplay, nextMonthIndex, currentYear]);
 
     useEffect(() => {
         setIsFormComplete(!!selectedDay && !!selectedTime);

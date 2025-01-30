@@ -185,45 +185,33 @@ const HomePage: React.FC = () => {
       </section>
       
       {/* Booking Section */}
-      <section className="bg-[#c2dffd] py-8 md:py-16">
-        <div className="relative z-10 max-w-4xl mx-auto px-4 md:px-8">
+      <section className="bg-[#c2dffd]">
+        <div className="absolute mt-16 right-0 w-1/2 h-screen bg-cover bg-no-repeat md:block hidden" style={{ backgroundImage: `url('/images/booksession.png')` }}></div>
+        <div className="relative z-10 max-w-5xl py-16 px-4 md:px-8 ml-10">
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-paintbrush mb-8 text-left text-blue-800">
-        How to Book a Session
+            How to Book a Session
           </h2>
           <p className="mb-8 text-base md:text-lg text-left max-w-2xl">
-        A.M. Peralta Psychological Services&apos; web application is designed to help you easily book an appointment in just a few simple steps.
+          A.M. Peralta Psychological Services&apos; web application is designed to help you easily book an appointment in just a few simple steps.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="md:col-span-2">
-          <ol className="space-y-4">
-            {bookingSteps.map((step, index) => (
-          <li key={index} className="flex items-start">
-            <span className={`text-6xl font-paintbrush text-gray-${500 + index * 100} w-10 text-center mr-4`}>
-              {index + 1}
-            </span>
-            <div className="flex-1">
-              <p className="text-left">{step}</p>
+            <div className="md:col-span-2">
+              <ol className="space-y-4">
+                {bookingSteps.map((step, index) => (
+                  <li key={index} className="flex items-start">
+                    <span className={`text-6xl font-paintbrush text-gray-${500 + index * 100} w-10 text-center mr-4`}>
+                      {index + 1}
+                    </span>
+                    <div className="flex-1">
+                      <p className="text-left">{step}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
             </div>
-          </li>
-            ))}
-          </ol>
-          <div className="relative">
-            <div className="absolute mt-16 right-0 w-1/2 h-screen bg-cover bg-no-repeat hidden md:block" style={{ backgroundImage: `url('/images/booksession.png')` }}></div>
-            <div className="mt-8 md:hidden">
-          <Image 
-            src="/images/booksession.png" 
-            alt="Book a Session" 
-            width={500} 
-            height={500} 
-            className="mx-auto"
-          />
-            </div>
-          </div>
-        </div>
           </div>
         </div>
       </section>
-      
       
         {/* Services Section */}
         <section id="services" className="relative flex flex-col justify-center items-end h-screen bg-white">
@@ -274,6 +262,7 @@ const HomePage: React.FC = () => {
           </div>
         </div>
       </section>
+
       {/* Contacts Section */}
       <section id="contacts" className="py-8 md:py-32 bg-[#c2dffd]">
         <div className="max-w-4xl mx-auto text-center md:text-left px-4">
@@ -313,25 +302,25 @@ const HomePage: React.FC = () => {
         <div className="text-center md:text-left mt-4 md:ml-36 flex flex-col md:flex-row justify-center md:justify-between items-center">
           <div>
         <button
-          type="button"
-          onClick={() => {
+            type="button"
+            onClick={() => {
             setIsModalOpen(true);
             setModalContentType('terms');
-          }}
-          className="text-blue-500 hover:underline ml-1"
+            }}
+            className="text-blue-500 hover:underline ml-1"
         >
-          Terms and Conditions
+            Terms and Conditions
         </button>
         &nbsp;|&nbsp;
         <button
-          type="button"
-          onClick={() => {
+            type="button"
+            onClick={() => {
             setIsModalOpen(true);
             setModalContentType('privacy');
-          }}
-          className="text-blue-500 hover:underline ml-1"
+            }}
+            className="text-blue-500 hover:underline ml-1"
         >
-          Privacy Policy
+            Privacy Policy
         </button>
           </div>
         </div>
