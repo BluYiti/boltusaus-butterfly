@@ -80,7 +80,7 @@ const Calendar: React.FC<CalendarProps> = ({
     const checkPreviousMonthAvailability = () => {
         const previousMonth = new Date(date.getFullYear(), date.getMonth() - 1, 1);
         const previousMonthDays = new Date(previousMonth.getFullYear(), previousMonth.getMonth() + 1, 0).getDate();
-    
+        
         for (let day = 1; day <= previousMonthDays; day++) {
             const dateToCheck = new Date(previousMonth.getFullYear(), previousMonth.getMonth(), day);
             if (isDateInRange(dateToCheck)) {
@@ -88,7 +88,7 @@ const Calendar: React.FC<CalendarProps> = ({
             }
         }
         return false;
-    };
+    };        
 
     const isPreviousMonthAvailable = checkPreviousMonthAvailability(); 
 
@@ -123,15 +123,15 @@ const Calendar: React.FC<CalendarProps> = ({
 
     const handleNextMonthClick = () => {
         const newDate = new Date(date.getFullYear(), date.getMonth() + 1, 1);
-        setDate(newDate); 
+        setDate(newDate);
         setSelectedMonth(newDate.toLocaleString('default', { month: 'long' }));
     };
-
+    
     const handlePreviousMonthClick = () => {
         const newDate = new Date(date.getFullYear(), date.getMonth() - 1, 1);
         setDate(newDate);
         setSelectedMonth(newDate.toLocaleString('default', { month: 'long' }));
-    };
+    };    
 
     useEffect(() => {
         const checkNextMonthAvailability = () => {
@@ -231,9 +231,7 @@ const Calendar: React.FC<CalendarProps> = ({
             </div>
 
             <h3 className="text-lg font-bold text-blue-900">Select Time {!selectedTime && <span className="text-red-500">*</span>}</h3>
-            {accountRole === "client"
 
-            }
             <div className="grid grid-cols-4 gap-4 mt-4">
                 {["09:00am", "10:00am", "11:00am", "01:00pm", "02:00pm", "03:00pm", "04:00pm"].map((time) => {
                     const isBooked = isSlotBooked(selectedDay || 0, time);

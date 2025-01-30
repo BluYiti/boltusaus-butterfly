@@ -216,7 +216,7 @@ const HomePage: React.FC = () => {
         {/* Services Section */}
         <section id="services" className="relative flex flex-col justify-center items-end h-screen bg-white">
           <div className="absolute right-40 w-full h-full bg-contain bg-no-repeat" style={{ backgroundImage: `url('/images/cloud.png')`, backgroundPosition: 'right center' }}></div>
-          <div className="absolute bottom-0 left-20 w-screen h-3/5 bg-contain bg-no-repeat" style={{ backgroundImage: `url('/images/services.png')`, backgroundPosition: 'left bottom' }}></div>
+          <div className="absolute bottom-0 left-20 w-screen h-3/5 bg-contain bg-no-repeat md:block hidden" style={{ backgroundImage: `url('/images/services.png')`, backgroundPosition: 'left bottom' }}></div>
 
             <h1 className="absolute top-4 md:top-16 left-4 md:left-48 text-4xl md:text-6xl lg:text-8xl z-10 font-paintbrush text-blue-800">
             Butterfly Offers
