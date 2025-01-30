@@ -136,7 +136,7 @@ const ClientsPayment = () => {
 
   const renderClientsByStatus = (status: string) => {
     return (
-      <div className="mt-4">
+      <div className="mt-4 overflow-x-auto">
         <table className="min-w-full bg-white shadow rounded-lg">
           <thead>
             <tr className="bg-blue-100 text-black">
@@ -205,7 +205,7 @@ const ClientsPayment = () => {
   const renderReports = () => (
     <div className="mt-4 space-y-3">
       <h3 className="text-lg font-bold mb-4">Daily Profit</h3>
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {Object.entries(dailyProfit).map(([date, profit]) => (
           <div
             key={date}
@@ -227,8 +227,8 @@ const ClientsPayment = () => {
         </div>
 
         <div className="mt-24 px-5 mb-5 ">
-          <div className="flex items-center justify-between">
-            <div className="flex space-x-8 border-b">
+          <div className="flex flex-wrap items-center justify-between">
+            <div className="flex space-x-8 border-b overflow-x-auto">
               {["Pending", "Paid", "Rescheduled", "Refunded", "Report"].map((tab) => (
                 <button
                   key={tab}
