@@ -50,29 +50,6 @@ const Account = () => {
     setCurrentPage(1);
   };
 
-  const handleAddUser = async (newUser) => {
-    setUsers((prevUsers) => ({
-      ...prevUsers,
-      [selectedTab]: [...(prevUsers[selectedTab] || []), newUser],
-    }));
-  };
-
-  const handleEditUser = async (updatedUser) => {
-    setUsers((prevUsers) => ({
-      ...prevUsers,
-      [selectedTab]: prevUsers[selectedTab].map((user) =>
-        user.$id === updatedUser.$id ? updatedUser : user
-      ),
-    }));
-  };
-
-  const handleDeleteUser = async (userId) => {
-    setUsers((prevUsers) => ({
-      ...prevUsers,
-      [selectedTab]: prevUsers[selectedTab].filter((user) => user.$id !== userId),
-    }));
-  };
-
   const closeAddModal = () => setShowAddModal(false);
   const closeEditModal = () => setEditUser(null);
   const closeDeleteModal = () => setDeleteUser(null);
@@ -119,7 +96,7 @@ const Account = () => {
             onClick={() => setShowAddModal(true)}
             disabled={selectedTab === "Client"}
           >
-            + Add Account
+            Add Account
           </button>
         </div>
 
@@ -153,12 +130,14 @@ const Account = () => {
                         <button
                           onClick={() => setEditUser(user)}
                           className="text-yellow-500 hover:text-yellow-700"
+                          disabled
                         >
                           <PencilIcon className="h-5 w-5" />
                         </button>
                         <button
                           onClick={() => setDeleteUser(user)}
                           className="text-red-500 hover:text-red-700"
+                          disabled
                         >
                           <TrashIcon className="h-5 w-5" />
                         </button>
