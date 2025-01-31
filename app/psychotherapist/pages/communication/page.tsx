@@ -78,7 +78,7 @@ const ContactList: FC<{ onContactClick: (id: string) => void; selectedContact: s
 };
 
 // Chat Box component
-const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSendMessage: (text: string) => void; onStartCall: () => void; onBack: () => void;}> = ({selectedContact, messages, onSendMessage, onStartCall, onBack}) => {
+const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSendMessage: (text: string) => void; onBack: () => void;}> = ({selectedContact, messages, onSendMessage, onBack}) => {
   const [messageInput, setMessageInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -87,10 +87,6 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSend
       onSendMessage(messageInput);
       setMessageInput('');
     }
-  };
-
-  const handleStartCall = () => {
-    onStartCall();
   };
 
   const handleGoogleMeet = () => {
@@ -115,44 +111,49 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSend
 
   return (
     <div className="w-full p-6 flex flex-col justify-between">
-      <div className="flex items-center justify-between mb-6">
-        <button 
-          onClick={onBack} 
-          className="text-blue-500 hover:text-blue-700"
-        >
-          ← Back
-        </button>
+      {/* Header Section */}
+      <div className="flex items-center justify-start w-full mb-3 top-0">
+        {/* Back Button */}
+        <div className='mr-3'>
+          <button 
+            onClick={onBack} 
+            className="text-white hover:text-blue-700 bg-blue-400 rounded-full p-2"
+          >
+            Back
+          </button>
+        </div>
+  
         {/* Contact Details */}
-        <div className="flex items-center">
+        <div className="flex-1 flex justify-start items-center">
           <Image
             src={selectedContact.imageUrl}
             alt={selectedContact.name}
-            width={48} // Width in pixels
-            height={48} // Height in pixels
+            width={48}
+            height={48}
             className="rounded-full mr-4"
           />
-          <h2 className="text-xl font-bold">{selectedContact.name}</h2>
+          <h2 className="text-xs md:text-xl font-bold">{selectedContact.name}</h2>
         </div>
-
-        {/* Buttons for Google Meet and Video Call */}
-        <div className="flex items-center space-x-4">
-          {/* Google Meet Icon */}
+  
+        {/* Action Buttons */}
+        <div className="flex-1 flex justify-end items-center space-x-4">
           <button
-            onClick={handleGoogleMeet} // Use the onStartCall prop here
+            onClick={handleGoogleMeet}
             className="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
             aria-label="Start Video Call"
           >
             <Image
               src="/images/meet-logo.png"
-              alt={selectedContact.name}
-              width={30} // Width in pixels
-              height={30} // Height in pixels
+              alt="Google Meet"
+              width={30}
+              height={30}
               className="rounded-full"
             />
           </button>
         </div>
       </div>
-
+  
+      {/* Messages Section */}
       <div className="flex-grow overflow-y-auto space-y-4">
         {messages.map((message) => (
           <div
@@ -173,7 +174,8 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSend
         ))}
         <div ref={messagesEndRef} />
       </div>
-
+  
+      {/* Message Input */}
       <div className="flex items-center mt-4 border-t pt-4">
         <input
           type="text"
@@ -196,6 +198,7 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSend
       </div>
     </div>
   );
+  
 };
 
 // Main Communication Page component with Layout
@@ -209,6 +212,7 @@ const Communication: FC = () => {
 
   const handleContactClick = (id: string) => {
     setSelectedContactId(id);
+    fetchOrCreateConversation(id);
   };
 
   const handleBackToContacts = () => {
