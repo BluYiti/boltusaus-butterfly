@@ -1,15 +1,15 @@
 'use client';
 
 import { FC, useState, useEffect, useRef, useCallback } from 'react';
-import { FaSearch, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { FaSearch } from 'react-icons/fa';
 import Layout from '@/components/Sidebar/Layout';
-import VideoCall from '@/components/VideoCall';
 import items from '@/psychotherapist/data/Links';
 import { Query, ID } from 'appwrite';
 import Image from 'next/image';
 import { account, databases, storage } from '@/appwrite';
 import useAuthCheck from '@/auth/page';
 import LoadingScreen from '@/components/LoadingScreen';
+
 
 // Define interfaces
 interface Contact {
@@ -28,86 +28,57 @@ interface Message {
   time: string;
 }
 
-const ContactList: FC<{
-  onContactClick: (id: string) => void;
-  selectedContact: string | null;
-  contacts: Contact[];
-}> = ({ onContactClick, selectedContact, contacts }) => {
-  const [isMinimized, setIsMinimized] = useState(false);
-
+// Contact List component
+const ContactList: FC<{ onContactClick: (id: string) => void; selectedContact: string | null; contacts: Contact[] }> = ({ onContactClick, selectedContact, contacts }) => {
   return (
-    <>
-      {/* Floating Button when Minimized */}
-      {isMinimized && (
-        <button
-          className="fixed top-4 left-4 md:left-64 z-20 p-3 bg-white shadow-lg rounded-full hover:bg-gray-200 transition"
-          onClick={() => setIsMinimized(false)}
-        >
-          <FaChevronRight />
-        </button>
-      )}
-
-      <div
-        className={`bg-gray-100 border-gray-200 transition-all duration-300 overflow-x-auto ${
-          isMinimized ? "w-0" : "w-1/4"
-        }`}
-      >
-        {/* Sticky Search Bar */}
-        <div className="sticky top-0 bg-white z-10 shadow flex items-center p-2">
-          <div className="flex items-center bg-white p-2 rounded-lg flex-grow">
-            <FaSearch className="text-gray-400 ml-2" />
-            <input
-              type="text"
-              placeholder="Search"
-              className="flex-grow bg-transparent p-2 outline-none text-sm"
-            />
-          </div>
-          {/* Minimize Button */}
-          <button
-            className="ml-2 p-2 rounded-full hover:bg-gray-200 transition"
-            onClick={() => setIsMinimized(true)}
-          >
-            <FaChevronLeft />
-          </button>
-        </div>
-
-        {/* Contact List */}
-        <div className={`space-y-2 transition-all duration-300 ${isMinimized ? "hidden" : "block"}`}>
-          {contacts.map((contact) => (
-            <div
-              key={contact.id}
-              className={`flex items-center p-3 rounded-lg cursor-pointer transition ${
-                selectedContact === contact.id ? "bg-blue-100" : "hover:bg-gray-100"
-              }`}
-              onClick={() => onContactClick(contact.id)}
-            >
-              <Image
-                src={contact.imageUrl}
-                alt={contact.name}
-                width={48}
-                height={48}
-                className="rounded-full mr-4"
-                unoptimized
-              />
-              <div className="flex-grow">
-                <div className="flex justify-between items-center">
-                  <span className="font-semibold">{contact.name}</span>
-                  <span className="text-xs text-gray-500">{contact.time}</span>
-                </div>
-                <p className={`text-sm ${contact.isSession ? "text-blue-500" : "text-gray-500"}`}>
-                  {contact.lastMessage}
-                </p>
-              </div>
-            </div>
-          ))}
+    <div className="bg-gray-100 border-gray-200 overflow-x-auto">
+      {/* Sticky Search Bar */}
+      <div className="sticky top-0 bg-white z-10 shadow">
+        <div className="flex items-center bg-white p-2 rounded-lg">
+          <FaSearch className="text-gray-400 ml-2" />
+          <input
+            type="text"
+            placeholder="Search"
+            className="flex-grow bg-transparent p-2 outline-none text-sm"
+          />
         </div>
       </div>
-    </>
+
+      <div className="space-y-2">
+        {contacts.map((contact) => (
+          <div
+            key={contact.id}
+            className={`flex items-center p-3 rounded-lg cursor-pointer transition ${
+              selectedContact === contact.id ? 'bg-blue-100' : 'hover:bg-gray-100'
+            }`}
+            onClick={() => onContactClick(contact.id)}
+          >
+            <Image
+              src={contact.imageUrl}
+              alt={contact.name}
+              width={48}  // 12 * 4 = 48px width
+              height={48} // 12 * 4 = 48px height
+              className="rounded-full mr-4"
+              unoptimized
+            />
+            <div className="flex-grow">
+              <div className="flex justify-between items-center">
+                <span className="font-semibold">{contact.name}</span>
+                <span className="text-xs text-gray-500">{contact.time}</span>
+              </div>
+              <p className={`text-sm ${contact.isSession ? 'text-blue-500' : 'text-gray-500'}`}>
+                {contact.lastMessage}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 };
 
 // Chat Box component
-const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSendMessage: (text: string) => void; onStartCall: () => void }> = ({selectedContact, messages, onSendMessage, onStartCall,}) => {
+const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSendMessage: (text: string) => void; onStartCall: () => void; onBack: () => void;}> = ({selectedContact, messages, onSendMessage, onStartCall, onBack}) => {
   const [messageInput, setMessageInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -116,6 +87,10 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSend
       onSendMessage(messageInput);
       setMessageInput('');
     }
+  };
+
+  const handleStartCall = () => {
+    onStartCall();
   };
 
   const handleGoogleMeet = () => {
@@ -132,15 +107,21 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSend
 
   if (!selectedContact) {
     return (
-      <div className="w-full ml-10 p-6 flex items-center justify-center">
+      <div className="w-3/4 p-6 flex items-center justify-center">
         <p>Select a contact to start chatting</p>
       </div>
     );
   }
 
   return (
-    <div className="w-full ml-10 p-6 flex flex-col justify-between">
+    <div className="w-full p-6 flex flex-col justify-between">
       <div className="flex items-center justify-between mb-6">
+        <button 
+          onClick={onBack} 
+          className="text-blue-500 hover:text-blue-700"
+        >
+          ← Back
+        </button>
         {/* Contact Details */}
         <div className="flex items-center">
           <Image
@@ -225,48 +206,16 @@ const Communication: FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [psychotherapistDocumentId, setPsychotherapistDocumentId] = useState<string | null>(null); // Store psychotherapist document ID
-  const [isVideoCallActive, setIsVideoCallActive] = useState(false);
+
+  const handleContactClick = (id: string) => {
+    setSelectedContactId(id);
+  };
+
+  const handleBackToContacts = () => {
+    setSelectedContactId(null);
+  };
 
   const selectedContact = contacts.find(contact => contact.id === selectedContactId) || null;
-
-  const handleStartCall = async () => {
-    if (!selectedContactId || !psychotherapistDocumentId) return;
-
-    try {
-      const callNotificationData = {
-        isActive: true,
-        callerId: psychotherapistDocumentId, // Use psychotherapist document ID here
-        receiverId: selectedContactId, // ID of the client being called
-        timestamp: new Date().toISOString(),
-      };
-
-      const existingNotificationResponse = await databases.listDocuments(
-        'Butterfly-Database',
-        'Call-Notification',
-        [Query.equal('receiverId', selectedContactId)]
-      );
-
-      if (existingNotificationResponse.documents.length > 0) {
-        await databases.updateDocument(
-          'Butterfly-Database',
-          'Call-Notification',
-          existingNotificationResponse.documents[0].$id,
-          callNotificationData
-        );
-      } else {
-        await databases.createDocument(
-          'Butterfly-Database',
-          'Call-Notification',
-          ID.unique(),
-          callNotificationData
-        );
-      }
-
-      setIsVideoCallActive(true);
-    } catch (error) {
-      console.error('Failed to notify client of call:', error);
-    }
-  };
 
   useEffect(() => {
     const fetchPsychotherapistData = async () => {
@@ -490,32 +439,24 @@ const Communication: FC = () => {
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
       <div className="flex h-screen bg-blue-50">
-        {isVideoCallActive && psychotherapistDocumentId && selectedContactId ? (
-          <VideoCall
-            onEndCall={() => {
-              setIsVideoCallActive(false);
-            }} 
-            callerId={psychotherapistDocumentId} // Use the psychotherapist document ID as the caller ID
-            receiverId={selectedContactId}
+      {selectedContact ? (
+        // Show ChatBox when a contact is selected
+        <ChatBox
+          selectedContact={selectedContact}
+          messages={messages}
+          onSendMessage={handleSendMessage}
+          onBack={handleBackToContacts} // Pass back function to ChatBox
+        />
+      ) : (
+        // Show ContactList when no contact is selected
+        <div className="w-full h-full">
+          <ContactList
+            onContactClick={handleContactClick}
+            selectedContact={selectedContactId}
+            contacts={contacts}
           />
-        ) : (
-          <>
-            <ContactList
-              onContactClick={(id) => {
-                setSelectedContactId(id);
-                fetchOrCreateConversation(id);
-              }}
-              selectedContact={selectedContactId}
-              contacts={contacts}
-            />
-            <ChatBox
-              selectedContact={selectedContact}
-              messages={messages}
-              onSendMessage={handleSendMessage}
-              onStartCall={handleStartCall}
-            />
-          </>
-        )}
+        </div>
+      )}
       </div>
     </Layout>
   );
