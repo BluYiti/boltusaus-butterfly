@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { account } from "@/appwrite"; // Ensure your SDK is correctly initialized
 import { useRouter } from "next/navigation";
 import Back from '@/components/Back';

@@ -121,6 +121,8 @@ const PaymentModal = ({ isOpen, onClose, client }) => {
           isOpen={showReceipt}
           onClose={() => setShowReceipt(false)}
           imageUrl={client.receipt} // Pass the receipt object
+          paymentId={client.id} // Pass the payment ID
+          client={client}
         />
 
         {/* Buttons */}

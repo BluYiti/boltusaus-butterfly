@@ -147,27 +147,42 @@ const NewClientDashboard = () => {
           )}
 
           {/* Psychotherapists Section */}
-          <div className="relative overflow-y-auto mt-6">
-            <div className="flex overflow-x-auto p-4 space-x-4 scrollbar-thin scrollbar-thumb-blue-300">
-              {psychotherapists.map((psychotherapist, index) => (
-                <div key={index} className="flex-shrink-0 flex items-center justify-center w-[280px] sm:w-[300px] p-4" onClick={() => handleProfileClick(psychotherapist)} tabIndex={0}>
-                  <div className="flex flex-col items-center bg-white border border-blue-300 rounded-3xl p-3 w-full max-w-sm transform transition-transform duration-500 hover:scale-105 shadow-lg">
-                    <Image
-                      src={profileImageUrls[psychotherapist.$id] || "/images/default-profile.png"}
-                      alt={`${psychotherapist.firstName || "N/A"} ${psychotherapist.lastName || "N/A"}`}
-                      className="rounded-full mb-4"
-                      width={96}
-                      height={96}
-                      unoptimized
-                    />
-                    <div className="text-center">
-                      <h4 className="text-lg font-bold text-blue-500">{psychotherapist.firstName || "First Name"} {psychotherapist.lastName || "Last Name"}</h4>
-                      <p className="text-sm text-gray-600">{psychotherapist.specialties || "Specialties not specified"}</p>
-                      <h3 className="text-gray-600">{psychotherapist.position ? `${psychotherapist.position.charAt(0).toUpperCase()}${psychotherapist.position.slice(1)}` : "Position not specified"}</h3>
-                    </div>
+          <div className="relative overflow-hidden">
+            <div className="max-w-[600px] overflow-x-auto p-4 space-x-4 scrollbar-thin scrollbar-thumb-blue-300 flex">
+            {psychotherapists.map((psychotherapist, index) => (
+              <div
+                key={index}
+                className="flex-shrink-0 flex items-center justify-center w-[300px] p-4"
+                onClick={() => handleProfileClick(psychotherapist)}
+                tabIndex={0} // Makes it focusable
+                aria-label={`View profile of ${psychotherapist.firstName} ${psychotherapist.lastName}`}
+              >
+                <div className="flex flex-col items-center bg-white border border-blue-300 rounded-3xl p-3 min-w-[300px] transform transition-transform duration-500 ease-in-out hover:scale-105 shadow-lg">
+                  <Image
+              src={profileImageUrls[psychotherapist.$id] || "/images/default-profile.png"}
+              alt={`${psychotherapist.firstName || "N/A"} ${psychotherapist.lastName || "N/A"}`}
+              className="rounded-full mb-4"
+              width={96}
+              height={96}
+              unoptimized
+              onError={() => "/images/default-profile.png"}
+                  />
+                  <div className="text-center">
+              <h4 className="text-lg font-bold text-blue-500 font-roboto">
+                {psychotherapist.firstName || "First Name"} {psychotherapist.lastName || "Last Name"}
+              </h4>
+              <p className="text-sm text-gray-600 font-lora">
+                {psychotherapist.specialties || "Specialties not specified"}
+              </p>
+              <h3 className="text-gray-600 font-lora">
+                {psychotherapist.position
+                  ? `${psychotherapist.position.charAt(0).toUpperCase()}${psychotherapist.position.slice(1)}`
+                  : "Position not specified"}
+              </h3>
                   </div>
                 </div>
-              ))}
+              </div>
+            ))}
             </div>
           </div>
         </div>
