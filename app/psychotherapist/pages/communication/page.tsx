@@ -176,7 +176,7 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSend
       </div>
   
       {/* Message Input */}
-      <div className="flex items-center mt-4 border-t pt-4">
+      <div className="flex flex-wrap items-center mt-4 border-t pt-4 px-4 sm:px-6">
         <input
           type="text"
           value={messageInput}
@@ -187,11 +187,11 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSend
             }
           }}
           placeholder="Type a message..."
-          className="flex-grow p-2 border border-gray-300 rounded-full"
+          className="flex-grow p-2 border border-gray-300 rounded-full text-sm sm:text-base"
         />
         <button
           onClick={handleSendMessage}
-          className="ml-2 bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600"
+          className="mt-2 sm:mt-0 sm:ml-2 bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600"
         >
           Send
         </button>
