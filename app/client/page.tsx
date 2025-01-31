@@ -17,7 +17,7 @@ import Image from 'next/image';
 
 const NewClientDashboard = () => {
   const authLoading = useAuthCheck(['client']); // Call the useAuthCheck hook
-  const [dataLoading, setDataLoading] = useState(true); // State to track if data is still loading
+  const [dataLoading, setDataLoading] = useState(false); // State to track if data is still loading
   const [, setUsers] = useState([]);
   const [psychotherapists, setPsychotherapists] = useState([]);
   const [profileImageUrls, setProfileImageUrls] = useState({});
@@ -109,154 +109,90 @@ const NewClientDashboard = () => {
         </p>
       </div>
 
-      <div className="flex flex-col lg:flex-row justify-between items-start space-x-4 px-8">
-        {/* Left side - Pre-assessment and Psychotherapists Section */}
-        <div className="flex-1 bg-white p-6 rounded-lg shadow-lg mb-6 mt-8 h-auto lg:h-[27rem] w-full lg:w-[50%]">
-          {/* Conditionally render based on client state */}
+      <div className="flex flex-col mt-7 lg:flex-row justify-between items-start px-4 sm:px-8 space-y-6 lg:space-y-0 lg:space-x-6">
+
+        {/* Left Section - Pre-assessment & Psychotherapists */}
+        <div className="flex-1 bg-white p-4 sm:p-6 rounded-lg shadow-lg w-full lg:h-[27rem]">
+          
+          {/* Pre-assessment & Booking Section */}
           {state === "new" && (
             <Link href="/preassessment">
-              <button className="bg-[#2563EB] text-white py-2 px-4 mb-4 rounded text-xl font-semibold hover:bg-blue-300 hover:scale-105">
-          Start Pre-assessment test
+              <button className="w-full sm:w-auto bg-blue-600 text-white py-2 px-4 rounded-lg text-lg font-semibold hover:bg-blue-500 transition-transform transform hover:scale-105">
+                Start Pre-assessment Test
               </button>
             </Link>
           )}
 
-            {state === "current" && (
-              <div className="mb-6 flex flex-col items-center lg:flex-row lg:justify-center text-center lg:text-left space-y-3 lg:space-y-0 lg:space-x-4 p-4 bg-white shadow-lg rounded-xl">
-                
-                {/* Book Appointment Button */}
-                <Link href="/client/pages/bookappointment">
-                  <button className="text-lg font-semibold bg-blue-800 hover:bg-blue-700 transition-colors duration-300 text-white py-3 px-6 rounded-xl w-full lg:w-auto shadow-md">
-                    📅 Book Your Appointment
-                  </button>
-                </Link>
-
-                {/* Animated Checkmark */}
-                <span className="text-green-600 animate-bounce text-2xl">✅</span>
-
-                {/* Evaluation Completed Message */}
-                <span className="text-lg font-bold text-gray-700">Evaluation Completed!</span>
-              </div>
-            )}
-
-  
-
-            {state === "evaluate" && (
-              <div className="relative flex flex-col items-center lg:flex-row lg:justify-center space-y-3 lg:space-y-0 lg:space-x-4 p-4 bg-white shadow-lg rounded-xl text-center lg:text-left">
-                
-                {/* Disabled Preassessment Button */}
-                <button
-                  className="bg-gray-300 text-green-600 font-semibold py-3 px-6 rounded-xl w-full lg:w-auto shadow-md cursor-not-allowed"
-                  disabled
-                >
-                  ✅ Preassessment Done!
+          {state === "current" && (
+            <div className="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4 p-4 bg-white shadow-lg rounded-lg text-center sm:text-left">
+              <Link href="/client/pages/bookappointment">
+                <button className="w-full sm:w-auto bg-blue-800 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition duration-300 shadow-md">
+                  📅 Book Your Appointment
                 </button>
+              </Link>
+              <span className="text-green-600 animate-bounce text-2xl">✅</span>
+              <span className="text-lg font-bold text-gray-700">Evaluation Completed!</span>
+            </div>
+          )}
 
-                {/* Confirmation Message */}
-                <p className="bg-blue-400 text-white py-3 px-6 rounded-xl w-full lg:w-auto shadow-md">
-                  ⏳ Please wait for confirmation in your dashboard. It may take 1-2 days.  
-                  Thank you for your patience!
-                </p>
-              </div>
-            )}
-
-
-            {state === "referred" && status === "pending" && (
-              <div className="mb-6 flex flex-col items-center lg:flex-row lg:justify-center space-y-3 lg:space-y-0 lg:space-x-4 p-4 bg-blue-400 shadow-lg rounded-xl text-center lg:text-left">
-                
-                {/* Animated Checkmark */}
-                <span className="text-green-600 animate-bounce text-3xl">✅</span>
-
-                {/* Referral Message */}
-                <span className="text-lg font-bold text-white">
-                  You have been referred. Your certificate of referral is on the way!📜✨
-                </span>
-              </div>
-            )}
-
-            {state === "referred" && status === "attached" && (
-              <div className="mb-6 flex flex-col items-center lg:flex-row lg:justify-center space-y-3 lg:space-y-0 lg:space-x-4 p-4 bg-white shadow-lg rounded-xl text-center lg:text-left">
-                
-                {/* Download Button */}
-                <button
-                  className="text-lg font-semibold bg-blue-600 hover:bg-blue-700 transition-colors duration-300 text-white py-3 px-6 rounded-xl shadow-md"
-                  onClick={handleDownload}
-                >
-                  📥 Click to Download Certificate
-                </button>
-
-                {/* Animated Checkmark */}
-                <span className="text-green-600 animate-bounce text-3xl">✅</span>
-
-                {/* Confirmation Message */}
-                <span className="text-lg font-bold text-gray-700">You have been referred! 🎉</span>
-              </div>
-            )}
-
+          {state === "evaluate" && (
+            <div className="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4 p-4 bg-white shadow-lg rounded-lg text-center sm:text-left">
+              <button className="w-full sm:w-auto bg-gray-300 text-green-600 font-semibold py-3 px-6 rounded-lg shadow-md cursor-not-allowed" disabled>
+                ✅ Preassessment Done!
+              </button>
+              <p className="bg-blue-400 text-white py-3 px-6 rounded-lg shadow-md">
+                ⏳ Please wait for confirmation in your dashboard. It may take 1-2 days. Thank you for your patience!
+              </p>
+            </div>
+          )}
 
           {/* Psychotherapists Section */}
-            <div className="relative overflow-hidden">
-              <div className="flex overflow-x-auto p-4 space-x-4 scrollbar-thin scrollbar-thumb-blue-300">
-          {psychotherapists.map((psychotherapist, index) => (
-            <div
-              key={index}
-              className="flex-shrink-0 flex items-center justify-center w-[300px] p-4"
-              onClick={() => handleProfileClick(psychotherapist)}
-              tabIndex={0} // Makes it focusable
-              aria-label={`View profile of ${psychotherapist.firstName} ${psychotherapist.lastName}`}
-            >
-              <div className="flex flex-col items-center bg-white border border-blue-300 rounded-3xl p-3 min-w-[300px] transform transition-transform duration-500 ease-in-out hover:scale-105 shadow-lg">
-                <Image
-            src={profileImageUrls[psychotherapist.$id] || "/images/default-profile.png"}
-            alt={`${psychotherapist.firstName || "N/A"} ${psychotherapist.lastName || "N/A"}`}
-            className="rounded-full mb-4"
-            width={96}
-            height={96}
-            unoptimized
-            onError={() => "/images/default-profile.png"}
-                />
-                <div className="text-center">
-            <h4 className="text-lg font-bold text-blue-500 font-roboto">
-              {psychotherapist.firstName || "First Name"} {psychotherapist.lastName || "Last Name"}
-            </h4>
-            <p className="text-sm text-gray-600 font-lora">
-              {psychotherapist.specialties || "Specialties not specified"}
-            </p>
-            <h3 className="text-gray-600 font-lora">
-              {psychotherapist.position
-                ? `${psychotherapist.position.charAt(0).toUpperCase()}${psychotherapist.position.slice(1)}`
-                : "Position not specified"}
-            </h3>
+          <div className="relative overflow-y-auto mt-6">
+            <div className="flex overflow-x-auto p-4 space-x-4 scrollbar-thin scrollbar-thumb-blue-300">
+              {psychotherapists.map((psychotherapist, index) => (
+                <div key={index} className="flex-shrink-0 flex items-center justify-center w-[280px] sm:w-[300px] p-4" onClick={() => handleProfileClick(psychotherapist)} tabIndex={0}>
+                  <div className="flex flex-col items-center bg-white border border-blue-300 rounded-3xl p-3 w-full max-w-sm transform transition-transform duration-500 hover:scale-105 shadow-lg">
+                    <Image
+                      src={profileImageUrls[psychotherapist.$id] || "/images/default-profile.png"}
+                      alt={`${psychotherapist.firstName || "N/A"} ${psychotherapist.lastName || "N/A"}`}
+                      className="rounded-full mb-4"
+                      width={96}
+                      height={96}
+                      unoptimized
+                    />
+                    <div className="text-center">
+                      <h4 className="text-lg font-bold text-blue-500">{psychotherapist.firstName || "First Name"} {psychotherapist.lastName || "Last Name"}</h4>
+                      <p className="text-sm text-gray-600">{psychotherapist.specialties || "Specialties not specified"}</p>
+                      <h3 className="text-gray-600">{psychotherapist.position ? `${psychotherapist.position.charAt(0).toUpperCase()}${psychotherapist.position.slice(1)}` : "Position not specified"}</h3>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              ))}
             </div>
-          ))}
-              </div>
-            </div>
-        </div>
-
-        {/* Right side - A Daily Reminder Section */}
-        <div className="flex-1 bg-white p-6 rounded-lg shadow-lg mt-8 h-auto lg:h-[27rem] w-full">
-          <h2 className="font-bold sm:text-2xl 2xl:text-4xl text-blue-950 mb-6">A Daily Reminder to Yourself</h2>
-          <div className="space-y-5 max-h-[300px] text-black">
-              <div className="bg-blue-50 border-blue-300 p-2 rounded-lg shadow-lg transition-transform transform hover:scale-105 hover:shadow-2xl duration-300">
-            <h2 className="font-semibold text-lg mb-2">😊 This Too Shall Pass</h2>
-            <p className="text-gray-800">Feelings are temporary. Hold on, better days are coming.</p>
-              </div>
-              <div className="bg-blue-50 border-blue-300 p-2 rounded-lg shadow-lg transition-transform transform hover:scale-105 hover:shadow-2xl duration-300">
-            <h3 className="font-semibold text-lg mb-2">😮‍💨 Breathe In, Let Go</h3>
-            <p className="text-gray-800">Take a moment to breathe. Release the tension in your mind and body.</p>
-              </div>
-              <div className="bg-blue-50 border-blue-300 p-2 rounded-lg shadow-lg transition-transform transform hover:scale-105 hover:shadow-2xl duration-300">
-            <h3 className="font-semibold text-lg mb-2">🫵 You Are Enough.</h3>
-            <p className="text-gray-800">Your worth isn&apos;t measured by your struggles. You are enough just as you are.</p>
-              </div>
           </div>
         </div>
-            </div>
 
-            {/* What to do section */}
-            <div className="flex flex-col lg:flex-row justify-between items-start space-y-8 lg:space-y-0 lg:space-x-8 px-8 w-full">
+        {/* Right Section - Daily Reminder */}
+        <div className="flex-1 bg-white p-4 sm:p-6 rounded-lg shadow-lg w-full">
+          <h2 className="font-bold text-xl sm:text-2xl lg:text-3xl text-blue-950 mb-4 sm:mb-6">A Daily Reminder to Yourself</h2>
+          <div className="space-y-5 text-black max-h-[300px] overflow-x-hidden overflow-y-auto">
+            {[
+              { emoji: "😊", title: "This Too Shall Pass", text: "Feelings are temporary. Hold on, better days are coming." },
+              { emoji: "😮‍💨", title: "Breathe In, Let Go", text: "Take a moment to breathe. Release the tension in your mind and body." },
+              { emoji: "🫵", title: "You Are Enough", text: "Your worth isn’t measured by your struggles. You are enough just as you are." }
+            ].map((item, index) => (
+              <div key={index} className="bg-blue-50 border-blue-300 p-3 rounded-lg shadow-lg transform transition-transform hover:scale-105 hover:shadow-2xl duration-300">
+                <h3 className="font-semibold text-lg mb-2">{item.emoji} {item.title}</h3>
+                <p className="text-gray-800">{item.text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+      </div>
+
+      {/* What to do section */}
+      <div className="flex flex-col mt-6 lg:flex-row justify-between items-start space-y-8 lg:space-y-0 lg:space-x-8 px-8 w-full">
         <div className="bg-white rounded-lg shadow-lg p-6 w-full mb-8">
           <h2 className="text-lg font-semibold text-blue-500">What to do during your freetime?</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
@@ -278,7 +214,7 @@ const NewClientDashboard = () => {
             </div>
           </div>
         </div>
-            </div>
+      </div>
 
       {/* Psychotherapist Modal */}
       {isModalOpen && selectedPsychotherapist && (
