@@ -21,9 +21,12 @@ const ShowReceiptModal: React.FC<ShowReceiptModalProps> = ({ isOpen, onClose, im
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (referenceNumber.length !== 13) {
-      setError('Reference number must be 13 digits long');
-      return;
+    if (client.channel === 'cash') {
+    }else{
+      if (referenceNumber.length !== 13) {
+        setError('Reference number must be 13 digits long');
+        return;
+      }
     }
 
     setError('');
@@ -62,6 +65,21 @@ const ShowReceiptModal: React.FC<ShowReceiptModalProps> = ({ isOpen, onClose, im
     setReferenceNumber(inputValue);
   };
 
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+  
+    // Check if the value is a valid date
+    const isValidDate = !isNaN(Date.parse(value));
+  
+    if (isValidDate) {
+      setReferenceNumber(value);
+    } else {
+      // Handle invalid date (e.g., show an error message)
+      console.error('Invalid date format');
+    }
+  };
+  
+
   useEffect(() => {
     const fetchImage = async () => {
       try {
@@ -84,7 +102,21 @@ const ShowReceiptModal: React.FC<ShowReceiptModalProps> = ({ isOpen, onClose, im
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-lg max-w-4xl w-auto max-h-[83vh]">
         <div className="relative">
-          {client.channel === 'cash' ? (<></>) : (
+          {client.channel === 'cash' ? (<>
+            <p className='px-10 py-12'>
+              <strong>
+                Payment Time and Date by Client: 
+                {new Date(client.referenceNo).toLocaleString('en-GB', {
+                  day: '2-digit',
+                  month: '2-digit',
+                  year: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  hour12: true,
+                })}
+              </strong>
+            </p>
+          </>) : (
           <Image
             src={receiptImageUrl || '/Images/noreceipt.png'}
             alt="Receipt"
@@ -109,37 +141,44 @@ const ShowReceiptModal: React.FC<ShowReceiptModalProps> = ({ isOpen, onClose, im
                   <p>Enter Payment Date</p>) : (
                   <label htmlFor="referenceNumber" className="block text-gray-800 mb-2">Enter Reference Number to Confirm Payment</label>
                 )}
-                {client.channel === 'cash' ? (
+                {client.channel === 'cash' ? (<>
                   <input
-                  id="referenceNumber"
-                  type="text"
-                  value={referenceNumber}
-                  onChange={handleReferenceChange}
-                  className="w-full p-2 border border-gray-300 rounded-lg mb-4"
-                  maxLength={13}
-                  placeholder="Enter Date & Time (YYYY-MM-DD HH:MM)"
-                  required
-                />) : (
+                    id="referenceNumber"
+                    type="datetime-local"
+                    value={referenceNumber}
+                    onChange={handleDateChange}
+                    className="w-full p-2 border border-gray-300 rounded-lg mb-4"
+                    required
+                  />
+                  {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+                  <button
+                    type="submit"
+                    className={`w-full p-2 bg-green-500 text-white rounded-lg ${isSubmitting || !referenceNumber || error ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    disabled={isSubmitting || !referenceNumber || Boolean(error)}
+                  >
+                    {isSubmitting ? 'Processing...' : 'Submit'}
+                  </button>
+                </>) : (
+                  <>
                   <input
-                  id="referenceNumber"
-                  type="text"
-                  value={referenceNumber}
-                  onChange={handleReferenceChange}
-                  className="w-full p-2 border border-gray-300 rounded-lg mb-4"
-                  maxLength={13}
-                  placeholder="Enter 13-digit number"
-                  required
-                />
-                )}
-                
-                {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
-                <button
-                  type="submit"
-                  className={`w-full p-2 bg-green-500 text-white rounded-lg ${isSubmitting || referenceNumber.trim().length !== 13 ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  disabled={isSubmitting || referenceNumber.trim().length !== 13}
-                >
-                  {isSubmitting ? 'Processing...' : 'Submit'}
-                </button>
+                    id="referenceNumber"
+                    type="text"
+                    value={referenceNumber}
+                    onChange={handleReferenceChange}
+                    className="w-full p-2 border border-gray-300 rounded-lg mb-4"
+                    maxLength={13}
+                    placeholder="Enter 13-digit number"
+                    required
+                  />
+                  {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+                  <button
+                    type="submit"
+                    className={`w-full p-2 bg-green-500 text-white rounded-lg ${isSubmitting || referenceNumber.trim().length !== 13 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    disabled={isSubmitting || referenceNumber.trim().length !== 13 || Boolean(error)}
+                  >
+                    {isSubmitting ? 'Processing...' : 'Submit'}
+                  </button>
+                </>)}
               </form></>
             ) : (
               <></>
