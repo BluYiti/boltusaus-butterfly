@@ -99,37 +99,39 @@ const PaymentsPage: React.FC = () => {
           </div>
 
           <div className="bg-white shadow-md p-4 sm:p-6 rounded-lg flex flex-col space-y-6">
-            <table className="min-w-full table-auto text-left">
-              <thead>
-                <tr className="border-b text-gray-700">
-                  <th className="px-2 sm:px-4 py-2">REFERENCE NO.</th>
-                  <th className="px-2 sm:px-4 py-2">MODE</th>
-                  <th className="px-2 sm:px-4 py-2">CHANNEL</th>
-                  <th className="px-2 sm:px-4 py-2">AMOUNT</th>
-                  <th className="px-2 sm:px-4 py-2">STATUS</th>
-                  <th className="px-2 sm:px-4 py-2">ACTIONS</th>
-                </tr>
-              </thead>
-              <tbody className="text-gray-600">
-                {payments.map((payment) => (
-                  <tr key={payment.id} className="border-b">
-                    <td className="px-2 sm:px-4 py-2">{payment.referenceNo}</td>
-                    <td className="px-2 sm:px-4 py-2">{payment.mode}</td>
-                    <td className="px-2 sm:px-4 py-2">{payment.channel}</td>
-                    <td className="px-2 sm:px-4 py-2">{payment.amount}</td>
-                    <td className="px-2 sm:px-4 py-2">{payment.status}</td>
-                    <td className="px-2 sm:px-4 py-2">
-                      <button
-                        onClick={() => viewReceipt(payment)}
-                        className="text-blue-500 hover:text-blue-700 font-semibold"
-                      >
-                        View Payment
-                      </button>
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="min-w-full table-auto text-left">
+                <thead>
+                  <tr className="border-b text-gray-700">
+                    <th className="px-2 sm:px-4 py-2">REFERENCE NO.</th>
+                    <th className="px-2 sm:px-4 py-2">MODE</th>
+                    <th className="px-2 sm:px-4 py-2">CHANNEL</th>
+                    <th className="px-2 sm:px-4 py-2">AMOUNT</th>
+                    <th className="px-2 sm:px-4 py-2">STATUS</th>
+                    <th className="px-2 sm:px-4 py-2">ACTIONS</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="text-gray-600">
+                  {payments.map((payment) => (
+                    <tr key={payment.id} className="border-b">
+                      <td className="px-2 sm:px-4 py-2">{payment.referenceNo}</td>
+                      <td className="px-2 sm:px-4 py-2">{payment.mode}</td>
+                      <td className="px-2 sm:px-4 py-2">{payment.channel}</td>
+                      <td className="px-2 sm:px-4 py-2">{payment.amount}</td>
+                      <td className="px-2 sm:px-4 py-2">{payment.status}</td>
+                      <td className="px-2 sm:px-4 py-2">
+                        <button
+                          onClick={() => viewReceipt(payment)}
+                          className="text-blue-500 hover:text-blue-700 font-semibold"
+                        >
+                          View Payment
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
 
           {showModal && selectedReceipt && (

@@ -143,6 +143,7 @@ const ClientsPayment = () => {
               <th className="py-3 px-6 text-left">Client Name</th>
               <th className="py-3 px-6 text-left">Email</th>
               <th className="py-3 px-6 text-left">Amount</th>
+              <th className="py-3 px-6 text-left">Therapy Mode</th>
               <th className="py-3 px-6 text-left">Payment Mode</th>
               <th className="py-3 px-6 text-left">Status</th>
               <th className="py-3 px-6 text-left">Date</th>
@@ -170,6 +171,7 @@ const ClientsPayment = () => {
                   <td className="py-3 px-6">{client.email}</td>
                   <td className="py-3 px-6">{`₱${client.amount.toFixed(2)}`}</td>
                   <td className="py-3 px-6">{client.mode}</td>
+                  <td className="py-3 px-6">{client.channel}</td>
                   <td className="py-3 px-6">{client.status}</td>
                   <td className="py-3 px-6">{new Date(client.createdAt).toLocaleDateString()}</td>
                   <td className="py-3 px-6 text-center">
