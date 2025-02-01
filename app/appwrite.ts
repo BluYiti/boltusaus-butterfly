@@ -51,6 +51,15 @@ client.subscribe('buckets.*.files.*', response => {
   }
 });
 
+// Subscribe specifically to the Bookings collection
+client.subscribe(`databases.${"Butterfly-Database"}.collections.${"Bookings"}.documents`, (response) => {
+  if (response.events.includes("databases.*.collections.*.documents.*.update")) {
+    console.log("Booking updated:", response.payload);
+    // You can trigger a re-fetch of the booking data here
+  }
+});
+
+
 // JWT Function: Create a JWT for the current authenticated user
 async function createJWT() {
   try {

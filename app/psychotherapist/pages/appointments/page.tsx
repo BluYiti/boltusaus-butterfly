@@ -10,7 +10,7 @@ import CountdownModal from '@/psychotherapist/components/CountdownModal';
 import RescheduleModal from '@/psychotherapist/components/RescheduleModal';
 import useAuthCheck from "@/auth/page";
 import LoadingScreen from "@/components/LoadingScreen";
-import { HappeningAppointment } from "@/psychotherapist/components/HappeningAppointment";
+import { updateBookingStatus } from "@/hooks/update";
 
 // Define the structure of a booking document
 interface Booking {
@@ -23,7 +23,6 @@ interface Booking {
 }
 
 const Appointments = () => {
-  HappeningAppointment();
   const authLoading = useAuthCheck(['psychotherapist']); // Call the useAuthCheck hook
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -44,6 +43,7 @@ const Appointments = () => {
 
   // Fetch data from Appwrite
   useEffect(() => {
+    updateBookingStatus(); // Call the updateBookingStatus function
     const fetchData = async () => {
       try { 
         const response = await databases.listDocuments('Butterfly-Database', 'Bookings');

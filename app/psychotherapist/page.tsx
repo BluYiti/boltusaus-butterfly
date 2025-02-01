@@ -9,7 +9,6 @@ import LoadingScreen from '@/components/LoadingScreen';
 import { useRouter } from 'next/navigation';
 import Calendar from '@/components/Calendar/PsychoCalendar';
 import { fetchPsychoId } from '@/hooks/userService';
-import { HappeningAppointment } from './components/HappeningAppointment';
 
 type Client = {
   $id: string;
@@ -69,7 +68,6 @@ const Dashboard: React.FC = () => {
   const router = useRouter();
 
   useEffect(() => {
-    HappeningAppointment();
     const fetchData = async () => {
       try {
         const user = await account.get();
