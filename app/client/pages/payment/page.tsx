@@ -114,7 +114,10 @@ const PaymentsPage: React.FC = () => {
                 <tbody className="text-gray-600">
                   {payments.map((payment) => (
                     <tr key={payment.id} className="border-b">
-                      <td className="px-2 sm:px-4 py-2">{payment.referenceNo}</td>
+                      {payment.id === "pending" ? (
+                        <td className="px-2 sm:px-4 py-2">Wait for Pyschotherapist</td>
+                      ) : 
+                      (<td className="px-2 sm:px-4 py-2">{payment.referenceNo}</td>)}
                       <td className="px-2 sm:px-4 py-2">{payment.mode}</td>
                       <td className="px-2 sm:px-4 py-2">{payment.channel}</td>
                       <td className="px-2 sm:px-4 py-2">{payment.amount}</td>
