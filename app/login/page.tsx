@@ -29,14 +29,14 @@ const LoginPage: React.FC = () => {
         <div className='overflow-hidden'>
             <Back/>
             <h1 className="absolute top-5 left-20 text-[#2081c3] text-2xl font-bold">Butterfly</h1>
-            <h2 className='absolute font-paintbrush text-7xl md:text-8xl text-[#2b4369] left-20 sm:left-16 2xl:left-20 3xl:left-36 top-28 md:top-32'>
+            <h2 className='absolute font-paintbrush text-7xl md:text-8xl text-[#2b4369] left-28 sm:left-16 2xl:left-20 3xl:left-36 top-28 md:top-32'>
                 Start your Journey
             </h2>
             <div className='absolute w-2/5 h-screen'>
                 <p className='absolute hidden md:block top-72 md:top-60 text-center sm:left-24 text-[#2081c3] font-poppins'>
                     We believe that mental health is a collaborative effort. Together, we can navigate the path toward emotional well-being and mental strength.
                 </p>
-                <div className='absolute left-14 sm:left-52 2xl:left-56 3xl:left-72 top-72 md:top-80'>
+                <div className='absolute left-20 sm:left-52 2xl:left-56 3xl:left-72 top-72 md:top-80'>
                     <LoginForm onLogin={handleLogin} error={error} loading={loading} />
                     <div>
                         <a className="absolute top-[10.5rem] left-[8.5rem] text-blue-500 text-sm">
