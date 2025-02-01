@@ -84,6 +84,7 @@ const ShowReceiptModal: React.FC<ShowReceiptModalProps> = ({ isOpen, onClose, im
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-lg max-w-4xl w-auto max-h-[83vh]">
         <div className="relative">
+          {client.channel === 'cash' ? (<></>) : (
           <Image
             src={receiptImageUrl || '/Images/noreceipt.png'}
             alt="Receipt"
@@ -92,7 +93,7 @@ const ShowReceiptModal: React.FC<ShowReceiptModalProps> = ({ isOpen, onClose, im
             height={400}
             className="w-full h-auto max-h-[60vh] object-contain"
             unoptimized
-          />
+          />)}
           <button
             className="absolute top-2 right-2 w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-blue-700 transition-all duration-200 transform hover:scale-105 active:scale-95"
             onClick={onClose}
@@ -104,8 +105,22 @@ const ShowReceiptModal: React.FC<ShowReceiptModalProps> = ({ isOpen, onClose, im
           </button>
           {client.status === 'pending' ? (<>
               <form onSubmit={handleSubmit} className="p-4 mb-4">
-                <label htmlFor="referenceNumber" className="block text-gray-800 mb-2">Enter Reference Number to Confirm Payment</label>
-                <input
+                {client.channel === 'cash' ? (
+                  <p>Enter Payment Date</p>) : (
+                  <label htmlFor="referenceNumber" className="block text-gray-800 mb-2">Enter Reference Number to Confirm Payment</label>
+                )}
+                {client.channel === 'cash' ? (
+                  <input
+                  id="referenceNumber"
+                  type="text"
+                  value={referenceNumber}
+                  onChange={handleReferenceChange}
+                  className="w-full p-2 border border-gray-300 rounded-lg mb-4"
+                  maxLength={13}
+                  placeholder="Enter Date & Time (YYYY-MM-DD HH:MM)"
+                  required
+                />) : (
+                  <input
                   id="referenceNumber"
                   type="text"
                   value={referenceNumber}
@@ -115,6 +130,8 @@ const ShowReceiptModal: React.FC<ShowReceiptModalProps> = ({ isOpen, onClose, im
                   placeholder="Enter 13-digit number"
                   required
                 />
+                )}
+                
                 {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
                 <button
                   type="submit"
