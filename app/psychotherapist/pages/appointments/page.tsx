@@ -270,109 +270,108 @@ const Appointments = () => {
               </div>
 
               <div className="mt-6">
-  <h3 className="font-semibold text-lg border-b-2 border-gray-300 pb-2">Missed Appointments</h3>
-  {missedBookings.length > 0 ? (
-    <div className="grid grid-cols-1 gap-6 mt-4">
-      {missedBookings.map((booking, index) => (
-        <div
-          key={index}
-          className="bg-red-50 rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-200 border-l-4 border-red-500 flex justify-between items-center"
-        >
-          <div>
-            <h4 className="font-semibold text-red-700">{booking.clientName}</h4>
-            <p className="text-gray-600">
-              Date: <span className="font-semibold">{booking.date}</span>
-            </p>
-            <p className="text-gray-600">
-              Time: <span className="font-semibold">{booking.time}</span>
-            </p>
-            <p className="text-gray-600">
-              Mode: <span className="font-semibold">{booking.mode}</span>
-            </p>
-          </div>
-        </div>
-      ))}
-    </div>
-  ) : (
-    <p>No missed appointments.</p>
-  )}
-</div>
+                <h3 className="font-semibold text-lg border-b-2 border-gray-300 pb-2">Missed Appointments</h3>
+                {missedBookings.length > 0 ? (
+                  <div className="grid grid-cols-1 gap-6 mt-4">
+                    {missedBookings.map((booking, index) => (
+                      <div
+                        key={index}
+                        className="bg-red-50 rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-200 border-l-4 border-red-500 flex justify-between items-center"
+                      >
+                        <div>
+                          <h4 className="font-semibold text-red-700">{booking.clientName}</h4>
+                          <p className="text-gray-600">
+                            Date: <span className="font-semibold">{booking.date}</span>
+                          </p>
+                          <p className="text-gray-600">
+                            Time: <span className="font-semibold">{booking.time}</span>
+                          </p>
+                          <p className="text-gray-600">
+                            Mode: <span className="font-semibold">{booking.mode}</span>
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p>No missed appointments.</p>
+                )}
+              </div>
 
-<div className="mt-6">
-  <h3 className="font-semibold text-lg border-b-2 border-gray-300 pb-2">Reschedule Request</h3>
-  {rescheduleRequestBookings.length > 0 ? (
-    <div className="grid grid-cols-1 gap-6 mt-4">
-      {rescheduleRequestBookings.map((booking, index) => (
-        <div
-          key={index}
-          className="bg-red-50 rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-200 border-l-4 border-red-500 flex justify-between items-center"
-        >
-          <div>
-            <h4 className="font-semibold text-red-700">{booking.clientName}</h4>
-            <p className="text-gray-600">
-              Date: <span className="font-semibold">{booking.date}</span>
-            </p>
-            <p className="text-gray-600">
-              Time: <span className="font-semibold">{booking.time}</span>
-            </p>
-            <p className="text-gray-600">
-              Mode: <span className="font-semibold">{booking.mode}</span>
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <button
-                  className="bg-red-500 text-white py-1 px-3 rounded hover:bg-red-600 transition-colors duration-200"
-                  onClick={() => {
-                    setSelectedBooking(booking);
-                    handleDeclineReschedule();
-                  }}
-                >
-                  Decline
-            </button>
-            <button
-              className="bg-green-500 text-white py-1 px-3 rounded hover:bg-green-600 transition-colors duration-200"
-              onClick={() => handleRescheduleOpen(booking)}
-            >
-              Approve
-            </button>
-          </div>
-        </div>
-      ))}
-    </div>
-  ) : (
-    <p>No reschedule requests.</p>
-  )}
-</div>
+              <div className="mt-6">
+                <h3 className="font-semibold text-lg border-b-2 border-gray-300 pb-2">Reschedule Request</h3>
+                {rescheduleRequestBookings.length > 0 ? (
+                  <div className="grid grid-cols-1 gap-6 mt-4">
+                    {rescheduleRequestBookings.map((booking, index) => (
+                      <div
+                        key={index}
+                        className="bg-red-50 rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-200 border-l-4 border-red-500 flex justify-between items-center"
+                      >
+                        <div>
+                          <h4 className="font-semibold text-red-700">{booking.clientName}</h4>
+                          <p className="text-gray-600">
+                            Date: <span className="font-semibold">{booking.date}</span>
+                          </p>
+                          <p className="text-gray-600">
+                            Time: <span className="font-semibold">{booking.time}</span>
+                          </p>
+                          <p className="text-gray-600">
+                            Mode: <span className="font-semibold">{booking.mode}</span>
+                          </p>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                                className="bg-red-500 text-white py-1 px-3 rounded hover:bg-red-600 transition-colors duration-200"
+                                onClick={() => {
+                                  setSelectedBooking(booking);
+                                  handleDeclineReschedule();
+                                }}
+                              >
+                                Decline
+                          </button>
+                          <button
+                            className="bg-green-500 text-white py-1 px-3 rounded hover:bg-green-600 transition-colors duration-200"
+                            onClick={() => handleRescheduleOpen(booking)}
+                          >
+                            Approve
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p>No reschedule requests.</p>
+                )}
+              </div>
 
-<div className="mt-6">
-  <h3 className="font-semibold text-lg border-b-2 border-gray-300 pb-2">Declined Appointments</h3>
-  {declinedBookings.length > 0 ? (
-    <div className="grid grid-cols-1 gap-6 mt-4">
-      {declinedBookings.map((booking, index) => (
-        <div
-          key={index}
-          className="bg-red-50 rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-200 border-l-4 border-red-500 flex justify-between items-center"
-        >
-          <div>
-            <h4 className="font-semibold text-red-700">{booking.clientName}</h4>
-            <p className="text-gray-600">
-              Date: <span className="font-semibold">{booking.date}</span>
-            </p>
-            <p className="text-gray-600">
-              Time: <span className="font-semibold">{booking.time}</span>
-            </p>
-            <p className="text-gray-600">
-              Mode: <span className="font-semibold">{booking.mode}</span>
-            </p>
-          </div>
-        </div>
-      ))}
-    </div>
-  ) : (
-    <p>No declined appointments.</p>
-  )}
-</div>
-
+              <div className="mt-6">
+                <h3 className="font-semibold text-lg border-b-2 border-gray-300 pb-2">Declined Appointments</h3>
+                {declinedBookings.length > 0 ? (
+                  <div className="grid grid-cols-1 gap-6 mt-4">
+                    {declinedBookings.map((booking, index) => (
+                      <div
+                        key={index}
+                        className="bg-red-50 rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-200 border-l-4 border-red-500 flex justify-between items-center"
+                      >
+                        <div>
+                          <h4 className="font-semibold text-red-700">{booking.clientName}</h4>
+                          <p className="text-gray-600">
+                            Date: <span className="font-semibold">{booking.date}</span>
+                          </p>
+                          <p className="text-gray-600">
+                            Time: <span className="font-semibold">{booking.time}</span>
+                          </p>
+                          <p className="text-gray-600">
+                            Mode: <span className="font-semibold">{booking.mode}</span>
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p>No declined appointments.</p>
+                )}
+              </div>
             </div>
           )}
         </div>

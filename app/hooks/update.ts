@@ -32,22 +32,17 @@ const convertTo24HourFormat = (time12h: string): string => {
     return `${hourNum.toString().padStart(2, "0")}:${minutes}`;
 };
 
-const isPastOneHour = (slotTime: string, currentTime: string, bookingMonth: number, bookingDay: number): boolean => {
-    const now = new Date();
-    const slotDate = new Date(now.getFullYear(), bookingMonth - 1, bookingDay, ...slotTime.split(':').map(Number));
-    const currentDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), ...currentTime.split(':').map(Number));
+function isPastOneHour(bookingSlot, currentTime) {
+    // Convert bookingSlot and currentTime to Date objects
+    const bookingDate = new Date(`1970-01-01T${bookingSlot}:00Z`);
+    const currentDate = new Date(`1970-01-01T${currentTime}:00Z`);
 
-    return currentDate.getTime() - slotDate.getTime() > 3600000; // 1 hour in ms
+    // Get the time difference in milliseconds
+    const timeDifference = currentDate.getTime() - bookingDate.getTime();
+    const oneHourInMillis = 60 * 60 * 1000; // 1 hour in milliseconds
+    
+    return timeDifference > oneHourInMillis;
 }
-
-// Function to check if the current time is within one hour of the slot time
-const isWithinOneHour = (slotTime: string, currentTime: string, bookingMonth: number, bookingDay: number): boolean => {
-    const now = new Date();
-    const slotDate = new Date(now.getFullYear(), bookingMonth - 1, bookingDay, ...slotTime.split(':').map(Number));
-    const currentDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), ...currentTime.split(':').map(Number));
-
-    return Math.abs(currentDate.getTime() - slotDate.getTime()) <= 3600000; // 1 hour in ms
-};
 
 // Function to update the status of bookings
 const updateBookingStatus = async () => {
@@ -82,7 +77,7 @@ const updateBookingStatus = async () => {
             updatedStatus = "missed";
         } else if (
             booking.status === "happening" &&
-            (bookingMonth !== month ||  bookingDay < day || isPastOneHour(bookingSlot, time, bookingMonth, bookingDay))
+            (bookingMonth !== month ||  bookingDay < day || isPastOneHour(bookingSlot, time))
         ) {
             updatedStatus = "missed";
         }
