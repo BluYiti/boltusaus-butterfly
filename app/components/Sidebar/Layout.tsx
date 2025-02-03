@@ -35,11 +35,14 @@ const Layout: React.FC<LayoutProps> = ({ children, sidebarTitle, sidebarItems })
 
     fetchData();
 
-    const savedState = localStorage.getItem('sidebarMinimized');
-    if (savedState) {
-      setIsMinimized(JSON.parse(savedState));
-    } else {
-      setIsMinimized(false);
+    // Ensure that window is only accessed in the client
+    if (typeof window !== "undefined") {
+      const savedState = localStorage.getItem('sidebarMinimized');
+      if (savedState) {
+        setIsMinimized(JSON.parse(savedState));
+      } else {
+        setIsMinimized(false);
+      }
     }
   }, []);
 

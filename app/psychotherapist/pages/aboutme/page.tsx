@@ -82,6 +82,8 @@ const AboutMe = () => {
 
   // Fetch profile image URL if the profile picture is set
   useEffect(() => {
+    if (typeof window === "undefined") return; // Prevent execution during SSR
+    
     const fetchProfileImage = async () => {
       if (profilepic) {
         try {

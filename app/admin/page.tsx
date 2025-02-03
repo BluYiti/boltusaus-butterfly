@@ -26,6 +26,8 @@ const Account = () => {
   const usersPerPage = 9;
 
   useEffect(() => {
+    if (typeof window === "undefined") return; // Prevent execution during SSR
+  
     const fetchUsers = async () => {
       if (users[selectedTab]) return; // Use cached data if available
       setIsLoading(true);
@@ -40,9 +42,10 @@ const Account = () => {
         setIsLoading(false);
       }
     };
-
+  
     fetchUsers();
   }, [selectedTab]);
+  
 
   const handleTabChange = (tab: string) => {
     setSelectedTab(tab);
@@ -63,9 +66,10 @@ const Account = () => {
   const totalEntries = filteredUsers.length;
 
   const paginate = (pageNumber: SetStateAction<number>) => setCurrentPage(pageNumber);
-
-  if (authLoading) return <LoadingScreen />;
-
+  
+  if (typeof window !== "undefined") {
+    if (authLoading) return <LoadingScreen />;
+  }
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
       <div className="bg-white rounded-b-lg shadow-md p-5">

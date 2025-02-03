@@ -1,3 +1,5 @@
+"use client";
+
 // app/components/LoadingScreen.tsx
 import Image from "next/image"; // Import Next.js Image component
 
