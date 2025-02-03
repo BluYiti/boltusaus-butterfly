@@ -1,11 +1,21 @@
-'use client';
-
+import { useEffect, useState } from 'react';
 import React from 'react';
 import Back from '@/components/Back';
 import Image from 'next/image';
 import RegisterForm from '@/register/pages/components/RegisterForm';
 
 const RegisterPage: React.FC = () => {
+    const [isClient, setIsClient] = useState(false);
+
+    // Only run after the component mounts on the client
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
+
+    if (!isClient) {
+        return null;  // Return nothing during SSR
+    }
+
     return (
         <div className='overflow-hidden flex flex-col items-center min-h-screen'>
             <Back />
