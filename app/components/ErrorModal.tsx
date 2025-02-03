@@ -7,16 +7,19 @@ interface ErrorModalProps {
 
 const ErrorModal: React.FC<ErrorModalProps> = ({ message, onClose }) => {
     useEffect(() => {
-        const handleKeyDown = (event: KeyboardEvent) => {
+        if (typeof window !== 'undefined') {
+          const handleKeyDown = (event: KeyboardEvent) => {
             if (event.key === 'Escape') {
-                onClose();
+              onClose();
             }
-        };
-
-        window.addEventListener('keydown', handleKeyDown);
-        return () => {
+          };
+    
+          window.addEventListener('keydown', handleKeyDown);
+    
+          return () => {
             window.removeEventListener('keydown', handleKeyDown);
-        };
+          };
+        }
     }, [onClose]);
 
     return (

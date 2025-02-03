@@ -20,11 +20,15 @@ const BackToTopButton: React.FC = () => {
     };
 
     useEffect(() => {
-        window.addEventListener('scroll', toggleVisibility);
-        return () => {
+        if (typeof window !== 'undefined') {
+          // Add event listener only on the client side
+          window.addEventListener('scroll', toggleVisibility);
+    
+          return () => {
             window.removeEventListener('scroll', toggleVisibility);
-        };
-    }, []);
+          };
+        }
+      }, []);
 
     return (
         <>

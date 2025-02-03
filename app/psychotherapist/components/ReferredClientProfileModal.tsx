@@ -73,15 +73,19 @@ const ReferredClientProfileModal: React.FC<ReferredClientProfileModalProps> = ({
       // Step 2: Create a new document in the database with the uploaded file's ID
       const updatedDocument = await databases.updateDocument(
         'Butterfly-Database', // Your Appwrite database ID
-        'Client',        // Collection ID set to 'Certificate'
-        clientId,           // Generate a unique ID for the document
-        {  certificate: uploadedFile.$id, status: 'attached' }
+        'Client',              // Collection ID set to 'Certificate'
+        clientId,              // Generate a unique ID for the document
+        { certificate: uploadedFile.$id, status: 'attached' }
       );
   
       console.log('Document updated with status "attached":', updatedDocument);
-
-      window.location.reload();
-      router.push(`/psychotherapist/pages/clients?tab=For%20Referral`);
+  
+      // Ensure window is defined before calling window methods
+      if (typeof window !== 'undefined') {
+        window.location.reload();
+        router.push(`/psychotherapist/pages/clients?tab=For%20Referral`);
+      }
+  
       setIsConfirmModalOpen(false);
     } catch (err: unknown) {
       console.error("Error referring client:", err);
@@ -91,7 +95,7 @@ const ReferredClientProfileModal: React.FC<ReferredClientProfileModalProps> = ({
         alert(`Error referring client: Unknown error occurred`);
       }
     }
-  };
+  };  
   
   // Handler for file selection
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {

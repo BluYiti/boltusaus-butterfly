@@ -15,13 +15,18 @@ const Sidebar: React.FC<SidebarProps> = ({ title, items, isMinimized, setIsMinim
   const [isMobile, setIsMobile] = useState<boolean>(false);
 
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768); // Mobile layout if width <= 768px
-    };
+    if (typeof window !== 'undefined') {
+      const handleResize = () => {
+        setIsMobile(window.innerWidth <= 768); // Mobile layout if width <= 768px
+      };
 
-    handleResize(); // Set initial state on mount
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+      handleResize(); // Set initial state on mount
+      window.addEventListener("resize", handleResize);
+
+      return () => {
+        window.removeEventListener("resize", handleResize);
+      };
+    }
   }, []);
 
   useEffect(() => {

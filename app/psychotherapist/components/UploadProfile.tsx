@@ -104,7 +104,9 @@ const UploadProfile: React.FC<UploadProfileProps> = ({
         // Close the modal after upload
         setIsModalOpen(false);
 
-        window.location.reload();
+        if (typeof window !== 'undefined') {
+          window.location.reload();
+        }
       } catch (error) {
         console.error('Upload failed:', error);
         // Handle error gracefully, show an alert or message to the user

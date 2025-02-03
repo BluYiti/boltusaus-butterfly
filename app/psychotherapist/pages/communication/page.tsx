@@ -90,9 +90,11 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSend
   };
 
   const handleGoogleMeet = () => {
-    window.open('https://meet.google.com/landing', '_blank');
-  }
-
+    if (typeof window !== 'undefined') {
+      window.open('https://meet.google.com/landing', '_blank');
+    }
+  };
+  
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };

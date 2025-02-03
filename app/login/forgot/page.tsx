@@ -13,24 +13,30 @@ const ForgotPassword: React.FC = () => {
     const handleSubmit = async (email: string) => {
         setLoading(true);
         setError(null);
-
+      
         try {
+          // Ensure window is available before using it
+          if (typeof window !== 'undefined') {
+            const recoveryLink = `${window.location.origin}/login/forgot/reset-password`;
             // Attempt to send the password reset email using Appwrite
-            await account.createRecovery(email, `${window.location.origin}/login/forgot/reset-password`);
+            await account.createRecovery(email, recoveryLink);
             alert('Password reset link sent to your email!');
+          } else {
+            console.warn('window is not defined during SSR');
+          }
         } catch (err: any) {
-            // If error is caused by account not existing, show specific message
-            if (err.code === 404) {
-                setError('No account found with this email address.');
-            } else if (err.code === 500) {
-                setError('A server error occurred. Please try again later');
-            } else {
-                setError('Failed to send reset link. Please try again.');
-            }
+          // If error is caused by account not existing, show specific message
+          if (err.code === 404) {
+            setError('No account found with this email address.');
+          } else if (err.code === 500) {
+            setError('A server error occurred. Please try again later');
+          } else {
+            setError('Failed to send reset link. Please try again.');
+          }
         } finally {
-            setLoading(false);
-        }
-    };
+          setLoading(false);
+        }   
+    };      
 
     return (
         <div className='flex flex-col justify-between h-screen'>

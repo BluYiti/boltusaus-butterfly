@@ -38,19 +38,22 @@ export default function PreAssessmentPage() {
       try {
         const user = await account.get(); // Get user information
         const hasPreAssessmentResult = await hasPreAssessment(await fetchClientId(user.$id));
-        
-        // If pre-assessment exists, redirect
-        if (hasPreAssessmentResult) {
-          window.location.replace("/client");
-          return; // Ensure that no further code executes after redirect
-        } else {
-          setDataLoading(false); // Data is loaded, proceed to render the assessment
+    
+        // Check if window is defined before redirecting
+        if (typeof window !== 'undefined') {
+          // If pre-assessment exists, redirect
+          if (hasPreAssessmentResult) {
+            window.location.replace("/client");
+            return; // Ensure that no further code executes after redirect
+          } else {
+            setDataLoading(false); // Data is loaded, proceed to render the assessment
+          }
         }
       } catch (error) {
         console.error("Error fetching data: ", error);
         setDataLoading(false); // In case of error, set dataLoading to false to allow rendering
       }
-    };
+    };    
   
     fetchData();
   }, []); // Empty dependency array ensures this runs only on component mount  

@@ -78,7 +78,9 @@ const CashPayment: React.FC<CashPaymentProps> = ({ isOpen, onClose, appointmentD
       setShowSuccess(true); // Show success modal
 
       setTimeout(() => {
-        window.location.reload();
+        if (typeof window !== "undefined") {
+          window.location.reload();
+        }
       }, 5000);
     } catch (err) {
       console.error('Submission failed:', err);

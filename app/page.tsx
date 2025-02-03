@@ -52,23 +52,21 @@ const HomePage: React.FC = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      if (typeof window !== "undefined") {
-        if (aboutRef.current && !hasAnimated) {
-          const rect = aboutRef.current.getBoundingClientRect();
-          const isVisible = rect.top >= 0 && rect.bottom <= window.innerHeight;
-    
-          if (isVisible) {
-            setHasAnimated(true); // Set to true to trigger the animation
-          }
+      if (!aboutRef.current || hasAnimated) return;
+  
+      requestAnimationFrame(() => {
+        const rect = aboutRef.current.getBoundingClientRect();
+        const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
+        
+        if (isVisible) {
+          setHasAnimated(true);
         }
-      }
+      });
     };
-
+  
     window.addEventListener('scroll', handleScroll);
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, [hasAnimated]); // Depend on hasAnimated to avoid unnecessary re-renders
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [hasAnimated]);  
 
   return (
     <div className='overflow-x-hidden'>

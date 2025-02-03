@@ -69,18 +69,24 @@ const PaymentModal = ({ onClose, client }) => {
   const handleReschedule = async () => {
     try {
       await databases.updateDocument('Butterfly-Database', 'Bookings', client.booking.$id, {
-        status: 'rescheduled'
+        status: 'rescheduled',
       });
+  
       await databases.updateDocument('Butterfly-Database', 'Payment', client.id, {
         status: 'rescheduled',
         declineReason: declineReason,
       });
+  
       onClose();
-      window.location.href = `/psychotherapist/pages/clientspayment?tab=Reschedule`;
+  
+      // Ensure window is defined before calling window methods
+      if (typeof window !== 'undefined') {
+        window.location.href = `/psychotherapist/pages/clientspayment?tab=Reschedule`;
+      }
     } catch (error) {
       console.error('Failed to update document', error);
     }
-  };
+  };  
 
   const handleRefund = async () => {
     try {

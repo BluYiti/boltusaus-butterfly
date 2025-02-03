@@ -195,7 +195,11 @@ const ShowReceiptModal: React.FC<ShowReceiptModalProps> = ({ isOpen, onClose, im
             <button
               onClick={() => {
                 setShowSuccess(false);
-                window.location.href = `/psychotherapist/pages/clientspayment?tab=Paid`;
+
+                // Check if window is defined to ensure it's being executed client-side
+                if (typeof window !== 'undefined') {
+                  window.location.href = `/psychotherapist/pages/clientspayment?tab=Paid`;
+                }
               }}
               className="mt-4 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all"
             >

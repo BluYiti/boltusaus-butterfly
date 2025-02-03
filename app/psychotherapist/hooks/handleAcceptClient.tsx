@@ -45,7 +45,9 @@ const AcceptClient: React.FC<AcceptClientProps> = ({ clientId, score, showModal,
       // Navigate to accepted client booking page
       console.log("Navigating to the accepted client booking page.");
       setShowModal(false);
-      window.location.reload();
+      if (typeof window !== 'undefined') {
+        window.location.reload();
+      }
     } catch (error) {
       console.error(`Error during client acceptance process: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {

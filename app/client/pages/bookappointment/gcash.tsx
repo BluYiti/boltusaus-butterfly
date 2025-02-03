@@ -127,7 +127,9 @@ const GCashPayment: React.FC<GCashPaymentProps> = ({ isOpen, onClose, appointmen
       setShowSuccess(true); // Show success modal
 
       setTimeout(() => {
-        window.location.reload();
+        if (typeof window !== "undefined") {
+          window.location.reload();
+        }
       }, 5000);
     } catch (err) {
       console.error('Submission failed:', err);

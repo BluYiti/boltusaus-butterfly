@@ -3,6 +3,7 @@
 import { databases } from '@/appwrite';
 import React, { useState } from 'react';
 import ShowReceiptModal from '@/psychotherapist/components/ShowReceiptModal'; // Adjust the path as needed
+import { useRouter } from 'next/navigation';
 
 // Helper function to format the date
 const formatDate = (dateString: string) => {
@@ -25,6 +26,7 @@ const PaymentModal = ({ isOpen, onClose, client }) => {
   const [isDeclining, setIsDeclining] = useState(false);
   const [showReceipt, setShowReceipt] = useState(false);
   const [error, setError] = useState('');
+  const router = useRouter();
 
   // Return null if modal is not open or client is not provided
   if (!isOpen || !client) return null;
@@ -41,7 +43,7 @@ const PaymentModal = ({ isOpen, onClose, client }) => {
         declineReason: declineReason,
       });
       onClose();
-      window.location.href = `/psychotherapist/pages/clientspayment?tab=Declined`;
+      router.replace('/psychotherapist/pages/clientspayment?tab=Declined');
     } catch (error) {
       console.error('Failed to update document', error);
     }

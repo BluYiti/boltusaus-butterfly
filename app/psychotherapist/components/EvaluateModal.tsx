@@ -69,16 +69,19 @@ const ReviewPreAssModal: React.FC<ReviewPreAssModalProps> = ({ clientId, isOpen,
         setLoading(true);
         const data = await fetchPreAssessment(clientId);
         
-          // Check the number of documents
-          if (data.length > 1) {
-            setError("Multiple pre-assessment documents found");
+        // Check the number of documents
+        if (data.length > 1) {
+          setError("Multiple pre-assessment documents found");
 
+          // Ensure window is defined before using window methods
+          if (typeof window !== 'undefined') {
             setTimeout(() => {
-              window.location.reload();
+              window.location.reload(); // Reload the page only on the client side
             }, 3000);
-
-            return; // Exit early
           }
+
+          return; // Exit early
+        }
         
         const allAnswers = data.flatMap((doc) => doc.answers || []);
         const parsedAnswers = allAnswers.map((answerString) => {
