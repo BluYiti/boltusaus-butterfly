@@ -53,8 +53,6 @@ const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({ isOpen, onClose
         throw new Error('Document not found in the selected collection');
       }
 
-    } catch (err) {
-      setError(err.message || 'Failed to delete account');
     } finally {
       setLoading(false);
     }

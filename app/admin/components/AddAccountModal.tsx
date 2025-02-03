@@ -145,8 +145,6 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, sele
       // Log out the user
       await account.deleteSession('current'); // 'current' refers to the active session
       console.log('User logged out successfully.');
-    } catch (err) {
-      setError(err.message || 'Failed to create account');
     } finally {
       setLoading(false);
     }

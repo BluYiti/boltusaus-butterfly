@@ -8,7 +8,7 @@ import { FaMapMarkerAlt, FaEnvelope, FaPhone, FaFacebookF, FaMap } from 'react-i
 import Image from 'next/image';
 import termsContent from '@/constants/terms';
 import privacyContent from '@/constants/privacy';
-import TermsAndPrivacy from "./components/TermsAndPrivacy";
+import TermsAndPrivacy from "./components/TermsAndPrivacy";import dynamic from 'next/dynamic';
 
 const navItems = [
   { label: "About Us", href: "#about" },
@@ -52,12 +52,14 @@ const HomePage: React.FC = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      if (aboutRef.current && !hasAnimated) {
-        const rect = aboutRef.current.getBoundingClientRect();
-        const isVisible = rect.top >= 0 && rect.bottom <= window.innerHeight;
-  
-        if (isVisible) {
-          setHasAnimated(true); // Set to true to trigger the animation
+      if (typeof window !== "undefined") {
+        if (aboutRef.current && !hasAnimated) {
+          const rect = aboutRef.current.getBoundingClientRect();
+          const isVisible = rect.top >= 0 && rect.bottom <= window.innerHeight;
+    
+          if (isVisible) {
+            setHasAnimated(true); // Set to true to trigger the animation
+          }
         }
       }
     };
