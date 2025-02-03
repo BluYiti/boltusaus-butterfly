@@ -24,6 +24,7 @@ const NewClientDashboard = () => {
   const [state, setState] = useState<string | null>(null); // State to track user state
   const [status, setStatus] = useState<string | null>(null); // State to track user status
   const [cert, setCert] = useState<string | null>(null); // State to track user certificate
+  const [hasPsychotherapist, setHasPsychotherapist] = useState(false);
   const [userName, setUserName] = useState<string | null>(null); // State to track user name
   
   // Modal state
@@ -49,9 +50,12 @@ const NewClientDashboard = () => {
         const userState = stateResponse.documents[0]?.state;
         const userStatus = stateResponse.documents[0]?.status;
         const userCert = stateResponse.documents[0]?.certificate;
+        const userPsycho = stateResponse.documents[0]?.psychotherapist;
+
         setState(userState);
         setStatus(userStatus);
         setCert(userCert);
+        setHasPsychotherapist(!!userPsycho); // If userPsycho is not null or empty, set to true
 
         // Fetch psychotherapists
         const therapistResponse = await databases.listDocuments('Butterfly-Database', 'Psychotherapist');
@@ -123,18 +127,6 @@ const NewClientDashboard = () => {
             </Link>
           )}
 
-          {state === "current" && (
-            <div className="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4 p-4 bg-white shadow-lg rounded-lg text-center sm:text-left">
-              <Link href="/client/pages/bookappointment">
-                <button className="w-full sm:w-auto bg-blue-800 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition duration-300 shadow-md">
-                  📅 Book Your Appointment
-                </button>
-              </Link>
-              <span className="text-green-600 animate-bounce text-2xl">✅</span>
-              <span className="text-lg font-bold text-gray-700">Evaluation Completed!</span>
-            </div>
-          )}
-
           {state === "evaluate" && (
             <div className="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4 p-4 bg-white shadow-lg rounded-lg text-center sm:text-left">
               <button className="w-full sm:w-auto bg-gray-300 text-green-600 font-semibold py-3 px-6 rounded-lg shadow-md cursor-not-allowed" disabled>
@@ -144,6 +136,42 @@ const NewClientDashboard = () => {
                 ⏳ Please wait for confirmation in your dashboard. It may take 1-2 days. Thank you for your patience!
               </p>
             </div>
+          )}
+
+          {state === "referred" && status === "attached" && (
+            <div className="mb-4 text-green-600 text-4xl flex items-center">
+              <button
+                className="text-xl font-semibold bg-blue-500 hover:bg-gray-500 text-white py-2 px-4 rounded"
+                onClick={handleDownload}
+              >
+                Click me to download Certificate.
+              </button>
+              <span className="text-green-600 animate-bounce">✅</span>
+              <span className="ml-2 text-lg font-bold">You have been referred</span>
+            </div>
+          )}
+
+          {state === "current" && (
+            hasPsychotherapist ? (
+              <div className="p-4 bg-white shadow-lg rounded-lg text-center">
+                <Link href="/client/pages/bookappointment">
+                  <button className="w-full sm:w-auto bg-blue-800 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition duration-300 shadow-md">
+                    📅 Book Your Appointment
+                  </button>
+                </Link>
+                <span className="text-lg font-bold text-gray-700 ml-8">Your Notifications will appear here!</span>
+              </div>
+            ) : (
+              <div className="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4 p-4 bg-white shadow-lg rounded-lg text-center sm:text-left">
+                <Link href="/client/pages/bookappointment">
+                  <button className="w-full sm:w-auto bg-blue-800 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition duration-300 shadow-md">
+                    📅 Book Your Appointment
+                  </button>
+                </Link>
+                <span className="text-green-600 animate-bounce text-2xl">✅</span>
+                <span className="text-lg font-bold text-gray-700">Evaluation Completed!</span>
+              </div>
+            )
           )}
 
           {/* Psychotherapists Section */}

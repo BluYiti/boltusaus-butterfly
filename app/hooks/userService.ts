@@ -390,5 +390,4 @@ export const findPaymentData = async (bookingId: string): Promise<any | null> =>
       console.error('Error fetching payment data:', error);
       return null;
     }
-  };
-  
+};

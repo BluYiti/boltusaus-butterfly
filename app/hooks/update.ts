@@ -20,7 +20,7 @@ const convertTo24HourFormat = (time12h: string): string => {
         throw new Error("Invalid time format. Use 'hh:mmAM' or 'hh:mmPM'.");
     }
 
-    let [_, hours, minutes, period] = match;
+    const [hours, minutes, period] = match;
     let hourNum = parseInt(hours, 10);
 
     if (period === "PM" && hourNum !== 12) {
