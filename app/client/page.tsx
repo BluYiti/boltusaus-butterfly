@@ -86,7 +86,7 @@ const NewClientDashboard = () => {
     };
 
     fetchData();
-  }, [state, status, apptStatus ]); // Empty dependency array to run once on component mount
+  }, [state, status, apptStatus]); // Empty dependency array to run once on component mount
 
   const handleDownload = () => {
     const documentId = cert; // Assuming userCert is defined in the same scope
@@ -125,20 +125,25 @@ const NewClientDashboard = () => {
           
           {/* Pre-assessment & Booking Section */}
           {state === "new" && (
-            <Link href="/preassessment">
-              <button className="w-full sm:w-auto bg-blue-600 text-white py-2 px-4 rounded-lg text-lg font-semibold hover:bg-blue-500 transition-transform transform hover:scale-105">
-                Start Pre-assessment Test
-              </button>
-            </Link>
+            <div className="flex flex-col items-center justify-center p-4 bg-white shadow-lg rounded-lg text-center">
+              <Link href="/preassessment">
+                <button className="w-full sm:w-auto bg-blue-500 text-white py-2 px-4 rounded-lg text-lg font-semibold hover:bg-blue-600 transition-transform transform hover:scale-105">
+                  Start Pre-assessment Test
+                </button>
+              </Link>
+              <p className="text-black py-3 px-2 rounded-lg font-mono">
+                "Take this brief pre-assessment test to help us understand how we can best support you on your journey to well-being! ✨🦋"
+              </p>
+            </div>
           )}
 
           {/* Evaluate Clients */}
           {state === "evaluate" && (
             <div className="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4 p-4 bg-white shadow-lg rounded-lg text-center sm:text-left">
-              <button className="w-full sm:w-auto bg-gray-300 text-green-600 font-semibold py-3 px-6 rounded-lg shadow-md cursor-not-allowed" disabled>
+              <button className="text-white w-full sm:w-auto bg-blue-400 font-semibold py-3 px-6 rounded-lg shadow-md" disabled>
                 ✅ Preassessment Done!
               </button>
-              <p className="bg-blue-400 text-white py-3 px-6 rounded-lg shadow-md">
+              <p className="py-3 px-6 rounded-lg font-mono">
                 ⏳ Please wait for confirmation in your dashboard. It may take 1-2 days. Thank you for your patience!
               </p>
             </div>
@@ -261,7 +266,7 @@ const NewClientDashboard = () => {
 
           {/* Psychotherapists Section */}
           <div className="relative overflow-hidden">
-            <div className="max-w-[600px] overflow-x-auto p-4 space-x-4 scrollbar-thin scrollbar-thumb-blue-300 flex">
+            <div className="max-w-[850px] overflow-x-auto p-4 space-x-4 scrollbar-thin scrollbar-thumb-blue-300 flex">
             {psychotherapists.map((psychotherapist, index) => (
               <div
                 key={index}
@@ -272,26 +277,26 @@ const NewClientDashboard = () => {
               >
                 <div className="flex flex-col items-center bg-white border border-blue-300 rounded-3xl p-3 min-w-[300px] transform transition-transform duration-500 ease-in-out hover:scale-105 shadow-lg">
                   <Image
-              src={profileImageUrls[psychotherapist.$id] || "/images/default-profile.png"}
-              alt={`${psychotherapist.firstName || "N/A"} ${psychotherapist.lastName || "N/A"}`}
-              className="rounded-full mb-4"
-              width={96}
-              height={96}
-              unoptimized
-              onError={() => "/images/default-profile.png"}
+                    src={profileImageUrls[psychotherapist.$id] || "/images/default-profile.png"}
+                    alt={`${psychotherapist.firstName || "N/A"} ${psychotherapist.lastName || "N/A"}`}
+                    className="rounded-full mb-4"
+                    width={96}
+                    height={96}
+                    unoptimized
+                    onError={() => "/images/default-profile.png"}
                   />
                   <div className="text-center">
-              <h4 className="text-lg font-bold text-blue-500 font-roboto">
-                {psychotherapist.firstName || "First Name"} {psychotherapist.lastName || "Last Name"}
-              </h4>
-              <p className="text-sm text-gray-600 font-lora">
-                {psychotherapist.specialties || "Specialties not specified"}
-              </p>
-              <h3 className="text-gray-600 font-lora">
-                {psychotherapist.position
-                  ? `${psychotherapist.position.charAt(0).toUpperCase()}${psychotherapist.position.slice(1)}`
-                  : "Position not specified"}
-              </h3>
+                    <h4 className="text-lg font-bold text-blue-500 font-roboto">
+                      {psychotherapist.firstName || "First Name"} {psychotherapist.lastName || "Last Name"}
+                    </h4>
+                    <p className="text-sm text-gray-600 font-lora">
+                      {psychotherapist.specialties || "Specialties not specified"}
+                    </p>
+                    <h3 className="text-gray-600 font-lora">
+                      {psychotherapist.position
+                        ? `${psychotherapist.position.charAt(0).toUpperCase()}${psychotherapist.position.slice(1)}`
+                        : "Position not specified"}
+                    </h3>
                   </div>
                 </div>
               </div>
@@ -303,7 +308,7 @@ const NewClientDashboard = () => {
         {/* Right Section - Daily Reminder */}
         <div className="flex-1 bg-white p-4 sm:p-6 rounded-lg shadow-lg w-full lg:h-[30rem]">
           <h2 className="font-bold text-xl sm:text-2xl lg:text-3xl text-blue-950 mb-4 sm:mb-6">A Daily Reminder to Yourself</h2>
-          <div className="space-y-5 text-black max-h-[300px] overflow-x-hidden overflow-y-auto">
+          <div className="space-y-5 text-black max-h-[365px] overflow-x-hidden overflow-y-auto">
             {[
               { emoji: "😊", title: "This Too Shall Pass", text: "Feelings are temporary. Hold on, better days are coming." },
               { emoji: "😮‍💨", title: "Breathe In, Let Go", text: "Take a moment to breathe. Release the tension in your mind and body." },

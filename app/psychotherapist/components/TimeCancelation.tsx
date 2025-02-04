@@ -153,28 +153,28 @@ const TimeCancelation: React.FC<TimeCancelationProps> = ({ selectedDay, selected
             </div>
         </div>
       ) : (<>
-        <div className="grid grid-cols-4 gap-4 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
             {timeSlots.map((time) => {
-            const isBooked = isSlotBooked(selectedDay || 0, time);
-            const isDisabled = isSlotDisabled(selectedDay || 0, time);
+              const isBooked = isSlotBooked(selectedDay || 0, time);
+              const isDisabled = isSlotDisabled(selectedDay || 0, time);
 
-            return (
-              <button
-              key={time}
-              className={`py-2 px-4 rounded-lg ${selectedTime === time ? "bg-blue-300 text-white" : isBooked
-              ? "bg-gray-400 text-gray-700 cursor-not-allowed"
-              : isDisabled
-              ? "bg-yellow-400 text-gray-700"
-              : "bg-gray-300 text-black hover:bg-blue-200 hover:text-white hover:scale-110"}`}
-              onClick={() => !isBooked && setSelectedTime(time)}
-              disabled={isBooked}
-              >
-              {time}
-              </button>
-            );
+              return (
+                <button
+                  key={time}
+                  className={`py-2 px-4 rounded-lg ${selectedTime === time ? "bg-blue-300 text-white" : isBooked
+                    ? "bg-gray-400 text-gray-700 cursor-not-allowed"
+                    : isDisabled
+                    ? "bg-yellow-400 text-gray-700"
+                    : "bg-gray-300 text-black hover:bg-blue-200 hover:text-white hover:scale-110"}`}
+                  onClick={() => !isBooked && setSelectedTime(time)}
+                  disabled={isBooked}
+                >
+                  {time}
+                </button>
+              );
             })}
-        </div>
-        <div className="mt-4">
+          </div>
+          <div className="mt-4">
             <button
             className={`py-2 px-4 rounded-lg mr-4 ${!selectedTime ? "bg-gray-400 text-gray-700 cursor-not-allowed" : isSlotDisabled(selectedDay || 0, selectedTime) ? "bg-green-500 text-white" : "bg-red-500 text-white"}`}
             onClick={isSlotDisabled(selectedDay || 0, selectedTime) ? handleEnableTimeSlot : handleDisableTimeSlot}

@@ -229,10 +229,10 @@ export const fetchReceiptImage = async (receiptId: string): Promise<string | nul
 };
 
 // Check if the client has a pre-assessment
-export const hasPreAssessment = async (userId: string): Promise<boolean> => {
+export const hasPreAssessment = async (userID: string): Promise<boolean> => {
     try {
         const response = await databases.listDocuments('Butterfly-Database', 'Pre-Assessment', [
-            Query.equal('userId', userId),
+            Query.equal('userID', userID),
         ]);
 
         // If any documents are returned, the pre-assessment exists
