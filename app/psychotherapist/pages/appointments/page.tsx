@@ -5,8 +5,6 @@ import items from "@/psychotherapist/data/Links";
 import { useEffect, useState } from "react";
 import { databases, Query } from "@/appwrite"; 
 import TakeNotesModal from '@/psychotherapist/components/TakeNotesModal'; 
-import CallModal from '@/psychotherapist/components/CallModal'; 
-import CountdownModal from '@/psychotherapist/components/CountdownModal';
 import RescheduleModal from '@/psychotherapist/components/RescheduleModal';
 import useAuthCheck from "@/auth/page";
 import LoadingScreen from "@/components/LoadingScreen";
@@ -27,10 +25,7 @@ const Appointments = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isTakeNotesModalOpen, setIsTakeNotesModalOpen] = useState(false);
-  const [isCallModalOpen, setIsCallModalOpen] = useState(false);
-  const [isCountdownModalOpen, setIsCountdownModalOpen] = useState(false);
   const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false);
-  const [selectedClient, setSelectedClient] = useState<string | null>(null);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
 
   // State for filtered bookings
@@ -74,19 +69,11 @@ const Appointments = () => {
   }, []);
 
   // Modal handlers
-  const handleTakeNotesOpen = (clientName: string) => {
-    setSelectedClient(clientName);
+
+  const handleSubmitNotes = (booking: Booking) => {
+    console.log('Opening TakeNotesModal for booking:', booking); // Debug line
+    setSelectedBooking(booking);
     setIsTakeNotesModalOpen(true);
-  };
-
-  const handleCallOpen = (clientName: string) => {
-    setSelectedClient(clientName);
-    setIsCountdownModalOpen(true);
-  };
-
-  const handleCountdownComplete = () => {
-    setIsCountdownModalOpen(false);
-    setIsCallModalOpen(true);
   };
 
   const handleRescheduleOpen = (booking: Booking) => {
@@ -213,21 +200,12 @@ const Appointments = () => {
                           <p className="text-gray-600">Time: <span className="font-semibold">{booking.time}</span></p>
                           <p className="text-gray-600">Mode: <span className="font-semibold">{booking.mode}</span></p>
                         </div>
-                        {booking.mode === 'f2f' ? (
-                          <button 
-                            className="bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-600 transition-colors duration-200"
-                            onClick={() => handleTakeNotesOpen(booking.clientName)}
-                          >
-                            Take notes
-                          </button>
-                        ) : (
-                          <button 
-                            className="bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-600 transition-colors duration-200"
-                            onClick={() => handleCallOpen(booking.clientName)}
-                          >
-                            Call
-                          </button>
-                        )}
+                        <button
+                          className="bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-600 transition-colors duration-200"
+                          onClick={() => handleSubmitNotes(booking)}
+                        >
+                          Submit Notes
+                        </button>
                       </div>
                     ))}
                   </div>
@@ -239,31 +217,34 @@ const Appointments = () => {
               {/* Upcoming bookings */}
               <div className="mt-6">
                 <h3 className="font-semibold text-lg border-b-2 border-gray-300 pb-2">Upcoming Appointments</h3>
-                {paidBookings.length > 0 ? (
-                  <div className="grid grid-cols-1 gap-6 mt-4">
-                    {paidBookings.map((booking, index) => (
-                      <div key={index} className="bg-blue-50 rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-200 border-l-4 border-blue-500">
-                        <h4 className="font-semibold text-blue-700">{booking.clientName}</h4>
-                        <p className="text-gray-600">Date: <span className="font-semibold">{booking.date}</span></p>
-                        <p className="text-gray-600">Time: <span className="font-semibold">{booking.time}</span></p>
-                        <p className="text-gray-600">Mode: <span className="font-semibold">{booking.mode}</span></p>
+                {(paidBookings.length > 0 || rescheduledBookings.length > 0) ? (
+                  <>
+                    {paidBookings.length > 0 && (
+                      <div className="grid grid-cols-1 gap-6 mt-4">
+                        {paidBookings.map((booking, index) => (
+                          <div key={index} className="bg-blue-50 rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-200 border-l-4 border-blue-500">
+                            <h4 className="font-semibold text-blue-700">{booking.clientName}</h4>
+                            <p className="text-gray-600">Date: <span className="font-semibold">{booking.date}</span></p>
+                            <p className="text-gray-600">Time: <span className="font-semibold">{booking.time}</span></p>
+                            <p className="text-gray-600">Mode: <span className="font-semibold">{booking.mode}</span></p>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p>No upcoming appointments.</p>
-                )}
-                {rescheduledBookings.length > 0 ? (
-                  <div className="grid grid-cols-1 gap-6 mt-4">
-                    {rescheduledBookings.map((booking, index) => (
-                      <div key={index} className="bg-blue-50 rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-200 border-l-4 border-blue-500">
-                        <h4 className="font-semibold text-blue-700">{booking.clientName}</h4>
-                        <p className="text-gray-600">Date: <span className="font-semibold">{booking.date}</span></p>
-                        <p className="text-gray-600">Time: <span className="font-semibold">{booking.time}</span></p>
-                        <p className="text-gray-600">Mode: <span className="font-semibold">{booking.mode}</span></p>
+                    )}
+
+                    {rescheduledBookings.length > 0 && (
+                      <div className="grid grid-cols-1 gap-6 mt-4">
+                        {rescheduledBookings.map((booking, index) => (
+                          <div key={index} className="bg-blue-50 rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-200 border-l-4 border-blue-500">
+                            <h4 className="font-semibold text-blue-700">{booking.clientName}</h4>
+                            <p className="text-gray-600">Date: <span className="font-semibold">{booking.date}</span></p>
+                            <p className="text-gray-600">Time: <span className="font-semibold">{booking.time}</span></p>
+                            <p className="text-gray-600">Mode: <span className="font-semibold">{booking.mode}</span></p>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
+                    )}
+                  </>
                 ) : (
                   <p>No upcoming appointments.</p>
                 )}
@@ -378,14 +359,11 @@ const Appointments = () => {
       </div>
 
       {/* Modals */}
-      <TakeNotesModal isOpen={isTakeNotesModalOpen} onClose={() => setIsTakeNotesModalOpen(false)} />
-      <CountdownModal
-        isOpen={isCountdownModalOpen}
-        onClose={() => setIsCountdownModalOpen(false)}
-        onComplete={handleCountdownComplete} // A function to handle completion logic
-        seconds={10} // Countdown duration in seconds
+      <TakeNotesModal
+        isOpen={isTakeNotesModalOpen}
+        onClose={() => setIsTakeNotesModalOpen(false)}
+        booking={selectedBooking}
       />
-      <CallModal isOpen={isCallModalOpen} clientName={selectedClient} onClose={() => setIsCallModalOpen(false)} />
       <RescheduleModal isOpen={isRescheduleModalOpen} booking={selectedBooking} onConfirm={handleConfirmReschedule} onClose={() => setIsRescheduleModalOpen(false)} />
     </Layout>
   );
