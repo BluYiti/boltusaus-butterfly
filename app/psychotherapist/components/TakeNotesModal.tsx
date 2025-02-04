@@ -15,9 +15,8 @@ interface TakeNotesModalProps {
 
 // TakeNotesModal Component
 const TakeNotesModal: React.FC<TakeNotesModalProps> = ({ isOpen, onClose, booking }) => {
-  if (!isOpen) return null;
   const [notes, setNotes] = useState('');
-
+  
   useEffect(() => {
     if (booking) {
       // Update notes state whenever booking changes
@@ -25,6 +24,8 @@ const TakeNotesModal: React.FC<TakeNotesModalProps> = ({ isOpen, onClose, bookin
       console.log('booking loaded:', booking);
     }
   }, [booking]); // This hook will run whenever the booking prop changes
+  
+  if (!isOpen) return null;
 
   const handleSave = () => {
     if (!booking || !booking.id) {
