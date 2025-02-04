@@ -132,7 +132,7 @@ const NewClientDashboard = () => {
                 </button>
               </Link>
               <p className="text-black py-3 px-2 rounded-lg font-mono">
-                "Take this brief pre-assessment test to help us understand how we can best support you on your journey to well-being! ✨🦋"
+                &quot;Take this brief pre-assessment test to help us understand how we can best support you on your journey to well-being! ✨🦋&quot;
               </p>
             </div>
           )}

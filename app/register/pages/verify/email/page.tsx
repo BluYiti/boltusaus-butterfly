@@ -70,7 +70,7 @@ const RegisterPage: React.FC = () => {
                     <p className="text-lg text-red-600 mt-4">No email detected or no permission to access email.</p>
                 )}
             </div>
-            <div className="absolute right-0 top-0 w-14 h-screen bg-cover bg-no-repeat" style={{ backgroundImage: `url('/images/rightblock.png')` }}></div>
+            <div className="absolute right-0 top-0 w-14 h-screen bg-cover bg-no-repeat hidden md:block" style={{ backgroundImage: `url('/images/rightblock.png')` }}></div>
             <footer className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-gray-600 text-xs text-center">
                 © Butterfly 2024
             </footer>
