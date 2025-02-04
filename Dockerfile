@@ -1,27 +1,37 @@
-# Use Node.js 18.17 image as the base
-FROM node:18-alpine
+# Use the official Node.js image as base
+FROM node:20-alpine AS builder
 
-# Set the working directory
+# Set working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json first for better caching
+# Copy package.json and package-lock.json
 COPY package.json package-lock.json ./
 
-# Install dependencies in development mode
-ENV NODE_ENV=development
-RUN npm install
+# Install dependencies
+RUN npm install --frozen-lockfile
 
-# Copy the rest of the application code
+# Copy the entire project
 COPY . .
 
-# Copy the .env.local file into the container
+# Copy .env.local file
 COPY .env.local .env.local
 
-# Ensure proper permissions
-RUN chown -R node:node /app
+# Build the application
+RUN npm run build
 
-# Expose the application port
+# Use a minimal Node.js image for production
+FROM node:20-alpine AS runner
+WORKDIR /app
+
+# Copy built application from builder
+COPY --from=builder /app/.next .next
+COPY --from=builder /app/public public
+COPY --from=builder /app/package.json .
+COPY --from=builder /app/node_modules node_modules
+COPY --from=builder /app/.env.local .env.local
+
+# Expose the port Next.js runs on
 EXPOSE 3000
 
-# Start the application in development mode
-CMD ["npm", "run", "dev"]
+# Start the application
+CMD ["npm", "run", "start"]
