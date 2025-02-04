@@ -26,15 +26,22 @@ const RegisterPage: React.FC = () => {
     const handleVerify = async () => {
         try {
             setIsVerified(true); // Set the verification status to true
-            console.log('Verification email sent');
+            console.log('Verification process started');
+    
+            // Ensure window is defined (avoiding SSR issues)
+            const baseUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost' 
+                ? 'http://localhost:3000' 
+                : 'http://193.46.198.8';
+    
             await account.getSession('current');
-            await account.createVerification("http://localhost:3000/register/pages/verify/email/success");
+            await account.createVerification(`${baseUrl}/register/pages/verify/email/success`);
+            
             console.log('Verification email sent');
             setIsVerified(true);
         } catch (error) {
             console.error('Failed to send verification email:', error);
         }
-    };
+    };    
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen relative bg-[#eff6ff]">

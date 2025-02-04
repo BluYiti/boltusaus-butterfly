@@ -51,21 +51,23 @@ const HomePage: React.FC = () => {
   const [hasAnimated, setHasAnimated] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      if (!aboutRef.current || hasAnimated) return;
-  
-      requestAnimationFrame(() => {
-        const rect = aboutRef.current.getBoundingClientRect();
-        const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
-        
-        if (isVisible) {
-          setHasAnimated(true);
-        }
-      });
-    };
-  
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    if (typeof window !== 'undefined') {
+      const handleScroll = () => {
+        if (!aboutRef.current || hasAnimated) return;
+    
+        requestAnimationFrame(() => {
+          const rect = aboutRef.current.getBoundingClientRect();
+          const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
+          
+          if (isVisible) {
+            setHasAnimated(true);
+          }
+        });
+      };
+    
+      window.addEventListener('scroll', handleScroll);
+      return () => window.removeEventListener('scroll', handleScroll);
+    }
   }, [hasAnimated]);  
 
   return (
