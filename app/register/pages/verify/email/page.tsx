@@ -31,7 +31,7 @@ const RegisterPage: React.FC = () => {
             // Ensure window is defined (avoiding SSR issues)
             const baseUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost' 
                 ? 'http://localhost:3000' 
-                : 'http://193.46.198.8';
+                : 'http://193.46.198.8:3000';
     
             await account.getSession('current');
             await account.createVerification(`${baseUrl}/register/pages/verify/email/success`);
