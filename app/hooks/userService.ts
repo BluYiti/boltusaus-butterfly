@@ -391,3 +391,28 @@ export const findPaymentData = async (bookingId: string): Promise<any | null> =>
       return null;
     }
 };
+
+// Fetch the status of the most recent appointment for a specific client
+export const getLatestAppointmentStatus = async (clientName: string): Promise<string | null> => {
+    try {
+        // Query the Bookings collection to fetch the most recent appointment for the given client
+        const response = await databases.listDocuments('Butterfly-Database', 'Bookings', [
+            Query.equal('client', clientName), // Filter by client name
+            Query.limit(1), // Limit the results to 1 document (the most recent one)
+            Query.orderDesc('createdAt') // Order by createdAt in descending order
+        ]);
+
+        if (response.documents.length > 0) {
+            const mostRecentAppointment = response.documents[0];
+            const status = mostRecentAppointment.status; // Extract the status from the appointment
+            console.log(`Most recent appointment status for client ${clientName}:`, status);
+            return status; // Return the status of the most recent appointment
+        } else {
+            console.log(`No appointments found for client ${clientName}.`);
+            return null; // Return null if no appointment is found for the client
+        }
+    } catch (error) {
+        console.error('Error fetching the most recent appointment status for client:', error);
+        return null; // Return null if an error occurred
+    }
+};

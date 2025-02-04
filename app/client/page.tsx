@@ -1,16 +1,16 @@
 'use client'
 
 import React, { useState, useEffect } from "react";
+import { account, databases, Query } from "@/appwrite"; // Import Appwrite account service for fetching user data
+import useAuthCheck from "@/auth/page"; // Correct import path for useAuthCheck
 import Layout from "@/components/Sidebar/Layout"; // Adjust the path if necessary
 import items from "@/client/data/Links";
 import SessionHandler from "@/auth/logout/component/SessionHandler"
 import Link from "next/link"; // Import Link for navigation
 import 'typeface-roboto';
 import 'typeface-lora';
-import { account, databases, Query } from "@/appwrite"; // Import Appwrite account service for fetching user data
-import useAuthCheck from "@/auth/page"; // Correct import path for useAuthCheck
 import LoadingScreen from "@/components/LoadingScreen"; // Import LoadingScreen component
-import { fetchProfileImageUrl } from "@/hooks/userService";
+import { fetchProfileImageUrl, getLatestAppointmentStatus } from "@/hooks/userService";
 import { downloadCertificate } from "@/hooks/userService";
 import PsychotherapistProfile from '@/client/components/PsychotherapistProfile'; // Adjust the path if necessary
 import Image from 'next/image';
@@ -23,6 +23,7 @@ const NewClientDashboard = () => {
   const [profileImageUrls, setProfileImageUrls] = useState({});
   const [state, setState] = useState<string | null>(null); // State to track user state
   const [status, setStatus] = useState<string | null>(null); // State to track user status
+  const [apptStatus, setApptStatus] = useState<string | null>(null); // State to track user's most recent appointment status
   const [cert, setCert] = useState<string | null>(null); // State to track user certificate
   const [hasPsychotherapist, setHasPsychotherapist] = useState(false);
   const [userName, setUserName] = useState<string | null>(null); // State to track user name
@@ -51,6 +52,10 @@ const NewClientDashboard = () => {
         const userStatus = stateResponse.documents[0]?.status;
         const userCert = stateResponse.documents[0]?.certificate;
         const userPsycho = stateResponse.documents[0]?.psychotherapist;
+
+        //Fetch user recent appointment status
+        setApptStatus(await getLatestAppointmentStatus(stateResponse.documents[0]?.$id));
+        console.log(apptStatus);
 
         setState(userState);
         setStatus(userStatus);
@@ -81,7 +86,7 @@ const NewClientDashboard = () => {
     };
 
     fetchData();
-  }, [state, status]); // Empty dependency array to run once on component mount
+  }, [state, status, apptStatus ]); // Empty dependency array to run once on component mount
 
   const handleDownload = () => {
     const documentId = cert; // Assuming userCert is defined in the same scope
@@ -116,7 +121,7 @@ const NewClientDashboard = () => {
       <div className="flex flex-col mt-7 lg:flex-row justify-between items-start px-4 sm:px-8 space-y-6 lg:space-y-0 lg:space-x-6">
 
         {/* Left Section - Pre-assessment & Psychotherapists */}
-        <div className="flex-1 bg-white p-4 sm:p-6 rounded-lg shadow-lg w-full lg:h-[27rem]">
+        <div className="flex-1 bg-white p-4 sm:p-6 rounded-lg shadow-lg w-full lg:h-[30rem]">
           
           {/* Pre-assessment & Booking Section */}
           {state === "new" && (
@@ -127,6 +132,7 @@ const NewClientDashboard = () => {
             </Link>
           )}
 
+          {/* Evaluate Clients */}
           {state === "evaluate" && (
             <div className="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4 p-4 bg-white shadow-lg rounded-lg text-center sm:text-left">
               <button className="w-full sm:w-auto bg-gray-300 text-green-600 font-semibold py-3 px-6 rounded-lg shadow-md cursor-not-allowed" disabled>
@@ -138,6 +144,7 @@ const NewClientDashboard = () => {
             </div>
           )}
 
+          {/* Referred Clients */}
           {state === "referred" && status === "attached" && (
             <div className="mb-4 text-green-600 text-4xl flex items-center">
               <button
@@ -151,16 +158,94 @@ const NewClientDashboard = () => {
             </div>
           )}
 
+          {/* Current Clients */}
           {state === "current" && (
             hasPsychotherapist ? (
-              <div className="p-4 bg-white shadow-lg rounded-lg text-center">
-                <Link href="/client/pages/bookappointment">
-                  <button className="w-full sm:w-auto bg-blue-800 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition duration-300 shadow-md">
-                    📅 Book Your Appointment
-                  </button>
-                </Link>
-                <span className="text-lg font-bold text-gray-700 ml-8">Your Notifications will appear here!</span>
-              </div>
+              <div className="p-2 bg-white rounded-lg text-center">
+              {apptStatus === 'pending' && (
+                <>
+                <div>
+                  <div className="w-full sm:w-auto bg-yellow-600 text-white py-3 px-6 rounded-full font-semibold hover:bg-yellow-400 transition duration-300 shadow-md mb-2">
+                    ⏳ Payment Pending
+                  </div>
+                </div>
+                <span className="text-lg font-bold text-gray-700 text-center">
+                  Payment is pending. Please wait for confirmation.
+                </span>
+                </>
+              )}
+              
+              {apptStatus === 'paid' && (
+                <>
+                  <div className="sm:w-auto bg-green-700 text-white py-2 px-6 rounded-lg font-semibold hover:bg-green-500 transition duration-300 shadow-md mb-1">
+                    ✅ Payment Confirmed
+                  </div>
+                  <span className="text-lg font-bold text-gray-700">
+                    Your appointment is confirmed and everything is set! We look forward to seeing you soon.
+                  </span>
+                </>
+              )}
+        
+              {apptStatus === 'happening' && (
+                <>
+                  <div className="sm:w-auto bg-blue-800 text-white py-3 px-6 rounded-full font-semibold hover:bg-blue-700 transition duration-300 shadow-md mb-2">
+                    📅 Appointment Happening Now
+                  </div>
+                  <span className="text-lg font-bold text-gray-700">
+                    Your appointment is currently happening.
+                  </span>
+                </>
+              )}
+
+              {apptStatus === 'success' && (
+                <>
+                  <div className="sm:w-auto bg-green-700 text-white py-2 px-6 rounded-full font-semibold hover:bg-green-500 transition duration-300 shadow-md mb-1">
+                    ✅ Appointment Done!
+                  </div>
+                  <span className="text-lg font-bold text-gray-700">
+                    Session complete! We hope this appointment was a valuable step forward in your journey 🙌
+                  </span>
+                </>
+              )}
+        
+              {apptStatus === 'missed' && (
+                <>
+                  <div className="bg-red-800 text-white py-2 rounded-full font-semibold hover:bg-red-500 transition duration-300 shadow-md mb-1">
+                    ❌ Appointment Missed You missed your appointment. Please reschedule.
+                  </div>
+                  <Link href="/client/pages/bookappointment">
+                    <button className="w-full sm:w-auto bg-blue-800 text-white py-2 px-6 rounded-full font-semibold hover:bg-blue-700 transition duration-300 shadow-md">
+                      📅 Reschedule Appointment
+                    </button>
+                  </Link>
+                </>
+              )}
+
+              {apptStatus === 'rescheduleRequest' && (
+                <>
+                  <div>
+                    <div className="w-full sm:w-auto bg-yellow-600 text-white py-3 px-6 rounded-full font-semibold hover:bg-yellow-400 transition duration-300 shadow-md mb-2">
+                      ⏳ Reschedule Request Pending
+                    </div>
+                  </div>
+                  <span className="text-lg font-bold text-gray-700 text-center">
+                    Reschedule is pending. Please wait for confirmation.
+                  </span>
+                </>
+              )}
+        
+              {/* If there's no status, the default rendering will be the "Book Your Appointment" button */}
+              {!apptStatus && (
+                <>
+                  <Link href="/client/pages/bookappointment">
+                    <button className="w-full sm:w-auto bg-blue-800 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition duration-300 shadow-md">
+                      📅 Book Your Appointment
+                    </button>
+                  </Link>
+                  <span className="text-lg font-bold text-gray-700 mt-4">Your Notifications will appear here!</span>
+                </>
+              )}
+            </div>
             ) : (
               <div className="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4 p-4 bg-white shadow-lg rounded-lg text-center sm:text-left">
                 <Link href="/client/pages/bookappointment">
@@ -216,7 +301,7 @@ const NewClientDashboard = () => {
         </div>
 
         {/* Right Section - Daily Reminder */}
-        <div className="flex-1 bg-white p-4 sm:p-6 rounded-lg shadow-lg w-full">
+        <div className="flex-1 bg-white p-4 sm:p-6 rounded-lg shadow-lg w-full lg:h-[30rem]">
           <h2 className="font-bold text-xl sm:text-2xl lg:text-3xl text-blue-950 mb-4 sm:mb-6">A Daily Reminder to Yourself</h2>
           <div className="space-y-5 text-black max-h-[300px] overflow-x-hidden overflow-y-auto">
             {[
