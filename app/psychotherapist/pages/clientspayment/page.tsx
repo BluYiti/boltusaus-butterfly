@@ -5,10 +5,12 @@ import Layout from "@/components/Sidebar/Layout";
 import items from "@/psychotherapist/data/Links";
 import PaymentModal from "@/psychotherapist/components/PaymentModal"; // Import the new modal component
 import LoadingScreen from "@/components/LoadingScreen";
+import RenderReports from "@/psychotherapist/components/RenderReports";
 import useAuthCheck from "@/auth/page";
 import { account, databases, Query } from "@/appwrite";
 import { fetchProfileImageUrl, fetchPsychoId } from "@/hooks/userService"; // Your existing function
 import Image from 'next/image';
+import { fetchYearlyProfit } from "@/psychotherapist/components/FetchProfit";
 
 interface Payment {
   $id: string;
@@ -48,11 +50,13 @@ const ClientsPayment = () => {
   const authLoading = useAuthCheck(['psychotherapist']);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("Pending");
-  const [searchTerm, setSearchTerm] = useState("");
   const [payments, setPayments] = useState<Payment[]>([]);
   const [, setShowModal] = useState(false); // State for modal visibility
   const [selectedClient, setSelectedClient] = useState<Payment | null>(null); // State for selected client's payment details
   const [profileImageUrls, setProfileImageUrls] = useState<{ [key: string]: string }>({});
+  const [monthlyProfit, setMonthlyProfit] = useState({});
+  const [transactions, setTransactions] = useState([]);
+  const [selectedMonth, setSelectedMonth] = useState(null);
 
   // Fetch payment data
   useEffect(() => {
@@ -64,6 +68,12 @@ const ClientsPayment = () => {
         const response = await databases.listDocuments('Butterfly-Database', 'Payment', [
           Query.equal('psychotherapist', psychoId),
         ]);
+
+        // Fetch profit data
+        const data = await fetchYearlyProfit();
+        console.log(data);
+        
+        //Can you make an array of the months and the profit for each month?
 
         // Map fetched data to match Payment type
         const fetchedPayments: Payment[] = response.documents.map((doc) => {
@@ -124,6 +134,15 @@ const ClientsPayment = () => {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    const getProfitData = async () => {
+      const data = await fetchYearlyProfit();
+      setMonthlyProfit(data.monthlyProfit);
+      setTransactions(data.transactions);
+    };
+    getProfitData();
+  }, []);
+
   const openModal = (client: Payment) => {
     setSelectedClient(client);
     setShowModal(true);
@@ -132,6 +151,11 @@ const ClientsPayment = () => {
   const closeModal = () => {
     setShowModal(false);
     setSelectedClient(null);
+  };
+
+  // Function to toggle selected month
+  const toggleMonth = (month) => {
+    setSelectedMonth(selectedMonth === month ? null : month);
   };
 
   const renderClientsByStatus = (status: string) => {
@@ -194,33 +218,6 @@ const ClientsPayment = () => {
     return <LoadingScreen />;
   }
 
-  // Mock data for daily profit
-  const dailyProfit: Record<string, string> = {
-    '2024-10-10': '₱16,000',
-    '2024-10-11': '₱22,500',
-    '2024-10-12': '₱20,000',
-    '2024-10-13': '₱25,000',
-    '2024-10-14': '₱17,500',
-    '2024-10-15': '₱30,000',
-  };
-
-  const renderReports = () => (
-    <div className="mt-4 space-y-3">
-      <h3 className="text-lg font-bold mb-4">Daily Profit</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {Object.entries(dailyProfit).map(([date, profit]) => (
-          <div
-            key={date}
-            className="p-4 bg-white shadow rounded-lg text-center"
-          >
-            <h4 className="font-semibold text-blue-500">{date}</h4>
-            <p className="text-gray-700 text-lg">{profit}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
       <div className="bg-blue-50 min-h-screen overflow-auto">
@@ -266,7 +263,7 @@ const ClientsPayment = () => {
                   : "opacity-0 translate-y-10"
               }`}
             >
-              {activeTab === "Report" && renderReports()}
+              {activeTab === "Report" && <RenderReports monthlyProfit={monthlyProfit} transactions={transactions} />}
             </div>
           </div>
         </div>
