@@ -26,26 +26,11 @@ interface AppointmentData {
 }
 
 const GCashPayment: React.FC<GCashPaymentProps> = ({ isOpen, onClose, appointmentData }) => {
-  const [referenceNumber, setReferenceNumber] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   const [showSuccess, setShowSuccess] = useState<boolean>(false); // State for success modal
   const [receipt, setReceipt] = useState<File | null>(null); // State for receipt file
   const [receiptPreview, setReceiptPreview] = useState<string | null>(null); // State for receipt preview URL
-
-  const handleReferenceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let inputValue = e.target.value;
-
-    // Remove non-numeric characters
-    inputValue = inputValue.replace(/\D/g, '');
-
-    // Limit the value to 13 digits
-    if (inputValue.length > 13) {
-      inputValue = inputValue.substring(0, 13);
-    }
-
-    setReferenceNumber(inputValue);
-  };
 
   const handleReceiptChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files ? e.target.files[0] : null;

@@ -9,6 +9,9 @@ import Image from 'next/image';
 import { account, databases, storage } from '@/appwrite';
 import useAuthCheck from '@/auth/page';
 import LoadingScreen from '@/components/LoadingScreen';
+import { checkClientLink } from '@/psychotherapist/hooks/checkClientLink';
+import { setNewLink } from '@/psychotherapist/hooks/setNewLink';
+import { fetchPsychoId } from '@/hooks/userService';
 
 
 // Define interfaces
@@ -80,9 +83,55 @@ const ContactList: FC<{ onContactClick: (id: string) => void; selectedContact: s
 };
 
 // Chat Box component
-const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSendMessage: (text: string) => void; onBack: () => void;}> = ({selectedContact, messages, onSendMessage, onBack}) => {
+const ChatBox: FC<{
+  selectedContact: Contact | null;
+  messages: Message[];
+  onSendMessage: (text: string) => void;
+  onBack: () => void;
+}> = ({ selectedContact, messages, onSendMessage, onBack }) => {
   const [messageInput, setMessageInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [user, setUser] = useState<any>(null);
+  const [psychoId, setPsychoId] = useState<string | null>(null);
+  const [isDropdownOpen, setDropdownOpen] = useState(false);
+  const [meetLink, setMeetLink] = useState('https://meet.google.com/landing');
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const userData = await account.get();
+        setUser(userData);
+
+        const psychoId = await fetchPsychoId(userData.$id);
+        setPsychoId(psychoId);
+      } catch (error) {
+        console.error('Failed to fetch user:', error);
+      }
+    };
+
+    fetchUser();
+  }, []);
+
+  const toggleDropdown = () => setDropdownOpen(!isDropdownOpen);
+
+  const goToMeet = () => {
+    if (typeof window !== 'undefined') {
+      window.open(meetLink, '_blank');
+    }
+  };
+
+  const handleEditMeetLink = async () => {
+    const newLink = prompt(
+      `Enter Google Meet link for ${selectedContact?.name} and ${psychoId}:`,
+      meetLink
+    );
+
+    if (newLink) {
+      await setNewLink(selectedContact?.id || '', psychoId || '', newLink);
+      setMeetLink(newLink);
+    }
+  };
 
   const handleSendMessage = () => {
     if (messageInput.trim()) {
@@ -91,12 +140,6 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSend
     }
   };
 
-  const handleGoogleMeet = () => {
-    if (typeof window !== 'undefined') {
-      window.open('https://meet.google.com/landing', '_blank');
-    }
-  };
-  
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -104,6 +147,46 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSend
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setDropdownOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!selectedContact) return;
+  
+    let isMounted = true;
+  
+    const fetchMeetLink = async () => {
+      try {
+        const clientId = selectedContact.id;
+        const response = await databases.listDocuments('Butterfly-Database', 'MeetLink', [
+          Query.equal('client', clientId) // Querying where the 'client' attribute matches clientId
+        ]);
+  
+        if (isMounted && response.documents.length > 0) {
+          setMeetLink(response.documents[0].link); // Assuming 'link' is the field storing the Meet link
+        }
+      } catch (error) {
+        console.error('Failed to fetch meet link:', error);
+      }
+    };
+  
+    fetchMeetLink();
+  
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedContact]);
+  
 
   if (!selectedContact) {
     return (
@@ -115,19 +198,16 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSend
 
   return (
     <div className="w-full p-6 flex flex-col justify-between">
-      {/* Header Section */}
       <div className="flex items-center justify-start w-full mb-3 top-0">
-        {/* Back Button */}
-        <div className='mr-3'>
-          <button 
-            onClick={onBack} 
-            className="text-white hover:text-blue-700 bg-blue-400 rounded-full p-2"
+        <div className="mr-3">
+          <button
+            onClick={onBack}
+            className="text-white hover:bg-blue-200 hover:text-black bg-blue-400 rounded-xl p-2"
           >
             Back
           </button>
         </div>
-  
-        {/* Contact Details */}
+
         <div className="flex-1 flex justify-start items-center">
           <Image
             src={selectedContact.imageUrl}
@@ -139,25 +219,33 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSend
           <h2 className="text-xs md:text-xl font-bold">{selectedContact.name}</h2>
         </div>
 
-        {/* Action Buttons */}
         <div className="flex-1 flex justify-end items-center space-x-4">
           <button
-            onClick={handleGoogleMeet}
-            className="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
+            onClick={toggleDropdown}
+            className="p-2 bg-blue-200 text-white rounded-full hover:bg-blue-400"
             aria-label="Start Video Call"
           >
-            <Image
-              src="/images/meet-logo.png"
-              alt="Google Meet"
-              width={30}
-              height={30}
-              className="rounded-full"
-            />
+            <Image src="/images/meet-logo.png" alt="Google Meet" width={30} height={30} className="rounded-full" />
           </button>
+          {isDropdownOpen && (
+            <div ref={dropdownRef} className="absolute mt-32 w-48 bg-white border border-gray-300 rounded-lg shadow-lg z-10">
+              <button
+                onClick={handleEditMeetLink}
+                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-200"
+              >
+                Edit Meet Link
+              </button>
+              <button
+                onClick={goToMeet}
+                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-200"
+              >
+                Go to Meet Link
+              </button>
+            </div>
+          )}
         </div>
       </div>
-  
-      {/* Messages Section */}
+
       <div className="flex-grow overflow-y-auto space-y-4">
         {messages.map((message) => (
           <div
@@ -178,8 +266,7 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSend
         ))}
         <div ref={messagesEndRef} />
       </div>
-  
-      {/* Message Input */}
+
       <div className="flex flex-wrap items-center mt-4 border-t pt-4 px-4 sm:px-6">
         <input
           type="text"
@@ -202,7 +289,6 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSend
       </div>
     </div>
   );
-  
 };
 
 // Main Communication Page component with Layout
