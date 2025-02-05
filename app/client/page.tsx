@@ -308,7 +308,7 @@ const NewClientDashboard = () => {
         {/* Right Section - Daily Reminder */}
         <div className="flex-1 bg-white p-4 sm:p-6 rounded-lg shadow-lg w-full lg:h-[30rem]">
           <h2 className="font-bold text-xl sm:text-2xl lg:text-3xl text-blue-950 sm:mb-4">A Daily Reminder to Yourself</h2>
-          <div className="space-y-5 text-black max-h-[360px] overflow-x-hidden overflow-y-hidden">
+          <div className="space-y-5 text-black max-h-[330px] overflow-x-hidden overflow-y-auto">
             {[
               { emoji: "😊", title: "This Too Shall Pass", text: "Feelings are temporary. Hold on, better days are coming." },
               { emoji: "😮‍💨", title: "Breathe In, Let Go", text: "Take a moment to breathe. Release the tension in your mind and body." },
