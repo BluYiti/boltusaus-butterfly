@@ -46,31 +46,33 @@ const ContactList: FC<{ onContactClick: (id: string) => void; selectedContact: s
 
       <div className="space-y-2">
         {contacts.map((contact) => (
-          <div
-            key={contact.id}
-            className={`flex items-center p-3 rounded-lg cursor-pointer transition ${
-              selectedContact === contact.id ? 'bg-blue-100' : 'hover:bg-gray-100'
-            }`}
-            onClick={() => onContactClick(contact.id)}
-          >
-            <Image
-              src={contact.imageUrl}
-              alt={contact.name}
-              width={48}  // 12 * 4 = 48px width
-              height={48} // 12 * 4 = 48px height
-              className="rounded-full mr-4"
-              unoptimized
-            />
-            <div className="flex-grow">
-              <div className="flex justify-between items-center">
-                <span className="font-semibold">{contact.name}</span>
-                <span className="text-xs text-gray-500">{contact.time}</span>
+            <div
+              key={contact.id}
+              className={`flex items-center p-3 rounded-lg cursor-pointer transition ${
+                selectedContact === contact.id ? 'bg-blue-100' : 'overflow-hidden hover:bg-gray-100'
+              }`}
+              onClick={() => onContactClick(contact.id)}
+            >
+              <div className="w-12 h-12 rounded-full overflow-hidden mr-4">
+                <Image
+                  src={contact.imageUrl}
+                  alt={contact.name}
+                  width={48}  // 12 * 4 = 48px width
+                  height={48} // 12 * 4 = 48px height
+                  className="object-cover"
+                  unoptimized
+                />
               </div>
-              <p className={`text-sm ${contact.isSession ? 'text-blue-500' : 'text-gray-500'}`}>
-                {contact.lastMessage}
-              </p>
+                <div className="flex-grow">
+                  <div className="flex justify-between items-center">
+                    <span className="font-semibold">{contact.name}</span>
+                    <span className="text-xs text-gray-500">{contact.time}</span>
+                  </div>
+                  <p className={`text-sm ${contact.isSession ? 'text-blue-500' : 'text-gray-500'}`}>
+                    {contact.lastMessage}
+                  </p>
+                </div>
             </div>
-          </div>
         ))}
       </div>
     </div>
@@ -132,11 +134,11 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSend
             alt={selectedContact.name}
             width={48}
             height={48}
-            className="rounded-full mr-4"
+            className="w-12 h-12 rounded-full object-cover aspect-square mr-4"
           />
           <h2 className="text-xs md:text-xl font-bold">{selectedContact.name}</h2>
         </div>
-  
+
         {/* Action Buttons */}
         <div className="flex-1 flex justify-end items-center space-x-4">
           <button
