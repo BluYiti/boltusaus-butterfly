@@ -230,16 +230,14 @@ const HomePage: React.FC = () => {
       </section>
       
       {/* Services Section */}
-      <section id="services" className="relative flex flex-col justify-center items-end h-screen bg-white">
+      <section id="services" className="relative flex flex-col justify-center items-end h-screen mb-20 bg-white">
         <div className="absolute right-40 w-full h-full bg-contain bg-no-repeat" style={{ backgroundImage: `url('/images/cloud.png')`, backgroundPosition: 'right center' }}></div>
         <div className="absolute bottom-0 left-20 w-screen h-3/5 bg-contain bg-no-repeat md:block hidden" style={{ backgroundImage: `url('/images/services.png')`, backgroundPosition: 'left bottom' }}></div>
-
-          <h1 className="absolute top-4 md:top-16 left-4 md:left-48 text-4xl md:text-6xl lg:text-8xl z-10 font-paintbrush text-blue-800">
+        <h1 className="absolute top-4 md:top-16 left-4 md:left-48 text-4xl md:text-6xl lg:text-8xl z-10 font-paintbrush text-blue-800">
           Butterfly Offers
-          </h1>
-
+        </h1> 
         <div className="relative z-10 flex flex-col items-end justify-center right-0 md:right-48 font-montserrat">
-          <div className="rounded-xl p-6 w-full md:w-2/3 lg:w-1/2 xl:w-1/3">
+          <div className="rounded-xl p-6 w-full mt-36 sm:mt-0 md:w-2/3 lg:w-1/2 xl:w-1/3">
             <h3 className="text-2xl mb-4 font-bold text-gray-800">Counseling and Psychotherapy</h3>
             <p>Counseling and psychotherapy involve talking with a trained professional to address mental health challenges. Counseling focuses on specific issues for guidance, while psychotherapy explores deeper emotional and psychological aspects for overall healing and personal growth.</p>
           </div>
