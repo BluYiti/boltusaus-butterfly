@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { account } from '@/appwrite';
 import { fetchAppointmentsForDay, fetchPsychoId, fetchPaymentStatus } from '@/hooks/userService';
+import RescheduleModal from '@/components/Reschedule';
 
 interface DayGridProps {
   selectedDay: number | null;
@@ -8,14 +9,18 @@ interface DayGridProps {
 }
 
 const DayGrid: React.FC<DayGridProps> = ({ selectedDay, selectedMonth }) => {
-  const [loading, setLoading] = useState<boolean>(true);  // General loading state
+  const [loading, setLoading] = useState<boolean>(true);
   const [, setError] = useState<string | null>(null);
   const [, setPsychoId] = useState<string | null>(null);
-  const [appointments, setAppointments] = useState<any[]>([]); // State to store appointments
+  const [appointments, setAppointments] = useState<any[]>([]);
+
+  // Modal State
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [selectedAppointment, setSelectedAppointment] = useState<any | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true); // Set loading to true when fetching data
+      setLoading(true);
       try {
         const user = await account.get();
         const psychoId = await fetchPsychoId(user.$id);
@@ -23,8 +28,6 @@ const DayGrid: React.FC<DayGridProps> = ({ selectedDay, selectedMonth }) => {
 
         if (selectedDay && selectedMonth && psychoId) {
           const appointments = await fetchAppointmentsForDay(selectedDay, selectedMonth, psychoId);
-          
-          // Fetch payment status for each appointment
           const appointmentsWithPaymentStatus = await Promise.all(
             appointments.map(async (appointment) => {
               const paymentStatus = await fetchPaymentStatus(appointment.$id);
@@ -38,12 +41,24 @@ const DayGrid: React.FC<DayGridProps> = ({ selectedDay, selectedMonth }) => {
         setError('Failed to fetch data.');
         console.error(err);
       } finally {
-        setLoading(false); // Set loading to false after fetching data
+        setLoading(false);
       }
     };
 
     fetchData();
   }, [selectedDay, selectedMonth]);
+
+  // Open modal function
+  const handleRescheduleClick = (appointment: any) => {
+    setSelectedAppointment(appointment);
+    setIsModalOpen(true);
+  };
+
+  // Close modal function
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedAppointment(null);
+  };
 
   if (!selectedDay || !selectedMonth) {
     return null;
@@ -56,10 +71,8 @@ const DayGrid: React.FC<DayGridProps> = ({ selectedDay, selectedMonth }) => {
       </div>
       {loading ? (
         <div className="flex justify-center items-center mt-4">
-            <div className="flex justify-center items-center">
           <img src="/gifs/butterfly.gif" alt="Loading" className="h-8 w-8" />
           <span className="ml-2 text-blue-500">Loading...</span>
-            </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 mt-4">
@@ -107,10 +120,13 @@ const DayGrid: React.FC<DayGridProps> = ({ selectedDay, selectedMonth }) => {
                         {appointment.paymentStatus}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        {appointment.paymentStatus === 'paid' || appointment.paymentStatus === 'reschedule'  ? (
-                          <a href="#" className="text-white p-[0.3rem] rounded-xl bg-amber-400 hover:text-indigo-900">
+                        {appointment.paymentStatus === 'paid' || appointment.paymentStatus === 'rescheduled' ? (
+                          <button 
+                            className="text-white p-[0.3rem] rounded-xl bg-amber-400 hover:text-indigo-900"
+                            onClick={() => handleRescheduleClick(appointment)}
+                          >
                             Reschedule
-                          </a>
+                          </button>
                         ) : (
                           <span className="text-gray-500">Not Available</span>
                         )}
@@ -122,6 +138,23 @@ const DayGrid: React.FC<DayGridProps> = ({ selectedDay, selectedMonth }) => {
             </div>
           )}
         </div>
+      )}
+
+      {/* Reschedule Modal */}
+      {isModalOpen && (
+        <RescheduleModal 
+        onClose={closeModal} 
+        appointmentId={selectedAppointment?.$id} 
+      >
+        <h3 className="text-lg font-semibold mb-2">Reschedule Appointment</h3>
+        <p className="text-gray-600 mb-4">
+          Reschedule appointment for:
+        </p>
+        <p className="text-md font-medium">
+          {selectedMonth} {selectedDay}, {selectedAppointment?.slots}
+        </p>
+      </RescheduleModal>      
+      
       )}
     </div>
   );

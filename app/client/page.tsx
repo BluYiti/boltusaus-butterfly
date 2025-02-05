@@ -150,6 +150,13 @@ const NewClientDashboard = () => {
           )}
 
           {/* Referred Clients */}
+          {state === "referred" && status === "pending" && (
+            <div className="mb-4 text-green-600 text-4xl flex items-center">
+              <span className="text-green-600 animate-bounce">✅</span>
+              <span className="ml-2 text-lg font-bold">You have been referred. Your certificate of referral is on the way!</span>
+            </div>
+          )}
+
           {state === "referred" && status === "attached" && (
             <div className="mb-4 text-green-600 text-4xl flex items-center">
               <button

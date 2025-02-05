@@ -98,7 +98,10 @@ const AppointmentBooking = () => {
   };
 
   const handleReschedule = () => {
-    router.push('./bookappointment/reschedule');
+    router.push('./reschedule');
+  }
+  const handleSchedule = () => {
+    router.push('./');
   }
   
   useEffect(() => {
@@ -275,7 +278,7 @@ const AppointmentBooking = () => {
         <Layout sidebarTitle="Butterfly" sidebarItems={items}>
           <div className="min-h-screen flex items-center justify-center bg-gray-100">
             <div className="bg-white p-8 rounded-lg shadow-lg text-center max-w-lg mx-auto">
-            <h2 className="text-3xl font-bold text-red-400 mb-4">Rescheduled Confirmed</h2>
+            <h2 className="text-3xl font-bold text-red-400 mb-4">Rescheduled Declined</h2>
                 <p className="text-xl text-gray-600">
                   Your request has been declined. Please choose a different date. Please feel free to contact your psychotherapist for any questions about your rescheduling via the communication tab.
                 </p>
@@ -318,12 +321,11 @@ const AppointmentBooking = () => {
               </>
             ) : paymentStatus === "rescheduled" ? (
               <>
-          <h2 className="text-2xl sm:text-3xl font-bold text-red-400 mb-4">Rescheduled Confirmed</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold text-green-400 mb-4">Rescheduled Confirmed</h2>
           <p className="text-lg sm:text-xl text-gray-600">
             Your appointment has been rescheduled. Please feel free to contact your psychotherapist for any questions about your rescheduling via the communication tab.
           </p>
           <p className="text-md sm:text-lg text-gray-600 mt-5">Your payment status is {paymentStatus}.</p>
-          <p className="text-md sm:text-lg text-gray-600 mt-5">Reason for rescheduling: {declineReason}.</p>
           <p className="text-md sm:text-lg text-gray-600 mt-2">{appointmentData.bookingMessage}</p>
             <button 
               className="px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-blue-300 to-blue-400 text-white rounded-lg text-md sm:text-lg font-semibold shadow-lg transform transition-all hover:scale-105 hover:shadow-2xl active:scale-100 mt-2"
@@ -332,6 +334,15 @@ const AppointmentBooking = () => {
             Click me to reschedule appointment
           </button>
               </>
+                          ) : paymentStatus === "reschedule" ? (
+                            <>
+                        <h2 className="text-2xl sm:text-3xl font-bold text-green-400 mb-4">Rescheduled Request Sent</h2>
+                        <p className="text-lg sm:text-xl text-gray-600">
+                          Your request for new appointment has been sent. Please feel free to contact your psychotherapist for any questions about your rescheduling via the communication tab.
+                        </p>
+                        <p className="text-md sm:text-lg text-gray-600 mt-5">Your payment status is {paymentStatus}.</p>
+                        <p className="text-md sm:text-lg text-gray-600 mt-2">{appointmentData.bookingMessage}</p>
+                            </>
             ) : (
               <>
           <h2 className="text-2xl sm:text-3xl font-bold text-red-400 mb-4">Payment Declined</h2>
@@ -339,7 +350,12 @@ const AppointmentBooking = () => {
             Your appointment has been declined. Please contact your psychotherapist for any questions about your appointment being declined via the communication tab.
           </p>
           <p className="text-md sm:text-lg text-gray-600 mt-5">The reason for your appointment decline:</p>
-          <p className="text-md sm:text-lg text-gray-600">&quot;{declineReason}&quot;</p>
+          <button 
+              className="px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-blue-300 to-blue-400 text-white rounded-lg text-md sm:text-lg font-semibold shadow-lg transform transition-all hover:scale-105 hover:shadow-2xl active:scale-100 mt-2"
+              onClick={handleSchedule}
+            >
+            Click me to schedule appointment
+          </button>
               </>
             )}
           </div>

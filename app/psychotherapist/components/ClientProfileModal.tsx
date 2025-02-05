@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { databases } from "@/appwrite";
+import { databases, Query } from "@/appwrite";
 import Image from 'next/image';
 import { Models } from 'appwrite';
 import { fetchProfileImageUrl } from "@/hooks/userService";
@@ -17,9 +17,11 @@ const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpe
   const [error, setError] = useState<string | null>(null);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [isReportsModalOpen, setIsReportsModalOpen] = useState(false);
-  const [selectedReportDetails, setSelectedReportDetails] = useState<string | null>(null);
-  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'sessions' | 'goals'>('sessions');
+  const [isSessionDetailsModalOpen, setIsSessionDetailsModalOpen] = useState(false);
+  const [isPaymentsDetailsModalOpen, setIsPaymentsDetailsModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<'sessions' | 'payments' | 'goals'>('sessions');
+  const [sessions, setSessions] = useState([]);
+  const [payments, setPayments] = useState([]);
 
   // Format the birthdate into a more readable format
   const formatDate = (dateString: string) => {
@@ -67,7 +69,45 @@ const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpe
       }
     };
 
+    const fetchClientSessions = async () => {
+      try {
+        // Fetch user state
+        const clientSessions = await databases.listDocuments(
+          'Butterfly-Database',
+          'Bookings',
+          [Query.equal('client', clientId)] // Fetch documents where userid matches the logged-in user
+        );
+        
+        setSessions(clientSessions.documents || []);
+      } catch (err) {
+        setError("Error fetching client profile");
+        console.error('Error fetching client data:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    const fetchClientPayments = async () => {
+      try {
+        // Fetch user state
+        const clientPayments = await databases.listDocuments(
+          'Butterfly-Database',
+          'Payment',
+          [Query.equal('client', clientId)] // Fetch documents where userid matches the logged-in user
+        );
+        
+        setPayments(clientPayments.documents || []);
+      } catch (err) {
+        setError("Error fetching client profile");
+        console.error('Error fetching client data:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
     fetchClientProfile();
+    fetchClientSessions();
+    fetchClientPayments();
   }, [clientId, isOpen]);
 
   const handleReferClient = async () => {
@@ -107,9 +147,12 @@ const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpe
     }
   };  
 
-  const handleViewDetails = (details: string) => {
-    setSelectedReportDetails(details);
-    setIsDetailsModalOpen(true);
+  const handleViewSessionDetails = () => {
+    setIsSessionDetailsModalOpen(true);
+  };
+  
+  const handleViewPaymentsDetails = () => {
+    setIsPaymentsDetailsModalOpen(true);
   };
 
   if (!isOpen) return null;
@@ -143,7 +186,7 @@ const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpe
             alt="Profile"
             width={192} // Equivalent to 48 * 4 for a consistent image size
             height={192} // Equivalent to 48 * 4 for a consistent image size
-            className="rounded-full object-cover mx-auto"
+            className="rounded-full object-cover mx-auto aspect-square"
             unoptimized
             />
             <h2 className="mt-4 text-2xl font-bold text-gray-800">
@@ -222,87 +265,87 @@ const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpe
                 Sessions
               </div>
               <div
-                onClick={() => setActiveTab('goals')}
-                className={`cursor-pointer px-4 py-2 rounded-lg ${activeTab === 'goals' ? 'bg-blue-400 text-white' : 'bg-gray-200 text-gray-800'}`}
+                onClick={() => setActiveTab('payments')}
+                className={`cursor-pointer px-4 py-2 rounded-lg ${activeTab === 'payments' ? 'bg-blue-400 text-white' : 'bg-gray-200 text-gray-800'}`}
               >
-                Goals
+                Payments
               </div>
             </div>
 
-            {/* Tab Content with Transitions */}
+            {/* SESSIONS */}
             <div className={`transition-opacity duration-300 ${activeTab === 'sessions' ? 'opacity-100' : 'opacity-0'}`}>
               {activeTab === 'sessions' && (
                 <div className="max-h-[400px] overflow-y-auto">
-                  <div className="space-y-4">
-                    <table className="table-auto w-full">
-                      <thead>
-                        <tr>
-                          <th className="px-4 py-2 text-left border-blue-400 border-[1px] bg-blue-200">Session ID</th>
-                          <th className="px-4 py-2 text-left border-blue-400 border-[1px] bg-blue-200">Time and Date</th>
-                          <th className="px-4 py-2 text-left border-blue-400 border-[1px] bg-blue-200">Details</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {Array.from({ length: 20 }, (_, index) => ({
-                          sessionId: `00${index + 1}A`,
-                          dateTime: new Date(Date.now() - index * 86400000).toLocaleString(),
-                          details: `Detailed report for session ${index + 1}`,
-                        })).map((report, index) => (
-                          <tr key={index}>
-                            <td className="px-4 py-2 border-blue-400 border-[1px]">{report.sessionId}</td>
-                            <td className="px-4 py-2 border-blue-400 border-[1px]">{report.dateTime}</td>
-                            <td className="px-4 py-2 border-blue-400 border-[1px]">
-                              <button
-                                onClick={() => handleViewDetails(report.details)}
-                                className="text-blue-500 hover:text-blue-700"
-                              >
-                                View Details
-                              </button>
-                            </td>
+                  {sessions.length > 0 ? (
+                    <div className="space-y-4">
+                      <table className="table-auto w-full">
+                        <thead>
+                          <tr>
+                            <th className="px-4 py-2 text-left border-blue-400 border-[1px] bg-blue-200">Session ID</th>
+                            <th className="px-4 py-2 text-left border-blue-400 border-[1px] bg-blue-200">Time and Date</th>
+                            <th className="px-4 py-2 text-left border-blue-400 border-[1px] bg-blue-200">Details</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                        </thead>
+                        <tbody>
+                          {sessions.map((session, index) => (
+                            <tr key={session.$id || index}>
+                              <td className="px-4 py-2 border-blue-400 border-[1px]">{session.$id}</td>
+                              <td className="px-4 py-2 border-blue-400 border-[1px]">{new Date(session.$createdAt).toLocaleString()}</td>
+                              <td className="px-4 py-2 border-blue-400 border-[1px]">
+                                <button
+                                  onClick={() => handleViewSessionDetails()}
+                                  className="text-blue-500 hover:text-blue-700"
+                                >
+                                  View Details
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <p className="text-center text-gray-500 mt-4">No sessions found.</p>
+                  )}
                 </div>
               )}
             </div>
 
-                 {/* Tab Content with Transitions */}
-                 <div className={`transition-opacity duration-300 ${activeTab === 'goals' ? 'opacity-100' : 'opacity-0'}`}>
-              {activeTab === 'goals' && (
+            {/* PAYMENTS */}
+            <div className={`transition-opacity duration-300 ${activeTab === 'payments' ? 'opacity-100' : 'opacity-0'}`}>
+              {activeTab === 'payments' && (
                 <div className="max-h-[400px] overflow-y-auto">
-                  <div className="space-y-4">
-                    <table className="table-auto w-full">
-                      <thead>
-                        <tr>
-                          <th className="px-4 py-2 text-left border-blue-400 border-[1px] bg-blue-200">Goal ID</th>
-                          <th className="px-4 py-2 text-left border-blue-400 border-[1px] bg-blue-200">Time and Date</th>
-                          <th className="px-4 py-2 text-left border-blue-400 border-[1px] bg-blue-200">Details</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {Array.from({ length: 30 }, (_, index) => ({
-                          sessionId: `00${index + 1}A`,
-                          dateTime: new Date(Date.now() - index * 86400000).toLocaleString(),
-                          details: `Detailed report for goal ${index + 1}`,
-                        })).map((report, index) => (
-                          <tr key={index}>
-                            <td className="px-4 py-2 border-blue-400 border-[1px]">{report.sessionId}</td>
-                            <td className="px-4 py-2 border-blue-400 border-[1px]">{report.dateTime}</td>
-                            <td className="px-4 py-2 border-blue-400 border-[1px]">
-                              <button
-                                onClick={() => handleViewDetails(report.details)}
-                                className="text-blue-500 underline hover:text-blue-700"
-                              >
-                                View Details
-                              </button>
-                            </td>
+                  {payments.length > 0 ? (
+                    <div className="space-y-4">
+                      <table className="table-auto w-full">
+                        <thead>
+                          <tr>
+                            <th className="px-4 py-2 text-left border-blue-400 border-[1px] bg-blue-200">Session ID</th>
+                            <th className="px-4 py-2 text-left border-blue-400 border-[1px] bg-blue-200">Time and Date</th>
+                            <th className="px-4 py-2 text-left border-blue-400 border-[1px] bg-blue-200">Details</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                        </thead>
+                        <tbody>
+                          {payments.map((payments, index) => (
+                            <tr key={payments.$id || index}>
+                              <td className="px-4 py-2 border-blue-400 border-[1px]">{payments.$id}</td>
+                              <td className="px-4 py-2 border-blue-400 border-[1px]">{new Date(payments.$createdAt).toLocaleString()}</td>
+                              <td className="px-4 py-2 border-blue-400 border-[1px]">
+                                <button
+                                  onClick={() => handleViewPaymentsDetails()}
+                                  className="text-blue-500 hover:text-blue-700"
+                                >
+                                  View Details
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <p className="text-center text-gray-500 mt-4">No sessions found.</p>
+                  )}
                 </div>
               )}
             </div>
@@ -319,22 +362,77 @@ const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpe
         </div>
       )}
 
-      {/* Details Modal */}
-      {isDetailsModalOpen && (
+      {/* Session Details Modal */}
+      {isSessionDetailsModalOpen && (
         <div className="fixed inset-0 bg-blue-600 bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white rounded-lg p-8 w-full max-w-4xl shadow-lg relative">
             <button
-              onClick={() => setIsDetailsModalOpen(false)}
+              onClick={() => setIsSessionDetailsModalOpen(false)}
               className="text-blue-400 hover:text-blue-600 absolute top-4 right-4"
               aria-label="Close modal"
             >
               &#10005;
             </button>
-            <h2 className="text-xl font-bold mb-4">Report Details</h2>
-            <p>{selectedReportDetails}</p>
+
+            <h2 className="text-xl font-bold mb-4">Session Report Details</h2>
+
+            <div className="space-y-4"> 
+              {sessions.map((session, index) => (
+                <div 
+                  key={session.$id || index} 
+                  className="border border-blue-400 rounded-lg p-4 bg-gray-100"
+                >
+                  <p><strong>Session ID:</strong> {session.$id}</p>
+                  <p><strong>Client ID:</strong> {session.client.$id}</p>
+                  <p><strong>Psycho ID:</strong> {session.client.$id}</p>
+                  <p><strong>Date:</strong> {session.month} {session.day} {session.slots}</p>
+                  <p><strong>Created At:</strong> {new Date(session.$createdAt).toLocaleString()}</p>
+                </div>
+              ))}
+            </div>
+
             <div className="mt-4">
               <button
-                onClick={() => setIsDetailsModalOpen(false)}
+                onClick={() => setIsSessionDetailsModalOpen(false)}
+                className="bg-gray-300 text-gray-800 px-4 py-2 rounded-full hover:bg-gray-400 transition-all"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Payments Details Modal */}
+      {isPaymentsDetailsModalOpen && (
+        <div className="fixed inset-0 bg-blue-600 bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white rounded-lg p-8 w-full max-w-4xl shadow-lg relative">
+            <button
+              onClick={() => setIsPaymentsDetailsModalOpen(false)}
+              className="text-blue-400 hover:text-blue-600 absolute top-4 right-4"
+              aria-label="Close modal"
+            >
+              &#10005;
+            </button>
+
+            <h2 className="text-xl font-bold mb-4">Payment Report Details</h2>
+
+            <div className="space-y-4"> 
+              {payments.map((payment, index) => (
+                <div 
+                  key={payment.$id || index} 
+                  className="border border-blue-400 rounded-lg p-4 bg-gray-100"
+                >
+                  <p><strong>Payment ID:</strong> {payment.$id}</p>
+                  <p><strong>Client ID:</strong> {payment.client.$id}</p>
+                  <p><strong>Created At:</strong> {new Date(payment.$createdAt).toLocaleString()}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-4">
+              <button
+                onClick={() => setIsPaymentsDetailsModalOpen(false)}
                 className="bg-gray-300 text-gray-800 px-4 py-2 rounded-full hover:bg-gray-400 transition-all"
               >
                 Close
