@@ -139,8 +139,8 @@ const NewClientDashboard = () => {
 
           {/* Evaluate Clients */}
           {state === "evaluate" && (
-            <div className="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4 p-4 bg-white shadow-lg rounded-lg text-center sm:text-left">
-              <button className="text-white w-full sm:w-auto bg-blue-400 font-semibold py-3 px-6 rounded-lg shadow-md" disabled>
+            <div className="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4 p-4 bg-white rounded-lg text-center sm:text-left">
+              <button className="text-white w-full sm:w-auto bg-blue-400 font-semibold py-3 px-6 rounded-lg" disabled>
                 ✅ Preassessment Done!
               </button>
               <p className="py-3 px-6 rounded-lg font-mono">

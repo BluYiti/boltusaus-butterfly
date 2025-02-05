@@ -3,8 +3,6 @@ import { FC, useState, useRef, useEffect } from 'react';
 import Layout from '@/components/Sidebar/Layout';
 import items from '@/client/data/Links';
 import { Client, Databases, Account, Query, ID } from 'appwrite';
-import CallNotification from '@/components/CallNotification';
-import ClientVideoCall from '@/components/ClientVideoCall';
 import Image from 'next/image';
 import LoadingScreen from '@/components/LoadingScreen';
 import useAuthCheck from '@/auth/page';
@@ -44,12 +42,9 @@ const ChatPage: FC = () => {
   const [isPsychotherapistMissing, setIsPsychotherapistMissing] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [messageInput, setMessageInput] = useState('');
-  const [call, setCall] = useState<Call>({ isActive: false, caller: null });
-  const [isVideoCallActive, setIsVideoCallActive] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [clientDocumentId, setClientDocumentId] = useState<string | null>(null);
-  const [notificationDocumentId, setNotificationDocumentId] = useState<string | null>(null); // To store Call-Notification ID
-  const [isPollingActive, setIsPollingActive] = useState(true);
+  const [meetLink, setMeetLink] = useState('https://meet.google.com/landing');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Fetching the Psychotherapist and Conversation ID
@@ -118,6 +113,33 @@ const ChatPage: FC = () => {
   
     fetchPsychotherapist();
   }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+  
+    const fetchMeetLink = async () => {
+      try {
+        const user = await account.get();
+        const clientId = user.$id;
+        const response = await databases.listDocuments('Butterfly-Database', 'MeetLink', [
+          Query.equal('client', clientId) // Querying where the 'client' attribute matches clientId
+        ]);
+  
+        if (isMounted && response.documents.length > 0) {
+          setMeetLink(response.documents[0].link); // Assuming 'link' is the field storing the Meet link
+        }
+      } catch (error) {
+        console.error('Failed to fetch meet link:', error);
+      }
+    };
+  
+    fetchMeetLink();
+  
+    return () => {
+      isMounted = false;
+    };
+  }, [])
+  
 
   // Function to handle sending a message
   const handleSendMessage = async () => {
@@ -212,54 +234,9 @@ const ChatPage: FC = () => {
     };
   }, [psychotherapist, conversationId, psychotherapist?.id]);
 
-  // Polling for Call Notification
-  useEffect(() => {
-    const pollForCallNotifications = async () => {
-      if (!clientDocumentId || !isPollingActive) return;
-
-      try {
-        const response = await databases.listDocuments(
-          'Butterfly-Database',
-          'Call-Notification',
-          [Query.equal('receiverId', clientDocumentId), Query.equal('isActive', true)]
-        );
-
-        if (response.documents.length > 0) {
-          const notification = response.documents[0];
-          if (notification.callerId === psychotherapist?.id) {
-            setCall({ isActive: true, caller: psychotherapist });
-            setNotificationDocumentId(notification.$id); // Capture Call-Notification ID for updating
-          }
-        } else {
-          setCall({ isActive: false, caller: null });
-        }
-      } catch (error) {
-        console.error("Error polling for call notifications:", error);
-      }
-    };
-
-    const interval = setInterval(pollForCallNotifications, 3000);
-    return () => clearInterval(interval);
-  }, [clientDocumentId, psychotherapist, isPollingActive]);
-
-  // Function to accept the call
-  const handleAcceptCall = async () => {
-    if (isVideoCallActive) return;
-    setIsVideoCallActive(true);
-    setCall({ isActive: false, caller: null });
-    setIsPollingActive(false);
-
-    if (notificationDocumentId) { // Use notificationDocumentId to update the correct Call-Notification document
-      try {
-        await databases.updateDocument(
-          'Butterfly-Database',
-          'Call-Notification',
-          notificationDocumentId,
-          { isActive: false }
-        );
-      } catch (error) {
-        console.error('Error updating call notification:', error);
-      }
+  const goToMeet = () => {
+    if (typeof window !== 'undefined') {
+      window.open(meetLink, '_blank');
     }
   };
 
@@ -292,6 +269,15 @@ const ChatPage: FC = () => {
                       unoptimized
                     />
                     <h2 className="text-xl font-bold">{psychotherapist.name}</h2>
+                  </div>
+                  <div className="flex-1 flex justify-end items-center space-x-4">
+                    <button
+                      onClick={goToMeet}
+                      className="p-2 bg-blue-200 text-white rounded-full hover:bg-blue-400"
+                      aria-label="Start Video Call"
+                    >
+                      <Image src="/images/meet-logo.png" alt="Google Meet" width={30} height={30} className="rounded-full" />
+                    </button>
                   </div>
                 </div>
 
@@ -339,23 +325,6 @@ const ChatPage: FC = () => {
             )}
           </div>
         </div>
-
-        {call.isActive && (
-          <CallNotification 
-            caller={call.caller} 
-            onAccept={handleAcceptCall} 
-          />
-        )}
-        {isVideoCallActive && psychotherapist && clientDocumentId && (
-          <ClientVideoCall 
-            callerId={psychotherapist.id} 
-            receiverId={clientDocumentId} 
-            onEndCall={() => {
-              setIsVideoCallActive(false);
-              setIsPollingActive(true); // Resume polling after call ends
-            }} 
-          />
-        )}
       </div>
     </Layout>
   );
