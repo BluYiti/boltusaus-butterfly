@@ -1,17 +1,23 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone',
+  output: 'standalone', // Required for static exports
+  trailingSlash: true, // Ensures paths end with "/"
   env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
   },
   images: {
+    unoptimized: true, // Required for static exports
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'cloud.appwrite.io',
-        pathname: '/v1/storage/buckets/Images/files/**', // You can adjust the pathname as needed
+        protocol: "https",
+        hostname: "cloud.appwrite.io",
+        pathname: "/v1/storage/buckets/Images/files/**",
       },
     ],
+  },
+  webpack: (config) => {
+    config.resolve.fallback = { fs: false };
+    return config;
   },
 };
 

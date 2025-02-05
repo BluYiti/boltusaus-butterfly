@@ -296,50 +296,50 @@ const AppointmentBooking = () => {
   if (appointmentData.isBookingDisabled) {
     return (
       <Layout sidebarTitle="Butterfly" sidebarItems={items}>
-        <div className="min-h-screen flex items-center justify-center bg-gray-100">
-          <div className="bg-white p-8 rounded-lg shadow-lg text-center max-w-lg mx-auto">
+        <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4 sm:px-6 lg:px-8">
+          <div className="bg-white p-6 sm:p-8 rounded-lg shadow-lg text-center max-w-lg w-full mx-auto">
             {paymentStatus === "pending" ? (
               <>
-                <h2 className="text-3xl font-bold text-blue-400 mb-4">Appointment Confirmation</h2>
-                <p className="text-xl text-gray-600">
-                  You will receive a confirmation notification for your appointment in <strong>1-2 days</strong>. If you have any questions in the meantime, feel free to reach out to your therapist via the communication tab.
-                </p>
-                <p className="text-lg text-gray-600 mt-5">Your payment status is {paymentStatus}.</p>
-                <p className="text-lg text-gray-600 mt-2">{appointmentData.bookingMessage}</p>
+          <h2 className="text-2xl sm:text-3xl font-bold text-blue-400 mb-4">Appointment Confirmation</h2>
+          <p className="text-lg sm:text-xl text-gray-600">
+            You will receive a confirmation notification for your appointment in <strong>1-2 days</strong>. If you have any questions in the meantime, feel free to reach out to your therapist via the communication tab.
+          </p>
+          <p className="text-md sm:text-lg text-gray-600 mt-5">Your payment status is {paymentStatus}.</p>
+          <p className="text-md sm:text-lg text-gray-600 mt-2">{appointmentData.bookingMessage}</p>
               </>
             ) : paymentStatus === "paid" ? (
               <>
-                <h2 className="text-3xl font-bold text-green-400 mb-4">Appointment Confirmed</h2>
-                <p className="text-xl text-gray-600">
-                  Your appointment has been confirmed. Please wait for the scheduled date to arrive, and feel free to contact your psychotherapist with any questions about your upcoming appointment via the communication tab.
-                </p>
-                <p className="text-lg text-gray-600 mt-5">Your payment status is {paymentStatus}.</p>
-                <p className="text-lg text-gray-600 mt-2">{appointmentData.bookingMessage}</p>
+          <h2 className="text-2xl sm:text-3xl font-bold text-green-400 mb-4">Appointment Confirmed</h2>
+          <p className="text-lg sm:text-xl text-gray-600">
+            Your appointment has been confirmed. Please wait for the scheduled date to arrive, and feel free to contact your psychotherapist with any questions about your upcoming appointment via the communication tab.
+          </p>
+          <p className="text-md sm:text-lg text-gray-600 mt-5">Your payment status is {paymentStatus}.</p>
+          <p className="text-md sm:text-lg text-gray-600 mt-2">{appointmentData.bookingMessage}</p>
               </>
             ) : paymentStatus === "rescheduled" ? (
               <>
-                <h2 className="text-3xl font-bold text-red-400 mb-4">Rescheduled Confirmed</h2>
-                <p className="text-xl text-gray-600">
-                  Your appointment has been rescheduled. Please feel free to contact your psychotherapist for any questions about your rescheduling via the communication tab.
-                </p>
-                <p className="text-lg text-gray-600 mt-5">Your payment status is {paymentStatus}.</p>
-                <p className="text-lg text-gray-600 mt-5">Reason for rescheduling: {declineReason}.</p>
-                <p className="text-lg text-gray-600 mt-2">{appointmentData.bookingMessage}</p>
-                  <button 
-                    className="px-6 py-3 bg-gradient-to-r from-blue-300 to-blue-400 text-white rounded-lg text-lg font-semibold shadow-lg transform transition-all hover:scale-105 hover:shadow-2xl active:scale-100 mt-2"
-                    onClick={handleReschedule}
-                  >
-                  Click me to reschedule appointment
-                </button>
+          <h2 className="text-2xl sm:text-3xl font-bold text-red-400 mb-4">Rescheduled Confirmed</h2>
+          <p className="text-lg sm:text-xl text-gray-600">
+            Your appointment has been rescheduled. Please feel free to contact your psychotherapist for any questions about your rescheduling via the communication tab.
+          </p>
+          <p className="text-md sm:text-lg text-gray-600 mt-5">Your payment status is {paymentStatus}.</p>
+          <p className="text-md sm:text-lg text-gray-600 mt-5">Reason for rescheduling: {declineReason}.</p>
+          <p className="text-md sm:text-lg text-gray-600 mt-2">{appointmentData.bookingMessage}</p>
+            <button 
+              className="px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-blue-300 to-blue-400 text-white rounded-lg text-md sm:text-lg font-semibold shadow-lg transform transition-all hover:scale-105 hover:shadow-2xl active:scale-100 mt-2"
+              onClick={handleReschedule}
+            >
+            Click me to reschedule appointment
+          </button>
               </>
             ) : (
               <>
-                <h2 className="text-3xl font-bold text-red-400 mb-4">Payment Declined</h2>
-                <p className="text-xl text-gray-600">
-                  Your appointment has been declined. Please contact your psychotherapist for any questions about your appointment being declined via the communication tab.
-                </p>
-                <p className="text-lg text-gray-600 mt-5">The reason for your appointment decline:</p>
-                <p className="text-lg text-gray-600">&quot;{declineReason}&quot;</p>
+          <h2 className="text-2xl sm:text-3xl font-bold text-red-400 mb-4">Payment Declined</h2>
+          <p className="text-lg sm:text-xl text-gray-600">
+            Your appointment has been declined. Please contact your psychotherapist for any questions about your appointment being declined via the communication tab.
+          </p>
+          <p className="text-md sm:text-lg text-gray-600 mt-5">The reason for your appointment decline:</p>
+          <p className="text-md sm:text-lg text-gray-600">&quot;{declineReason}&quot;</p>
               </>
             )}
           </div>
@@ -349,77 +349,77 @@ const AppointmentBooking = () => {
   } else {
     return (
       <Layout sidebarTitle="Butterfly" sidebarItems={items}>
-        <div className="text-black min-h-screen flex">
-          <div className="flex-grow flex flex-col justify-between bg-gray-100 w-3/4">
+        <div className="text-black min-h-screen flex flex-col lg:flex-row">
+          <div className="flex-grow flex flex-col justify-between bg-gray-100 w-full lg:w-3/4">
             <div className="bg-blue-100 shadow-lg py-4 px-6 flex justify-between items-center">
               <div className="text-black w-full flex flex-col bg-gray-100">
-                <div className="flex flex-col p-6 space-y-3">
-                  <h3 className="text-3xl font-bold text-blue-900">
-                    Choose Psychotherapist <span className="text-red-500">{!appointmentData.selectedTherapist && "*"}</span>
-                  </h3>
-                  <p className="top-0">
-                    **NOTE: Choosing your psychotherapist for the very first time will be permanent throughout your psychological journey.
-                  </p>
-                  <div className="flex space-x-6 mt-4">
-                    {!clientsPsycho ? (
-                      psychotherapists.map((therapist) => (
-                        <div key={therapist.$id} className="flex items-center space-x-4">
-                          <Image
-                            src={profileImageUrls[therapist.$id] || "/images/default-profile.png"}
-                            alt={`${therapist.firstName} ${therapist.lastName}`}
-                            width={64}   // Equivalent to w-16 (16 * 4)
-                            height={64}  // Equivalent to h-16 (16 * 4)
-                            className="rounded-full"
-                            unoptimized
-                          />
-                          <div>
-                            <h3 className="text-lg font-bold">{therapist.firstName} {therapist.lastName}</h3>
-                            <p className="text-sm text-gray-500">Specialty: {therapist.specialties}</p>
-                            <button
-                              className={`mt-2 py-1 px-3 rounded ${appointmentData.selectedTherapist?.$id === therapist.$id ? 'bg-[#2563EB] text-white' : 'bg-gray-300 text-blue-500 hover:bg-gray-400'}`}
-                              onClick={() => {
-                                if (appointmentData.allowTherapistChange) {
-                                  setAppointmentData((prev) => ({
-                                    ...prev,
-                                    selectedTherapist: therapist,
-                                    selectedTherapistId: therapist.$id // Update with therapist ID
-                                  }));
-                                }
-                              }}
-                              disabled={appointmentData.selectedTherapist?.$id === therapist.$id && !appointmentData.allowTherapistChange}
-                            >
-                              {appointmentData.selectedTherapist?.$id === therapist.$id ? "Selected" : "Select"}
-                            </button>
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="flex items-center space-x-4">
-                        <Image
-                          src={clientsPsycho && clientsPsycho.$id ? profileImageUrls[clientsPsycho.$id] : "/images/default-profile.png"}
-                          alt={`${clientsPsycho ? clientsPsycho.firstName : "No Therapist"} ${clientsPsycho ? clientsPsycho.lastName : ""}`}
-                          width={64}   // Equivalent to 16 * 4
-                          height={64}  // Equivalent to 16 * 4
-                          className="rounded-full"
-                          unoptimized
-                        />
-                        <div>
-                          <h3 className="text-lg font-bold">
-                            {clientsPsycho ? `${clientsPsycho.firstName} ${clientsPsycho.lastName}` : "No Therapist Selected"}
-                          </h3>
-                          <p className="text-sm text-gray-500">
-                            Specialty: {clientsPsycho ? clientsPsycho.specialties : "N/A"}
-                          </p>
-                          <button
-                            className="mt-2 py-1 px-3 rounded bg-[#2563EB] text-white"
-                            disabled={true}
-                          >
-                            Selected
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
+          <div className="flex flex-col p-6 space-y-3">
+            <h3 className="text-3xl font-bold text-blue-900">
+              Choose Psychotherapist <span className="text-red-500">{!appointmentData.selectedTherapist && "*"}</span>
+            </h3>
+            <p className="top-0">
+              **NOTE: Choosing your psychotherapist for the very first time will be permanent throughout your psychological journey.
+            </p>
+            <div className="flex flex-wrap space-x-0 lg:space-x-6 mt-4">
+              {!clientsPsycho ? (
+                psychotherapists.map((therapist) => (
+            <div key={therapist.$id} className="flex items-center space-x-4 mb-4 lg:mb-0 w-full lg:w-auto">
+              <Image
+                src={profileImageUrls[therapist.$id] || "/images/default-profile.png"}
+                alt={`${therapist.firstName} ${therapist.lastName}`}
+                width={64}   // Equivalent to w-16 (16 * 4)
+                height={64}  // Equivalent to h-16 (16 * 4)
+                className="rounded-full"
+                unoptimized
+              />
+              <div>
+                <h3 className="text-lg font-bold">{therapist.firstName} {therapist.lastName}</h3>
+                <p className="text-sm text-gray-500">Specialty: {therapist.specialties}</p>
+                <button
+                  className={`mt-2 py-1 px-3 rounded ${appointmentData.selectedTherapist?.$id === therapist.$id ? 'bg-[#2563EB] text-white' : 'bg-gray-300 text-blue-500 hover:bg-gray-400'}`}
+                  onClick={() => {
+              if (appointmentData.allowTherapistChange) {
+                setAppointmentData((prev) => ({
+                  ...prev,
+                  selectedTherapist: therapist,
+                  selectedTherapistId: therapist.$id // Update with therapist ID
+                }));
+              }
+                  }}
+                  disabled={appointmentData.selectedTherapist?.$id === therapist.$id && !appointmentData.allowTherapistChange}
+                >
+                  {appointmentData.selectedTherapist?.$id === therapist.$id ? "Selected" : "Select"}
+                </button>
+              </div>
+            </div>
+                ))
+              ) : (
+                <div className="flex items-center space-x-4 mb-4 lg:mb-0 w-full lg:w-auto">
+            <Image
+              src={clientsPsycho && clientsPsycho.$id ? profileImageUrls[clientsPsycho.$id] : "/images/default-profile.png"}
+              alt={`${clientsPsycho ? clientsPsycho.firstName : "No Therapist"} ${clientsPsycho ? clientsPsycho.lastName : ""}`}
+              width={64}   // Equivalent to 16 * 4
+              height={64}  // Equivalent to 16 * 4
+              className="rounded-full"
+              unoptimized
+            />
+            <div>
+              <h3 className="text-lg font-bold">
+                {clientsPsycho ? `${clientsPsycho.firstName} ${clientsPsycho.lastName}` : "No Therapist Selected"}
+              </h3>
+              <p className="text-sm text-gray-500">
+                Specialty: {clientsPsycho ? clientsPsycho.specialties : "N/A"}
+              </p>
+              <button
+                className="mt-2 py-1 px-3 rounded bg-[#2563EB] text-white"
+                disabled={true}
+              >
+                Selected
+              </button>
+            </div>
+                </div>
+              )}
+            </div>
 
                   <h2 className="text-3xl font-bold text-left text-blue-900 mt-8">Counseling and Therapy Sessions</h2>
                   <div className="bg-gray-50 p-4 rounded-lg shadow border border-gray-200 mt-4">
@@ -439,21 +439,21 @@ const AppointmentBooking = () => {
                     />
                   </div>
 
-                  {/* Therapy Mode Selection */}
-                  <div className="mb-4">
+                    {/* Therapy Mode Selection */}
+                    <div className="mb-4">
                     <label className="block mb-2 text-lg font-medium text-gray-700">
                       Select Therapy Mode {!appointmentData.selectedMode && <span className="text-red-500">*</span>}
                     </label>
                     <select
                       value={appointmentData.selectedMode || ""}
                       onChange={(e) => setAppointmentData(prev => ({ ...prev, selectedMode: e.target.value }))}
-                      className="border w-32 border-gray-300 rounded-lg p-2"
+                      className="border w-full sm:w-32 border-gray-300 rounded-lg p-2"
                     >
                       <option value="" disabled>Select Mode</option>
                       <option value="online">Online</option>
                       <option value="f2f">In-Person</option>
                     </select>
-                  </div>
+                    </div>
 
                   {/* Selected Info */}
                   <div className="mt-6">

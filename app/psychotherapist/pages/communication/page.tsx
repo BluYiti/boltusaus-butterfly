@@ -1,15 +1,17 @@
 'use client';
 
 import { FC, useState, useEffect, useRef, useCallback } from 'react';
-import { FaVideo, FaSearch } from 'react-icons/fa';
+import { FaSearch } from 'react-icons/fa';
 import Layout from '@/components/Sidebar/Layout';
-import VideoCall from '@/components/VideoCall';
 import items from '@/psychotherapist/data/Links';
 import { Query, ID } from 'appwrite';
 import Image from 'next/image';
 import { account, databases, storage } from '@/appwrite';
 import useAuthCheck from '@/auth/page';
 import LoadingScreen from '@/components/LoadingScreen';
+import { checkClientLink } from '@/psychotherapist/hooks/checkClientLink';
+import { setNewLink } from '@/psychotherapist/hooks/setNewLink';
+import { fetchPsychoId } from '@/hooks/userService';
 
 
 // Define interfaces
@@ -32,43 +34,48 @@ interface Message {
 // Contact List component
 const ContactList: FC<{ onContactClick: (id: string) => void; selectedContact: string | null; contacts: Contact[] }> = ({ onContactClick, selectedContact, contacts }) => {
   return (
-    <div className="w-full md:w-1/4 bg-gray-100 p-4 border-r border-gray-200">
-      <div className="flex items-center bg-white p-2 rounded-full mb-4">
-        <FaSearch className="text-gray-400 ml-2" />
-        <input
-          type="text"
-          placeholder="Search"
-          className="flex-grow bg-transparent p-2 outline-none text-sm"
-        />
+    <div className="bg-gray-100 border-gray-200 overflow-x-auto">
+      {/* Sticky Search Bar */}
+      <div className="sticky top-0 bg-white z-10 shadow">
+        <div className="flex items-center bg-white p-2 rounded-lg">
+          <FaSearch className="text-gray-400 ml-2" />
+          <input
+            type="text"
+            placeholder="Search"
+            className="flex-grow bg-transparent p-2 outline-none text-sm"
+          />
+        </div>
       </div>
 
       <div className="space-y-2">
         {contacts.map((contact) => (
-          <div
-            key={contact.id}
-            className={`flex items-center p-3 rounded-lg cursor-pointer transition ${
-              selectedContact === contact.id ? 'bg-blue-100' : 'hover:bg-gray-100'
-            }`}
-            onClick={() => onContactClick(contact.id)}
-          >
-            <Image
-              src={contact.imageUrl}
-              alt={contact.name}
-              width={48}  // 12 * 4 = 48px width
-              height={48} // 12 * 4 = 48px height
-              className="rounded-full mr-4"
-              unoptimized
-            />
-            <div className="flex-grow">
-              <div className="flex justify-between items-center">
-                <span className="font-semibold">{contact.name}</span>
-                <span className="text-xs text-gray-500">{contact.time}</span>
+            <div
+              key={contact.id}
+              className={`flex items-center p-3 rounded-lg cursor-pointer transition ${
+                selectedContact === contact.id ? 'bg-blue-100' : 'overflow-hidden hover:bg-gray-100'
+              }`}
+              onClick={() => onContactClick(contact.id)}
+            >
+              <div className="w-12 h-12 rounded-full overflow-hidden mr-4">
+                <Image
+                  src={contact.imageUrl}
+                  alt={contact.name}
+                  width={48}  // 12 * 4 = 48px width
+                  height={48} // 12 * 4 = 48px height
+                  className="object-cover"
+                  unoptimized
+                />
               </div>
-              <p className={`text-sm ${contact.isSession ? 'text-blue-500' : 'text-gray-500'}`}>
-                {contact.lastMessage}
-              </p>
+                <div className="flex-grow">
+                  <div className="flex justify-between items-center">
+                    <span className="font-semibold">{contact.name}</span>
+                    <span className="text-xs text-gray-500">{contact.time}</span>
+                  </div>
+                  <p className={`text-sm ${contact.isSession ? 'text-blue-500' : 'text-gray-500'}`}>
+                    {contact.lastMessage}
+                  </p>
+                </div>
             </div>
-          </div>
         ))}
       </div>
     </div>
@@ -76,9 +83,55 @@ const ContactList: FC<{ onContactClick: (id: string) => void; selectedContact: s
 };
 
 // Chat Box component
-const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSendMessage: (text: string) => void; onStartCall: () => void }> = ({selectedContact, messages, onSendMessage, onStartCall,}) => {
+const ChatBox: FC<{
+  selectedContact: Contact | null;
+  messages: Message[];
+  onSendMessage: (text: string) => void;
+  onBack: () => void;
+}> = ({ selectedContact, messages, onSendMessage, onBack }) => {
   const [messageInput, setMessageInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [user, setUser] = useState<any>(null);
+  const [psychoId, setPsychoId] = useState<string | null>(null);
+  const [isDropdownOpen, setDropdownOpen] = useState(false);
+  const [meetLink, setMeetLink] = useState('https://meet.google.com/landing');
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const userData = await account.get();
+        setUser(userData);
+
+        const psychoId = await fetchPsychoId(userData.$id);
+        setPsychoId(psychoId);
+      } catch (error) {
+        console.error('Failed to fetch user:', error);
+      }
+    };
+
+    fetchUser();
+  }, []);
+
+  const toggleDropdown = () => setDropdownOpen(!isDropdownOpen);
+
+  const goToMeet = () => {
+    if (typeof window !== 'undefined') {
+      window.open(meetLink, '_blank');
+    }
+  };
+
+  const handleEditMeetLink = async () => {
+    const newLink = prompt(
+      `Enter Google Meet link for ${selectedContact?.name} and ${psychoId}:`,
+      meetLink
+    );
+
+    if (newLink) {
+      await setNewLink(selectedContact?.id || '', psychoId || '', newLink);
+      setMeetLink(newLink);
+    }
+  };
 
   const handleSendMessage = () => {
     if (messageInput.trim()) {
@@ -87,14 +140,6 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSend
     }
   };
 
-  const handleStartCall = () => {
-    onStartCall();
-  };
-
-  const handleGoogleMeet = () => {
-    window.open('https://meet.google.com/landing', '_blank');
-  }
-
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -102,6 +147,46 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSend
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setDropdownOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!selectedContact) return;
+  
+    let isMounted = true;
+  
+    const fetchMeetLink = async () => {
+      try {
+        const clientId = selectedContact.id;
+        const response = await databases.listDocuments('Butterfly-Database', 'MeetLink', [
+          Query.equal('client', clientId) // Querying where the 'client' attribute matches clientId
+        ]);
+  
+        if (isMounted && response.documents.length > 0) {
+          setMeetLink(response.documents[0].link); // Assuming 'link' is the field storing the Meet link
+        }
+      } catch (error) {
+        console.error('Failed to fetch meet link:', error);
+      }
+    };
+  
+    fetchMeetLink();
+  
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedContact]);
+  
 
   if (!selectedContact) {
     return (
@@ -112,45 +197,52 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSend
   }
 
   return (
-    <div className="w-3/4 p-6 flex flex-col justify-between">
-      <div className="flex items-center justify-between mb-6">
-        {/* Contact Details */}
-        <div className="flex items-center">
+    <div className="w-full p-6 flex flex-col justify-between">
+      <div className="flex items-center justify-start w-full mb-3 top-0">
+        <div className="mr-3">
+          <button
+            onClick={onBack}
+            className="text-white hover:bg-blue-200 hover:text-black bg-blue-400 rounded-xl p-2"
+          >
+            Back
+          </button>
+        </div>
+
+        <div className="flex-1 flex justify-start items-center">
           <Image
             src={selectedContact.imageUrl}
             alt={selectedContact.name}
-            width={48} // Width in pixels
-            height={48} // Height in pixels
-            className="rounded-full mr-4"
+            width={48}
+            height={48}
+            className="w-12 h-12 rounded-full object-cover aspect-square mr-4"
           />
-          <h2 className="text-xl font-bold">{selectedContact.name}</h2>
+          <h2 className="text-xs md:text-xl font-bold">{selectedContact.name}</h2>
         </div>
 
-        {/* Buttons for Google Meet and Video Call */}
-        <div className="flex items-center space-x-4">
-          {/* Google Meet Icon */}
+        <div className="flex-1 flex justify-end items-center space-x-4">
           <button
-            onClick={handleGoogleMeet} // Use the onStartCall prop here
-            className="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
+            onClick={toggleDropdown}
+            className="p-2 bg-blue-200 text-white rounded-full hover:bg-blue-400"
             aria-label="Start Video Call"
           >
-            <Image
-              src="/images/meet-logo.png"
-              alt={selectedContact.name}
-              width={30} // Width in pixels
-              height={30} // Height in pixels
-              className="rounded-full"
-            />
+            <Image src="/images/meet-logo.png" alt="Google Meet" width={30} height={30} className="rounded-full" />
           </button>
-
-          {/* Video Call Icon */}
-          {/* <button
-            onClick={handleStartCall} // Use the onStartCall prop here
-            className="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
-            aria-label="Start Video Call"
-          >
-            <FaVideo className="w-7 h-7" />
-          </button> */}
+          {isDropdownOpen && (
+            <div ref={dropdownRef} className="absolute mt-32 w-48 bg-white border border-gray-300 rounded-lg shadow-lg z-10">
+              <button
+                onClick={handleEditMeetLink}
+                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-200"
+              >
+                Edit Meet Link
+              </button>
+              <button
+                onClick={goToMeet}
+                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-200"
+              >
+                Go to Meet Link
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -175,7 +267,7 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSend
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="flex items-center mt-4 border-t pt-4">
+      <div className="flex flex-wrap items-center mt-4 border-t pt-4 px-4 sm:px-6">
         <input
           type="text"
           value={messageInput}
@@ -186,11 +278,11 @@ const ChatBox: FC<{ selectedContact: Contact | null; messages: Message[]; onSend
             }
           }}
           placeholder="Type a message..."
-          className="flex-grow p-2 border border-gray-300 rounded-full"
+          className="flex-grow p-2 border border-gray-300 rounded-full text-sm sm:text-base"
         />
         <button
           onClick={handleSendMessage}
-          className="ml-2 bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600"
+          className="mt-2 sm:mt-0 sm:ml-2 bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600"
         >
           Send
         </button>
@@ -207,48 +299,17 @@ const Communication: FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [psychotherapistDocumentId, setPsychotherapistDocumentId] = useState<string | null>(null); // Store psychotherapist document ID
-  const [isVideoCallActive, setIsVideoCallActive] = useState(false);
+
+  const handleContactClick = (id: string) => {
+    setSelectedContactId(id);
+    fetchOrCreateConversation(id);
+  };
+
+  const handleBackToContacts = () => {
+    setSelectedContactId(null);
+  };
 
   const selectedContact = contacts.find(contact => contact.id === selectedContactId) || null;
-
-  const handleStartCall = async () => {
-    if (!selectedContactId || !psychotherapistDocumentId) return;
-
-    try {
-      const callNotificationData = {
-        isActive: true,
-        callerId: psychotherapistDocumentId, // Use psychotherapist document ID here
-        receiverId: selectedContactId, // ID of the client being called
-        timestamp: new Date().toISOString(),
-      };
-
-      const existingNotificationResponse = await databases.listDocuments(
-        'Butterfly-Database',
-        'Call-Notification',
-        [Query.equal('receiverId', selectedContactId)]
-      );
-
-      if (existingNotificationResponse.documents.length > 0) {
-        await databases.updateDocument(
-          'Butterfly-Database',
-          'Call-Notification',
-          existingNotificationResponse.documents[0].$id,
-          callNotificationData
-        );
-      } else {
-        await databases.createDocument(
-          'Butterfly-Database',
-          'Call-Notification',
-          ID.unique(),
-          callNotificationData
-        );
-      }
-
-      setIsVideoCallActive(true);
-    } catch (error) {
-      console.error('Failed to notify client of call:', error);
-    }
-  };
 
   useEffect(() => {
     const fetchPsychotherapistData = async () => {
@@ -472,32 +533,24 @@ const Communication: FC = () => {
   return (
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
       <div className="flex h-screen bg-blue-50">
-        {isVideoCallActive && psychotherapistDocumentId && selectedContactId ? (
-          <VideoCall
-            onEndCall={() => {
-              setIsVideoCallActive(false);
-            }} 
-            callerId={psychotherapistDocumentId} // Use the psychotherapist document ID as the caller ID
-            receiverId={selectedContactId}
+      {selectedContact ? (
+        // Show ChatBox when a contact is selected
+        <ChatBox
+          selectedContact={selectedContact}
+          messages={messages}
+          onSendMessage={handleSendMessage}
+          onBack={handleBackToContacts} // Pass back function to ChatBox
+        />
+      ) : (
+        // Show ContactList when no contact is selected
+        <div className="w-full h-full">
+          <ContactList
+            onContactClick={handleContactClick}
+            selectedContact={selectedContactId}
+            contacts={contacts}
           />
-        ) : (
-          <>
-            <ContactList
-              onContactClick={(id) => {
-                setSelectedContactId(id);
-                fetchOrCreateConversation(id);
-              }}
-              selectedContact={selectedContactId}
-              contacts={contacts}
-            />
-            <ChatBox
-              selectedContact={selectedContact}
-              messages={messages}
-              onSendMessage={handleSendMessage}
-              onStartCall={handleStartCall}
-            />
-          </>
-        )}
+        </div>
+      )}
       </div>
     </Layout>
   );

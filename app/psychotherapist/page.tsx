@@ -9,7 +9,6 @@ import LoadingScreen from '@/components/LoadingScreen';
 import { useRouter } from 'next/navigation';
 import Calendar from '@/components/Calendar/PsychoCalendar';
 import { fetchPsychoId } from '@/hooks/userService';
-import { HappeningAppointment } from './components/HappeningAppointment';
 
 type Client = {
   $id: string;
@@ -69,7 +68,6 @@ const Dashboard: React.FC = () => {
   const router = useRouter();
 
   useEffect(() => {
-    HappeningAppointment();
     const fetchData = async () => {
       try {
         const user = await account.get();
@@ -211,7 +209,7 @@ const Dashboard: React.FC = () => {
     <Layout sidebarTitle="Butterfly" sidebarItems={items}>
       <div className="bg-blue-50 min-h-screen mb-10">
         <div className="bg-white width rounded-b-lg fixed p-5 top-0 w-full z-10">
-          <h2 className="text-3xl font-bold text-blue-400">
+          <h2 className="text-2xl font-bold text-blue-400">
             Welcome, {userName ? userName : "Client"}!
           </h2>
         </div>

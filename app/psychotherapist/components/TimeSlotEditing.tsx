@@ -14,7 +14,6 @@ const TimeSlotAdding: React.FC<TimeSlotAddingProps> = ({ selectedDay, selectedMo
   const [selectedMinute, setSelectedMinute] = useState<string>('');
   const [selectedPeriod, setSelectedPeriod] = useState<string>('AM');
   const [loading, setLoading] = useState<boolean>(true);
-  const [showEditDropdown, setShowEditDropdown] = useState<boolean>(false);
 
   useEffect(() => {
     const getTimeSlots = async () => {
@@ -30,14 +29,6 @@ const TimeSlotAdding: React.FC<TimeSlotAddingProps> = ({ selectedDay, selectedMo
 
     getTimeSlots();
   }, []);
-
-  const handleDisableTimeSlot = () => {
-    // logic to disable selected time slot
-  };
-
-  const handleDisableDay = () => {
-    // logic to disable the entire day
-  };
 
   const handleAddTimeSlot = async (type: string) => {
     const timeString = `${selectedHour.padStart(2, '0')}:${selectedMinute.padStart(2, '0')}${selectedPeriod}`;
@@ -59,6 +50,8 @@ const TimeSlotAdding: React.FC<TimeSlotAddingProps> = ({ selectedDay, selectedMo
       await addTimeSlotToDatabase(newTimeSlot);
       console.log('Added time slot:', newTimeSlot);
       setTimeSlots([...timeSlots, timeString]);
+      // Show success message
+      alert(`Successfully added time slot`);
     } catch (error) {
       console.error('Error adding time slot:', error);
     }
@@ -71,6 +64,9 @@ const TimeSlotAdding: React.FC<TimeSlotAddingProps> = ({ selectedDay, selectedMo
       console.log('Deleted time slot:', selectedTimeSlot);
       // Update the state to remove the deleted time slot from the list
       setTimeSlots(timeSlots.filter(time => time !== selectedTimeSlot));
+
+      // Show success message
+      alert(`Successfully deleted time slot`);
     } catch (error) {
       console.error('Error deleting time slot:', error);
     }

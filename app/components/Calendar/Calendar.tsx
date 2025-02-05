@@ -25,7 +25,7 @@ interface Booking {
     status: 'pending' | 'paid' | 'rescheduled' | 'happening' | 'missed' | 'disabled' | 'refunded'; // Adjust based on the actual statuses you have
 }
 
-const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 const Calendar: React.FC<CalendarProps> = ({
     currentMonth,
@@ -221,7 +221,7 @@ const Calendar: React.FC<CalendarProps> = ({
             </div>
 
             <h3 className="text-lg font-bold text-blue-900">Select Time {!selectedTime && <span className="text-red-500">*</span>}</h3>
-            <div className="grid grid-cols-4 gap-4 mt-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-4">
                 {timeSlots.map((time) => {
                     const isBooked = isSlotBooked(selectedDay || 0, time);
                     return (

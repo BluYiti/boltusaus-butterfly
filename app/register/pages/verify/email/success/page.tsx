@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { account } from "@/appwrite"; // Ensure your SDK is correctly initialized
 import { useRouter } from "next/navigation";
 import Back from '@/components/Back';
@@ -42,7 +42,7 @@ const VerifyPage: React.FC = () => {
                     Go to Login
                 </button>
             </div>
-            <div className="absolute right-0 top-0 w-14 h-screen bg-cover bg-no-repeat" style={{ backgroundImage: `url('/images/rightblock.png')` }}></div>
+            <div className="absolute right-0 top-0 w-14 h-screen bg-cover bg-no-repeat hidden md:block" style={{ backgroundImage: `url('/images/rightblock.png')` }}></div>
             <footer className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-gray-600 text-xs text-center">
                 © Butterfly 2024
             </footer>

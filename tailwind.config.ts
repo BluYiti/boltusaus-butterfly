@@ -101,6 +101,7 @@ const config: Config = {
         paintbrush: ['PaintBrush'],
         montserrat: ['Montserrat'],
         poppins: ['Poppins'],
+        baskerville: ['Baskerville'],
       },
       backgroundImage: {
         appointments: "url('/assets/images/appointments-bg.png')",

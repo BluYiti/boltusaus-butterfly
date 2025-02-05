@@ -69,18 +69,24 @@ const PaymentModal = ({ onClose, client }) => {
   const handleReschedule = async () => {
     try {
       await databases.updateDocument('Butterfly-Database', 'Bookings', client.booking.$id, {
-        status: 'rescheduled'
+        status: 'rescheduled',
       });
+  
       await databases.updateDocument('Butterfly-Database', 'Payment', client.id, {
         status: 'rescheduled',
         declineReason: declineReason,
       });
+  
       onClose();
-      window.location.href = `/psychotherapist/pages/clientspayment?tab=Reschedule`;
+  
+      // Ensure window is defined before calling window methods
+      if (typeof window !== 'undefined') {
+        window.location.href = `/psychotherapist/pages/clientspayment?tab=Reschedule`;
+      }
     } catch (error) {
       console.error('Failed to update document', error);
     }
-  };
+  };  
 
   const handleRefund = async () => {
     try {
@@ -117,15 +123,27 @@ const PaymentModal = ({ onClose, client }) => {
         <p><strong>Status:</strong> {client.status}</p>
         {/* Format the date */}
         <p><strong>Submission Date and Time:</strong> {formatDate(client.createdAt)}</p>
-        <p className="text-gray-800">
-          <strong>Receipt:</strong>
-          <button 
-            className="bg-blue-400 ml-2 text-white py-2 px-6 rounded-3xl text-md hover:bg-blue-600 transition duration-300"
-            onClick={handleShowReceipt}
-          >
-            Click to view
-          </button>
-        </p>
+        {client.channel === 'cash' ? (
+          <p className="text-gray-800">
+            <strong>Input Payment Details:</strong>
+            <button 
+              className="bg-blue-400 ml-2 text-white py-2 px-6 rounded-3xl text-md hover:bg-blue-600 transition duration-300"
+              onClick={handleShowReceipt}
+            >
+              Payment Details
+            </button>
+          </p>
+        ) : (        
+          <p className="text-gray-800">
+            <strong>Receipt:</strong>
+            <button 
+              className="bg-blue-400 ml-2 text-white py-2 px-6 rounded-3xl text-md hover:bg-blue-600 transition duration-300"
+              onClick={handleShowReceipt}
+            >
+              Click to view
+            </button>
+          </p>
+        )}
         {client.status === 'declined' ? (
           <p className='mt-1'><strong>Reason for decline:</strong> {client.declineReason}</p>
         ): (<></>)}
@@ -188,15 +206,18 @@ const PaymentModal = ({ onClose, client }) => {
           paymentId={client.id} // Pass the payment ID
           client = {client}
         />
-        {client.status === 'pending' ? (<>   
-              <p
-                className="py-2 text-sm font-semibold text-green-700 rounded-full"
-              >
-                Confirm Payment inside Receipt
-              </p></>
-            ) : (
-              <></>
-            )}
+        {client.status === 'pending' ? ( <>
+          {client.mode === 'cash' ? (
+            <p className="py-2 text-sm font-semibold text-green-700 rounded-full">
+              Confirm Payment inside Payment Detail
+            </p>) : (
+            <p className="py-2 text-sm font-semibold text-green-700 rounded-full">
+              Confirm Payment inside Receipt
+            </p>
+          )}</>
+        ) : (
+          <></>
+        )}
 
         {/* Buttons */}
         {!isDeclining && (

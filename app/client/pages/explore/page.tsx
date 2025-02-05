@@ -124,8 +124,14 @@ const App = () => {
 
   // Function to handle card click and redirect to file URL
   const handleCardClick = (fileUrl: string) => {
-    window.open(fileUrl, "_blank"); // Open the file in a new tab
-  };
+    if (!fileUrl) {
+      console.error("Invalid file URL");
+      return;
+    }
+    if (typeof window !== "undefined") {
+      window.open(fileUrl, "_blank", "noopener,noreferrer");
+    }
+  };  
 
   if (authLoading) return <LoadingScreen />;
 

@@ -108,8 +108,10 @@ const CreditCardPayment: React.FC<CreditCardPaymentProps> = ({ isOpen, onClose, 
       setShowSuccess(true); // Show success modal
       console.log("showing success modal");
   
-      setTimeout(function() {
+      setTimeout(() => {
+        if (typeof window !== "undefined") {
           window.location.reload();
+        }
       }, 5000);
     } catch (err) {
       console.error('Submission failed:', err);

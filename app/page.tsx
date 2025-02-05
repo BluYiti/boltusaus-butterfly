@@ -8,7 +8,7 @@ import { FaMapMarkerAlt, FaEnvelope, FaPhone, FaFacebookF, FaMap } from 'react-i
 import Image from 'next/image';
 import termsContent from '@/constants/terms';
 import privacyContent from '@/constants/privacy';
-import TermsAndPrivacy from "./components/TermsAndPrivacy";
+import TermsAndPrivacy from "./components/TermsAndPrivacy";import dynamic from 'next/dynamic';
 
 const navItems = [
   { label: "About Us", href: "#about" },
@@ -51,46 +51,54 @@ const HomePage: React.FC = () => {
   const [hasAnimated, setHasAnimated] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      if (aboutRef.current && !hasAnimated) {
-        const rect = aboutRef.current.getBoundingClientRect();
-        const isVisible = rect.top >= 0 && rect.bottom <= window.innerHeight;
-  
-        if (isVisible) {
-          setHasAnimated(true); // Set to true to trigger the animation
-        }
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, [hasAnimated]); // Depend on hasAnimated to avoid unnecessary re-renders
+    if (typeof window !== 'undefined') {
+      const handleScroll = () => {
+        if (!aboutRef.current || hasAnimated) return;
+    
+        requestAnimationFrame(() => {
+          const rect = aboutRef.current.getBoundingClientRect();
+          const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
+          
+          if (isVisible) {
+            setHasAnimated(true);
+          }
+        });
+      };
+    
+      window.addEventListener('scroll', handleScroll);
+      return () => window.removeEventListener('scroll', handleScroll);
+    }
+  }, [hasAnimated]);  
 
   return (
     <div className='overflow-x-hidden'>
       <BackToTopButton />
       
       {/* Top Section */}
-      <section className="relative h-screen flex flex-col justify-center items-start bg-cover bg-center px-4 md:px-8" style={{ backgroundImage: `url('/images/landingbg.png')` }}>
-        
-        <motion.div
-          className="relative z-10 text-left text-white max-w-md ml-4 md:ml-10"
-          initial={{ opacity: 0, y: -50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-paintbrush whitespace-nowrap">Start your Journey</h1>
-          <p className="mt-4 text-base md:text-lg">
-            We believe that mental health is a collaborative effort. Together, we can navigate the path towards emotional well-being and strength.
+      <section className="h-screen flex flex-col justify-center items-start bg-cover bg-center px-4 md:px-8" style={{ backgroundImage: `url('/images/landingbg.png')` }}>
+      <motion.div
+        className="flex justify-center items-center z-10 text-white text-center max-w-md md:ml-10 px-4 sm:px-6"
+        initial={{ opacity: 0, y: -50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+      >
+        <div className="text-center md:ml-40">
+          <h1 className="text-5xl sm:text-3xl md:text-4xl lg:text-5xl font-paintbrush md:whitespace-nowrap">
+            Your <span className="text-amber-300">Hope through Transcendance</span> begins with
+          </h1>
+          <h2 className="mt-2 text-2xl sm:text-2xl md:text-3xl font-baskerville">
+            A.M Peralta Psychological Services
+          </h2>
+          <p className="mt-4 text-lg sm:text-xl md:text-base">
+            We believe that mental health is a collaborative effort. Together, we can navigate the path towards emotional well-being and mental strength.
           </p>
           <Link href={'/register'}>
-            <button className="mt-6 w-full md:w-auto bg-[#2081c3] text-white font-bold py-3 px-6 rounded-full border-2 border-transparent hover:border-[#2081c3] hover:bg-transparent transform hover:scale-110 transition-all duration-300">
+            <button className="mt-6 w-full sm:w-auto bg-[#2081c3] text-white font-bold py-4 px-9 rounded-2xl border-2 border-transparent hover:border-[#2081c3] hover:bg-transparent transform hover:scale-110 transition-all duration-300">
               Book an Appointment
             </button>
           </Link>
-        </motion.div>
+        </div>
+      </motion.div>
 
         {/* Butterfly GIF */}
         <motion.img
@@ -143,7 +151,14 @@ const HomePage: React.FC = () => {
         </nav>
 
         {/* Right Side Butterfly Header */}
-        <h2 className="absolute top-4 left-4 text-white text-2xl md:text-3xl font-bold">Butterfly</h2>
+        <Image
+          src="/images/NEW BUTTERFLY PROTO.png"
+          alt="Butterfly Logo"
+          width={65}
+          height={65}
+          className="absolute top-3 left-3"
+        ></Image>
+        <p className="absolute top-7 text-white left-20 text-xl font-baskerville">Butterfly</p>
 
         {/* Adjusted Login Button */}
         <div className="absolute top-4 right-4">
@@ -154,6 +169,7 @@ const HomePage: React.FC = () => {
           </Link>
         </div>
       </section>
+
       {/* About Section */}
       <section ref={aboutRef} id="about" className="py-8 md:py-32 bg-white text-center md:text-left h-auto md:h-[80vh]">
         <motion.div

@@ -312,15 +312,15 @@ const handleProgressChange = async (newProgress: Goal['progress'], goalId: strin
     return (
         <Layout sidebarTitle="Butterfly" sidebarItems={items}>
             <div 
-                className="min-h-screen p-8 bg-cover bg-center"
+                className="min-h-screen p-3 md:p-8 bg-cover bg-center"
                 style={{ backgroundImage: "url('/images/contact.jpeg')" }} // Update the path to your image
             >
-            <div className="flex-grow p-8">
+            <div className="flex-grow md:p-8">
                 <div className="bg-white shadow-lg rounded-xl p-8 mb-10 border border-blue-200">
                     <h2 className="text-4xl font-bold text-blue-500 mb-4">Hello, {userName}!</h2>
                     <p className="text-gray-600 text-lg">Set and track your personal goals with ease.</p>
                 </div>
-                <div className="flex space-x-8">
+                <div className="flex flex-col lg:flex-row space-y-8 lg:space-y-0 lg:space-x-8">
                     <div className="flex-1 bg-white shadow-lg rounded-xl p-6 border border-gray-200">
                         <div className="flex justify-between items-center mb-6">
                             <button
@@ -356,7 +356,7 @@ const handleProgressChange = async (newProgress: Goal['progress'], goalId: strin
                                     <div
                                         key={index}
                                         onClick={() => !isPast && !isTooFar && handleDateClick(day)}
-                                        className={`h-16 flex items-center justify-center border rounded-lg transition-colors duration-300
+                                        className={`h-10 md:h-16 flex items-center justify-center border rounded-lg transition-colors duration-300
                                         ${day ? '' : ''} 
                                         ${isSelected ? 'bg-blue-400 text-white' : 'bg-gray-100'} 
                                         ${!isSelected && !isPast && !isTooFar ? 'hover:bg-blue-500 hover:text-white' : ''} 

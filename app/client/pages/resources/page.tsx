@@ -63,7 +63,15 @@ const ResourcesPage: React.FC = () => {
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {resources.map((resource) => (
-                <div key={resource.$id} className="bg-white rounded-lg shadow-lg relative p-4 cursor-pointer" onClick={() => window.open(getFileUrl(resource.file), "_blank")}>
+                <div 
+                  key={resource.$id} 
+                  className="bg-white rounded-lg shadow-lg relative p-4 cursor-pointer" 
+                  onClick={() => {
+                    if (typeof window !== "undefined") {
+                      window.open(getFileUrl(resource.file), "_blank");
+                    }
+                  }}
+                >
                   {resource.image ? (
                     <Image
                       src={getFileUrl(resource.image)} // The image URL

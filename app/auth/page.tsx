@@ -6,8 +6,7 @@ import { useRouter } from "next/navigation";
 
 const VALID_ROLES = ["admin", "client", "psychotherapist", "associate"]; // Define allowed roles
 
-const useAuthCheck = (allowedRoles) => {
-  const [loading, setLoading] = useState(true); // Loading state for authentication check
+const useAuthCheck = (allowedRoles) => {const [loading, setLoading] = useState(true); // Loading state for authentication check
   const router = useRouter(); // Router to handle redirects
 
   // Validate the allowedRoles prop
@@ -20,6 +19,8 @@ const useAuthCheck = (allowedRoles) => {
   }, [allowedRoles]);
 
   useEffect(() => {
+    if (typeof window === "undefined") return; // Prevent execution during SSR
+
     const checkAuth = async () => {
       try {
         const user = await account.get();

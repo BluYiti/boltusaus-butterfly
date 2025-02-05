@@ -90,7 +90,12 @@ const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpe
       setClientData(refreshedClientData);
   
       alert('Client referred successfully!');
-      window.location.reload();
+  
+      // Ensure window is defined before calling window methods
+      if (typeof window !== 'undefined') {
+        window.location.reload(); // Reload the page only on the client side
+      }
+      
       setIsConfirmModalOpen(false);
     } catch (err: unknown) {
       console.error("Error referring client:", err);
@@ -100,7 +105,7 @@ const ClientProfileModal: React.FC<ClientProfileModalProps> = ({ clientId, isOpe
         alert(`Error referring client: Unknown error occurred`);
       }
     }
-  };
+  };  
 
   const handleViewDetails = (details: string) => {
     setSelectedReportDetails(details);

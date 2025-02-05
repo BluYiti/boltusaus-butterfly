@@ -24,6 +24,11 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, sele
   const [isAdminValidating, setIsAdminValidating] = useState(false);
   const [isModalOpen, setModalOpen] = useState(false);
 
+  const validateName = (name: string) => {
+    const nameRegex = /^[a-zA-Z]{2,}$/;
+    return nameRegex.test(name);
+  };  
+
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
@@ -84,7 +89,18 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, sele
 
   const handleSubmit = async () => {
     setError(null);
-    // Check if the email and phone number are valid
+    // Check if inputs are valid
+    
+    if (!validateName(firstName)) {
+      setError('Invalid email format.');
+      return;
+    }
+
+    if (!validateName(lastName)) {
+      setError('Invalid email format.');
+      return;
+    }
+    
     if (!validateEmail(email)) {
       setError('Invalid email format.');
       return;
@@ -129,8 +145,6 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, sele
       // Log out the user
       await account.deleteSession('current'); // 'current' refers to the active session
       console.log('User logged out successfully.');
-    } catch (err) {
-      setError(err.message || 'Failed to create account');
     } finally {
       setLoading(false);
     }
@@ -204,7 +218,7 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, sele
                 className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-black"
                 placeholder="63"
               />
-              <small className="text-xs text-black">Format: 63 followed by 10 digits</small>
+              <small className="text-xs text-black">Format: 63 followed by 10 digits. No 0</small>
             </div>
 
             <div>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { databases } from '@/appwrite';
+import { databases } from '@/appwrite';  // Ensure you have the Appwrite users SDK imported
 import { Query } from 'appwrite';
 import SuccessModal from './SuccessfulMessage';
 
@@ -35,18 +35,17 @@ const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({ isOpen, onClose
 
         // If the selected tab is "Client", delete associated documents from other collections first
         if (selectedTab === "Client") {
-          // Delete associated documents in other collections
+          // Delete associated documents in other collections first
           await deleteAssociatedDocuments(clientId);
-
-          // Now delete the document from the selectedTab collection
-          await databases.deleteDocument('Butterfly-Database', selectedTab, documentId);
-        } else {
-          // If not "Client", simply delete the document from the selectedTab
-          await databases.deleteDocument('Butterfly-Database', selectedTab, documentId);
         }
+
+        // Now delete the document from the selectedTab collection
+        await databases.deleteDocument('Butterfly-Database', selectedTab, documentId);
 
         // Delete the document from the Accounts collection using the clientId
         await databases.deleteDocument('Butterfly-Database', 'Accounts', clientId);
+
+        // Delete user from Appwrite authentication system
 
         // Show success modal
         setModalOpen(true);
@@ -54,8 +53,6 @@ const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({ isOpen, onClose
         throw new Error('Document not found in the selected collection');
       }
 
-    } catch (err) {
-      setError(err.message || 'Failed to delete account');
     } finally {
       setLoading(false);
     }
@@ -67,7 +64,7 @@ const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({ isOpen, onClose
       await Promise.all([
         deleteFromCollection('Pre-Assessment', 'userID', clientId),
         deleteFromCollection('Payment', 'client', clientId),
-        deleteFromCollection('Bookings', 'client', clientId)
+        deleteFromCollection('Bookings', 'client', clientId),
       ]);
     } catch (error) {
       console.log('Error deleting associated documents:', error);
@@ -94,8 +91,6 @@ const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({ isOpen, onClose
           <h2 className="text-3xl text-red-700 text-center font-semibold">Are you sure you want to delete this account?</h2>
           <h2 className="text-2xl text-red-700 text-center font-semibold mb-4">Everything related to this account will be gone forever</h2>
 
-          {error && <p className="text-red-500">{error}</p>}
-
           <form onSubmit={(e) => { e.preventDefault() }}>
             <div className="mb-4">
               <label htmlFor="confirmationInput" className="block text-sm font-medium text-gray-700">
@@ -110,6 +105,8 @@ const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({ isOpen, onClose
                 placeholder="Type DELETE"
               />
             </div>
+
+            {error && <p className="text-red-500">{error}</p>}
 
             <div className="flex justify-center space-x-6">
               <button

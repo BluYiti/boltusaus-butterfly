@@ -201,16 +201,16 @@ const Clients = () => {
 
   const renderClientList = () => {
     return (
-      <div className="mt-4 space-y-3 mb- overflow-hidden">
+      <div className="mt-4 space-y-3 mb- overflow-hidden mb-5">
         {renderClients().map((client, index) => (
           <div key={index} className="flex flex-col md:flex-row items-start md:items-center justify-between p-4 bg-white shadow rounded-lg">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-full bg-gray-200">
+              <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden">
                 <Image
                   src={profileImageUrls[client.id] || "/images/default-profile.png"}
                   alt={`${client.firstname} ${client.lastname}`}
-                  className="rounded-full mb-4"
-                  width={96}  // Set width explicitly
+                  className="object-cover"
+                  width={96} // Set width explicitly
                   height={96} // Set height explicitly
                   unoptimized
                 />

@@ -13,9 +13,18 @@ import { useFetchProvinces } from '@/register/pages/hooks/useFetch/useFetchProvi
 import { useFetchCities } from '@/register/pages/hooks/useFetch/useFetchCitiesAndMunicipalities';
 import { useFetchBarangays } from '@/register/pages/hooks/useFetch/useFetchBarangays';
 import { useRouter } from 'next/navigation';
+import { EyeOffIcon, EyeIcon } from '@heroicons/react/solid';
 
 const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
     const [isFocused, setIsFocused] = useState(false);
+    const [showRePassword, setShowRePassword] = useState(true);
+    const [showPassword, setShowPassword] = useState(true);
+    const togglePasswordVisibility = () => {
+        setShowPassword(!showPassword);
+    };
+    const toggleRePasswordVisibility = () => {
+        setShowRePassword(!showRePassword);
+    };
     const router = useRouter();
 
     const {
@@ -244,7 +253,13 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
                             required
                             placeholder="First Name"
                             value={firstName}
-                            onChange={(e) => setFirstName(e.target.value)}
+                            onChange={(e) => {
+                                // Regular expression to allow only alphabetic characters (A-Z, a-z)
+                                const value = e.target.value;
+                                if (/^[A-Za-z]*$/.test(value)) {
+                                    setFirstName(value);
+                                }
+                            }}
                             className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
                         />
                     </div>
@@ -258,7 +273,13 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
                             required
                             placeholder="Last Name"
                             value={lastName}
-                            onChange={(e) => setLastName(e.target.value)}
+                            onChange={(e) => {
+                                // Regular expression to allow only alphabetic characters (A-Z, a-z)
+                                const value = e.target.value;
+                                if (/^[A-Za-z]*$/.test(value)) {
+                                    setLastName(value);
+                                }
+                            }}
                             className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-[0.35rem] w-full text-gray-500"
                         />
                     </div>
@@ -526,7 +547,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
                         <label htmlFor="password" className="block text-[#38b6ff]">Password</label>
                         <input
                             id="password"
-                            type="password"
+                            type={showPassword ? "text" : "password"}
                             value={password}
                             onChange={handlePasswordChange}
                             onFocus={() => setIsFocused(true)}
@@ -536,6 +557,14 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
                                 isPasswordValid ? 'border-green-500' : 'border-red-500'
                             }`}
                         />
+                        {/* Toggle Password Visibility */}
+                        <button
+                            type="button"
+                            onClick={togglePasswordVisibility}
+                            className="absolute right-3 top-11 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                        >
+                            {showPassword ? <EyeOffIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
+                        </button>
                         {/* Show password requirements only when the input is focused */}
                         {isFocused && (
                             <div className="absolute left-0 top-full mt-2 bg-white bg-opacity-95 border rounded-xl w-full p-2 text-sm text-gray-500 shadow-md">
@@ -558,6 +587,36 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
                         )}
                     </div>
 
+                    {/* Confirm Password */}
+                    <div className="relative">
+                        <label htmlFor="rePassword" className="block text-[#38b6ff]">Confirm Password</label>
+                        <input
+                            id="rePassword"
+                            type={showRePassword ? "text" : "password"}
+                            required
+                            placeholder="Confirm Password"
+                            value={rePassword}
+                            onChange={handleRePasswordChange}
+                            className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
+                        />
+                        {/* Toggle Password Visibility */}
+                        <button
+                            type="button"
+                            onClick={toggleRePasswordVisibility}
+                            className="absolute right-3 top-11 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                        >
+                            {showRePassword ? <EyeOffIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
+                        </button>
+                        {/* Visual indicator for password match */}
+                        <div className="mt-2 text-sm">
+                            {rePassword && (
+                                <p className={`text-${passwordsMatch ? 'green' : 'red'}-500`}>
+                                    {passwordsMatch ? 'Passwords match!' : 'Passwords do not match.'}
+                                </p>
+                            )}
+                        </div>
+                    </div>
+
                     {/* Email */}
                     <div>
                         <label htmlFor="email" className="block text-[#38b6ff]">Email</label>
@@ -575,28 +634,6 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
                         <p className="text-red-500 text-sm mt-1" id="emailError" style={{ display: email && !validateEmail(email) ? 'block' : 'none' }}>
                             Invalid email address. Please check the format.
                         </p>
-                    </div>
-
-                    {/* Confirm Password */}
-                    <div>
-                        <label htmlFor="rePassword" className="block text-[#38b6ff]">Confirm Password</label>
-                        <input
-                        id="rePassword"
-                        type="password"
-                        required
-                        placeholder="Confirm Password"
-                        value={rePassword}
-                        onChange={handleRePasswordChange}
-                        className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
-                        />
-                        {/* Visual indicator for password match */}
-                        <div className="mt-2 text-sm">
-                        {rePassword && (
-                            <p className={`text-${passwordsMatch ? 'green' : 'red'}-500`}>
-                            {passwordsMatch ? 'Passwords match!' : 'Passwords do not match.'}
-                            </p>
-                        )}
-                        </div>
                     </div>
 
                     {/* Submit Button */}
