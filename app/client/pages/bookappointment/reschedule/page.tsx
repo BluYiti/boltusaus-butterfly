@@ -41,90 +41,99 @@ const RescheduleBooking = () => {
   const [, setSelectedTherapistId] = useState<number | null>(null); // Start with null
   const [profileImageUrls, setProfileImageUrls] = useState({});
   const [showPrompt, setShowPrompt] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false); // Show success message first
+  const [showConfirmationPrompt, setShowConfirmationPrompt] = useState(false); // Then show confirmation prompt
+
 
   const handleBookAppointment = () => {
     const { selectedTherapist, selectedDay, selectedTime, selectedMode } = appointmentData;
     if (selectedTherapist && selectedDay && selectedTime && selectedMode) {
-      setShowPrompt(true);
-      console.log("Showing prompt for booking confirmation.");
+        setShowSuccessMessage(true); // Show Success Message first
+        console.log("Showing success message for booking.");
     }
-  };
+};
 
-  const handleReschedule = async () => {
-    try {
-      // Fetch the logged-in user and their client ID
+// Function to proceed from success message to confirmation prompt
+const proceedToConfirmationPrompt = () => {
+    setShowSuccessMessage(false);
+    setShowConfirmationPrompt(true);
+};
+
+  // Function to handle the final confirmation & update database
+const handleConfirmReschedule = async () => {
+  try {
+      setLoading(true);
+      // Fetch user and client ID
       const user = await account.get();
       const clientId = await fetchClientId(user.$id);
-  
-      // Fetch the most recent payment for the client
+
+      // Fetch the most recent payment
       const paymentResponse = await databases.listDocuments('Butterfly-Database', 'Payment', [
-        Query.equal('client', clientId),
+          Query.equal('client', clientId),
       ]);
-  
+
       if (paymentResponse.documents.length === 0) {
-        console.log("No payment found for this client.");
-        return;
+          console.log("No payment found for this client.");
+          return;
       }
-  
-      // Get the most recent payment
+
       const sortedPayments = paymentResponse.documents.sort((a, b) => {
-        const dateA = new Date(a.$createdAt).getTime();
-        const dateB = new Date(b.$createdAt).getTime();
-        return dateB - dateA; // Sort in descending order
+          return new Date(b.$createdAt).getTime() - new Date(a.$createdAt).getTime();
       });
-  
+
       const mostRecentPayment = sortedPayments[0];
-  
-      // Update the payment status to "reschedule"
+
+      // Update payment status
       await databases.updateDocument('Butterfly-Database', 'Payment', mostRecentPayment.$id, {
-        status: 'reschedule',
+          status: 'reschedule',
       });
-  
-      console.log("Payment status successfully updated to 'reschedule'.");
-  
-      // Fetch the current booking for the client
+
+      console.log("Payment status updated to 'reschedule'.");
+
+      // Fetch client's most recent booking
       const bookingResponse = await databases.listDocuments('Butterfly-Database', 'Bookings', [
-        Query.equal('client', clientId),
+          Query.equal('client', clientId),
       ]);
-  
+
       if (bookingResponse.documents.length === 0) {
-        console.log("No booking found for this client.");
-        return;
+          console.log("No booking found for this client.");
+          return;
       }
-  
-      // Get the most recent booking (assuming there's only one active booking)
+
       const booking = bookingResponse.documents[0];
-  
-      // Update the booking status to "rescheduleRequest"
-      await databases.updateDocument('Butterfly-Database', 'Bookings', booking.$id, {
-        status: 'rescheduleRequest',
-      });
-  
-      console.log("Booking status successfully updated to 'rescheduleRequest'.");
-      // Ensure the user has selected a new date and time
+
+      // Ensure new date & time are selected
       if (!appointmentData.selectedDay || !appointmentData.selectedTime) {
-        console.log("Please select a new date and time before rescheduling.");
-        return;
+          console.log("Please select a new date and time before rescheduling.");
+          return;
       }
 
-      // Update the booking with the new date, time, and status
+      // Update booking with new date, time, and status
       await databases.updateDocument('Butterfly-Database', 'Bookings', booking.$id, {
-        status: 'rescheduleRequest',
-        day: appointmentData.selectedDay,
-        month: appointmentData.selectedMonth,
-        slots: appointmentData.selectedTime,
+          status: 'rescheduleRequest',
+          day: appointmentData.selectedDay,
+          month: appointmentData.selectedMonth,
+          slots: appointmentData.selectedTime,
       });
 
-      console.log("Booking successfully updated with new date, time, and status.");
+      console.log("Booking successfully updated.");
+      
+      // Redirect back to appointment page
+      router.push('/client');
 
-      // Optionally redirect or show success message
-      router.push('/client/pages/bookappointment');
-      } catch (error) {
-      console.error("Error while updating booking:", error);
-      }
+  } catch (error) {
+      console.error("Error updating booking:", error);
+  } finally {
+      setLoading(false);
+      setShowConfirmationPrompt(false); // Hide confirmation prompt after updating
+  }
+};
 
+// Cancel confirmation prompt
+const cancelConfirmation = () => {
+  setShowConfirmationPrompt(false);
+};
 
-  };
   
 
   const confirmBooking = () => {
@@ -373,56 +382,55 @@ const RescheduleBooking = () => {
             </div>
         </div>
 
-        {/* Confirmation Prompt */}
-        {showPrompt && (
-            <div className="fixed inset-0 flex justify-center items-center bg-gray-800 bg-opacity-50 z-50">
-            <div className="bg-white p-8 rounded-xl shadow-xl max-w-md w-full text-center relative border border-gray-300">
-                <h3 className="text-2xl font-bold text-blue-900 mb-4">Are you sure you want to proceed?</h3>
-                <div className="mt-6 flex justify-around">
+{/* Success Message and Confetti - Shows first */}
+{showSuccessMessage && (
+    <div className="fixed inset-0 flex justify-center items-center bg-gray-800 bg-opacity-50 z-50">
+        <div className="bg-white p-8 rounded-lg shadow-xl max-w-md w-full text-center border border-gray-300">
+            <h3 className="text-2xl font-bold text-green-600">
+                You Are Almost Done With Rescheduling!
+            </h3>
+            <p className="mt-2">
+                Service Counseling and Therapy<br />
+                <strong>Date & Time:</strong> {appointmentData.selectedMonth} {appointmentData.selectedDay}, {currentYear} | {appointmentData.selectedTime}<br />
+                <strong>Mode:</strong> {appointmentData.selectedMode}<br />
+                <strong>Psychotherapist:</strong> {appointmentData.selectedTherapist ? `${appointmentData.selectedTherapist.firstName} ${appointmentData.selectedTherapist.lastName}` : "No therapist selected"}
+            </p>
+            <p className="text-lg text-gray-700">You can proceed to complete the rescheduling.</p>
+            <button
+                className="mt-4 py-2 px-4 bg-blue-400 text-white rounded-lg hover:bg-blue-500"
+                onClick={proceedToConfirmationPrompt}
+            >
+                Proceed to Rescheduling
+            </button>
+        </div>
+    </div>
+)}
+
+{/* Confirmation Prompt - Shows AFTER Success Message */}
+{showConfirmationPrompt && (
+    <div className="fixed inset-0 flex justify-center items-center bg-gray-800 bg-opacity-50 z-50">
+        <div className="bg-white p-8 rounded-xl shadow-xl max-w-md w-full text-center border border-gray-300">
+            <h3 className="text-2xl font-bold text-blue-900 mb-4">
+                Are you sure you want to proceed?
+            </h3>
+            <div className="mt-6 flex justify-around">
                 <button
                     className="bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-400"
-                    onClick={cancelBooking}
+                    onClick={cancelConfirmation}
                 >
                     Cancel
                 </button>
                 <button
                     className="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-blue-500"
-                    onClick={confirmBooking}
+                    onClick={handleConfirmReschedule}
                 >
                     Confirm
                 </button>
-                </div>
             </div>
-            </div>
-        )}
+        </div>
+    </div>
+)}
 
-        {/* Success Message and Confetti */}
-        {appointmentData.appointmentBooked && (
-            <div className="fixed inset-0 flex justify-center items-center bg-gray-800 bg-opacity-50 z-50">
-            <div className="bg-white p-8 rounded-lg shadow-xl max-w-md w-full text-center relative border border-gray-300">
-                <button
-                className="absolute top-2 right-2 bg-gray-300 rounded-full w-6 h-6 flex items-center justify-center text-black hover:bg-gray-400"
-                onClick={() => setAppointmentData((prev) => ({ ...prev, appointmentBooked: false }))}
-                >
-                &times;
-                </button>
-                <h3 className="text-2xl font-bold text-green-600">You Are Almost Done With Booking your Appointment!</h3>
-                <p className="mt-2">
-                Service Counseling and Therapy<br />
-                <strong>Date & Time</strong>: {appointmentData.selectedMonth} {appointmentData.selectedDay}, {currentYear} | {appointmentData.selectedTime}<br />
-                <strong>Mode</strong>: {appointmentData.selectedMode}<br />
-                <strong>Psychotherapist</strong>: {appointmentData.selectedTherapist ? `${appointmentData.selectedTherapist.firstName} ${appointmentData.selectedTherapist.lastName}` : "No therapist selected"}
-                </p>
-                <p className="text-lg text-gray-700">You can proceed to complete the rescheduling.</p>
-                <button
-                className="mt-4 py-2 px-4 bg-blue-400 text-white rounded-lg hover:bg-blue-500"
-                onClick={handleReschedule}
-                >
-                Proceed to Rescheduling
-                </button>
-            </div>
-            </div>
-        )}
         </Layout>
   );
 };
