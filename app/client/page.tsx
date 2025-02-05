@@ -125,7 +125,7 @@ const NewClientDashboard = () => {
           
           {/* Pre-assessment & Booking Section */}
           {state === "new" && (
-            <div className="flex flex-col items-center justify-center p-4 bg-white shadow-lg rounded-lg text-center">
+            <div className="flex flex-col items-center justify-center p-4 bg-white rounded-lg text-center">
               <Link href="/preassessment">
                 <button className="w-full sm:w-auto bg-blue-500 text-white py-2 px-4 rounded-lg text-lg font-semibold hover:bg-blue-600 transition-transform transform hover:scale-105">
                   Start Pre-assessment Test
@@ -153,7 +153,7 @@ const NewClientDashboard = () => {
           {state === "referred" && status === "pending" && (
             <div className="mb-4 text-green-600 text-4xl flex items-center">
               <span className="text-green-600 animate-bounce">✅</span>
-              <span className="ml-2 text-lg font-bold">You have been referred. Your certificate of referral is on the way!</span>
+              <span className="ml-2 text-lg font-bold">You have been referred. To receive your certificate of referral book an appointment 🦋</span>
             </div>
           )}
 
@@ -273,6 +273,9 @@ const NewClientDashboard = () => {
 
           {/* Psychotherapists Section */}
           <div className="relative overflow-hidden">
+            <h3 className="text-2xl font-bold text-blue-500 text-left mb-2 font-lora">
+              Meet our caring psychotherapists, here to guide your healing!
+            </h3>
             <div className="max-w-[750px] md:max-w-[850px] overflow-x-auto p-4 space-x-4 scrollbar-thin scrollbar-thumb-blue-300 flex">
             {psychotherapists.map((psychotherapist, index) => (
               <div
