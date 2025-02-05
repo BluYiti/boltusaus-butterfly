@@ -186,8 +186,19 @@ const SettingsPage = () => {
             <input
               type="text"
               className="w-full p-2 border border-gray-300 rounded"
-              value={contactNumber}
-              onChange={(e) => setContactNumber(e.target.value)}
+              value={contactNumber.startsWith('63') ? contactNumber.slice(2) : contactNumber}  // Display number without the leading '63' country code
+              maxLength={10}  // Limits input to 11 characters
+              onChange={(e) => {
+                // Allow only numeric input and restrict length to 11 digits
+                let value = e.target.value.replace(/[^\d]/g, '');  // Remove non-numeric characters
+                if (value.length <= 11) {
+                  // If the value starts with '0', remove it before adding the country code
+                  if (value.startsWith('0')) {
+                    value = value.slice(1);  // Remove leading '0'
+                  }
+                  setContactNumber(`63${value}`);  // Internally prepend '63' to the number
+                }
+              }}
             />
           </div>
           <div className="mb-4">
