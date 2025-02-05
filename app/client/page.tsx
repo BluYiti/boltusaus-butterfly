@@ -266,7 +266,7 @@ const NewClientDashboard = () => {
 
           {/* Psychotherapists Section */}
           <div className="relative overflow-hidden">
-            <div className="max-w-[850px] overflow-x-auto p-4 space-x-4 scrollbar-thin scrollbar-thumb-blue-300 flex">
+            <div className="max-w-[750px] md:max-w-[850px] overflow-x-auto p-4 space-x-4 scrollbar-thin scrollbar-thumb-blue-300 flex">
             {psychotherapists.map((psychotherapist, index) => (
               <div
                 key={index}
@@ -307,15 +307,15 @@ const NewClientDashboard = () => {
 
         {/* Right Section - Daily Reminder */}
         <div className="flex-1 bg-white p-4 sm:p-6 rounded-lg shadow-lg w-full lg:h-[30rem]">
-          <h2 className="font-bold text-xl sm:text-2xl lg:text-3xl text-blue-950 mb-4 sm:mb-6">A Daily Reminder to Yourself</h2>
-          <div className="space-y-5 text-black max-h-[365px] overflow-x-hidden overflow-y-auto">
+          <h2 className="font-bold text-xl sm:text-2xl lg:text-3xl text-blue-950 sm:mb-4">A Daily Reminder to Yourself</h2>
+          <div className="space-y-5 text-black max-h-[360px] overflow-x-hidden overflow-y-hidden">
             {[
               { emoji: "😊", title: "This Too Shall Pass", text: "Feelings are temporary. Hold on, better days are coming." },
               { emoji: "😮‍💨", title: "Breathe In, Let Go", text: "Take a moment to breathe. Release the tension in your mind and body." },
               { emoji: "🫵", title: "You Are Enough", text: "Your worth isn’t measured by your struggles. You are enough just as you are." }
             ].map((item, index) => (
               <div key={index} className="bg-blue-50 border-blue-300 p-3 rounded-lg shadow-lg transform transition-transform hover:scale-105 hover:shadow-2xl duration-300">
-                <h3 className="font-semibold text-lg mb-2">{item.emoji} {item.title}</h3>
+                <h3 className="font-semibold text-lg">{item.emoji} {item.title}</h3>
                 <p className="text-gray-800">{item.text}</p>
               </div>
             ))}
