@@ -120,7 +120,7 @@ const DayGrid: React.FC<DayGridProps> = ({ selectedDay, selectedMonth }) => {
                         {appointment.paymentStatus}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        {appointment.paymentStatus === 'paid' || appointment.paymentStatus === 'reschedule' ? (
+                        {appointment.paymentStatus === 'paid' || appointment.paymentStatus === 'rescheduled' ? (
                           <button 
                             className="text-white p-[0.3rem] rounded-xl bg-amber-400 hover:text-indigo-900"
                             onClick={() => handleRescheduleClick(appointment)}
