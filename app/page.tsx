@@ -158,7 +158,8 @@ const HomePage: React.FC = () => {
           height={65}
           className="absolute top-3 left-3"
         ></Image>
-        <p className="absolute top-7 text-white left-20 text-xl font-baskerville">Butterfly</p>
+        <p className="absolute top-5 text-white left-20 text-2xl font-baskerville">Butterfly</p>
+        <p className="absolute top-11 text-white left-20 text-base font-baskerville">Hope through Transcendence</p>
 
         {/* Adjusted Login Button */}
         <div className="absolute top-4 right-4">
