@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { account } from '@/appwrite';
 import { fetchAppointmentsForDay, fetchPsychoId, fetchPaymentStatus } from '@/hooks/userService';
 import RescheduleModal from '@/components/Reschedule';
@@ -9,44 +9,52 @@ interface DayGridProps {
 }
 
 const DayGrid: React.FC<DayGridProps> = ({ selectedDay, selectedMonth }) => {
-  const [loading, setLoading] = useState<boolean>(true);
-  const [, setError] = useState<string | null>(null);
-  const [, setPsychoId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const [appointments, setAppointments] = useState<any[]>([]);
-
-  // Modal State
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState<any | null>(null);
+  const [psychoId, setPsychoId] = useState<string | null>(null);
 
+  // Fetch psychoId only once per session
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
+    const fetchPsycho = async () => {
       try {
         const user = await account.get();
-        const psychoId = await fetchPsychoId(user.$id);
-        setPsychoId(psychoId);
-
-        if (selectedDay && selectedMonth && psychoId) {
-          const appointments = await fetchAppointmentsForDay(selectedDay, selectedMonth, psychoId);
-          const appointmentsWithPaymentStatus = await Promise.all(
-            appointments.map(async (appointment) => {
-              const paymentStatus = await fetchPaymentStatus(appointment.$id);
-              return { ...appointment, paymentStatus };
-            })
-          );
-
-          setAppointments(appointmentsWithPaymentStatus || []);
-        }
-      } catch (err) {
-        setError('Failed to fetch data.');
-        console.error(err);
-      } finally {
-        setLoading(false);
+        const id = await fetchPsychoId(user.$id);
+        setPsychoId(id);
+      } catch (error) {
+        console.error('Failed to fetch psychoId:', error);
       }
     };
 
+    fetchPsycho();
+  }, []);
+
+  // Fetch appointments whenever selectedDay, selectedMonth, and psychoId change
+  const fetchData = useCallback(async () => {
+    if (!selectedDay || !selectedMonth || !psychoId) return;
+
+    setLoading(true);
+    try {
+      const appointments = await fetchAppointmentsForDay(selectedDay, selectedMonth, psychoId);
+      const appointmentsWithPaymentStatus = await Promise.all(
+        appointments.map(async (appointment) => ({
+          ...appointment,
+          paymentStatus: await fetchPaymentStatus(appointment.$id),
+        }))
+      );
+
+      setAppointments(appointmentsWithPaymentStatus);
+    } catch (error) {
+      console.error('Failed to fetch appointments:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedDay, selectedMonth, psychoId]);
+
+  useEffect(() => {
     fetchData();
-  }, [selectedDay, selectedMonth]);
+  }, [fetchData]);
 
   // Open modal function
   const handleRescheduleClick = (appointment: any) => {
@@ -60,15 +68,14 @@ const DayGrid: React.FC<DayGridProps> = ({ selectedDay, selectedMonth }) => {
     setSelectedAppointment(null);
   };
 
-  if (!selectedDay || !selectedMonth) {
-    return null;
-  }
+  if (!selectedDay || !selectedMonth) return null;
 
   return (
     <div>
-      <div>
-        <h1 className="text-2xl font-bold text-[#3585ff]">{selectedMonth} {selectedDay.toString()} Appointments</h1>
-      </div>
+      <h1 className="text-2xl font-bold text-[#3585ff]">
+        {selectedMonth} {selectedDay.toString()} Appointments
+      </h1>
+
       {loading ? (
         <div className="flex justify-center items-center mt-4">
           <img src="/gifs/butterfly.gif" alt="Loading" className="h-8 w-8" />
@@ -78,30 +85,21 @@ const DayGrid: React.FC<DayGridProps> = ({ selectedDay, selectedMonth }) => {
         <div className="grid grid-cols-1 gap-4 mt-4">
           {appointments.length === 0 ? (
             <div className="flex justify-center items-center h-full">
-              <p className="text-lg text-blue-500">
-                No appointments found for this day.
-              </p>
+              <p className="text-lg text-blue-500">No appointments found for this day.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Client
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Time
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Payment
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
+                    {['Client', 'Time', 'Status', 'Payment', 'Actions'].map((header) => (
+                      <th
+                        key={header}
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      >
+                        {header}
+                      </th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
@@ -121,7 +119,7 @@ const DayGrid: React.FC<DayGridProps> = ({ selectedDay, selectedMonth }) => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         {appointment.paymentStatus === 'paid' || appointment.paymentStatus === 'rescheduled' ? (
-                          <button 
+                          <button
                             className="text-white p-[0.3rem] rounded-xl bg-amber-400 hover:text-indigo-900"
                             onClick={() => handleRescheduleClick(appointment)}
                           >
@@ -141,20 +139,14 @@ const DayGrid: React.FC<DayGridProps> = ({ selectedDay, selectedMonth }) => {
       )}
 
       {/* Reschedule Modal */}
-      {isModalOpen && (
-        <RescheduleModal 
-        onClose={closeModal} 
-        appointmentId={selectedAppointment?.$id} 
-      >
-        <h3 className="text-lg font-semibold mb-2">Reschedule Appointment</h3>
-        <p className="text-gray-600 mb-4">
-          Reschedule appointment for:
-        </p>
-        <p className="text-md font-medium">
-          {selectedMonth} {selectedDay}, {selectedAppointment?.slots}
-        </p>
-      </RescheduleModal>      
-      
+      {isModalOpen && selectedAppointment && (
+        <RescheduleModal onClose={closeModal} appointmentId={selectedAppointment.$id}>
+          <h3 className="text-lg font-semibold mb-2">Reschedule Appointment</h3>
+          <p className="text-gray-600 mb-4">Reschedule appointment for:</p>
+          <p className="text-md font-medium">
+            {selectedMonth} {selectedDay}, {selectedAppointment.slots}
+          </p>
+        </RescheduleModal>
       )}
     </div>
   );
