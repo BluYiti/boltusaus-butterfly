@@ -25,7 +25,6 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
     const [showPassword, setShowPassword] = useState(true);
     const [step, setStep] = useState(1);
     const [countryCode, setCountryCode] = useState("+63"); // Default to PH
-    const [phoneNumber, setPhoneNumber] = useState("");
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
     };
@@ -435,8 +434,6 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
                                     onChange={(e) => {
                                         const newCode = e.target.value;
                                         setCountryCode(newCode);
-                                        // Update phone number when country code changes
-                                        setPhoneNumber(`${newCode}${contactNumber}`);
                                     }}
                                 >
                                     {countryCodes.map((country) => (
@@ -453,10 +450,9 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
                                     name="contactNumber"
                                     value={contactNumber} // Stores raw phone number
                                     onChange={(e) => {
-                                        let value = e.target.value.replace(/[^\d]/g, ''); // Remove non-numeric characters
+                                        const value = e.target.value.replace(/[^\d]/g, ''); // Remove non-numeric characters
                                         if (value.length <= 10) {
                                             setContactNumber(value);
-                                            setPhoneNumber(`${countryCode}${value}`); // Update full phone number
                                         }
                                     }}
                                     className="flex-1 px-3 py-2 outline-none text-gray-500"
@@ -512,7 +508,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
                                     value={emergencyContactNumber} // No more prefix manipulation
                                     onChange={(e) => {
                                         // Allow only numeric input and restrict length to 11 digits
-                                        let value = e.target.value.replace(/[^\d]/g, ''); // Remove non-numeric characters
+                                        const value = e.target.value.replace(/[^\d]/g, ''); // Remove non-numeric characters
                                         if (value.length <= 10) {
                                             setEmergencyContactNumber(value); // Store only the entered digits
                                         }
