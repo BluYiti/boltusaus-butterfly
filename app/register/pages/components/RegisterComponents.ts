@@ -22,10 +22,6 @@ const useRegisterForm = () => {
     const [password, setPassword] = useState<string>('');
     const [passwordCriteria, setPasswordCriteria] = useState({
         length: false,
-        number: false,
-        specialChar: false,
-        uppercase: false,
-        lowercase: false,
     });
     const [rePassword, setRePassword] = useState<string>('');
     const [passwordsMatch, setPasswordsMatch] = useState(true);

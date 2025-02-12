@@ -29,7 +29,7 @@ const RegisterPage: React.FC = () => {
                     width={540} 
                     height={540} 
                     priority // Set priority for LCP
-                    className="fixed object-contain max-w-full h-auto 3xl:left-48 3xl:top-64 sm:left-12 sm:top-44" // Maintain aspect ratio
+                    className="fixed object-contain max-w-full h-auto 3xl:left-48 3xl:top-64 sm:left-44  sm:top-44" // Maintain aspect ratio
                 />
             </div>
             <div className="flex justify-end items-end w-full px-4 sm:px-0">

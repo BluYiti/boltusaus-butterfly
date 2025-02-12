@@ -136,15 +136,15 @@ const HomePage: React.FC = () => {
           <div className={`md:flex ${open === -1 ? 'block' : 'hidden'} transition-all duration-300`}>
             {navItems.map((item, index) => (
               <motion.a
-          key={item.label}
-          href={item.href}
-          className="hover:text-gray-400 mr-5 block md:inline-block"
-          initial="hidden"
-          animate="visible"
-          variants={navVariants}
-          custom={index}
+                key={item.label}
+                href={item.href}
+                className="hover:text-gray-400 mr-5 block md:inline-block"
+                initial="hidden"
+                animate="visible"
+                variants={navVariants}
+                custom={index}
               >
-          {item.label}
+                {item.label}
               </motion.a>
             ))}
           </div>
@@ -154,12 +154,12 @@ const HomePage: React.FC = () => {
         <Image
           src="/images/NEW BUTTERFLY PROTO.png"
           alt="Butterfly Logo"
-          width={65}
-          height={65}
+          width={125}
+          height={125}
           className="absolute top-3 left-3"
         ></Image>
-        <p className="absolute top-5 text-white left-20 text-2xl font-baskerville">Butterfly</p>
-        <p className="absolute top-11 text-white left-20 text-base font-baskerville">Hope through Transcendence</p>
+        <p className="absolute top-9 text-white left-36 text-5xl font-baskerville">Butterfly</p>
+        <p className="absolute top-20 text-white left-36 text-2xl font-baskerville">Hope through Transcendence</p>
 
         {/* Adjusted Login Button */}
         <div className="absolute top-4 right-4">

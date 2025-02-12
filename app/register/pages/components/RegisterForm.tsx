@@ -15,10 +15,17 @@ import { useFetchBarangays } from '@/register/pages/hooks/useFetch/useFetchBaran
 import { useRouter } from 'next/navigation';
 import { EyeOffIcon, EyeIcon } from '@heroicons/react/solid';
 
+const countryCodes = [
+    { code: "+63", label: "PH" }
+  ];
+
 const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
     const [isFocused, setIsFocused] = useState(false);
     const [showRePassword, setShowRePassword] = useState(true);
     const [showPassword, setShowPassword] = useState(true);
+    const [step, setStep] = useState(1);
+    const [countryCode, setCountryCode] = useState("+63"); // Default to PH
+    const [phoneNumber, setPhoneNumber] = useState("");
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
     };
@@ -87,15 +94,109 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
             const { userId } = data; // Extract the userId from data
             router.push(`/register/pages/verify/email?user=${encodeURIComponent(userId)}`);
         },
-        setValidationError,
+        setValidationError
     }, setLoading, setButtonClicked); // Pass setLoading and setButtonClicked here
 
     const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        validateForm();
         e.preventDefault();
         if (isFormValid()) {
             setButtonClicked(true); // Set buttonClicked to true when the button is clicked
             handleSubmit(e);  // Perform form submission logic
         }
+    };
+
+    const validateForm = () => {
+        // Clear any previous validation errors
+        setValidationError(null);
+    
+        // Validate first name
+        if (firstName.trim().length === 0) {
+            setValidationError("First name is required.");
+            return false;
+        }
+    
+        // Validate last name
+        if (lastName.trim().length === 0) {
+            setValidationError("Last name is required.");
+            return false;
+        }
+    
+        // Validate birthday
+        if (birthday.trim().length === 0) {
+            setValidationError("Birthday is required.");
+            return false;
+        }
+    
+        // Validate age
+        if (age <= 0) {
+            setValidationError("Invalid age.");
+            return false;
+        }
+    
+        // Validate sex
+        if (sex.trim().length === 0) {
+            setValidationError("Sex is required.");
+            return false;
+        }
+    
+        // Validate address (region, province, city, barangay)
+        if (!region || !province || !city || !barangay) {
+            setValidationError("Complete address is required.");
+            return false;
+        }
+    
+        // Validate contact number (length and starting digits)
+        if (contactNumber.length !== 10) {
+            setValidationError("Invalid contact number. It must 10 digits long.");
+            return false;
+        }
+    
+        // Validate emergency contact name
+        if (emergencyContactName.trim().length === 0) {
+            setValidationError("Emergency contact name is required.");
+            return false;
+        }
+    
+        // Validate emergency contact number
+        if (emergencyContactNumber.length !== 10) {
+            setValidationError("Invalid emergency contact number. It must be 10 digits long.");
+            return false;
+        }
+    
+        // Validate email
+        if (!validateEmail(email)) {
+            setValidationError("Invalid email address.");
+            return false;
+        }
+    
+        // Validate password
+        if (password.length < 8) {
+            setValidationError("Password must be at least 8 characters long.");
+            return false;
+        }
+    
+        // Validate if passwords match
+        if (password !== rePassword) {
+            setValidationError("Passwords do not match.");
+            return false;
+        }
+    
+        // Validate terms agreement
+        if (!agreeToTerms) {
+            setValidationError("You must agree to the terms and conditions.");
+            return false;
+        }
+    
+        // Validate ID file
+        const fileError = validateFile(idFile);
+        if (fileError) {
+            setValidationError(fileError);
+            return false;
+        }
+    
+        // If all validations pass, return true
+        return true;
     };
 
     // Use custom hooks to fetch data
@@ -149,26 +250,18 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
     };
 
     const validateEmail = (email) => {
-        const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        const regex = /^[a-zA-Z0-9]+@(?:[a-zA-Z0-9]+\.)+[A-Za-z]+$/;
         return regex.test(email);
     };
 
     const validatePassword = (password: string) => {
         const length = password.length >= 8;
-        const number = /\d/.test(password);
-        const specialChar = /[@$!%*?&]/.test(password);
-        const uppercase = /[A-Z]/.test(password);
-        const lowercase = /[a-z]/.test(password);
 
         setPasswordCriteria({
             length,
-            number,
-            specialChar,
-            uppercase,
-            lowercase,
         });
 
-        setIsPasswordValid(length && number && specialChar && uppercase && lowercase);
+        setIsPasswordValid(length);
     };
 
     // Function to validate the uploaded file (ID)
@@ -184,6 +277,10 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
         }
         return null;
     };
+    
+    // Handle next and previous steps
+    const nextStep = () => setStep((prev) => prev + 1);
+    const prevStep = () => setStep((prev) => prev - 1);
     
     const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newPassword = e.target.value;
@@ -204,15 +301,11 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
         const isAgeValid = age > 0;
         const isSexValid = sex.trim().length > 0;
         const isAddressValid = region && province && city && barangay;
-        const isContactNumberValid = contactNumber.length === 12 && contactNumber.startsWith('63');
+        const isContactNumberValid = contactNumber.length === 10;
         const isEmergencyContactNameValid = emergencyContactName.trim().length > 0;
-        const isEmergencyContactNumberValid = emergencyContactNumber.length === 12 && emergencyContactNumber.startsWith('63');
+        const isEmergencyContactNumberValid = emergencyContactNumber.length === 10;
         const isEmailValid = validateEmail(email);
-        const isPasswordValid = password.length >= 8 &&
-                                /\d/.test(password) &&           // At least 1 number
-                                /[!@#$%^&*(),.?":{}|<>]/.test(password) && // At least 1 special character
-                                /[a-z]/.test(password) &&         // At least 1 lowercase letter
-                                /[A-Z]/.test(password);           // At least 1 uppercase letter
+        const isPasswordValid = password.length >= 8;
         const doPasswordsMatch = password === rePassword;
         const isTermsAgreed = agreeToTerms;
         const isIdFileValid = idFile && !validateFile(idFile);
@@ -237,244 +330,368 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
 
     return (
         <div className="w-full mt-8 p-8">
-            <form className="3xl:mt-24 space-y-4" onSubmit={handleFormSubmit}>
-                {error && <div className="text-red-600 text-lg font-bold">{error}</div>}
-                {validationError && <div className="text-red-600 text-lg font-bold">{validationError}</div>}
-
-                <div>
-                {/* Two-Column Layout */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 gap-y-0">
-                    {/* First Name */}
-                    <div>
-                        <label htmlFor="firstName" className="block text-[#38b6ff]">First Name</label>
-                        <input
-                            id="firstName"
-                            type="text"
-                            required
-                            placeholder="First Name"
-                            value={firstName}
-                            onChange={(e) => {
-                                // Regular expression to allow only alphabetic characters (A-Z, a-z)
-                                const value = e.target.value;
-                                if (/^[A-Za-z]*$/.test(value)) {
-                                    setFirstName(value);
-                                }
-                            }}
-                            className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
-                        />
-                    </div>
-
-                    {/* Last Name */}
-                    <div>
-                        <label htmlFor="lastName" className="block text-[#38b6ff]">Last Name</label>
-                        <input
-                            id="lastName"
-                            type="text"
-                            required
-                            placeholder="Last Name"
-                            value={lastName}
-                            onChange={(e) => {
-                                // Regular expression to allow only alphabetic characters (A-Z, a-z)
-                                const value = e.target.value;
-                                if (/^[A-Za-z]*$/.test(value)) {
-                                    setLastName(value);
-                                }
-                            }}
-                            className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-[0.35rem] w-full text-gray-500"
-                        />
-                    </div>
-
-                    {/* Birthday and Age */}
-                    <div className="flex space-x-2">
-                        <div className="flex-1">
-                            <label htmlFor="birthday" className="block text-[#38b6ff]">Birthday</label>
+            <form className="3xl:mt-24" onSubmit={handleFormSubmit}>
+                {error && <div className="absolute text-red-700 text-lg font-bold">{error}</div>}
+                {validationError && <div className="absolute text-red-700 text-lg font-bold">{validationError}</div>}
+                {step === 1 && (
+                    <div className='md:pr-48 md:pt-10'>
+                        {/* First Name */}
+                        <div>
+                            <label htmlFor="firstName" className="block text-[#38b6ff]">First Name</label>
                             <input
-                                id="birthday"
-                                type="date"
+                                id="firstName"
+                                type="text"
                                 required
-                                value={birthday}
-                                onChange={(e) => handleBirthdayChange(e.target.value)}
-                                min="1900-01-01"  // Setting the minimum date to 1900
-                                max="2099-12-31"  // Setting the maximum date to 2099
+                                placeholder="First Name"
+                                value={firstName}
+                                onChange={(e) => {
+                                    // Regular expression to allow only alphabetic characters (A-Z, a-z) and spaces
+                                    const value = e.target.value;
+                                    if (/^[A-Za-z\s]*$/.test(value)) {
+                                        setFirstName(value);
+                                    }
+                                }}
+                                className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
+                            />
+                        </div>
+
+                        {/* Last Name */}
+                        <div>
+                            <label htmlFor="lastName" className="block text-[#38b6ff]">Last Name</label>
+                            <input
+                                id="lastName"
+                                type="text"
+                                required
+                                placeholder="Last Name"
+                                value={lastName}
+                                onChange={(e) => {
+                                    // Regular expression to allow only alphabetic characters (A-Z, a-z)
+                                    const value = e.target.value;
+                                    if (/^[A-Za-z]*$/.test(value)) {
+                                        setLastName(value);
+                                    }
+                                }}
                                 className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-[0.35rem] w-full text-gray-500"
                             />
                         </div>
-                        <div className="flex-none w-1/3">
-                            <label className="block text-[#38b6ff]">Age</label>
+
+                        {/* Birthday and Age */}
+                        <div className="flex space-x-2">
+                            <div className="flex-1">
+                                <label htmlFor="birthday" className="block text-[#38b6ff]">Birthday</label>
+                                <input
+                                    id="birthday"
+                                    type="date"
+                                    required
+                                    value={birthday}
+                                    onChange={(e) => handleBirthdayChange(e.target.value)}
+                                    min="1900-01-01"  // Setting the minimum date to 1900
+                                    max="2099-12-31"  // Setting the maximum date to 2099
+                                    className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-[0.35rem] w-full text-gray-500"
+                                />
+                            </div>
+                            <div className="flex-none w-1/3">
+                                <label className="block text-[#38b6ff]">Age</label>
+                                <input
+                                    type="text"
+                                    value={age !== null ? age : ''}
+                                    readOnly
+                                    className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-[0.325rem] w-full text-gray-500"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Sex Dropdown */}
+                        <div>
+                            <label className="block text-[#38b6ff]">Sex</label>
+                            <select
+                                className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
+                                value={sex}
+                                onChange={(e) => setSex(e.target.value)}
+                            >
+                                <option value="">Select Sex</option>
+                                {["Male", "Female"].map((gender) => (
+                                    <option key={gender} value={gender}>
+                                        {gender}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {/* Contact Number */}
+                        <div>
+                            {/* Label */}
+                            <div className="flex items-center mb-2">
+                                <label htmlFor="contactNumber" className="block text-[#38b6ff]">Contact Number</label>
+                                <p className="text-xs text-red-500 ml-2">*No zero at the start</p>
+                            </div>
+
+                            {/* Country Code & Phone Input Wrapper */}
+                            <div className="flex border border-[#38b6ff] rounded-xl overflow-hidden">
+                                {/* Country Code Dropdown */}
+                                <select
+                                    className="bg-gray-100 px-3 py-2 border-r border-[#38b6ff] outline-none text-gray-700 text-sm"
+                                    value={countryCode}
+                                    onChange={(e) => {
+                                        const newCode = e.target.value;
+                                        setCountryCode(newCode);
+                                        // Update phone number when country code changes
+                                        setPhoneNumber(`${newCode}${contactNumber}`);
+                                    }}
+                                >
+                                    {countryCodes.map((country) => (
+                                        <option key={country.code} value={country.code}>
+                                            {country.label} {country.code}
+                                        </option>
+                                    ))}
+                                </select>
+
+                                {/* Phone Number Input */}
+                                <input
+                                    type="tel"
+                                    id="contactNumber"
+                                    name="contactNumber"
+                                    value={contactNumber} // Stores raw phone number
+                                    onChange={(e) => {
+                                        let value = e.target.value.replace(/[^\d]/g, ''); // Remove non-numeric characters
+                                        if (value.length <= 10) {
+                                            setContactNumber(value);
+                                            setPhoneNumber(`${countryCode}${value}`); // Update full phone number
+                                        }
+                                    }}
+                                    className="flex-1 px-3 py-2 outline-none text-gray-500"
+                                    required
+                                    autoComplete="tel"
+                                    maxLength={10}
+                                    inputMode="numeric"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Emergency Contact Name */}
+                        <div>
+                            <label htmlFor="emergencyContactName" className="block text-[#38b6ff]">Emergency Contact Name</label>
                             <input
+                                id="emergencyContactName"
                                 type="text"
-                                value={age !== null ? age : ''}
-                                readOnly
-                                className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-[0.325rem] w-full text-gray-500"
+                                required
+                                placeholder="Emergency Contact Name"
+                                value={emergencyContactName}
+                                onChange={(e) => setEmergencyContactName(e.target.value)}
+                                className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
                             />
                         </div>
-                    </div>
 
-                    {/* Sex Dropdown */}
-                    <div>
-                        <label className="block text-[#38b6ff]">Sex</label>
-                        <select
-                            className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
-                            value={sex}
-                            onChange={(e) => setSex(e.target.value)}
-                        >
-                            <option value="">Select Sex</option>
-                            {["Male", "Female"].map((gender) => (
-                                <option key={gender} value={gender}>
-                                    {gender}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+                        {/* Emergency Contact Number */}
+                        <div>
+                            <div className="flex items-center mb-2">
+                                <label htmlFor="emergencyContactNumber" className="block text-[#38b6ff]">Emergency Contact Number</label>
+                                <p className="text-xs text-red-500 ml-2">*No zero at the start</p> {/* Add message here */}
+                            </div>
 
-                    {/* Country Dropdown */}
-                    <div>
-                        <label className="block text-[#38b6ff]">Country</label>
-                        <select
-                            className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
-                            value="Philippines" // Directly set the value to "Philippines"
-                            onChange={() => {}} // No need to update state since it's fixed to "Philippines"
-                            disabled // Option to prevent any changes (if the dropdown is meant to be fixed)
-                        >
-                            <option value="Philippines">Philippines</option> {/* Only "Philippines" option */}
-                        </select>
-                    </div>
+                            {/* Country Code & Phone Input Wrapper */}
+                            <div className="flex border border-[#38b6ff] rounded-xl overflow-hidden">
+                                {/* Country Code Dropdown */}
+                                <select
+                                    className="bg-gray-100 px-3 py-2 border-r border-[#38b6ff] outline-none text-gray-700 text-sm"
+                                    value={countryCode}
+                                    onChange={(e) => setCountryCode(e.target.value)}
+                                >
+                                    {countryCodes.map((country) => (
+                                        <option key={country.code} value={country.code}>
+                                            {country.label} {country.code}
+                                        </option>
+                                    ))}
+                                </select>
 
-                    {/* Region Dropdown */}
-                    <div>
-                        <label className="block text-[#38b6ff]">Region</label>
-                        <select
-                            className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
-                            value={region}
-                            required
-                            onChange={(e) => {
-                                setCountry("Philippines");
-                                const selectedRegion = regions.find(r => r.name === e.target.value);
-                                setRegion(e.target.value);
-                                setSelectedRegionCode(selectedRegion?.code ?? null); // Use nullish coalescing to handle undefined
-                                setProvince(''); // Reset province when region changes
-                                setCity(''); // Reset city when region changes
-                                setBarangay(''); // Reset barangay when region changes
-                                setProvinces([]); // Clear provinces
-                                setCities([]); // Clear cities
-                                setBarangays([]); // Clear barangays
-                            }}
-                        >
-                            <option value="">Select Region</option>
-                            {regions
-                                .sort((a, b) => a.name.localeCompare(b.name))
-                                .map((region) => (
-                                    <option key={region.code} value={region.name}>
-                                        {region.name}
-                                    </option>
+                                {/* Phone Number Input */}
+                                <input
+                                    type="tel"
+                                    id="emergencyContactNumber"
+                                    name="emergencyContactNumber"
+                                    value={emergencyContactNumber} // No more prefix manipulation
+                                    onChange={(e) => {
+                                        // Allow only numeric input and restrict length to 11 digits
+                                        let value = e.target.value.replace(/[^\d]/g, ''); // Remove non-numeric characters
+                                        if (value.length <= 10) {
+                                            setEmergencyContactNumber(value); // Store only the entered digits
+                                        }
+                                    }}
+                                    className="flex-1 px-3 py-2 outline-none text-gray-500"
+                                    required
+                                    autoComplete="tel"
+                                    maxLength={10} // Limits input to 11 characters
+                                    inputMode="numeric" // Suggest numeric keyboard on mobile
+                                />
+                            </div>
+                        </div>
+                        {/* Next Page Button */}
+                        <button
+                            type="button"
+                            className={`
+                                bg-gradient-to-r 
+                                from-[#38b6ff] 
+                                to-[#4982ae] 
+                                text-white 
+                                font-bold 
+                                mt-5
+                                py-2 
+                                px-4 
+                                rounded-xl 
+                                transition-all 
+                                duration-300 
+                                ease-in-out 
+                                shadow-lg 
+                                transform 
+                                hover:scale-105 
+                                hover:shadow-xl 
+                                ${buttonClicked ? 'bg-green-500' : ''}
+                            `}
+                            onClick={nextStep}>
+                            {loading ? 'Loading...' : 'Next'}
+                        </button>
+                    </div>
+                )}
+                        
+                {step === 2 && (
+                    <div className="md:pr-56 pt-16">
+                        {/* Country Dropdown */}
+                        <div>
+                            <label className="block text-[#38b6ff]">Country</label>
+                            <select
+                                className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full md:w-96 text-gray-500 cursor-not-allowed"
+                                value="Philippines"
+                                disabled
+                            >
+                                <option value="Philippines">Philippines</option>
+                            </select>
+                        </div>
+
+                        {/* Region Dropdown */}
+                        <div>
+                            <label className="block text-[#38b6ff]">Region</label>
+                            <select
+                                className={`border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full md:w-96 text-gray-500 
+                                            ${regions.length ? 'cursor-pointer' : 'cursor-not-allowed'}`}
+                                value={region}
+                                required
+                                onChange={(e) => {
+                                    setCountry("Philippines");
+                                    const selectedRegion = regions.find(r => r.name === e.target.value);
+                                    setRegion(e.target.value);
+                                    setSelectedRegionCode(selectedRegion?.code ?? null);
+                                    setProvince('');
+                                    setCity('');
+                                    setBarangay('');
+                                    setProvinces([]);
+                                    setCities([]);
+                                    setBarangays([]);
+                                }}
+                                disabled={!regions.length}
+                            >
+                                <option value="">Select Region</option>
+                                {regions.sort((a, b) => a.name.localeCompare(b.name)).map((region) => (
+                                    <option key={region.code} value={region.name}>{region.name}</option>
                                 ))}
-                        </select>
-                    </div>
+                            </select>
+                        </div>
 
-                    {/* Province Dropdown */}
-                    <div>
-                        <label className="block text-[#38b6ff]">Province</label>
-                        <select
-                            className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
-                            value={province}
-                            required
-                            onChange={(e) => {
-                                setProvince(e.target.value);
-                                setCity(''); // Reset city when province changes
-                                setBarangays([]); // Clear barangays when province changes
-                            }}
-                        >
-                            <option value="">Select Province</option>
-                            {provinces
-                                .sort((a, b) => a.name.localeCompare(b.name))
-                                .map((province) => (
-                                    <option key={province.code} value={province.name}>
-                                        {province.name}
-                                    </option>
+                        {/* Province Dropdown */}
+                        <div>
+                            <label className="block text-[#38b6ff]">Province</label>
+                            <select
+                                className={`border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full md:w-96 text-gray-500 
+                                            ${region ? 'cursor-pointer' : 'cursor-not-allowed'}`}
+                                value={province}
+                                required
+                                onChange={(e) => {
+                                    setProvince(e.target.value);
+                                    setCity('');
+                                    setBarangays([]);
+                                }}
+                                disabled={!region}
+                            >
+                                <option value="">Select Province</option>
+                                {provinces.sort((a, b) => a.name.localeCompare(b.name)).map((province) => (
+                                    <option key={province.code} value={province.name}>{province.name}</option>
                                 ))}
-                        </select>
-                    </div>
+                            </select>
+                        </div>
 
-                    {/* City Dropdown */}
-                    <div>
-                        <label className="block text-[#38b6ff]">City</label>
-                        <select
-                            className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
-                            value={city}
-                            required
-                            onChange={(e) => setCity(e.target.value)}
-                        >
-                            <option value="">Select City</option>
-                            {cities
-                                .sort((a, b) => a.name.localeCompare(b.name))
-                                .map((city) => (
-                                    <option key={city.code} value={city.name}>
-                                        {city.name}
-                                    </option>
+                        {/* City Dropdown */}
+                        <div>
+                            <label className="block text-[#38b6ff]">City</label>
+                            <select
+                                className={`border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full md:w-96 text-gray-500 
+                                            ${province ? 'cursor-pointer' : 'cursor-not-allowed'}`}
+                                value={city}
+                                required
+                                onChange={(e) => setCity(e.target.value)}
+                                disabled={!province}
+                            >
+                                <option value="">Select City</option>
+                                {cities.sort((a, b) => a.name.localeCompare(b.name)).map((city) => (
+                                    <option key={city.code} value={city.name}>{city.name}</option>
                                 ))}
-                        </select>
-                    </div>
+                            </select>
+                        </div>
 
-                    {/* Barangay Dropdown */}
-                    <div>
-                        <label className="block text-[#38b6ff]">Barangay</label>
-                        <select
-                            className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
-                            value={barangay}
-                            required
-                            onChange={(e) => setBarangay(e.target.value)}
-                        >
-                            <option value="">Select Barangay</option>
-                            {barangays
-                                .sort((b1, b2) => b1.name.localeCompare(b2.name))
-                                .map((b) => (
+                        {/* Barangay Dropdown */}
+                        <div>
+                            <label className="block text-[#38b6ff]">Barangay</label>
+                            <select
+                                className={`border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full md:w-96 text-gray-500 
+                                            ${city ? 'cursor-pointer' : 'cursor-not-allowed'}`}
+                                value={barangay}
+                                required
+                                onChange={(e) => setBarangay(e.target.value)}
+                                disabled={!city}
+                            >
+                                <option value="">Select Barangay</option>
+                                {barangays.sort((b1, b2) => b1.name.localeCompare(b2.name)).map((b) => (
                                     <option key={b.code} value={b.name}>{b.name}</option>
                                 ))}
-                        </select>
-                    </div>
-
-                    {/* Street Input */}
-                    <div>
-                        <label className="block text-[#38b6ff]">Street</label>
-                        <input
-                            className="border border-[#38b6ff] rounded-xl pl-3 pr-3 py-2 w-full text-gray-500"
-                            value={street}
-                            onChange={(e) => setStreet(e.target.value)}
-                            placeholder="Enter your street"
-                            required
-                        />
-                    </div>
-
-                    {/* Contact Number */}
-                    <div>
-                        <div className="flex items-center">
-                            <label htmlFor="contactNumber" className="block text-[#38b6ff]">Contact Number</label>
-                            <p className="text-xs text-red-500 ml-2">*No zero at the start</p> {/* Add message here */}
+                            </select>
                         </div>
-                        <input
-                            type="tel"
-                            id="contactNumber"
-                            name="contactNumber"
-                            value={contactNumber.startsWith('63') ? contactNumber.slice(2) : contactNumber}  // Display number without the leading '63' country code
-                            onChange={(e) => {
-                                // Allow only numeric input and restrict length to 11 digits
-                                let value = e.target.value.replace(/[^\d]/g, '');  // Remove non-numeric characters
-                                if (value.length <= 11) {
-                                    // If the value starts with '0', remove it before adding the country code
-                                    if (value.startsWith('0')) {
-                                        value = value.slice(1);  // Remove leading '0'
-                                    }
-                                    setContactNumber(`63${value}`);  // Internally prepend '63' to the number
-                                }
-                            }}
-                            className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
-                            required
-                            autoComplete="tel"
-                            maxLength={10}  // Limits input to 11 characters
-                            inputMode="numeric"  // Suggest numeric keyboard on mobile
-                        />
-                    </div>
 
+                        {/* Street Input */}
+                        <div>
+                            <label className="block text-[#38b6ff]">Street</label>
+                            <input
+                                className="border border-[#38b6ff] rounded-xl pl-3 pr-3 py-2 w-full md:w-96 text-gray-500"
+                                value={street}
+                                onChange={(e) => setStreet(e.target.value)}
+                                placeholder="Enter your street"
+                                required
+                            />
+                        </div>
+
+                        {/* Navigation Buttons */}
+                        <div>
+                            <button
+                                type="button"
+                                className="bg-gradient-to-r from-[#38b6ff] to-[#4982ae] text-white font-bold mt-6 mr-4 py-2 px-4 rounded-xl 
+                                        transition-all duration-300 ease-in-out shadow-lg transform hover:scale-105 hover:shadow-xl"
+                                onClick={prevStep}
+                            >
+                                {loading ? 'Loading...' : 'Back'}
+                            </button>
+
+                            <button
+                                type="button"
+                                className={`bg-gradient-to-r from-[#38b6ff] to-[#4982ae] text-white font-bold py-2 px-4 rounded-xl 
+                                            transition-all duration-300 ease-in-out shadow-lg transform hover:scale-105 hover:shadow-xl 
+                                            ${buttonClicked ? 'bg-green-500' : ''}`}
+                                onClick={nextStep}
+                            >
+                                {loading ? 'Loading...' : 'Next'}
+                            </button>
+                        </div> 
+                    </div>
+                )}
+
+                {step === 3 &&(
+                    <div className="md:pr-52 pt-40">
                     {/* Upload ID */}
                     <div>
                         <label htmlFor="idFile" className="block text-[#38b6ff]">
@@ -493,52 +710,8 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
                                     setValidationError(null);
                                     setIdFile(file);
                                 }
-                            }}
+                            }}                            
                             className="border border-[#38b6ff] rounded-xl pl-2 pr-10 py-1 w-full text-gray-500 mt-1"
-                        />
-                    </div>
-
-                    {/* Emergency Contact Name */}
-                    <div>
-                        <label htmlFor="emergencyContactName" className="block text-[#38b6ff]">Emergency Contact Name</label>
-                        <input
-                            id="emergencyContactName"
-                            type="text"
-                            required
-                            placeholder="Emergency Contact Name"
-                            value={emergencyContactName}
-                            onChange={(e) => setEmergencyContactName(e.target.value)}
-                            className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
-                        />
-                    </div>
-
-                    {/* Emergency Contact Number */}
-                    <div>
-                        <div className="flex items-center">
-                            <label htmlFor="contactNumber" className="block text-[#38b6ff]">Emergency Contact Number</label>
-                            <p className="text-xs text-red-500 ml-2">*No zero at the start</p> {/* Add message here */}
-                        </div>
-                        <input
-                            type="tel"
-                            id="emergencyContactNumber"
-                            name="emergencyContactNumber"
-                            value={emergencyContactNumber.replace(/^63/, '')}  // Display only the 11 digits without the country code
-                            onChange={(e) => {
-                                // Allow only numeric input and restrict length to 11 digits
-                                let value = e.target.value.replace(/[^\d]/g, '');  // Remove non-numeric characters
-                                if (value.length <= 11) {
-                                    // If the value starts with '0', remove it before adding the country code
-                                    if (value.startsWith('0')) {
-                                        value = value.slice(1);  // Remove leading '0'
-                                    }
-                                    setEmergencyContactNumber(`63${value}`);  // Internally prepend '63' to the number
-                                }
-                            }}
-                            className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500 mt-1"
-                            required
-                            autoComplete="tel"
-                            maxLength={10}  // Limits input to 11 characters
-                            inputMode="numeric"  // Suggest numeric keyboard on mobile
                         />
                     </div>
 
@@ -563,25 +736,13 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
                             onClick={togglePasswordVisibility}
                             className="absolute right-3 top-11 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
                         >
-                            {showPassword ? <EyeOffIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
+                            {showPassword ? <EyeIcon className="w-5 h-5" /> : <EyeOffIcon className="w-5 h-5" />}
                         </button>
                         {/* Show password requirements only when the input is focused */}
                         {isFocused && (
-                            <div className="absolute left-0 top-full mt-2 bg-white bg-opacity-95 border rounded-xl w-full p-2 text-sm text-gray-500 shadow-md">
+                            <div className="absolute left-0 top-full mt-2 bg-white bg-opacity-95 border rounded-xl w-full p-2 text-sm text-gray-500 shadow-md z-50">
                                 <p className={`text-sm ${passwordCriteria.length ? 'text-green-500' : 'text-red-500'}`}>
                                     - At least 8 characters
-                                </p>
-                                <p className={`text-sm ${passwordCriteria.number ? 'text-green-500' : 'text-red-500'}`}>
-                                    - At least 1 number
-                                </p>
-                                <p className={`text-sm ${passwordCriteria.specialChar ? 'text-green-500' : 'text-red-500'}`}>
-                                    - At least 1 special character (@, $, !, %, *, ?, &)
-                                </p>
-                                <p className={`text-sm ${passwordCriteria.uppercase ? 'text-green-500' : 'text-red-500'}`}>
-                                    - At least 1 uppercase letter
-                                </p>
-                                <p className={`text-sm ${passwordCriteria.lowercase ? 'text-green-500' : 'text-red-500'}`}>
-                                    - At least 1 lowercase letter
                                 </p>
                             </div>
                         )}
@@ -605,7 +766,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
                             onClick={toggleRePasswordVisibility}
                             className="absolute right-3 top-11 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
                         >
-                            {showRePassword ? <EyeOffIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
+                            {showRePassword ? <EyeIcon className="w-5 h-5" /> : <EyeOffIcon className="w-5 h-5" />}
                         </button>
                         {/* Visual indicator for password match */}
                         <div className="mt-2 text-sm">
@@ -628,63 +789,87 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ isAdult, error }) => {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             className="border border-[#38b6ff] rounded-xl pl-3 pr-10 py-2 w-full text-gray-500"
-                            pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"  // Custom regex for better email format validation
+                            pattern="^[a-zA-Z0-9]+@(?:[a-zA-Z0-9]+\.)+[A-Za-z]+$"  // Custom regex for better email format validation
                             title="Please enter a valid email address"  // Custom tooltip for invalid input
                         />
                         <p className="text-red-500 text-sm mt-1" id="emailError" style={{ display: email && !validateEmail(email) ? 'block' : 'none' }}>
                             Invalid email address. Please check the format.
                         </p>
                     </div>
-
-                    {/* Submit Button */}
-                    <div>
-                        <input
-                            type="checkbox"
-                            checked={agreeToTerms}
-                            onChange={() => setAgreeToTerms(!agreeToTerms)}
-                            required
-                        />
-                        <label htmlFor="terms" className="text-gray-500 text-xs">
-                            &nbsp;I agree to the
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setIsModalOpen(true);
-                                    setModalContentType('terms');
-                                }}
-                                className="text-blue-500 hover:underline ml-1"
-                            >
-                                Terms and Conditions
-                            </button>
-                            &nbsp;and the
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setIsModalOpen(true);
-                                    setModalContentType('privacy');
-                                }}
-                                className="text-blue-500 hover:underline ml-1"
-                            >
-                                Privacy Policy
-                            </button>.
-                        </label>
+                    
+                    <div className='flex gap-4'>
+                        {/* Prev Page Button */}
+                        <button
+                            type="button"
+                            className={`
+                                bg-gradient-to-r 
+                                from-[#38b6ff] 
+                                to-[#4982ae] 
+                                text-white 
+                                font-bold 
+                                top-0
+                                mt-6
+                                py-2 
+                                px-4 
+                                rounded-xl 
+                                transition-all 
+                                duration-300 
+                                ease-in-out 
+                                shadow-lg 
+                                transform 
+                                hover:scale-105 
+                                hover:shadow-xl 
+                            `}
+                            onClick={prevStep}>
+                            {loading ? 'Loading...' : 'Back'}
+                        </button>
+                        {/* Submit Button */}
                         <div>
-                            <button
-                                type="submit"
-                                disabled={loading || !isFormValid()} // Disable the button if form is invalid
-                                aria-label="Submit registration form"
-                                aria-disabled={loading || !isFormValid()}
-                                className={`bg-gradient-to-r from-[#38b6ff] to-[#4982ae] text-white font-bold py-2 px-4 rounded-xl transition-all duration-300 ease-in-out shadow-lg transform hover:scale-105 hover:shadow-xl ${!isFormValid() ? 'opacity-50 cursor-not-allowed' : ''} ${buttonClicked ? 'bg-green-500' : ''}`}
-                            >
-                                {loading ? 'Registering...' : 'Register'}
-                            </button>
+                            <input
+                                type="checkbox"
+                                checked={agreeToTerms}
+                                onChange={() => setAgreeToTerms(!agreeToTerms)}
+                                required
+                            />
+                            <label htmlFor="terms" className="text-gray-500 text-xs">
+                                &nbsp;I agree to the
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setIsModalOpen(true);
+                                        setModalContentType('terms');
+                                    }}
+                                    className="text-blue-500 hover:underline ml-1"
+                                >
+                                    Terms and Conditions
+                                </button>
+                                &nbsp;and the
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setIsModalOpen(true);
+                                        setModalContentType('privacy');
+                                    }}
+                                    className="text-blue-500 hover:underline ml-1"
+                                >
+                                    Privacy Policy
+                                </button>.
+                            </label>
+                            <div>
+                                <button
+                                    type="submit"
+                                    disabled={loading} // Disable the button if form is invalid
+                                    aria-label="Submit registration form"
+                                    aria-disabled={loading}
+                                    className={`bg-gradient-to-r from-[#38b6ff] to-[#4982ae] text-white font-bold py-2 px-4 rounded-xl transition-all duration-300 ease-in-out shadow-lg transform hover:scale-105 hover:shadow-xl ${buttonClicked ? 'bg-green-500' : ''}`}
+                                >
+                                    {loading ? 'Registering...' : 'Register'}
+                                </button>
+                            </div>
                         </div>
                     </div>
-                    
-                    {error && <div className="text-red-600 text-lg font-bold">{error}</div>}
-                    {validationError && <div className="text-red-600 text-lg font-bold">{validationError}</div>}
                 </div>
-                </div>
+                )}
             </form>
 
             {/* Terms and Privacy Modal */}
