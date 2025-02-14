@@ -31,7 +31,7 @@ COPY --from=builder /app/node_modules node_modules
 COPY --from=builder /app/.env.local .env.local
 
 # Expose the port Next.js runs on
-EXPOSE 3000
+EXPOSE 80
 
 # Start the application
-CMD ["npm", "run", "start"]
+CMD ["npm", "run", "start", "--", "-p", "80"]
