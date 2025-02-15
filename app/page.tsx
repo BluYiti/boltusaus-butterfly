@@ -39,7 +39,7 @@ const bookingSteps = [
 ];
 
 const HomePage: React.FC = () => {
-  const [open, setOpen] = useState<number | null>(null);
+  const [open, setOpen] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [modalContentType, setModalContentType] = React.useState<'terms' | 'privacy'>('terms');
 
@@ -111,34 +111,26 @@ const HomePage: React.FC = () => {
         />
 
         {/* Centered Navbar with Burger Icon for Mobile */}
-        <nav className="absolute top-6 left-1/2 transform -translate-x-1/2 flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4 text-white text-center transition-all duration-300">
+        <nav className="absolute top-2 left-0 w-full flex flex-col md:flex-row md:justify-center space-y-2 md:space-y-0 md:space-x-6 text-white z-50 transition-all duration-300 p-4">
+          {/* Mobile Menu Button */}
           <div className="md:hidden">
             <button
               className="text-white focus:outline-none"
-              onClick={() => setOpen(open === -1 ? null : -1)}
+              onClick={() => setOpen(!open)}
             >
-              <svg
-          className="w-6 h-6"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-              >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M4 6h16M4 12h16m-7 6h7"
-          ></path>
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"></path>
               </svg>
             </button>
           </div>
-          <div className={`md:flex ${open === -1 ? 'block' : 'hidden'} transition-all duration-300`}>
+
+          {/* Navigation Items */}
+          <div className={`md:flex ${open ? "block" : "hidden"} transition-all rounded-full duration-300`}>
             {navItems.map((item, index) => (
               <motion.a
                 key={item.label}
                 href={item.href}
-                className="hover:text-gray-400 mr-5 block md:inline-block"
+                className="md:hover:text-blue-400 p-3 md:p-0 md:pr-5 md:rounded-none md:bg-opacity-0 bg-slate-800 z-50 pr-6 block md:inline-block text-2xl md:text-base"
                 initial="hidden"
                 animate="visible"
                 variants={navVariants}
@@ -156,10 +148,10 @@ const HomePage: React.FC = () => {
           alt="Butterfly Logo"
           width={125}
           height={125}
-          className="absolute top-3 left-3"
-        ></Image>
-        <p className="absolute top-9 text-white left-36 text-5xl font-baskerville">Butterfly</p>
-        <p className="absolute top-20 text-white left-36 text-2xl font-baskerville">Hope through Transcendence</p>
+          className="absolute top-14 z-10 md:top-3 left-3"
+        />
+        <p className="absolute top-20 md:top-9 text-white left-36 text-[2.5rem] md:text-5xl font-baskerville">Butterfly</p>
+        <p className="absolute top-32 md:top-20 text-white left-36 text-[1.35rem] md:text-2xl font-baskerville">Hope through Transcendence</p>
 
         {/* Adjusted Login Button */}
         <div className="absolute top-4 right-4">
