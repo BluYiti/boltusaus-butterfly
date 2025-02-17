@@ -130,7 +130,7 @@ const HomePage: React.FC = () => {
               <motion.a
                 key={item.label}
                 href={item.href}
-                className="md:hover:text-blue-400 p-3 md:p-0 md:pr-5 md:rounded-none md:bg-opacity-0 bg-slate-800 z-50 pr-6 block md:inline-block text-2xl md:text-base"
+                className="md:hover:text-blue-400 p-3 md:p-0 md:pr-5 md:rounded-none md:bg-opacity-0 bg-slate-800 z-40 pr-6 block md:inline-block text-2xl md:text-base"
                 initial="hidden"
                 animate="visible"
                 variants={navVariants}
@@ -154,7 +154,7 @@ const HomePage: React.FC = () => {
         <p className="absolute top-32 md:top-20 text-white left-36 text-[1.35rem] md:text-2xl font-baskerville">Hope through Transcendence</p>
 
         {/* Adjusted Login Button */}
-        <div className="absolute top-4 right-4">
+        <div className="absolute top-4 right-4 z-50">
           <Link href={"/login"}>
             <button className='bg-blue-500 text-white font-bold py-2 px-4 rounded-full hover:bg-blue-700'>
               Login
